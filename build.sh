@@ -4,6 +4,8 @@ BASE=$PWD
 DIR_BUILD=$PWD/build
 DIR_WORLD=$PWD/world
 
+autoreconf -i
+
 mkdir $DIR_BUILD
 mkdir $DIR_WORLD
 
