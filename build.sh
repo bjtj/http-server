@@ -4,11 +4,29 @@ BASE=$PWD
 DIR_BUILD=$PWD/build
 DIR_WORLD=$PWD/world
 
-autoreconf -i
+OPT=build
 
-mkdir $DIR_BUILD
-mkdir $DIR_WORLD
+if [ -n "$1" ]; then
+	OPT=$1
+fi
 
-cd $DIR_BUILD
-
-$BASE/configure --prefix "$DIR_WORLD" && make && make install
+case $OPT in
+	reconf)
+		autoreconf -i
+		;;
+	build)
+		mkdir -p $DIR_BUILD
+		mkdir -p $DIR_WORLD
+		
+		cd $DIR_BUILD
+		
+		$BASE/configure --prefix "$DIR_WORLD" && make && make install
+		;;
+	clean)
+		rm -rf $DIR_BUILD $DIR_WORLD
+		;;
+	*)
+		echo "unknown option - $OPT"
+		exit 1
+		;;
+esac
