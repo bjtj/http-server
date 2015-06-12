@@ -386,29 +386,60 @@ namespace OS {
 
 		return "0.0.0.0";
 	}
+
+
+	/* select */
+	Selector::Selector() : maxfds(0) {
+		FD_ZERO(&readfds);
+		FD_ZERO(&curfds);
+	}
 	
+	Selector::~Selector() {
+	}
+	void Selector::set(int fd) {
+		if (fd > maxfds) {
+			maxfds = fd;
+		}
+		FD_SET(fd, &readfds);
+	}
+	void Selector::unset(int fd) {
+		FD_CLR(fd, &readfds);
+	}
+	int Selector::select(unsigned long timeout_milli) {
+
+		struct timeval timeout;
+		
+		curfds = readfds;
+		timeout.tv_sec = timeout_milli / 1000;
+		timeout.tv_usec = (timeout_milli % 1000) * 1000;
+		
+		return ::select(maxfds + 1, &curfds, NULL, NULL, &timeout);
+	}
+	vector<int> & Selector::getSelected() {
+		selected.clear();
+		for (int i = 0; i < maxfds + 1; i++) {
+			if (FD_ISSET(i, &curfds)) {
+				selected.push_back(i);
+			}
+		}
+		return selected;
+	}
 
 	/* SOCKET */
 #if defined(USE_BSD_SOCKET)
 
 	class BsdSocket : public Socket {
 	private:
-		// char host[1024];
-		// int port;
 		int sock;
-		//struct sockaddr_in targetAddr;
 	public:
 		BsdSocket(int sock) : Socket(NULL, NULL, 0) {
 			this->sock = sock;
-			//memset(&targetAddr, 0, sizeof(targetAddr));
 		}
 		BsdSocket(const char * host, int port) : Socket(NULL, host, port) {
-			// snprintf(this->host, sizeof(this->host), "%s", host);
-			// this->port = port;
 		}
 		virtual ~BsdSocket() {
 		}
-		int connect() {
+		virtual int connect() {
 
 			int ret;
 			struct addrinfo hints, * res;
@@ -445,14 +476,23 @@ namespace OS {
 			
 			return 0;
 		}
-		int recv(char * buffer, int max) {
+		virtual void registerSelector(Selector & selector) {
+			selector.set(sock);
+		}
+		virtual bool compareFd(int fd) {
+			return sock == fd;
+		}
+		virtual int getFd() {
+			return sock;
+		}
+		virtual int recv(char * buffer, int max) {
 			return ::read(sock, buffer, max);
 		}
-		int send(char * buffer, int length) {
+		virtual int send(char * buffer, int length) {
 			return ::write(sock, buffer, length);
 		}
-		void shutdown(/* type */) {}
-		void close() {
+		virtual void shutdown(/* type */) {}
+		virtual void close() {
 			::close(sock);
 		}
 	};
@@ -607,7 +647,18 @@ namespace OS {
 	int Socket::connect() {
 		return socketImpl ? socketImpl->connect() : -1;
 	}
-	
+
+	void Socket::registerSelector(Selector & selector) {
+		if (socketImpl) {
+			socketImpl->registerSelector(selector);
+		}
+	}
+	bool Socket::compareFd(int fd) {
+		return socketImpl ? socketImpl->compareFd(fd) : false;
+	}
+	int Socket::getFd() {
+		return socketImpl ? socketImpl->getFd() : -1;
+	}
 	int Socket::recv(char * buffer, int max) {
 		return socketImpl ? socketImpl->recv(buffer, max) : -1;
 	}
@@ -666,6 +717,16 @@ namespace OS {
 			}
 		}
 
+		virtual void registerSelector(Selector & selector) {
+			selector.set(sock);
+		}
+		virtual bool compareFd(int fd) {
+			return sock == fd;
+		}
+		virtual int getFd() {
+			return sock;
+		}
+
 		virtual bool bind() {
 			struct sockaddr_in addr;
 
@@ -692,7 +753,7 @@ namespace OS {
 	
 		virtual Socket * accept() {
 			struct sockaddr_in clientaddr;
-			socklen_t clientaddr_len;
+			socklen_t clientaddr_len = 0;
 			int client = ::accept(sock, (struct sockaddr*)&clientaddr, &clientaddr_len);
 			if (client < 0) {
 				// error
@@ -836,6 +897,20 @@ namespace OS {
 			serverSocketImpl->setReuseAddr();
 		}
 	}
+
+	void ServerSocket::registerSelector(Selector & selector) {
+		if (serverSocketImpl) {
+			serverSocketImpl->registerSelector(selector);
+		}
+	}
+
+	bool ServerSocket::compareFd(int fd) {
+		return serverSocketImpl ? serverSocketImpl->compareFd(fd) : false;
+	}
+
+	int ServerSocket::getFd() {
+		return serverSocketImpl ? serverSocketImpl->getFd() : -1;
+	}
 	
 	bool ServerSocket::bind() {
 		return serverSocketImpl ? serverSocketImpl->bind() : false;
@@ -899,6 +974,7 @@ namespace OS {
 		return (c == '/');
 	}
 	static string s_remove_if_last(string & path, char m) {
+		SUPPRESS_WARNING(m);
 		if (!path.empty()
 			&& path.length() > 1
 			&& s_is_separator(*(path.rbegin())) ) {

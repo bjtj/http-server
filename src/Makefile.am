@@ -1,11 +1,13 @@
 bin_PROGRAMS=http-server
 http_server_SOURCES= \
+	os.hpp os.cpp \
 	Text.hpp Text.cpp \
-	HttpHeader.hpp HttpHeader.cpp \
-	HttpConnection.hpp \
-	HttpServer.hpp HttpServer.cpp \
 	Url.hpp Url.cpp \
-	os.hpp os.cpp main.cpp
+	MultiConn.hpp MultiConn.cpp \
+	HttpConnection.hpp \
+	HttpHeader.hpp HttpHeader.cpp \
+	HttpServer.hpp HttpServer.cpp \
+	main.cpp
 
 http_server_CXXFLAGS=$(PTHREAD_CXXFLAGS)
 http_server_LDFLAGS=$(PTHREAD_CFLAGS)

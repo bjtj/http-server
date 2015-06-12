@@ -2,12 +2,19 @@
 #define __OS_HPP__
 
 /*
- * standards
+ * @brief standard header
  */
 #include <string>
+#include <vector>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+
+/**
+ * @brief common feature
+ * unused : http://stackoverflow.com/questions/3599160/unused-parameter-warnings-in-c-code
+ */
+#define SUPPRESS_WARNING(x) (void)(x)
 
 /*
 * Predefined OS macros
@@ -94,7 +101,7 @@ typedef HANDLE THREAD_HANDLE;
 #endif
 
 /*
- * Socket
+ * @brief Socket
  */
 #if defined(USE_BSD_SOCKET) /* BSD */
 
@@ -130,12 +137,12 @@ typedef HANDLE THREAD_HANDLE;
 namespace OS {
 
 	/**
-	 * 
+	 * @brief milli seconds sleep
 	 */
 	void idle(unsigned long timeout);
 
 	/**
-	 *
+	 * @brief get tick count
 	 */
 	unsigned long tick_milli();
 
@@ -153,7 +160,7 @@ namespace OS {
 	};
 
 	/*
-	 * Thread
+	 * @brief Thread
 	 */
 	class Thread {
 	private: /* private */
@@ -199,10 +206,41 @@ namespace OS {
 		static std::string getIPAddress(const char * iface);
 	};
 
+	/**
+	 * @brief selector
+	 */
+	class Selector {
+	private:
+		int maxfds;
+        fd_set readfds;
+		fd_set curfds;
+		std::vector<int> selected;
+	public:
+		Selector();
+		virtual ~Selector();
+
+		virtual void set(int fd);
+		virtual void unset(int fd);
+		virtual int select(unsigned long timeout_milli);
+		virtual std::vector<int> & getSelected();
+	};
+
+	/**
+	 * @brief Selectable interface
+	 */
+	class Selectable {
+	public:
+		Selectable() {}
+		virtual ~Selectable() {}
+
+		virtual void registerSelector(Selector & selector) = 0;
+	};
+
+
 	/*
 	 * @brief Socket
 	 */
-	class Socket {
+	class Socket : public Selectable {
 	private:
 		Socket * socketImpl;
 		char host[2048];
@@ -214,6 +252,10 @@ namespace OS {
 		virtual ~Socket();
 
 		virtual int connect();
+
+		virtual void registerSelector(Selector & selector);
+		virtual bool compareFd(int fd);
+		virtual int getFd();
 
 		virtual int recv(char * buffer, int max);
 		virtual int send(char * buffer, int length);
@@ -228,7 +270,7 @@ namespace OS {
 	/*
 	 * @brief Server Socket
 	 */
-	class ServerSocket {
+	class ServerSocket : public Selectable {
 	private:
 		ServerSocket * serverSocketImpl;
 		int port;
@@ -239,6 +281,10 @@ namespace OS {
 		virtual ~ServerSocket();
 
 		virtual void setReuseAddr();
+
+		virtual void registerSelector(Selector & selector);
+		virtual bool compareFd(int fd);
+		virtual int getFd();
 
 		virtual bool bind();
 		virtual bool listen(int max);
