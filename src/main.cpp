@@ -46,6 +46,20 @@ static void s_run_multiconn() {
 	cout << "bye~" << endl;
 }
 
+class MyPath : public HttpRequestHandler
+{
+public:
+    MyPath() {
+	}
+    virtual ~MyPath() {
+	}
+
+	virtual void onRequest(HttpRequest & request, HttpResponse & response) {
+		response.write("HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\nhello world");
+	}
+};
+
+
 /**
  * @brief run server
  */
@@ -56,8 +70,10 @@ static void s_run_server() {
 	MultiConnServer server(8082);
 	
 	HttpProtocol http;
+	MyPath mypath;
+	http.vpath("/", &mypath);
+	
 	server.setProtocol(&http);
-
 	server.start();
 
 	while(!done) {

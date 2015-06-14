@@ -6,13 +6,13 @@ namespace HTTP {
 	using namespace OS;
 
 
-	Packet::Packet(int size) : size(size), length(0) {
-		buffer = (char*)malloc(size);
-		memset(buffer, 0, size);
+	Packet::Packet(int size) : _size(size), _length(0) {
+		buffer = (char*)malloc(_size);
+		memset(buffer, 0, _size);
 	}
-	Packet::Packet(char * buffer, int size) : size(size), length(0) {
-		this->buffer = (char*)malloc(size);
-		memcpy(this->buffer, buffer, size);
+	Packet::Packet(char * buffer, size_t size) : _size(size), _length(_size) {
+		this->buffer = (char*)malloc(_size);
+		memcpy(this->buffer, buffer, _size);
 	}
 	Packet::~Packet() {
 		if (buffer) {
@@ -23,29 +23,29 @@ namespace HTTP {
 		return buffer;
 	}
 	int Packet::put(char * data, int len) {
-		int cap = size - length;
+		int cap = _size - _length;
 		if (cap < len) {
 			return -1;
 		}
 
-		memcpy(buffer + length, data, len);
-		length += len;
+		memcpy(buffer + _length, data, len);
+		_length += len;
 
-		return length;
+		return _length;
 	}
-	int Packet::getSize() {
-		return size;
+	size_t Packet::size() {
+		return _size;
 	}
 	void Packet::resize(int size) {
 		if (buffer) {
 			free(buffer);
 		}
-		this->size = size;
-		buffer = (char*)malloc(size);
-		memset(buffer, 0, size);
+		_size = size;
+		buffer = (char*)malloc(_size);
+		memset(buffer, 0, _size);
 	}
-	int Packet::getLength() {
-		return length;
+	int Packet::length() {
+		return _length;
 	}
 
 

@@ -7,7 +7,7 @@
 #include <utility>
 
 namespace UTIL {
-
+	
 	class Text {
 	private:
 		Text();

@@ -15,19 +15,19 @@ namespace HTTP {
 	class Packet {
 	private:
 		char * buffer;
-		int size;
-		int length;
+		size_t _size;
+		int _length;
 
 	public:
 		Packet(int size);
-		Packet(char * buffer, int size);
+		Packet(char * buffer, size_t size);
 		virtual ~Packet();
 
 		char * getBuffer();
 		int put(char * data, int len);
-		int getSize();
+		size_t size();
 		void resize(int size);
-		int getLength();
+		int length();
 	};
 
 
