@@ -7,6 +7,11 @@
 
 namespace HTTP {
 
+	class MultiConnServer;
+
+	/**
+	 * @brief packet
+	 */
 	class Packet {
 	private:
 		char * buffer;
@@ -26,33 +31,54 @@ namespace HTTP {
 	};
 
 
+	/**
+	 * @brief on connect listener
+	 */
 	class OnConnectListener {
 	public:
 		OnConnectListener() {}
 		virtual ~OnConnectListener() {}
 
-		virtual void onConnect(OS::Socket & client) = 0;
+		virtual void onConnect(MultiConnServer & server, OS::Socket & client) = 0;
 	};
 
+	/**
+	 * @brief on receive listener
+	 */
 	class OnReceiveListener {
 	public:
 		OnReceiveListener() {}
 		virtual ~OnReceiveListener() {}
 
-		virtual void onReceive(OS::Socket & client, Packet & packet) = 0;
+		virtual void onReceive(MultiConnServer & server, OS::Socket & client, Packet & packet) = 0;
 	};
 
-	class OnDisconnectListener
-	{
+	/**
+	 * @brief on disconnect listener
+	 */
+	class OnDisconnectListener {
 	public:
 		OnDisconnectListener() {}
 		virtual ~OnDisconnectListener() {}
 
-		virtual void onDisconnect(OS::Socket & client) = 0;
+		virtual void onDisconnect(MultiConnServer & server, OS::Socket & client) = 0;
 	};
 
+	class MultiConnProtocol : public OnConnectListener,
+							  public OnReceiveListener,
+							  public OnDisconnectListener {
+	public:
+        MultiConnProtocol() {}
+		virtual ~MultiConnProtocol() {}
+		virtual void onConnect(MultiConnServer & server, OS::Socket & client) = 0;
+		virtual void onReceive(MultiConnServer & server, OS::Socket & client, Packet & packet) = 0;
+		virtual void onDisconnect(MultiConnServer & server, OS::Socket & client) = 0;
+	};
 
-	class MultiConnServer : public OnConnectListener, public OnReceiveListener, public OnDisconnectListener {
+	/**
+	 * @brief multi connection server
+	 */
+	class MultiConnServer {
 	private:
 		int port;
 
@@ -73,6 +99,9 @@ namespace HTTP {
 		virtual void stop();
 		virtual bool isRunning();
 
+		virtual bool isDisconnected(OS::Socket & client);
+		virtual void disconnect(OS::Socket & client);
+
 		virtual void onConnect(OS::Socket & client);
 		virtual void onReceive(OS::Socket & client, Packet & packet);
 		virtual void onDisconnect(OS::Socket & client);
@@ -80,9 +109,10 @@ namespace HTTP {
 		void setOnConnectListener(OnConnectListener * onConnectListener);
 		void setOnReceiveListener(OnReceiveListener * onReceiveListener);
 		void setOnDisconnectListener(OnDisconnectListener * onDisconnectListener);
-		
-	};
 
+		void setProtocol(MultiConnProtocol * protocol);
+	};
+	
 }
 
 #endif

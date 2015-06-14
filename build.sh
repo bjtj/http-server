@@ -22,6 +22,9 @@ case $OPT in
 		
 		$BASE/configure --prefix "$DIR_WORLD" && make && make install
 		;;
+	make)
+		cd $DIR_BUILD && make && make install
+		;;
 	clean)
 		rm -rf $DIR_BUILD $DIR_WORLD
 		;;

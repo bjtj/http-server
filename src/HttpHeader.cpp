@@ -4,71 +4,71 @@ namespace HTTP {
 
 	using namespace std;
 	
-	HeaderField::HeaderField(string name) {
+	HttpHeaderField::HttpHeaderField(string name) {
 	}
-	HeaderField::~HeaderField() {
-	}
-
-	bool HeaderField::empty() {
-	}
-	size_t HeaderField::size() {
-	}
-	string & HeaderField::getName() {
-	}
-	string & HeaderField::getFirstParameter() {
-	}
-	vector<string> & HeaderField::getParameters() {
-	}
-	string & HeaderField::getParameter(int index) {
-	}
-	void HeaderField::setParameter(string param) {
-	}
-	void HeaderField::setParameters(vector<string> & params) {
-	}
-	void HeaderField::appendParamter(string param) {
-	}
-	void HeaderField::appendParameters(vector<string> & param) {
+	HttpHeaderField::~HttpHeaderField() {
 	}
 
-	string & HeaderField::operator[](int index) {
+	bool HttpHeaderField::empty() {
 	}
-	string HeaderField::toString() {
+	size_t HttpHeaderField::size() {
+	}
+	string & HttpHeaderField::getName() {
+	}
+	string & HttpHeaderField::getFirstParameter() {
+	}
+	vector<string> & HttpHeaderField::getParameters() {
+	}
+	string & HttpHeaderField::getParameter(int index) {
+	}
+	void HttpHeaderField::setParameter(string param) {
+	}
+	void HttpHeaderField::setParameters(vector<string> & params) {
+	}
+	void HttpHeaderField::appendParamter(string param) {
+	}
+	void HttpHeaderField::appendParameters(vector<string> & param) {
+	}
+
+	string & HttpHeaderField::operator[](int index) {
+	}
+	string HttpHeaderField::toString() {
 	}
 
 
-	Header::Header() {
+	HttpHeader::HttpHeader() {
 	}
-	Header::~Header() {
-	}
-
-	bool Header::contains() {
-	}
-	string Header::getParameter(string name) {
-	}
-	vector<string> Header::getParameters(string name) {
+	HttpHeader::~HttpHeader() {
 	}
 
-	HeaderParseResult::HeaderParseResult() {
+	bool HttpHeader::contains() {
 	}
-	HeaderParseResult::~HeaderParseResult() {
+	string HttpHeader::getParameter(string name) {
 	}
-
-	Header & HeaderParseResult::getHeader() {
-	}
-	bool HeaderParseResult::isSucceeded() {
-	}
-	bool HeaderParseResult::isFailed() {
-	}
-	int HeaderParseResult::getErrorCode() {
-	}
-	string HeaderParseResult::getErrorMessage() {
+	vector<string> HttpHeader::getParameters(string name) {
 	}
 
-	HeaderParser::HeaderParser() {
+	HttpHeaderParseResult::HttpHeaderParseResult() {
 	}
-	HeaderParser::~HeaderParser() {
+	HttpHeaderParseResult::~HttpHeaderParseResult() {
 	}
 
-	HeaderParseResult HeaderParser::parse(string & header) {
+	HttpHeader & HttpHeaderParseResult::getHeader() {
+	}
+	bool HttpHeaderParseResult::isSucceeded() {
+	}
+	bool HttpHeaderParseResult::isFailed() {
+	}
+	int HttpHeaderParseResult::getErrorCode() {
+	}
+	string HttpHeaderParseResult::getErrorMessage() {
+	}
+
+	HttpHeaderParser::HttpHeaderParser() {
+	}
+	HttpHeaderParser::~HttpHeaderParser() {
+	}
+
+	HttpHeaderParseResult HttpHeaderParser::parse(string & header) {
 	}
 }

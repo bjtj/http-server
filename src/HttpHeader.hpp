@@ -7,13 +7,13 @@
 
 namespace HTTP {
 
-	class HeaderField {
+	class HttpHeaderField {
 	private:
 		std::string name;
 		std::vector<std::string> values;
 	public:
-		HeaderField(std::string name);
-		virtual ~HeaderField();
+		HttpHeaderField(std::string name);
+		virtual ~HttpHeaderField();
 
 		virtual bool empty();
 		virtual size_t size();
@@ -31,30 +31,30 @@ namespace HTTP {
 	};
 
 	
-	class Header {
+	class HttpHeader {
 	private:
 		std::string firstline;
-		std::vector<HeaderField> fields;
+		std::vector<HttpHeaderField> fields;
 	public:
-		Header();
-		virtual ~Header();
+		HttpHeader();
+		virtual ~HttpHeader();
 
 		virtual bool contains();
 		virtual std::string getParameter(std::string name);
 		virtual std::vector<std::string> getParameters(std::string name);
 	};
 
-	class HeaderParseResult {
+	class HttpHeaderParseResult {
 	private:
 		bool success;
 		int errorCode;
 		std::string errorMessage;
-        Header header;
+        HttpHeader header;
 	public:
-		HeaderParseResult();
-		virtual ~HeaderParseResult();
+		HttpHeaderParseResult();
+		virtual ~HttpHeaderParseResult();
 
-		Header & getHeader();
+		HttpHeader & getHeader();
 		bool isSucceeded();
 		bool isFailed();
 		int getErrorCode();
@@ -62,12 +62,12 @@ namespace HTTP {
 	};
 
 	
-	class HeaderParser {
+	class HttpHeaderParser {
 	public:
-		HeaderParser();
-		virtual ~HeaderParser();
+		HttpHeaderParser();
+		virtual ~HttpHeaderParser();
 
-		HeaderParseResult parse(std::string & header);
+		HttpHeaderParseResult parse(std::string & header);
 	};
 
 }

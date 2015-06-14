@@ -50,13 +50,13 @@ namespace HTTP {
 
 
 
-
+	
 	MultiConnServer::MultiConnServer(int port)
 		: port(port),
 		  server(NULL),
 		  onConnectListener(NULL),
 		  onReceiveListener(NULL),
-		  onDisconnectListener(NULL) {
+		  onDisconnectListener(NULL){
 	}
 	MultiConnServer::~MultiConnServer() {
 	}
@@ -103,9 +103,16 @@ namespace HTTP {
 		}
 	}
 	void MultiConnServer::stop() {
-		for (size_t i = 0; i < clients.size(); i++) {
-			delete clients[i];
+		vector<Socket*> vec;
+
+		for (map<int, Socket*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
+			vec.push_back(iter->second);
 		}
+		
+		for (size_t i = 0; i < vec.size(); i++) {
+			disconnect(*vec[i]);
+		}
+		
 		clients.clear();
 
 		server->close();
@@ -115,44 +122,63 @@ namespace HTTP {
 		return server != NULL;
 	}
 
+	bool MultiConnServer::isDisconnected(Socket & client) {
+		for (size_t i = 0; i < clients.size(); i++) {
+			if (clients[i] == &client) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	void MultiConnServer::disconnect(Socket & client) {
+		onDisconnect(client);
+	}
+
 	void MultiConnServer::onConnect(Socket & client) {
 
 		clients[client.getFd()] = &client;
 		client.registerSelector(selector);
 		
 		if (onConnectListener) {
-			onConnectListener->onConnect(client);
+			onConnectListener->onConnect(*this, client);
 		}
 	}
 	
 	void MultiConnServer::onReceive(Socket & client, Packet & packet) {
+		
 		if (onReceiveListener) {
-			onReceiveListener->onReceive(client, packet);
+			onReceiveListener->onReceive(*this, client, packet);
 		}
 	}
 
 	void MultiConnServer::onDisconnect(Socket & client) {
-
+		
 		int fd = client.getFd();
 		
 		if (onDisconnectListener) {
-			onDisconnectListener->onDisconnect(client);
+			onDisconnectListener->onDisconnect(*this, client);
 		}
 
 		clients.erase(fd);
 		selector.unset(fd);
+		client.close();
 		delete &client;
 	}
 
 	void MultiConnServer::setOnConnectListener(OnConnectListener * onConnectListener) {
 		this->onConnectListener = onConnectListener;
 	}
-	
 	void MultiConnServer::setOnReceiveListener(OnReceiveListener * onReceiveListener) {
 		this->onReceiveListener = onReceiveListener;
 	}
-
 	void MultiConnServer::setOnDisconnectListener(OnDisconnectListener * onDisconnectListener) {
 		this->onDisconnectListener = onDisconnectListener;
+	}
+
+	void MultiConnServer::setProtocol(MultiConnProtocol * protocol) {
+		setOnConnectListener(protocol);
+		setOnReceiveListener(protocol);
+		setOnDisconnectListener(protocol);
 	}
 }
