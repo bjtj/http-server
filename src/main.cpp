@@ -1,6 +1,7 @@
 #include <iostream>
 #include "HttpProtocol.hpp"
 #include "MultiConn.hpp"
+#include "HttpRequestHandlers.hpp"
 
 using namespace std;
 using namespace HTTP;
@@ -75,8 +76,10 @@ static void s_run_server() {
 	MultiConnServer server(8082);
 	
 	HttpProtocol http;
-	MyPath mypath;
-	http.vpath("/", &mypath);
+	//MyPath mypath;
+	FileRedirectHandler fileh(".");
+	//http.vpath("/hello", &mypath);
+	http.vpath("/", &fileh);
 	
 	server.setProtocol(&http);
 	server.start();

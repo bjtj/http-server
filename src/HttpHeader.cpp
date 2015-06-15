@@ -71,31 +71,43 @@ namespace HTTP {
 	
 
 	HttpHeader::HttpHeader() : valid(false) {
+		parts.push_back("");
+		parts.push_back("");
+		parts.push_back("");
 	}
 	HttpHeader::~HttpHeader() {
 	}
 	bool HttpHeader::isValid() {
 		return valid;
 	}
-	void HttpHeader::setFirstLine(std::string & firstline) {
+	void HttpHeader::setFirstLine(string & firstline) {
 		this->firstline = firstline;
 	}
-	void HttpHeader::setParts(std::vector<std::string> & parts) {
+	void HttpHeader::setParts(vector<string> & parts) {
 		this->parts = parts;
 	}
-	std::string HttpHeader::getPart1() {
+	string HttpHeader::getPart1() {
 		return parts[0];
 	}
-	std::string HttpHeader::getPart2() {
+	string HttpHeader::getPart2() {
 		return parts[1];
 	}
-	std::string HttpHeader::getPart3() {
+	string HttpHeader::getPart3() {
 		return parts[2];
+	}
+	void HttpHeader::setPart1(string part) {
+		parts[0] = part;
+	}
+	void HttpHeader::setPart2(string part) {
+		parts[1] = part;
+	}
+	void HttpHeader::setPart3(string part) {
+		parts[2] = part;
 	}
 	string HttpHeader::getHeaderField(string name) {
 		return fields[name];
 	}
-	void HttpHeader::setHeaderField(std::string name, std::string value) {
+	void HttpHeader::setHeaderField(string name, string value) {
 		fields[name] = value;
 	}
 	string HttpHeader::getParameter(string name) {
@@ -104,7 +116,7 @@ namespace HTTP {
 	vector<string> HttpHeader::getParameters(string name) {
 		return params[name].getValues();
 	}
-	void HttpHeader::setParameter(std::string name, std::string value) {
+	void HttpHeader::setParameter(string name, string value) {
 		if (params.find(name) == params.end()) {
 			HttpParameter param(name);
 			param.setValue(value);
@@ -120,17 +132,48 @@ namespace HTTP {
 		ret += "\r\n";
 		return ret;
 	}
+
+
+
+
+	HttpResponseHeader::HttpResponseHeader() : HttpHeaderWrapper(header) {
+		header.setPart1("HTTP/1.1");
+		header.setPart2("200");
+		header.setPart3("OK");
+	}
+	HttpResponseHeader::HttpResponseHeader(HttpHeader & header) : HttpHeaderWrapper(header) {
+	}
+	HttpResponseHeader::~HttpResponseHeader() {
+	}
+	
+	string HttpResponseHeader::getProtocol() {
+		return getHeader().getPart1();
+	}
+	int HttpResponseHeader::getStatusCode() {
+		return atoi(getHeader().getPart2().c_str());
+	}
+	void HttpResponseHeader::setStatusCode(int status) {
+		getHeader().setPart2(UTIL::Text::toString(status));
+	}
+	string HttpResponseHeader::getMessage() {
+		return getHeader().getPart3();
+	}
+	void HttpResponseHeader::setMessage(string message) {
+		getHeader().setPart3(message);
+	}
+
+
 	
 
 	
 	HttpHeaderParseResult::HttpHeaderParseResult() : success(false), errorCode(0) {
 	}
-	HttpHeaderParseResult::HttpHeaderParseResult(bool success, int errorCode, std::string errorMessage)
+	HttpHeaderParseResult::HttpHeaderParseResult(bool success, int errorCode, string errorMessage)
 		: success(false), errorCode(0), errorMessage(errorMessage) {
 	}
 	HttpHeaderParseResult::~HttpHeaderParseResult() {
 	}
-	int HttpHeaderParseResult::setResult(bool success, int errorCode, std::string errorMessage) {
+	int HttpHeaderParseResult::setResult(bool success, int errorCode, string errorMessage) {
 		this->success = success;
 		this->errorCode = errorCode;
 		this->errorMessage = errorMessage;
@@ -155,7 +198,7 @@ namespace HTTP {
 	}
 	HttpHeaderParser::~HttpHeaderParser() {
 	}
-	int HttpHeaderParser::parseFirstLine(HttpHeader & header, std::string & line) {
+	int HttpHeaderParser::parseFirstLine(HttpHeader & header, string & line) {
 		vector<string> parts;
 		string space = " \t";
 		size_t e = 0;

@@ -4,8 +4,10 @@ http_server_SOURCES= \
 	Text.hpp Text.cpp \
 	Url.hpp Url.cpp \
 	MultiConn.hpp MultiConn.cpp \
+	HttpRequestHandlers.hpp HttpRequestHandlers.cpp \
 	HttpHeader.hpp HttpHeader.cpp \
 	HttpProtocol.hpp HttpProtocol.cpp \
+	HttpStatusCodes.hpp HttpStatusCodes.cpp \
 	main.cpp
 
 http_server_CXXFLAGS=$(PTHREAD_CXXFLAGS)

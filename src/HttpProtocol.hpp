@@ -45,7 +45,7 @@ namespace HTTP {
 	 */
 	class HttpResponse {
 	private:
-		HttpHeader header;
+		HttpResponseHeader header;
         OS::Socket & socket;
 		bool complete;
 		std::string content;
@@ -53,11 +53,14 @@ namespace HTTP {
 		HttpResponse(OS::Socket & socket);
 		virtual ~HttpResponse();
 
+		void setStatusCode(int code);
+		void setStatusCode(int code, std::string message);
 		void setParts(std::vector<std::string> &parts);
 		void setContentLength(int length);
 		void setContentType(std::string type);
 		
 		int write(std::string content);
+		int write(char * buf, int size);
 		void sendContent();
 		void setComplete();
 		bool hasComplete();
@@ -98,8 +101,7 @@ namespace HTTP {
 	/**
 	 * @brief http request handler
 	 */
-	class HttpRequestHandler
-	{
+	class HttpRequestHandler {
 	public:
 		HttpRequestHandler() {}
 		virtual ~HttpRequestHandler() {}

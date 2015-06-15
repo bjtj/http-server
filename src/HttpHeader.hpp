@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <cstdlib>
+#include "Text.hpp"
 
 namespace HTTP {
 
@@ -59,6 +60,9 @@ namespace HTTP {
 		std::string getPart1();
 		std::string getPart2();
 		std::string getPart3();
+		void setPart1(std::string part);
+		void setPart2(std::string part);
+		void setPart3(std::string part);
 		
 		std::string getHeaderField(std::string name);
 		void setHeaderField(std::string name, std::string value);
@@ -70,6 +74,9 @@ namespace HTTP {
 		virtual std::string toString();
 	};
 
+	/**
+	 * @brief http header wrapper
+	 */
 	class HttpHeaderWrapper : public HttpHeader {
 	private:
         HttpHeader & header;
@@ -78,6 +85,8 @@ namespace HTTP {
 		virtual ~HttpHeaderWrapper() {}
 
 		HttpHeader & getHeader() {return header;}
+
+		virtual std::string toString() {return header.toString();}
 	};
 
 	
@@ -100,13 +109,17 @@ namespace HTTP {
 	 */
 	class HttpResponseHeader : public HttpHeaderWrapper {
 	private:
+		HttpHeader header;
 	public:
-		HttpResponseHeader(HttpHeader & header) : HttpHeaderWrapper(header) {}
-		virtual ~HttpResponseHeader() {}
+		HttpResponseHeader();
+		HttpResponseHeader(HttpHeader & header);
+		virtual ~HttpResponseHeader();
 
-		std::string getProtocol() {return getHeader().getPart1();}
-		int getStatus() {return atoi(getHeader().getPart2().c_str());}
-		std::string getMessage() {return getHeader().getPart3();}
+		std::string getProtocol();
+		int getStatusCode();
+		void setStatusCode(int status);
+		std::string getMessage();
+		void setMessage(std::string message);
 	};
 
 	/**

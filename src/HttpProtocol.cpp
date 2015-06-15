@@ -1,5 +1,6 @@
 #include <iostream>
 #include "HttpProtocol.hpp"
+#include "HttpStatusCodes.hpp"
 #include "Text.hpp"
 
 namespace HTTP {
@@ -61,7 +62,14 @@ namespace HTTP {
 	}
 	HttpResponse::~HttpResponse() {
 	}
-
+	void HttpResponse::setStatusCode(int code) {
+		header.setStatusCode(code);
+		header.setMessage(HttpStatusCodes::getMessage(code));
+	}
+	void HttpResponse::setStatusCode(int code, string message) {
+		header.setStatusCode(code);
+		header.setMessage(message);
+	}
 	void HttpResponse::setParts(vector<string> & parts) {
 		header.setParts(parts);
 	}
@@ -72,8 +80,11 @@ namespace HTTP {
 		header.setHeaderField("Content-Type", type);
 	}
 	
-	int HttpResponse::write(std::string content) {
+	int HttpResponse::write(string content) {
 		this->content += content;
+	}
+	int HttpResponse::write(char * buf, int size) {
+		this->content += string(buf, size);
 	}
 	void HttpResponse::sendContent() {
 		string header_string = header.toString();
@@ -185,7 +196,7 @@ namespace HTTP {
 		delete conns[&client];
 		conns.erase(&client);
 	}
-	void HttpProtocol::vpath(std::string path, HttpRequestHandler * handler) {
+	void HttpProtocol::vpath(string path, HttpRequestHandler * handler) {
 		if (!handler) {
 			handlers.erase(path);
 		} else {
@@ -200,7 +211,13 @@ namespace HTTP {
 			response.write("HTTP/1.1 404 not found\r\n\r\n");
 		}
 	}
-	HttpRequestHandler * HttpProtocol::getHandler(std::string path) {
-		return handlers[path];
+	HttpRequestHandler * HttpProtocol::getHandler(string path) {
+		map<string, HttpRequestHandler*>::iterator iter;
+		for (iter = handlers.begin(); iter != handlers.end(); iter++) {
+			if (Text::startsWith(path, iter->first)) {
+				return iter->second;
+			}
+		}
+		return NULL;
 	}
 }
