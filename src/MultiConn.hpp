@@ -9,6 +9,7 @@ namespace HTTP {
 
 	class MultiConn;
 	class MultiConnMultiplexServer;
+	class MultiConnThreadedServer;
 
 	/**
 	 * @brief packet
@@ -40,7 +41,6 @@ namespace HTTP {
 		OnConnectListener() {}
 		virtual ~OnConnectListener() {}
 
-		// virtual void onConnect(MultiConnMultiplexServer & server, OS::Socket & client) = 0;
 		virtual void onConnect(MultiConn & server, OS::Socket & client) = 0;
 	};
 
@@ -52,7 +52,6 @@ namespace HTTP {
 		OnReceiveListener() {}
 		virtual ~OnReceiveListener() {}
 
-		// virtual void onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet) = 0;
 		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet) = 0;
 	};
 
@@ -64,7 +63,6 @@ namespace HTTP {
 		OnDisconnectListener() {}
 		virtual ~OnDisconnectListener() {}
 
-		// virtual void onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client) = 0;
 		virtual void onDisconnect(MultiConn & server, OS::Socket & client) = 0;
 	};
 
@@ -77,16 +75,16 @@ namespace HTTP {
 	public:
         MultiConnProtocol() {}
 		virtual ~MultiConnProtocol() {}
-		// virtual void onConnect(MultiConnMultiplexServer & server, OS::Socket & client) = 0;
-		// virtual void onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet) = 0;
-		// virtual void onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client) = 0;
 		virtual void onConnect(MultiConn & server, OS::Socket & client) = 0;
 		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet) = 0;
 		virtual void onDisconnect(MultiConn & server, OS::Socket & client) = 0;
 	};
 
 
-	
+
+	/**
+	 * @brief multi conn interface
+	 */
 	class MultiConn {
 	private:
         OnConnectListener * onConnectListener;
@@ -126,10 +124,6 @@ namespace HTTP {
 		std::map<int, OS::Socket*> clients;
 		OS::ServerSocket * server;
 
-		OnConnectListener * onConnectListener;
-		OnReceiveListener * onReceiveListener;
-		OnDisconnectListener * onDisconnectListener;
-		
 	public:
 		MultiConnMultiplexServer(int port);
 		virtual ~MultiConnMultiplexServer();
@@ -145,14 +139,50 @@ namespace HTTP {
 		virtual void onConnect(OS::Socket & client);
 		virtual void onReceive(OS::Socket & client, Packet & packet);
 		virtual void onDisconnect(OS::Socket & client);
+	};
 
-		// void setOnConnectListener(OnConnectListener * onConnectListener);
-		// void setOnReceiveListener(OnReceiveListener * onReceiveListener);
-		// void setOnDisconnectListener(OnDisconnectListener * onDisconnectListener);
-
-		// void setProtocol(MultiConnProtocol * protocol);
+	/**
+	 * @brief client thread
+	 */
+	class ClientThread : public OS::Thread {
+	private:
+		MultiConnThreadedServer & server;
+		OS::Socket & socket;
+	public:
+		ClientThread(MultiConnThreadedServer & server, OS::Socket & socket);
+		virtual ~ClientThread();
+		virtual void run();
+		OS::Socket & getSocket();
 	};
 	
+	/**
+	 * @brief multi conn threaded server
+	 */
+	class MultiConnThreadedServer : public MultiConn {
+	private:
+		int port;
+		OS::Selector selector;
+        std::map<int, ClientThread *> clients;
+		OS::ServerSocket * server;
+	public:
+		MultiConnThreadedServer(int port);
+		virtual ~MultiConnThreadedServer();
+
+		virtual void start();
+		virtual void poll(unsigned long timeout_milli);
+		virtual void stop();
+		virtual bool isRunning();
+
+		void releaseInvalidThreads();
+
+		virtual bool isDisconnected(OS::Socket & client);
+		virtual void disconnect(OS::Socket & client);
+
+		virtual void onConnect(OS::Socket & client);
+		virtual void onReceive(OS::Socket & client, Packet & packet);
+		virtual void onDisconnect(OS::Socket & client);
+	};
+
 }
 
 #endif

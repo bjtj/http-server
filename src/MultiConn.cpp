@@ -98,11 +98,7 @@ namespace HTTP {
 	
 	MultiConnMultiplexServer::MultiConnMultiplexServer(int port)
 		: port(port),
-		  server(NULL)// ,
-		  // onConnectListener(NULL),
-		  // onReceiveListener(NULL),
-		  // onDisconnectListener(NULL)
-	{
+		  server(NULL) {
 	}
 	MultiConnMultiplexServer::~MultiConnMultiplexServer() {
 	}
@@ -186,19 +182,11 @@ namespace HTTP {
 		clients[client.getFd()] = &client;
 		client.registerSelector(selector);
 		
-		// if (onConnectListener) {
-		// 	onConnectListener->onConnect(*this, client);
-		// }
-
 		MultiConn::onConnect(client);
 	}
 	
 	void MultiConnMultiplexServer::onReceive(Socket & client, Packet & packet) {
 		
-		// if (onReceiveListener) {
-		// 	onReceiveListener->onReceive(*this, client, packet);
-		// }
-
 		MultiConn::onReceive(client, packet);
 	}
 
@@ -208,29 +196,131 @@ namespace HTTP {
 
 		MultiConn::onDisconnect(client);
 		
-		// if (onDisconnectListener) {
-		// 	onDisconnectListener->onDisconnect(*this, client);
-		// }
-
 		clients.erase(fd);
 		selector.unset(fd);
 		client.close();
 		delete &client;
 	}
 
-	// void MultiConnMultiplexServer::setOnConnectListener(OnConnectListener * onConnectListener) {
-	// 	this->onConnectListener = onConnectListener;
-	// }
-	// void MultiConnMultiplexServer::setOnReceiveListener(OnReceiveListener * onReceiveListener) {
-	// 	this->onReceiveListener = onReceiveListener;
-	// }
-	// void MultiConnMultiplexServer::setOnDisconnectListener(OnDisconnectListener * onDisconnectListener) {
-	// 	this->onDisconnectListener = onDisconnectListener;
-	// }
 
-	// void MultiConnMultiplexServer::setProtocol(MultiConnProtocol * protocol) {
-	// 	setOnConnectListener(protocol);
-	// 	setOnReceiveListener(protocol);
-	// 	setOnDisconnectListener(protocol);
-	// }
+
+
+
+
+	ClientThread::ClientThread(MultiConnThreadedServer & server, OS::Socket & socket)
+		: server(server), socket(socket) {
+	}
+	ClientThread::~ClientThread() {
+	}
+	void ClientThread::run() {
+		char buffer[1024] = {0,};
+		int len = 0;
+		while ((len = socket.recv(buffer, sizeof(buffer))) > 0) {
+			Packet packet(buffer, len);
+			server.onReceive(socket, packet);
+		}
+	}
+	OS::Socket & ClientThread::getSocket() {
+		return socket;
+	}
+	
+
+
+	MultiConnThreadedServer::MultiConnThreadedServer(int port) : port(port) {
+	}
+	MultiConnThreadedServer::~MultiConnThreadedServer() {
+	}
+	
+	void MultiConnThreadedServer::start() {
+		server = new ServerSocket(port);
+		server->setReuseAddr();
+		server->bind();
+		server->listen(5);
+
+		server->registerSelector(selector);
+
+		clients.clear();
+	}
+	void MultiConnThreadedServer::poll(unsigned long timeout_milli) {
+		if (selector.select(timeout_milli) > 0) {
+			
+			vector<int> selected = selector.getSelected();
+			for (size_t i = 0; i < selected.size(); i++) {
+					
+				int fd = selected[i];
+
+				if (server->compareFd(fd)) {
+					Socket * client = server->accept();
+					
+					if (client) {
+						onConnect(*client);
+					}
+					break;
+				}
+			}
+		}
+
+		releaseInvalidThreads();
+	}
+	void MultiConnThreadedServer::stop() {
+		vector<ClientThread*> vec;
+
+		for (map<int, ClientThread*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
+			vec.push_back(iter->second);
+		}
+		
+		for (size_t i = 0; i < vec.size(); i++) {
+			disconnect(vec[i]->getSocket());
+		}
+		
+		clients.clear();
+
+		server->close();
+		server = NULL;
+	}
+	bool MultiConnThreadedServer::isRunning() {
+		return server != NULL;
+	}
+	
+	bool MultiConnThreadedServer::isDisconnected(OS::Socket & client) {
+		for (map<int, ClientThread*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
+			if (&(iter->second->getSocket()) == &client) {
+				return false;
+			}
+		}
+		return true;
+	}
+	void MultiConnThreadedServer::disconnect(OS::Socket & client) {
+		onDisconnect(client);
+		client.close();
+	}
+
+	void MultiConnThreadedServer::releaseInvalidThreads() {
+		map<int, ClientThread*>::iterator iter = clients.begin();
+		while (iter != clients.end()) {
+			ClientThread * thread = iter->second;
+			if (!thread) {
+				clients.erase(iter++);
+			} else if (!thread->isRunning()) {
+				disconnect(thread->getSocket());
+				delete thread;
+				clients.erase(iter++);
+			} else {
+				++iter;
+			}
+		}
+	}
+	
+	void MultiConnThreadedServer::onConnect(OS::Socket & client) {
+		ClientThread * thread = new ClientThread(*this, client);
+		clients[client.getFd()] = thread;
+		thread->start();
+		MultiConn::onConnect(client);
+	}
+	void MultiConnThreadedServer::onReceive(OS::Socket & client, Packet & packet) {
+		MultiConn::onReceive(client, packet);
+	}
+	void MultiConnThreadedServer::onDisconnect(OS::Socket & client) {
+		MultiConn::onDisconnect(client);
+	}
 }

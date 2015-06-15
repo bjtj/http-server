@@ -76,7 +76,8 @@ static void s_run_server() {
 	
 	bool done = false;
 	
-	MultiConnMultiplexServer server(8082);
+	// MultiConnMultiplexServer server(8082);
+	MultiConnThreadedServer server(8082);
 	
 	HttpProtocol http;
 	//MyPath mypath;

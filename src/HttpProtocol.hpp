@@ -81,9 +81,6 @@ namespace HTTP {
 		HttpConnection(HttpProtocol & protocol);
 		virtual ~HttpConnection();
 
-		// virtual void onConnect(MultiConnMultiplexServer & server, OS::Socket & client);
-		// virtual void onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet);
-		// virtual void onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client);
 		virtual void onConnect(MultiConn & server, OS::Socket & client);
 		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet);
 		virtual void onDisconnect(MultiConn & server, OS::Socket & client);
@@ -126,9 +123,6 @@ namespace HTTP {
 		HttpProtocol();
 		virtual ~HttpProtocol();
 
-		// virtual void onConnect(MultiConnMultiplexServer & server, OS::Socket & client);
-		// virtual void onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet);
-		// virtual void onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client);
 		virtual void onConnect(MultiConn & server, OS::Socket & client);
 		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet);
 		virtual void onDisconnect(MultiConn & server, OS::Socket & client);

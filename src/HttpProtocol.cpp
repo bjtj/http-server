@@ -114,10 +114,10 @@ namespace HTTP {
 		releaseResponse();
 	}
 	
-	// void HttpConnection::onConnect(MultiConnMultiplexServer & server, OS::Socket & client) {
+
 	void HttpConnection::onConnect(MultiConn & server, OS::Socket & client) {
 	}
-	// void HttpConnection::onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet) {
+
 	void HttpConnection::onReceive(MultiConn & server, OS::Socket & client, Packet & packet) {
 
 		if (!headerReader.complete()) {
@@ -147,7 +147,7 @@ namespace HTTP {
 			}
 		}
 	}
-	// void HttpConnection::onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client) {
+
 	void HttpConnection::onDisconnect(MultiConn & server, OS::Socket & client) {
 	}
 	void HttpConnection::gatherContent(char * buffer, size_t size) {
@@ -186,18 +186,17 @@ namespace HTTP {
 	HttpProtocol::~HttpProtocol() {
 	}
 	
-	// void HttpProtocol::onConnect(MultiConnMultiplexServer & server, OS::Socket & client) {
 	void HttpProtocol::onConnect(MultiConn & server, OS::Socket & client) {
 		conns[&client] = new HttpConnection(*this);
 	}
-	// void HttpProtocol::onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet) {
+
 	void HttpProtocol::onReceive(MultiConn & server, OS::Socket & client, Packet & packet) {
 		HttpConnection * conn = conns[&client];
 		if (conn) {
 			conn->onReceive(server, client, packet);
 		}
 	}
-	//void HttpProtocol::onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client) {
+
 	void HttpProtocol::onDisconnect(MultiConn & server, OS::Socket & client) {
 		delete conns[&client];
 		conns.erase(&client);
