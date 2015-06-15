@@ -7,7 +7,8 @@
 
 namespace HTTP {
 
-	class MultiConnServer;
+	class MultiConn;
+	class MultiConnMultiplexServer;
 
 	/**
 	 * @brief packet
@@ -39,7 +40,8 @@ namespace HTTP {
 		OnConnectListener() {}
 		virtual ~OnConnectListener() {}
 
-		virtual void onConnect(MultiConnServer & server, OS::Socket & client) = 0;
+		// virtual void onConnect(MultiConnMultiplexServer & server, OS::Socket & client) = 0;
+		virtual void onConnect(MultiConn & server, OS::Socket & client) = 0;
 	};
 
 	/**
@@ -50,7 +52,8 @@ namespace HTTP {
 		OnReceiveListener() {}
 		virtual ~OnReceiveListener() {}
 
-		virtual void onReceive(MultiConnServer & server, OS::Socket & client, Packet & packet) = 0;
+		// virtual void onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet) = 0;
+		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet) = 0;
 	};
 
 	/**
@@ -61,24 +64,61 @@ namespace HTTP {
 		OnDisconnectListener() {}
 		virtual ~OnDisconnectListener() {}
 
-		virtual void onDisconnect(MultiConnServer & server, OS::Socket & client) = 0;
+		// virtual void onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client) = 0;
+		virtual void onDisconnect(MultiConn & server, OS::Socket & client) = 0;
 	};
 
+	/**
+	 * @brief multi conn protocol
+	 */
 	class MultiConnProtocol : public OnConnectListener,
 							  public OnReceiveListener,
 							  public OnDisconnectListener {
 	public:
         MultiConnProtocol() {}
 		virtual ~MultiConnProtocol() {}
-		virtual void onConnect(MultiConnServer & server, OS::Socket & client) = 0;
-		virtual void onReceive(MultiConnServer & server, OS::Socket & client, Packet & packet) = 0;
-		virtual void onDisconnect(MultiConnServer & server, OS::Socket & client) = 0;
+		// virtual void onConnect(MultiConnMultiplexServer & server, OS::Socket & client) = 0;
+		// virtual void onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet) = 0;
+		// virtual void onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client) = 0;
+		virtual void onConnect(MultiConn & server, OS::Socket & client) = 0;
+		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet) = 0;
+		virtual void onDisconnect(MultiConn & server, OS::Socket & client) = 0;
 	};
+
+
+	
+	class MultiConn {
+	private:
+        OnConnectListener * onConnectListener;
+		OnReceiveListener * onReceiveListener;
+		OnDisconnectListener * onDisconnectListener;
+	public:
+		MultiConn();
+		virtual ~MultiConn();
+
+		virtual void start() = 0;
+		virtual void stop() = 0;
+		virtual bool isRunning() = 0;
+
+		virtual bool isDisconnected(OS::Socket & client) = 0;
+		virtual void disconnect(OS::Socket & client) = 0;
+
+		virtual void onConnect(OS::Socket & client);
+		virtual void onReceive(OS::Socket & client, Packet & packet);
+		virtual void onDisconnect(OS::Socket & client);
+
+		void setOnConnectListener(OnConnectListener * onConnectListener);
+		void setOnReceiveListener(OnReceiveListener * onReceiveListener);
+		void setOnDisconnectListener(OnDisconnectListener * onDisconnectListener);
+
+		void setProtocol(MultiConnProtocol * protocol);
+	};
+
 
 	/**
 	 * @brief multi connection server
 	 */
-	class MultiConnServer {
+	class MultiConnMultiplexServer : public MultiConn {
 	private:
 		int port;
 
@@ -91,8 +131,8 @@ namespace HTTP {
 		OnDisconnectListener * onDisconnectListener;
 		
 	public:
-		MultiConnServer(int port);
-		virtual ~MultiConnServer();
+		MultiConnMultiplexServer(int port);
+		virtual ~MultiConnMultiplexServer();
 
 		virtual void start();
 		virtual void poll(unsigned long timeout_milli);
@@ -106,11 +146,11 @@ namespace HTTP {
 		virtual void onReceive(OS::Socket & client, Packet & packet);
 		virtual void onDisconnect(OS::Socket & client);
 
-		void setOnConnectListener(OnConnectListener * onConnectListener);
-		void setOnReceiveListener(OnReceiveListener * onReceiveListener);
-		void setOnDisconnectListener(OnDisconnectListener * onDisconnectListener);
+		// void setOnConnectListener(OnConnectListener * onConnectListener);
+		// void setOnReceiveListener(OnReceiveListener * onReceiveListener);
+		// void setOnDisconnectListener(OnDisconnectListener * onDisconnectListener);
 
-		void setProtocol(MultiConnProtocol * protocol);
+		// void setProtocol(MultiConnProtocol * protocol);
 	};
 	
 }

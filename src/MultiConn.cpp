@@ -50,18 +50,64 @@ namespace HTTP {
 
 
 
-	
-	MultiConnServer::MultiConnServer(int port)
-		: port(port),
-		  server(NULL),
-		  onConnectListener(NULL),
-		  onReceiveListener(NULL),
-		  onDisconnectListener(NULL){
+
+
+	MultiConn::MultiConn() : onConnectListener(NULL), onReceiveListener(NULL), onDisconnectListener(NULL) {
 	}
-	MultiConnServer::~MultiConnServer() {
+	MultiConn::~MultiConn() {
+	}
+	
+	void MultiConn::onConnect(OS::Socket & client) {
+		if (onConnectListener) {
+			onConnectListener->onConnect(*this, client);
+		}
+	}
+	void MultiConn::onReceive(OS::Socket & client, Packet & packet) {
+		if (onReceiveListener) {
+			onReceiveListener->onReceive(*this, client, packet);
+		}
+	}
+	void MultiConn::onDisconnect(OS::Socket & client) {
+		if (onDisconnectListener) {
+			onDisconnectListener->onDisconnect(*this, client);
+		}
 	}
 
-	void MultiConnServer::start() {
+	void MultiConn::setOnConnectListener(OnConnectListener * onConnectListener) {
+		this->onConnectListener = onConnectListener;
+	}
+	void MultiConn::setOnReceiveListener(OnReceiveListener * onReceiveListener) {
+		this->onReceiveListener = onReceiveListener;
+	}
+	void MultiConn::setOnDisconnectListener(OnDisconnectListener * onDisconnectListener) {
+		this->onDisconnectListener = onDisconnectListener;
+	}
+
+	void MultiConn::setProtocol(MultiConnProtocol * protocol) {
+		setOnConnectListener(protocol);
+		setOnReceiveListener(protocol);
+		setOnDisconnectListener(protocol);
+	}
+	
+
+
+
+
+	
+
+	
+	MultiConnMultiplexServer::MultiConnMultiplexServer(int port)
+		: port(port),
+		  server(NULL)// ,
+		  // onConnectListener(NULL),
+		  // onReceiveListener(NULL),
+		  // onDisconnectListener(NULL)
+	{
+	}
+	MultiConnMultiplexServer::~MultiConnMultiplexServer() {
+	}
+
+	void MultiConnMultiplexServer::start() {
 		server = new ServerSocket(port);
 		server->setReuseAddr();
 		server->bind();
@@ -71,7 +117,7 @@ namespace HTTP {
 
 		clients.clear();
 	}
-	void MultiConnServer::poll(unsigned long timeout_milli) {
+	void MultiConnMultiplexServer::poll(unsigned long timeout_milli) {
 		
 		if (selector.select(timeout_milli) > 0) {
 			
@@ -102,7 +148,7 @@ namespace HTTP {
 			}
 		}
 	}
-	void MultiConnServer::stop() {
+	void MultiConnMultiplexServer::stop() {
 		vector<Socket*> vec;
 
 		for (map<int, Socket*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
@@ -118,11 +164,11 @@ namespace HTTP {
 		server->close();
 		server = NULL;
 	}
-	bool MultiConnServer::isRunning() {
+	bool MultiConnMultiplexServer::isRunning() {
 		return server != NULL;
 	}
 
-	bool MultiConnServer::isDisconnected(Socket & client) {
+	bool MultiConnMultiplexServer::isDisconnected(Socket & client) {
 		for (size_t i = 0; i < clients.size(); i++) {
 			if (clients[i] == &client) {
 				return false;
@@ -131,34 +177,40 @@ namespace HTTP {
 		return true;
 	}
 	
-	void MultiConnServer::disconnect(Socket & client) {
+	void MultiConnMultiplexServer::disconnect(Socket & client) {
 		onDisconnect(client);
 	}
 
-	void MultiConnServer::onConnect(Socket & client) {
+	void MultiConnMultiplexServer::onConnect(Socket & client) {
 
 		clients[client.getFd()] = &client;
 		client.registerSelector(selector);
 		
-		if (onConnectListener) {
-			onConnectListener->onConnect(*this, client);
-		}
+		// if (onConnectListener) {
+		// 	onConnectListener->onConnect(*this, client);
+		// }
+
+		MultiConn::onConnect(client);
 	}
 	
-	void MultiConnServer::onReceive(Socket & client, Packet & packet) {
+	void MultiConnMultiplexServer::onReceive(Socket & client, Packet & packet) {
 		
-		if (onReceiveListener) {
-			onReceiveListener->onReceive(*this, client, packet);
-		}
+		// if (onReceiveListener) {
+		// 	onReceiveListener->onReceive(*this, client, packet);
+		// }
+
+		MultiConn::onReceive(client, packet);
 	}
 
-	void MultiConnServer::onDisconnect(Socket & client) {
+	void MultiConnMultiplexServer::onDisconnect(Socket & client) {
 		
 		int fd = client.getFd();
+
+		MultiConn::onDisconnect(client);
 		
-		if (onDisconnectListener) {
-			onDisconnectListener->onDisconnect(*this, client);
-		}
+		// if (onDisconnectListener) {
+		// 	onDisconnectListener->onDisconnect(*this, client);
+		// }
 
 		clients.erase(fd);
 		selector.unset(fd);
@@ -166,19 +218,19 @@ namespace HTTP {
 		delete &client;
 	}
 
-	void MultiConnServer::setOnConnectListener(OnConnectListener * onConnectListener) {
-		this->onConnectListener = onConnectListener;
-	}
-	void MultiConnServer::setOnReceiveListener(OnReceiveListener * onReceiveListener) {
-		this->onReceiveListener = onReceiveListener;
-	}
-	void MultiConnServer::setOnDisconnectListener(OnDisconnectListener * onDisconnectListener) {
-		this->onDisconnectListener = onDisconnectListener;
-	}
+	// void MultiConnMultiplexServer::setOnConnectListener(OnConnectListener * onConnectListener) {
+	// 	this->onConnectListener = onConnectListener;
+	// }
+	// void MultiConnMultiplexServer::setOnReceiveListener(OnReceiveListener * onReceiveListener) {
+	// 	this->onReceiveListener = onReceiveListener;
+	// }
+	// void MultiConnMultiplexServer::setOnDisconnectListener(OnDisconnectListener * onDisconnectListener) {
+	// 	this->onDisconnectListener = onDisconnectListener;
+	// }
 
-	void MultiConnServer::setProtocol(MultiConnProtocol * protocol) {
-		setOnConnectListener(protocol);
-		setOnReceiveListener(protocol);
-		setOnDisconnectListener(protocol);
-	}
+	// void MultiConnMultiplexServer::setProtocol(MultiConnProtocol * protocol) {
+	// 	setOnConnectListener(protocol);
+	// 	setOnReceiveListener(protocol);
+	// 	setOnDisconnectListener(protocol);
+	// }
 }

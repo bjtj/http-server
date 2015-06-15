@@ -12,17 +12,20 @@ public:
     MyListener() {}
     virtual ~MyListener() {}
 
-	virtual void onConnect(MultiConnServer & server, OS::Socket & client) {
+	// virtual void onConnect(MultiConnMultiplexServer & server, OS::Socket & client) {
+	virtual void onConnect(MultiConn & server, OS::Socket & client) {
 		cout << " ++ " << client.getFd() << endl;
 	}
 
-	virtual void onReceive(MultiConnServer & server, OS::Socket & client, Packet & packet) {
+	// virtual void onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet) {
+	virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet) {
 		const char * data = "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nhello";
 		client.send((char*)data, strlen(data));
 		server.disconnect(client);
 	}
 
-	virtual void onDisconnect(MultiConnServer & server, OS::Socket & client) {
+	// virtual void onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client) {
+	virtual void onDisconnect(MultiConn & server, OS::Socket & client) {
 		cout << " -- " << client.getFd() << endl;
 	}
 };
@@ -30,7 +33,7 @@ public:
 
 static void s_run_multiconn() {
 	bool done = false;
-	MultiConnServer server(8082);
+	MultiConnMultiplexServer server(8082);
 
 	MyListener listener;
 	server.setOnConnectListener(&listener);
@@ -73,7 +76,7 @@ static void s_run_server() {
 	
 	bool done = false;
 	
-	MultiConnServer server(8082);
+	MultiConnMultiplexServer server(8082);
 	
 	HttpProtocol http;
 	//MyPath mypath;

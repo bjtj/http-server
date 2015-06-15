@@ -81,9 +81,12 @@ namespace HTTP {
 		HttpConnection(HttpProtocol & protocol);
 		virtual ~HttpConnection();
 
-		virtual void onConnect(MultiConnServer & server, OS::Socket & client);
-		virtual void onReceive(MultiConnServer & server, OS::Socket & client, Packet & packet);
-		virtual void onDisconnect(MultiConnServer & server, OS::Socket & client);
+		// virtual void onConnect(MultiConnMultiplexServer & server, OS::Socket & client);
+		// virtual void onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet);
+		// virtual void onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client);
+		virtual void onConnect(MultiConn & server, OS::Socket & client);
+		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet);
+		virtual void onDisconnect(MultiConn & server, OS::Socket & client);
 
 		virtual void gatherContent(char * buffer, size_t size);
 		virtual void onRequest(HttpRequest & request, HttpResponse & response);
@@ -123,9 +126,12 @@ namespace HTTP {
 		HttpProtocol();
 		virtual ~HttpProtocol();
 
-		virtual void onConnect(MultiConnServer & server, OS::Socket & client);
-		virtual void onReceive(MultiConnServer & server, OS::Socket & client, Packet & packet);
-		virtual void onDisconnect(MultiConnServer & server, OS::Socket & client);
+		// virtual void onConnect(MultiConnMultiplexServer & server, OS::Socket & client);
+		// virtual void onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet);
+		// virtual void onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client);
+		virtual void onConnect(MultiConn & server, OS::Socket & client);
+		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet);
+		virtual void onDisconnect(MultiConn & server, OS::Socket & client);
 
 		void vpath(std::string path, HttpRequestHandler * handler);
 		void onRequest(HttpRequest & request, HttpResponse & response);
