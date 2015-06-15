@@ -8,12 +8,17 @@
 
 namespace HTTP {
 
+
 	class HttpProtocol;
 
+	/**
+	 * @brief http request
+	 */
 	class HttpRequest {
 	private:
         HttpRequestHeader header;
 		std::string content;
+		int contentSize;
 		OS::Socket & socket;
 	public:
 		HttpRequest(HttpHeader & header, OS::Socket & socket);
@@ -27,20 +32,41 @@ namespace HTTP {
 
 		HttpRequestHeader & getHeader();
 		void appendContent(char * buffer, size_t size);
-		void clearContent();
+		void compactContent();
+		std::string & getContent();
+
+		int getContentLength();
+		std::string getContentType();
+		bool remaining();
 	};
 
+	/**
+	 * @brief http response
+	 */
 	class HttpResponse {
 	private:
+		HttpHeader header;
         OS::Socket & socket;
+		bool complete;
+		std::string content;
 	public:
 		HttpResponse(OS::Socket & socket);
 		virtual ~HttpResponse();
 
-		virtual int write(std::string content);
+		void setParts(std::vector<std::string> &parts);
+		void setContentLength(int length);
+		void setContentType(std::string type);
+		
+		int write(std::string content);
+		void sendContent();
+		void setComplete();
+		bool hasComplete();
 	};
 
 
+	/**
+	 * @brief http connection
+	 */
 	class HttpConnection : public MultiConnProtocol {
 	private:
 		HttpProtocol & protocol;
@@ -60,12 +86,18 @@ namespace HTTP {
 		virtual void onRequest(HttpRequest & request, HttpResponse & response);
 
 	private:
-		virtual bool needMoreHeader();
-		virtual void readHeader(Packet & packet);
-		virtual bool needMoreContent();
-		virtual void readContent(Packet & packet);
+		bool needMoreHeader();
+		void readHeader(Packet & packet);
+		bool needMoreContent();
+		void readContent(Packet & packet);
+
+		void releaseRequest();
+		void releaseResponse();
 	};
 
+	/**
+	 * @brief http request handler
+	 */
 	class HttpRequestHandler
 	{
 	public:
@@ -76,10 +108,15 @@ namespace HTTP {
 	};
 
 
+	/**
+	 * @brief http protocol
+	 */
 	class HttpProtocol : public MultiConnProtocol {
 	private:
 		std::map<OS::Socket*, HttpConnection*> conns;
 		std::map<std::string, HttpRequestHandler*> handlers;
+		HttpRequest * request;
+		HttpResponse * response;
 	public:
 		HttpProtocol();
 		virtual ~HttpProtocol();

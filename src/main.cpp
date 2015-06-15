@@ -55,7 +55,12 @@ public:
 	}
 
 	virtual void onRequest(HttpRequest & request, HttpResponse & response) {
-		response.write("HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\nhello world");
+
+		if (!request.remaining()) {
+			// response.write("HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\nhello world");
+			response.write("hello world sfwfwfwfwpjpjpwpofjwefpj");
+			response.setComplete();
+		}
 	}
 };
 

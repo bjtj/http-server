@@ -27,7 +27,10 @@ namespace HTTP {
 	void HttpParameter::setName(string name) {
 		this->name = name;
 	}
-	string & HttpParameter::getFirstValue() {
+	string HttpParameter::getFirstValue() {
+		if (values.empty()) {
+			return "";
+		}
 		return values[0];
 	}
 	vector<string> & HttpParameter::getValues() {
@@ -108,6 +111,14 @@ namespace HTTP {
 			params[name] = param;
 		}
 		params[name].appendValue(value);
+	}
+	string HttpHeader::toString() {
+		string ret = parts[0] + " " + parts[1] + " " +  parts[2] + "\r\n";
+		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
+			ret += (iter->first + ": " + iter->second + "\r\n");
+		}
+		ret += "\r\n";
+		return ret;
 	}
 	
 

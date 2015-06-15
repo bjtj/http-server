@@ -26,7 +26,7 @@ namespace HTTP {
 		size_t size();
 		std::string & getName();
 		void setName(std::string name);
-		std::string & getFirstValue();
+		std::string getFirstValue();
 		std::vector<std::string> & getValues();
 		std::string & getValue(int index);
 		void setValue(std::string value);
@@ -66,6 +66,8 @@ namespace HTTP {
 		std::string getParameter(std::string name);
 		std::vector<std::string> getParameters(std::string name);
 		void setParameter(std::string name, std::string value);
+
+		virtual std::string toString();
 	};
 
 	class HttpHeaderWrapper : public HttpHeader {
