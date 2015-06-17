@@ -95,6 +95,7 @@ namespace HTTP {
 		virtual ~MultiConn();
 
 		virtual void start() = 0;
+		virtual void poll(unsigned long timeout_milli) = 0;
 		virtual void stop() = 0;
 		virtual bool isRunning() = 0;
 

@@ -8,6 +8,7 @@ http_server_SOURCES= \
 	HttpHeader.hpp HttpHeader.cpp \
 	HttpProtocol.hpp HttpProtocol.cpp \
 	HttpStatusCodes.hpp HttpStatusCodes.cpp \
+	HttpConnection.hpp HttpConnection.cpp \
 	main.cpp
 
 http_server_CXXFLAGS=$(PTHREAD_CXXFLAGS)

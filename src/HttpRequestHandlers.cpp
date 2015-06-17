@@ -1,5 +1,6 @@
-#include "HttpRequestHandlers.hpp"
 #include <iostream>
+#include "HttpRequestHandlers.hpp"
+#include "os.hpp"
 
 namespace HTTP {
 
@@ -18,18 +19,24 @@ namespace HTTP {
 			string uri = request.getPath();
 			string fullpath = path + uri;
 
-			FILE * fp = fopen(fullpath.c_str(), "rb");
-			if (!fp) {
+			if (!OS::File::isFile(fullpath)) {
 				response.setStatusCode(404);
+				response.write("404 not found");
 			} else {
-				char buf[1024] = {0,};
-				int len = 0;
-				while ((len = fread(buf, 1, sizeof(buf), fp)) > 0) {
-					response.write(buf, len);
+				FILE * fp = fopen(fullpath.c_str(), "rb");
+				if (!fp) {
+					response.setStatusCode(404);
+					response.write("404 not found");
+				} else {
+					char buf[1024] = {0,};
+					int len = 0;
+					while ((len = fread(buf, 1, sizeof(buf), fp)) > 0) {
+						response.write(buf, len);
+					}
+					fclose(fp);
+					
+					response.setContentType("text/html");
 				}
-				fclose(fp);
-
-				response.setContentType("text/html");
 			}
 			
 			response.setComplete();

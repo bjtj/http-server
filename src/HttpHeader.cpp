@@ -6,6 +6,9 @@ namespace HTTP {
 	using namespace std;
 	using namespace UTIL;
 
+	/**
+	 * @brief http parameter constructor
+	 */
 	HttpParameter::HttpParameter() {
 	}
 	HttpParameter::HttpParameter(string name) : name(name){
@@ -68,8 +71,9 @@ namespace HTTP {
 	}
 
 
-	
-
+	/**
+	 * @brief http header constructor
+	 */
 	HttpHeader::HttpHeader() : valid(false) {
 		parts.push_back("");
 		parts.push_back("");
@@ -135,7 +139,9 @@ namespace HTTP {
 
 
 
-
+	/**
+	 * @brief http response header (wrapper) constructor
+	 */
 	HttpResponseHeader::HttpResponseHeader() : HttpHeaderWrapper(header) {
 		header.setPart1("HTTP/1.1");
 		header.setPart2("200");
@@ -165,7 +171,9 @@ namespace HTTP {
 
 	
 
-	
+	/**
+	 * @brief http header parse result constructor
+	 */	
 	HttpHeaderParseResult::HttpHeaderParseResult() : success(false), errorCode(0) {
 	}
 	HttpHeaderParseResult::HttpHeaderParseResult(bool success, int errorCode, string errorMessage)
@@ -193,7 +201,9 @@ namespace HTTP {
 	}
 
 
-	
+	/**
+	 * @brief http header parser constructor
+	 */
 	HttpHeaderParser::HttpHeaderParser() {
 	}
 	HttpHeaderParser::~HttpHeaderParser() {
@@ -268,6 +278,9 @@ namespace HTTP {
 	}
 
 
+	/**
+	 * @brief http header reader constructor
+	 */
 	HttpHeaderReader::HttpHeaderReader() {
 	}
 	HttpHeaderReader::~HttpHeaderReader() {
