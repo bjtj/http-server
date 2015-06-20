@@ -523,6 +523,7 @@ namespace OS {
 			char portStr[10] = {0,};
 			int ret = WSAStartup(MAKEWORD(2,2), &wsaData);
 			if (ret != 0) {
+				std::cout << "WSAStartup error" << std::endl;
 				// error
 				return;
 			}
@@ -535,8 +536,10 @@ namespace OS {
 			snprintf(portStr, sizeof(portStr), "%d", port);
 			ret = getaddrinfo(host, portStr, &hints, &targetAddr);
 			if (ret != 0) {
+				std::cout << "getaddrinfo error" << std::endl;
 				// error
 				WSACleanup();
+				targetAddr = NULL;
 				return;
 			}
 		}
@@ -562,6 +565,7 @@ namespace OS {
 				// try to connect until one succeeds
 				sock = ::socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
 				if (sock == INVALID_SOCKET) {
+					std::cout << "invalid socket" << std::endl;
 					// error
 					freeaddrinfo(targetAddr);
 					WSACleanup();
@@ -570,8 +574,9 @@ namespace OS {
 
 				ret = ::connect(sock, addr->ai_addr, (int)addr->ai_addrlen);
 				if (ret == SOCKET_ERROR) {
+					std::cout << "socket error" << std::endl;
 					// error
-					freeaddrinfo(targetAddr);
+					// freeaddrinfo(targetAddr);
 					::closesocket(sock);
 					sock = INVALID_SOCKET;
 					continue;
@@ -590,12 +595,28 @@ namespace OS {
 
 			return 0;
 		}
-
+		virtual void registerSelector(Selector & selector) {
+			selector.set((int)sock);
+		}
+		virtual bool compareFd(int fd) {
+			return (int)sock == fd;
+		}
+		virtual int getFd() {
+			return (int)sock;
+		}
 		virtual int recv(char * buffer, int max) {
+			if (sock == INVALID_SOCKET) {
+				std::cout << "recv: invliad socket" << std::endl;
+				return -1;
+			}
 			return ::recv(sock, buffer, max, 0);
 		}
 
 		virtual int send(char * buffer, int length) {
+			if (sock == INVALID_SOCKET) {
+				std::cout << "recv: invliad socket" << std::endl;
+				return -1;
+			}
 			return ::send(sock, buffer, length, 0);
 		}
 
@@ -603,6 +624,10 @@ namespace OS {
 		}
 
 		virtual void close() {
+			if (sock == INVALID_SOCKET) {
+				std::cout << "recv: invliad socket" << std::endl;
+				return;
+			}
 			closesocket(sock);
 		}
 	};
@@ -819,7 +844,17 @@ namespace OS {
 		}
 
 		virtual void setReuseAddr() {
-			// TODO: implement
+			// TODO: implement - https://msdn.microsoft.com/en-us/library/windows/desktop/ms740621%28v=vs.85%29.aspx
+		}
+
+		virtual void registerSelector(Selector & selector) {
+			selector.set((int)sock);
+		}
+		virtual bool compareFd(int fd) {
+			return (int)sock == fd;
+		}
+		virtual int getFd() {
+			return (int)sock;
 		}
 
 		virtual bool bind() {
@@ -1019,6 +1054,9 @@ namespace OS {
 		lstat(path.c_str(), &st);
 		return (S_ISDIR(st.st_mode) ? true : false);
 	}
+	static bool s_is_writable(string & path) {
+		return (access(path.c_str(), W_OK) == 0);
+	}
 	static string s_get_parent_path(string & path) {
 
 		if (path.empty()) {
@@ -1131,6 +1169,24 @@ namespace OS {
 	}
 	
 #elif defined(USE_MS_WIN)
+
+	static bool s_is_separator(char c);
+	static string s_remove_if_last(string & path, char m);
+	static bool s_is_fullpath(string & path);
+	static bool s_is_root_path(string & path);
+	static bool s_exists(string & path);
+	static bool s_is_file(string & path);
+	static bool s_is_directory(string & path);
+	static string s_get_parent_path(string & path);
+	static string s_get_path_part(string & path);
+	static string s_get_filename_part(string & path);
+	static string s_get_entity_name_part(string & path);
+	static string s_get_ext(string & path);
+	static int s_mkdir(const char *dir, int mode);
+	static TIME s_get_creation_date(string path);
+	static TIME s_get_modified_date(string path);
+
+
 	static bool s_is_separator(char c) {
 		return (c == '/' || c == '\\');
 	}
@@ -1153,14 +1209,12 @@ namespace OS {
 		if (path.empty()) {
 			return false;
 		}
-		
-		WIN32_FIND_DATA FindFileData;
-		HANDLE handle = FindFirstFile(path.c_str(), &FindFileData) ;
-		bool found = (handle != INVALID_HANDLE_VALUE);
-		if(found) {
-			FindClose(handle);
+
+		if (s_is_directory(path) || s_is_file(path)) {
+			return true;
 		}
-		return found;
+		
+		return false;
 	}
 	static bool s_is_file(string & path) {
 
@@ -1168,8 +1222,20 @@ namespace OS {
 			return false;
 		}
 		
-		// TODO:
-		return false;
+		//// http://stackoverflow.com/questions/146924/how-can-i-tell-if-a-given-path-is-a-directory-or-a-file-c-c
+		//if (GetFileAttributes(path.c_str()) == FILE_ATTRIBUTE_NORMAL) {
+		//	return true;
+		//}
+		//return false;
+
+		// http://stackoverflow.com/questions/146924/how-can-i-tell-if-a-given-path-is-a-directory-or-a-file-c-c
+		struct stat s;
+		if (stat(path.c_str(), &s) != 0) {
+			// error
+			return false;
+		}
+
+		return (s.st_mode & S_IFREG ? true : false);
 	}
 	static bool s_is_directory(string & path) {
 
@@ -1177,8 +1243,25 @@ namespace OS {
 			return false;
 		}
 		
-		// TODO:
-		return false;
+		//// http://stackoverflow.com/questions/146924/how-can-i-tell-if-a-given-path-is-a-directory-or-a-file-c-c
+		//if (GetFileAttributes(path.c_str()) == FILE_ATTRIBUTE_DIRECTORY) {
+		//	return true;
+		//}
+
+		// http://stackoverflow.com/questions/146924/how-can-i-tell-if-a-given-path-is-a-directory-or-a-file-c-c
+		struct stat s;
+		if (stat(path.c_str(), &s) != 0) {
+			// error
+			return false;
+		}
+
+		return (s.st_mode & S_IFDIR ? true : false);
+	}
+	static bool s_is_writable(string & path) {
+		if (!s_exists(path)) {
+			return false;
+		}
+		return (_access(path.c_str(), 2) == 0);
 	}
 	static string s_get_parent_path(string & path) {
 
@@ -1251,7 +1334,30 @@ namespace OS {
 	// http://stackoverflow.com/questions/2336242/recursive-mkdir-system-call-on-unix
 	static int s_mkdir(const char *dir, int mode) {
 	
-		// TODO:
+		// https://msdn.microsoft.com/en-us/library/2fkk4dzw.aspx
+
+		char tmp[256];
+		char *p = NULL;
+		size_t len;
+
+		snprintf(tmp, sizeof(tmp),"%s",dir);
+		len = strlen(tmp);
+
+		if(tmp[len - 1] == '\\') {
+			tmp[len - 1] = 0;
+		}
+
+		for(p = tmp + 1; *p; p++) {
+			if(*p == '\\') {
+				*p = 0;
+				_mkdir(tmp);
+				*p = '\\';
+			}
+		}
+	
+		return _mkdir(tmp);
+
+
 		return 0;
 	}
 	static TIME s_get_creation_date(string path) {
@@ -1324,6 +1430,10 @@ namespace OS {
 
 	bool File::isDirectory(string path){
 		return s_is_directory(path);
+	}
+
+	bool File::isWritable(string path) {
+		return s_is_writable(path);
 	}
 
 	string File::getParentPath(string path) {

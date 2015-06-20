@@ -1,10 +1,12 @@
 #include <iostream>
 #include "HttpRequestHandlers.hpp"
 #include "os.hpp"
+#include "Text.hpp"
 
 namespace HTTP {
 
 	using namespace std;
+	using namespace UTIL;
 	
 	FileRedirectHandler::FileRedirectHandler(string path) : path(path) {
 	}
@@ -42,6 +44,38 @@ namespace HTTP {
 			response.setComplete();
 		}
 	}
+
+
+
+
+	RESThandler::RESThandler() {
+	}
+	RESThandler::~RESThandler() {
+	}
 	
+	void RESThandler::onRequest(HttpRequest & request, HttpResponse & response) {
+		
+		string method = request.getMethod();
+		
+		if (Text::equalsIgnoreCase(method, "POST")) {
+			onPost(request, response);
+		} else if (Text::equalsIgnoreCase(method, "GET")) {
+			onGet(request, response);
+		} else if (Text::equalsIgnoreCase(method, "PUT")) {
+			onPut(request, response);
+		} else if (Text::equalsIgnoreCase(method, "DELETE")) {
+			onDelete(request, response);
+		} else {
+		}
+	}
+
+	void RESThandler::onPost(HttpRequest & request, HttpResponse & response) {
+	}
+	void RESThandler::onGet(HttpRequest & request, HttpResponse & response) {
+	}
+	void RESThandler::onPut(HttpRequest & request, HttpResponse & response) {
+	}
+	void RESThandler::onDelete(HttpRequest & request, HttpResponse & response) {
+	}
 }
 

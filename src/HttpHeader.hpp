@@ -53,23 +53,23 @@ namespace HTTP {
 		HttpHeader();
 		virtual ~HttpHeader();
 
-		bool isValid();
+		virtual bool isValid();
 		
-		void setFirstLine(std::string & firstline);
-		void setParts(std::vector<std::string> & parts);
-		std::string getPart1();
-		std::string getPart2();
-		std::string getPart3();
-		void setPart1(std::string part);
-		void setPart2(std::string part);
-		void setPart3(std::string part);
+		virtual void setFirstLine(std::string & firstline);
+		virtual void setParts(std::vector<std::string> & parts);
+		virtual std::string getPart1();
+		virtual std::string getPart2();
+		virtual std::string getPart3();
+		virtual void setPart1(std::string part);
+		virtual void setPart2(std::string part);
+		virtual void setPart3(std::string part);
 		
-		std::string getHeaderField(std::string name);
-		void setHeaderField(std::string name, std::string value);
+		virtual std::string getHeaderField(std::string name);
+		virtual void setHeaderField(std::string name, std::string value);
 		
-		std::string getParameter(std::string name);
-		std::vector<std::string> getParameters(std::string name);
-		void setParameter(std::string name, std::string value);
+		virtual std::string getParameter(std::string name);
+		virtual std::vector<std::string> getParameters(std::string name);
+		virtual void setParameter(std::string name, std::string value);
 
 		virtual std::string toString();
 	};
@@ -86,6 +86,27 @@ namespace HTTP {
 
 		HttpHeader & getHeader() {return header;}
 
+		virtual bool isValid() {return getHeader().isValid();}
+		
+		virtual void setFirstLine(std::string & firstline) {getHeader().setFirstLine(firstline);}
+		virtual void setParts(std::vector<std::string> & parts) {getHeader().setParts(parts);}
+		virtual std::string getPart1() {return getHeader().getPart1();}
+		virtual std::string getPart2() {return getHeader().getPart2();}
+		virtual std::string getPart3() {return getHeader().getPart3();}
+		virtual void setPart1(std::string part) {getHeader().setPart1(part);}
+		virtual void setPart2(std::string part) {getHeader().setPart2(part);}
+		virtual void setPart3(std::string part) {getHeader().setPart3(part);}
+		
+		virtual std::string getHeaderField(std::string name) {return getHeader().getHeaderField(name);}
+		virtual void setHeaderField(std::string name, std::string value) {
+			getHeader().setHeaderField(name, value);}
+		
+		virtual std::string getParameter(std::string name) {return getHeader().getParameter(name);}
+		virtual std::vector<std::string> getParameters(std::string name) {
+			return getHeader().getParameters(name);}
+		virtual void setParameter(std::string name, std::string value) {
+			getHeader().setParameter(name, value);}
+		
 		virtual std::string toString() {return header.toString();}
 	};
 
@@ -95,13 +116,19 @@ namespace HTTP {
 	 */
 	class HttpRequestHeader : public HttpHeaderWrapper {
 	private:
+		bool parsed;
 	public:
-		HttpRequestHeader(HttpHeader & header) : HttpHeaderWrapper(header) {}
-		virtual ~HttpRequestHeader() {}
+		HttpRequestHeader(HttpHeader & header);
+		virtual ~HttpRequestHeader();
 
-		std::string getMethod() {return getHeader().getPart1();}
-		std::string getPath() {return getHeader().getPart2();}
-		std::string getProtocol() {return getHeader().getPart3();}
+		void parsePath();
+		void parseParams(const std::string & params, size_t offset);
+
+		virtual void setPart2(std::string part);
+
+		std::string getMethod();
+		std::string getPath();
+		std::string getProtocol();
 	};
 
 	/**
@@ -153,9 +180,13 @@ namespace HTTP {
 		HttpHeaderParser();
 		virtual ~HttpHeaderParser();
 
+		static size_t parseParam(HttpHeader & header, const std::string & param, size_t & f);
+		static void parseParams(HttpHeader & header, std::string params, size_t offset);
+
 		int parseFirstLine(HttpHeader & header, std::string & line);
-		int parseParam(HttpHeader & header, std::string line);
-		int parse(std::string & header);
+		int parseHeaderField(HttpHeader & header, std::string line);
+		std::string readLine(const std::string & full, size_t & f);
+		int parse(const std::string & header);
 		HttpHeaderParseResult & getResult();
 		HttpHeader & getHeader();
 	};

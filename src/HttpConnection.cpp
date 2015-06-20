@@ -25,7 +25,10 @@ namespace HTTP {
 	string HttpRequest::getHeaderField(string & name) {
 		return header.getHeaderField(name);
 	}
-	string HttpRequest::getParameter(string & name) {
+	string HttpRequest::getParameter(const string & name) {
+		return header.getParameter(name);
+	}
+	string HttpRequest::getParameter(const char * name) {
 		return header.getParameter(name);
 	}
 	vector<string> HttpRequest::getParameters(string & name) {
@@ -78,11 +81,10 @@ namespace HTTP {
 	void HttpResponse::setContentType(string type) {
 		header.setHeaderField("Content-Type", type);
 	}
-	
-	int HttpResponse::write(string content) {
+	int HttpResponse::write(const string & content) {
 		this->content += content;
 	}
-	int HttpResponse::write(char * buf, int size) {
+	int HttpResponse::write(const char * buf, int size) {
 		this->content += string(buf, size);
 	}
 	void HttpResponse::sendContent() {
@@ -121,19 +123,19 @@ namespace HTTP {
 
 		if (!headerReader.complete()) {
 			int offset = headerReader.read(packet.getBuffer(), packet.size());
-			gatherContent(packet.getBuffer() + offset, packet.length() - offset);
+			readContent(packet.getBuffer() + offset, packet.length() - offset);
 		} else {
-			gatherContent(packet.getBuffer(), packet.length());
+			readContent(packet.getBuffer(), packet.length());
 		}
 
 		if (headerReader.complete()) {
+			
 			if (!request) {
 				request = new HttpRequest(headerReader.getHeader(), client);
 			}
+			
 			if (!response) {
-				vector<string> parts;
 				response = new HttpResponse(client);
-				response->setStatusCode(200);
 			}
 			
 			onRequest(*request, *response);
@@ -146,22 +148,14 @@ namespace HTTP {
 
 	void HttpConnection::onDisconnect(MultiConn & server, OS::Socket & client) {
 	}
-	void HttpConnection::gatherContent(char * buffer, size_t size) {
+	void HttpConnection::readContent(char * buffer, size_t size) {
+		// content buffer manipulation
 	}
 	void HttpConnection::onRequest(HttpRequest & request, HttpResponse & response) {
 		// protocol.onRequest(request, response);
 		if (getHandler()) {
 			getHandler()->onRequest(request, response);
 		}
-	}
-	bool HttpConnection::needMoreHeader() {
-		return !headerReader.complete();
-	}
-	void HttpConnection::readHeader(Packet & packet) {
-	}
-	bool HttpConnection::needMoreContent() {
-	}
-	void HttpConnection::readContent(Packet & packet) {
 	}
 	void HttpConnection::releaseRequest() {
 		if (request) {

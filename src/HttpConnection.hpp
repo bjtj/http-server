@@ -24,7 +24,8 @@ namespace HTTP {
 		std::string getMethod();
 		std::string getPath();
 		std::string getHeaderField(std::string & name);
-		std::string getParameter(std::string & name);
+		std::string getParameter(const std::string & name);
+		std::string getParameter(const char * name);
 		std::vector<std::string> getParameters(std::string & name);
 
 		HttpRequestHeader & getHeader();
@@ -56,8 +57,8 @@ namespace HTTP {
 		void setContentLength(int length);
 		void setContentType(std::string type);
 		
-		int write(std::string content);
-		int write(char * buf, int size);
+		int write(const std::string & content);
+		int write(const char * buf, int size);
 		void sendContent();
 		void setComplete();
 		bool hasComplete();
@@ -106,15 +107,10 @@ namespace HTTP {
 		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet);
 		virtual void onDisconnect(MultiConn & server, OS::Socket & client);
 
-		virtual void gatherContent(char * buffer, size_t size);
+		virtual void readContent(char * buffer, size_t size);
 		virtual void onRequest(HttpRequest & request, HttpResponse & response);
 
 	private:
-		bool needMoreHeader();
-		void readHeader(Packet & packet);
-		bool needMoreContent();
-		void readContent(Packet & packet);
-
 		void releaseRequest();
 		void releaseResponse();
 	};

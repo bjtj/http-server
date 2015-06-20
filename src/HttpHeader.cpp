@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Text.hpp"
 #include "HttpHeader.hpp"
 
@@ -139,6 +140,46 @@ namespace HTTP {
 
 
 
+
+	/**
+	 * @brief http request header
+	 */
+	HttpRequestHeader::HttpRequestHeader(HttpHeader & header) : HttpHeaderWrapper(header) {
+		parsePath();
+	}
+
+	HttpRequestHeader::~HttpRequestHeader() {
+	}
+
+	void HttpRequestHeader::parsePath() {
+		HttpHeader & header = getHeader();
+		string path = header.getPart2();
+		size_t p = path.find("?");
+		if (p != string::npos) {
+			parseParams(path, ++p);
+			header.setPart2(path.substr(0, p));
+		}
+	}
+	void HttpRequestHeader::parseParams(const string & params, size_t offset) {
+		HttpHeader & header = getHeader();
+		HttpHeaderParser::parseParams(header, params, offset);
+	}
+
+	void HttpRequestHeader::setPart2(string part) {
+		HttpHeaderWrapper::setPart2(part);
+		parsePath();
+	}
+	
+	string HttpRequestHeader::getMethod() {
+		return getHeader().getPart1();
+	}
+	string HttpRequestHeader::getPath() {
+		return getHeader().getPart2();
+	}
+	string HttpRequestHeader::getProtocol() {
+		return getHeader().getPart3();
+	}
+
 	/**
 	 * @brief http response header (wrapper) constructor
 	 */
@@ -208,25 +249,47 @@ namespace HTTP {
 	}
 	HttpHeaderParser::~HttpHeaderParser() {
 	}
+	size_t HttpHeaderParser::parseParam(HttpHeader & header, const string & param, size_t & f) {
+		size_t sep = param.find("=", f);
+		size_t next = param.find("&", f);
+		if (sep != string::npos) {
+			size_t s = sep + 1;
+			size_t e = (next == string::npos ? param.length() : next);
+			string name = param.substr(f, sep - f);
+			string value = param.substr(s, e - s);
+			header.setParameter(name, value);
+			f = next + 1;
+		}
+		return next;
+	}
+	void HttpHeaderParser::parseParams(HttpHeader & header, std::string params, size_t offset) {
+		size_t f = offset;
+		while (parseParam(header, params, f) != string::npos) {
+		}
+	}
 	int HttpHeaderParser::parseFirstLine(HttpHeader & header, string & line) {
 		vector<string> parts;
-		string space = " \t";
+		string spaces = " \t";
 		size_t e = 0;
-		size_t f = line.find_first_of(space);
+		size_t f = line.find_first_of(spaces);
 		if (f == string::npos) {
 			return -1;
 		}
+		// first
 		string part = line.substr(0, f);
 		parts.push_back(part);
-		f = line.find_first_not_of(space, f);
+
+		// second
+		f = line.find_first_not_of(spaces, f);
 		if (f == string::npos) {
 			return -1;
 		}
-		e = line.find_first_of(space, f);
+		e = line.find_first_of(spaces, f);
 		part = (e != string::npos) ? line.substr(f, e - f) : line.substr(f);
 		parts.push_back(part);
 
-		f = line.find_first_not_of(space, e);
+		// third
+		f = line.find_first_not_of(spaces, e);
 		if (f == string::npos) {
 			return -1;
 		}
@@ -238,7 +301,7 @@ namespace HTTP {
 		header.setParts(parts);
 		return 0;
 	}
-	int HttpHeaderParser::parseParam(HttpHeader & header, string line) {
+	int HttpHeaderParser::parseHeaderField(HttpHeader & header, string line) {
 		size_t f = line.find(":");
 		if (f == string::npos) {
 			return -1;
@@ -248,25 +311,33 @@ namespace HTTP {
 		header.setParameter(Text::trim(name), Text::trim(value));
 		return 0;
 	}
-	int HttpHeaderParser::parse(string & header) {
-		size_t f = header.find("\r\n");
-		if (f == string::npos) {
+	string HttpHeaderParser::readLine(const string & full, size_t & f) {
+		string ret;
+		size_t nr = full.find("\r\n", f);
+		if (nr != string::npos) {
+			ret = full.substr(f, nr + 2);
+			f = nr + 2;
+		}
+		return ret;
+	}
+	int HttpHeaderParser::parse(const string & rawHeader) {
+
+		HttpHeader & httpHeader = result.getHeader();
+		
+		size_t f = 0;
+		string line = readLine(rawHeader, f);
+		if (line.empty()) {
 			return result.setResult(false, -1, "invalid header");
 		}
-		string line = header.substr(0, f + 2);
-		if (parseFirstLine(result.getHeader(), line) < 0) {
+
+		if (parseFirstLine(httpHeader, line) < 0) {
 			return result.setResult(false, -1, "invalid first line - " + line);
 		}
-		size_t s = f + 2;
-		while ((f = header.find("\r\n", s)) != string::npos) {
-			line = header.substr(s, f - s);
-			if (line.empty()) {
-				break;
-			}
-			if (parseParam(result.getHeader(), line) < 0) {
+
+		while (!(line = readLine(rawHeader, f)).empty()) {
+			if (parseHeaderField(httpHeader, line) < 0) {
 				return result.setResult(false, -1, "invalid param - " + line);
 			}
-			s = f + 2;
 		}
 		return result.setResult(true, 0, "valid header");
 	}

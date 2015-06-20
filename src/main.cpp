@@ -50,19 +50,48 @@ static void s_run_multiconn() {
 	cout << "bye~" << endl;
 }
 
-class MyPath : public HttpRequestHandler
+class Hello : public HttpRequestHandler
 {
 public:
-    MyPath() {
+    Hello() {
 	}
-    virtual ~MyPath() {
+    virtual ~Hello() {
 	}
 
 	virtual void onRequest(HttpRequest & request, HttpResponse & response) {
 
 		if (!request.remaining()) {
-			// response.write("HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\nhello world");
-			response.write("hello world sfwfwfwfwpjpjpwpofjwefpj");
+			string path = request.getPath();
+			response.write("hello world - " + path);
+			response.setComplete();
+		}
+	}
+};
+
+class ParamHandle : public HttpRequestHandler
+{
+public:
+    ParamHandle() {
+	}
+    virtual ~ParamHandle() {
+	}
+
+	virtual void onRequest(HttpRequest & request, HttpResponse & response) {
+
+		if (!request.remaining()) {
+
+			string method = request.getMethod();
+			string name = request.getParameter("name");
+
+			string content = string("<html><body>") +
+				"<ul>" +
+				"<li>method: " + method + "</li>" +
+				"<li>param.name: " + name + "</li>" +
+				"</ul>" +
+				"</body></html>";
+			
+			response.write(content);
+			
 			response.setComplete();
 		}
 	}
@@ -80,10 +109,13 @@ static void s_run_server() {
 	MultiConnThreadedServer server(8082);
 	
 	HttpProtocol http;
-	//MyPath mypath;
+	
 	FileRedirectHandler fileh(".");
-	//http.vpath("/hello", &mypath);
-	http.vpath("/", &fileh);
+	Hello hello;
+	ParamHandle ph;
+	http.vpath("/*", &fileh);
+	http.vpath("/hello", &hello);
+	http.vpath("/param", &ph);
 	
 	server.setProtocol(&http);
 	server.start();

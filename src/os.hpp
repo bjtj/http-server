@@ -62,6 +62,10 @@
 
 #	define TIME FILETIME
 
+#	include <direct.h>
+#	include <sys/stat.h>
+#	include <io.h>
+
 #endif /* OS DETECTING */
 
 
@@ -318,6 +322,7 @@ namespace OS {
 		static bool exists(std::string path);
 		static bool isFile(std::string path);
 		static bool isDirectory(std::string path);
+		static bool isWritable(std::string path);
 		static std::string getParentPath(std::string path);
 		static std::string getPathPart(std::string path);
 		static std::string getFileNamePart(std::string path);

@@ -19,6 +19,23 @@ namespace HTTP {
 		virtual void onRequest(HttpRequest & request, HttpResponse & response);
 	};
 
+	/**
+	 * @brief REST handler
+	 */
+	class RESThandler : public HttpRequestHandler {
+	public:
+		RESThandler();
+		virtual ~RESThandler();
+
+		virtual void onRequest(HttpRequest & request, HttpResponse & response);
+		
+		virtual void onPost(HttpRequest & request, HttpResponse & response);
+		virtual void onGet(HttpRequest & request, HttpResponse & response);
+		virtual void onPut(HttpRequest & request, HttpResponse & response);
+		virtual void onDelete(HttpRequest & request, HttpResponse & response);
+		
+	};
+
 }
 
 #endif
