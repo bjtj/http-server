@@ -21,69 +21,97 @@ namespace HTTP {
 
 		if (!request.remaining()) {
 
+			bool found = false;
 			string uri = request.getPath();
 			string fullpath = path + uri;
 
-			if (!OS::File::exists(fullpath)) {
-				response.setStatusCode(404);
-				response.write("404 not found");
-			} else {
+			if (OS::File::exists(fullpath)) {
 
 				if (OS::File::isFile(fullpath)) {
-
-					FILE * fp = fopen(fullpath.c_str(), "rb");
-					if (!fp) {
-						response.setStatusCode(404);
-						response.write("404 not found");
-					} else {
-						char buf[1024] = {0,};
-						int len = 0;
-						while ((len = fread(buf, 1, sizeof(buf), fp)) > 0) {
-							response.write(buf, len);
-						}
-						fclose(fp);
-
-						if (Text::endsWith(fullpath, ".html")) {
-							response.setContentType("text/html");
-						} else {
-							response.setContentType("text/plain");
-						}
-						
-					}
+					
+					found = onFile(fullpath, response);
 					
 				} else {
-
-					int cnt, i;
-					struct dirent * ent = NULL;
-					struct dirent ** list = NULL;
-					cnt = scandir(fullpath.c_str(), &list, NULL, alphasort);
-
-					response.setContentType("text/html");
-
-					response.write("<html>");
-					response.write("<body>");
-					response.write("<ul>");
-					for (i = 0; i < cnt; i++) {
-
-						ent = list[i];
-
-						char buf[1024] = {0,};
-						snprintf(buf, sizeof(buf), "<li><a href=\"%s/%s\">%s</a></li>",
-								 fullpath.c_str(),
-								 ent->d_name,
-								 ent->d_name);
-						response.write(buf, strlen(buf));
-					}
-					response.write("</ul>");
-					response.write("</body>");
-					response.write("</html>");
+					
+					found = onDirectory(fullpath, response);
+					
 				}
+			}
 
-				
+			if (!found) {
+				response.setStatusCode(404);
+				response.write("404 Not Found");
 			}
 			
 			response.setComplete();
 		}
+	}
+
+	int FileRedirectHandler::getFileSize(string path) {
+		struct stat st;
+		if (stat(path.c_str(), &st) == 0) {
+			return st.st_size;
+		}
+		return 0;
+	}
+	
+	string FileRedirectHandler::getContentType(string path) {
+		if (Text::endsWith(path, ".html")) {
+			return "text/html";
+		}
+		return "text/plain";
+	}
+	
+	bool FileRedirectHandler::onFile(string path, HttpResponse & response) {
+		
+		FILE * fp = fopen(path.c_str(), "rb");
+		if (!fp) {
+			return false;
+		}
+
+		response.setContentLength(getFileSize(path));
+		response.setContentType(getContentType(path));
+		
+		char buf[1024] = {0,};
+		int len = 0;
+		while ((len = fread(buf, 1, sizeof(buf), fp)) > 0) {
+			response.send(buf, len);
+		}
+		fclose(fp);
+		return true;
+	}
+
+	bool FileRedirectHandler::onDirectory(string path, HttpResponse & response) {
+
+		int cnt, i;
+		struct dirent * ent = NULL;
+		struct dirent ** list = NULL;
+		cnt = scandir(path.c_str(), &list, NULL, alphasort);
+		
+		response.setContentType("text/html");
+		
+		response.write("<html>");
+		response.write("<body>");
+		response.write("<ul>");
+		for (i = 0; i < cnt; i++) {
+
+			ent = list[i];
+
+			bool isDir = OS::File::isDirectory(path + "/" + ent->d_name);
+			
+			char buf[1024] = {0,};
+			snprintf(buf, sizeof(buf), "<li><a href=\"%s/%s\">%s%s</a></li>",
+					 path.c_str(),
+					 ent->d_name,
+					 ent->d_name,
+					 (isDir ? "/" : ""));
+			response.write(buf, strlen(buf));
+		}
+		response.write("</ul>");
+		response.write("</body>");
+		response.write("</html>");
+
+		return true;
 	}
 
 

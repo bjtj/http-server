@@ -17,6 +17,11 @@ namespace HTTP {
 		virtual ~FileRedirectHandler();
 
 		virtual void onRequest(HttpRequest & request, HttpResponse & response);
+
+		int getFileSize(std::string path);
+		std::string getContentType(std::string path);
+		bool onFile(std::string path, HttpResponse & response);
+		bool onDirectory(std::string path, HttpResponse & response);
 	};
 
 	/**

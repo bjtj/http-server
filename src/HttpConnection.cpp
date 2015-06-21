@@ -60,7 +60,8 @@ namespace HTTP {
 	/**
 	 * @brief http response constructor
 	 */
-	HttpResponse::HttpResponse(OS::Socket & socket) : socket(socket), complete(false) {
+	HttpResponse::HttpResponse(OS::Socket & socket)
+		: socket(socket), complete(false), headerSent(false), contentLength(-1) {
 	}
 	HttpResponse::~HttpResponse() {
 	}
@@ -76,10 +77,21 @@ namespace HTTP {
 		header.setParts(parts);
 	}
 	void HttpResponse::setContentLength(int length) {
+		contentLength = length;
 		header.setHeaderField("Content-Length", Text::toString(length));
 	}
 	void HttpResponse::setContentType(string type) {
 		header.setHeaderField("Content-Type", type);
+	}
+	void HttpResponse::clearBuffer() {
+		content = "";
+	}
+	int HttpResponse::send(const char * buf, int size) {
+		if (contentLength > 0) {
+			sendHeaderOnce();
+			return socket.send((char *)buf, size);
+		}
+		return 0;
 	}
 	int HttpResponse::write(const string & content) {
 		this->content += content;
@@ -87,14 +99,21 @@ namespace HTTP {
 	int HttpResponse::write(const char * buf, int size) {
 		this->content += string(buf, size);
 	}
+	void HttpResponse::sendHeaderOnce() {
+		if (!headerSent) {
+			string header_string = header.toString();
+			socket.send((char*)header_string.c_str(), header_string.length());
+			headerSent = true;
+		}
+	}
 	void HttpResponse::sendContent() {
-		string header_string = header.toString();
-		setContentLength(content.length());
-		socket.send((char*)header_string.c_str(), header_string.length());
 		socket.send((char*)content.c_str(), content.length());
+		clearBuffer();
 	}
 	void HttpResponse::setComplete() {
 		if (!complete) {
+			setContentLength(content.length());
+			sendHeaderOnce();
 			sendContent();
 			complete = true;
 		}

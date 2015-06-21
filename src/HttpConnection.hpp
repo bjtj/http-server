@@ -47,6 +47,8 @@ namespace HTTP {
         OS::Socket & socket;
 		bool complete;
 		std::string content;
+		bool headerSent;
+		int contentLength;
 	public:
 		HttpResponse(OS::Socket & socket);
 		virtual ~HttpResponse();
@@ -56,9 +58,12 @@ namespace HTTP {
 		void setParts(std::vector<std::string> &parts);
 		void setContentLength(int length);
 		void setContentType(std::string type);
-		
+
+		void clearBuffer();
+		int send(const char * buf, int size);
 		int write(const std::string & content);
 		int write(const char * buf, int size);
+		void sendHeaderOnce();
 		void sendContent();
 		void setComplete();
 		bool hasComplete();
