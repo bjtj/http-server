@@ -5,13 +5,21 @@
 
 #    define PLATFORM_APPLE
 
+#	include <unistd.h>
+
 #elif defined(unix) || defined(__unix__) || defined(__unix) /* unix or linux */
 
 #    define PLATFORM_NIX
 
+#	include <unistd.h>
+
 #elif defined(_WIN32) || defined(_WIN64) /* windows */
 
 #    define PLATFORM_WIN
+
+#	define strcasecmp(x,y) _stricmp((x),(y))
+#	define strncasecmp(x,y,z) _strnicmp((x),(y),(z))
+#	define snprintf _snprintf_s
 
 #endif
 

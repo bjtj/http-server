@@ -1,13 +1,9 @@
-#ifndef PLATFORM_WIN
-#	include <unistd.h>
-#endif
+#include "Text.hpp"
 
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
-#include "Text.hpp"
 
 /**
  * @namespace UTIL
