@@ -11,10 +11,9 @@ if [ -n "$1" ]; then
 fi
 
 case $OPT in
-	reconf)
-		autoreconf -i
-		;;
 	build)
+		autoreconf -i
+		
 		mkdir -p $DIR_BUILD
 		mkdir -p $DIR_WORLD
 		
