@@ -1,4 +1,7 @@
-#include <unistd.h>
+#ifndef PLATFORM_WIN
+#	include <unistd.h>
+#endif
+
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -7,7 +10,7 @@
 #include "Text.hpp"
 
 /**
- * @namespace dlna
+ * @namespace UTIL
  */
 namespace UTIL {
 
@@ -81,7 +84,7 @@ namespace UTIL {
 		}
 
 		if (just_cnt_match) {
-			return (s.length() >= any) ? true : false;
+			return (s.length() >= (size_t)any) ? true : false;
 		}
 	
 		// real checking
@@ -193,7 +196,7 @@ namespace UTIL {
 
 		string ret;
 		
-		for (int i = 0; i < vec.size(); i++) {
+		for (size_t i = 0; i < vec.size(); i++) {
 			if (i > 0) {
 				ret += glue;
 			}

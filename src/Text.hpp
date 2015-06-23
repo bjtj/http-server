@@ -1,13 +1,27 @@
 #ifndef __TEXT_HPP__
 #define __TEXT_HPP__
 
+#if defined(__APPLE__) || defined(__MACH__) /* mac os x */
+
+#    define PLATFORM_APPLE
+
+#elif defined(unix) || defined(__unix__) || defined(__unix) /* unix or linux */
+
+#    define PLATFORM_NIX
+
+#elif defined(_WIN32) || defined(_WIN64) /* windows */
+
+#    define PLATFORM_WIN
+
+#endif
+
 #include <string>
 #include <vector>
 #include <map>
 #include <utility>
 
 namespace UTIL {
-	
+
 	class Text {
 	private:
 		Text();
