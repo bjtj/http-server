@@ -11,9 +11,9 @@ namespace HTTP {
 	 */
 	class FileRedirectHandler : public HttpRequestHandler {
 	private:
-		std::string path;
+		std::string basePath;
 	public:
-		FileRedirectHandler(std::string path);
+		FileRedirectHandler(std::string basePath);
 		virtual ~FileRedirectHandler();
 
 		virtual void onRequest(HttpRequest & request, HttpResponse & response);
@@ -22,6 +22,7 @@ namespace HTTP {
 		std::string getContentType(std::string path);
 		bool onFile(std::string path, HttpResponse & response);
 		bool onDirectory(std::string path, HttpResponse & response);
+		std::string getFullPath(const std::string & path);
 	};
 
 	/**

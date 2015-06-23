@@ -11,7 +11,7 @@ namespace HTTP {
 	using namespace std;
 	using namespace UTIL;
 	
-	FileRedirectHandler::FileRedirectHandler(string path) : path(path) {
+	FileRedirectHandler::FileRedirectHandler(string basePath) : basePath(basePath) {
 	}
 	
 	FileRedirectHandler::~FileRedirectHandler() {
@@ -22,20 +22,15 @@ namespace HTTP {
 		if (!request.remaining()) {
 
 			bool found = false;
-			string uri = request.getPath();
-			string fullpath = path + uri;
+			string relativePath = request.getPath();
+			string fullpath = getFullPath(relativePath);
 
-			if (OS::File::exists(fullpath)) {
-
-				if (OS::File::isFile(fullpath)) {
-					
-					found = onFile(fullpath, response);
-					
-				} else {
-					
-					found = onDirectory(fullpath, response);
-					
-				}
+			if (OS::File::isFile(fullpath)) {
+				found = onFile(relativePath, response);
+			} else if (OS::File::isDirectory(fullpath)) {
+				found = onDirectory(relativePath, response);
+			} else {
+				found = false;
 			}
 
 			if (!found) {
@@ -62,15 +57,16 @@ namespace HTTP {
 		return "text/plain";
 	}
 	
-	bool FileRedirectHandler::onFile(string path, HttpResponse & response) {
-		
-		FILE * fp = fopen(path.c_str(), "rb");
+	bool FileRedirectHandler::onFile(string relativePath, HttpResponse & response) {
+
+		string fullpath = getFullPath(relativePath);
+		FILE * fp = fopen(fullpath.c_str(), "rb");
 		if (!fp) {
 			return false;
 		}
 
-		response.setContentLength(getFileSize(path));
-		response.setContentType(getContentType(path));
+		response.setContentLength(getFileSize(fullpath));
+		response.setContentType(getContentType(fullpath));
 		
 		char buf[1024] = {0,};
 		int len = 0;
@@ -81,12 +77,13 @@ namespace HTTP {
 		return true;
 	}
 
-	bool FileRedirectHandler::onDirectory(string path, HttpResponse & response) {
+	bool FileRedirectHandler::onDirectory(string relativePath, HttpResponse & response) {
 
+		string fullpath = getFullPath(relativePath);
 		int cnt, i;
 		struct dirent * ent = NULL;
 		struct dirent ** list = NULL;
-		cnt = scandir(path.c_str(), &list, NULL, alphasort);
+		cnt = scandir(fullpath.c_str(), &list, NULL, alphasort);
 		
 		response.setContentType("text/html");
 		
@@ -97,12 +94,11 @@ namespace HTTP {
 
 			ent = list[i];
 
-			bool isDir = OS::File::isDirectory(path + "/" + ent->d_name);
-			
+			string entPath = OS::File::fullpath(fullpath, ent->d_name);
+			bool isDir = OS::File::isDirectory(entPath);
 			char buf[1024] = {0,};
-			snprintf(buf, sizeof(buf), "<li><a href=\"%s/%s\">%s%s</a></li>",
-					 path.c_str(),
-					 ent->d_name,
+			snprintf(buf, sizeof(buf), "<li><a href=\"%s\">%s%s</a></li>",
+					 OS::File::fullpath(relativePath, ent->d_name).substr(1).c_str(),
 					 ent->d_name,
 					 (isDir ? "/" : ""));
 			response.write(buf, strlen(buf));
@@ -113,6 +109,13 @@ namespace HTTP {
 
 		return true;
 	}
+
+	string FileRedirectHandler::getFullPath(const string & path) {
+		return OS::File::fullpath(basePath, path);
+	}
+
+
+	
 
 
 

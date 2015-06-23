@@ -95,9 +95,11 @@ namespace HTTP {
 	}
 	int HttpResponse::write(const string & content) {
 		this->content += content;
+		return content.length();
 	}
 	int HttpResponse::write(const char * buf, int size) {
 		this->content += string(buf, size);
+		return size;
 	}
 	void HttpResponse::sendHeaderOnce() {
 		if (!headerSent) {
