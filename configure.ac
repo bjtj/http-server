@@ -7,6 +7,9 @@ AC_INIT([http-server], [0.1], [bjtj10@gmail.com])
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE
+LT_PREREQ([2.2])
+LT_INIT([dlopen])
+
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
 
@@ -36,5 +39,7 @@ AC_FUNC_MALLOC
 AC_CHECK_FUNCS([gettimeofday memset mkdir socket strcasecmp])
 
 AC_CONFIG_FILES([Makefile
-                 src/Makefile])
+                 include/Makefile
+				 libhttp-server/Makefile
+                 app/Makefile])
 AC_OUTPUT

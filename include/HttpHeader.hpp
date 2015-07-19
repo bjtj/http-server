@@ -6,7 +6,6 @@
 #include <vector>
 #include <map>
 #include <cstdlib>
-#include "Text.hpp"
 
 namespace HTTP {
 

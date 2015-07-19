@@ -24,6 +24,9 @@ case $OPT in
 	make)
 		cd $DIR_BUILD && make && make install
 		;;
+	dist)
+		cd $DIR_BUILD && make dist
+		;;
 	clean)
 		rm -rf $DIR_BUILD $DIR_WORLD
 		;;
