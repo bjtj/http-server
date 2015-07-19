@@ -90,12 +90,11 @@ namespace HTTP {
 	}
 	
 
-
-
-
 	
 
-	
+	/**
+	 * @brief multi conn multiplex server
+	 */
 	MultiConnMultiplexServer::MultiConnMultiplexServer(int port)
 		: port(port),
 		  server(NULL) {
@@ -203,10 +202,9 @@ namespace HTTP {
 	}
 
 
-
-
-
-
+	/**
+	 * @brief client thread
+	 */
 	ClientThread::ClientThread(MultiConnThreadedServer & server, OS::Socket & socket)
 		: server(server), socket(socket) {
 	}
@@ -225,13 +223,16 @@ namespace HTTP {
 	}
 	
 
-
+	/**
+	 * @brief multi conn threaded server
+	 */
 	MultiConnThreadedServer::MultiConnThreadedServer(int port) : port(port) {
 	}
 	MultiConnThreadedServer::~MultiConnThreadedServer() {
 	}
 	
 	void MultiConnThreadedServer::start() {
+
 		server = new ServerSocket(port);
 		server->setReuseAddr();
 		server->bind();
@@ -243,7 +244,6 @@ namespace HTTP {
 	}
 	void MultiConnThreadedServer::poll(unsigned long timeout_milli) {
 		if (selector.select(timeout_milli) > 0) {
-			
 			vector<int> selected = selector.getSelected();
 			for (size_t i = 0; i < selected.size(); i++) {
 					

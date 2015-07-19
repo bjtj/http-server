@@ -182,11 +182,12 @@ namespace HTTP {
 
 		static size_t parseParam(HttpHeader & header, const std::string & param, size_t & f);
 		static void parseParams(HttpHeader & header, std::string params, size_t offset);
-
+		
+		int parse(const std::string & header);
+		bool isEmptyLine(std::string & line);
+		std::string readLine(const std::string & full, size_t & f);
 		int parseFirstLine(HttpHeader & header, std::string & line);
 		int parseHeaderField(HttpHeader & header, std::string line);
-		std::string readLine(const std::string & full, size_t & f);
-		int parse(const std::string & header);
 		HttpHeaderParseResult & getResult();
 		HttpHeader & getHeader();
 	};

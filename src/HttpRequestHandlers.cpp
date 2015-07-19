@@ -1,6 +1,6 @@
 #include <cstring>
-#include <sys/stat.h>
-#include <dirent.h>
+// #include <sys/stat.h>
+// #include <dirent.h>
 
 #include "HttpRequestHandlers.hpp"
 #include "os.hpp"
@@ -80,26 +80,21 @@ namespace HTTP {
 	bool FileRedirectHandler::onDirectory(string relativePath, HttpResponse & response) {
 
 		string fullpath = getFullPath(relativePath);
-		int cnt, i;
-		struct dirent * ent = NULL;
-		struct dirent ** list = NULL;
-		cnt = scandir(fullpath.c_str(), &list, NULL, alphasort);
+		int cnt;
+		std::vector<OS::File> list = OS::File::list(fullpath);
 		
 		response.setContentType("text/html");
 		
 		response.write("<html>");
 		response.write("<body>");
 		response.write("<ul>");
-		for (i = 0; i < cnt; i++) {
-
-			ent = list[i];
-
-			string entPath = OS::File::fullpath(fullpath, ent->d_name);
-			bool isDir = OS::File::isDirectory(entPath);
+		for (size_t i = 0; i < list.size(); i++) {
+			OS::File file = list[i];
+			bool isDir = OS::File::isDirectory(file.toString());
 			char buf[1024] = {0,};
 			snprintf(buf, sizeof(buf), "<li><a href=\"%s\">%s%s</a></li>",
-					 OS::File::fullpath(relativePath, ent->d_name).substr(1).c_str(),
-					 ent->d_name,
+					 file.toString().c_str(),
+					 file.getName().c_str(),
 					 (isDir ? "/" : ""));
 			response.write(buf, strlen(buf));
 		}

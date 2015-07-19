@@ -25,7 +25,7 @@
 #if defined(__APPLE__) || defined(__MACH__) /* mac os x */
 
 #	define USE_UNIX_STD
-#	define USE_POSIX_SEMAPHORE
+#	define USE_APPLE_SEMAPHORE
 #	define USE_PTHREAD
 #	define USE_BSD_SOCKET
 
@@ -34,6 +34,7 @@
 #	include <sys/stat.h>
 #	include <sys/types.h>
 #	include <ctime>
+#	include <dirent.h>
 
 #	define TIME long int
 
@@ -43,12 +44,14 @@
 #	define USE_POSIX_SEMAPHORE
 #	define USE_PTHREAD
 #	define USE_BSD_SOCKET
+#	define USE_PRCTL
 
 #	include <unistd.h>
 #	include <sys/time.h>
 #	include <sys/stat.h>
 #	include <sys/types.h>
 #	include <ctime>
+#	include <dirent.h>
 
 #	define TIME long int
 
@@ -74,7 +77,12 @@
  * Semaphore
  */
 
-#if defined(USE_POSIX_SEMAPHORE)
+#if defined(USE_APPLE_SEMAPHORE)
+
+#	include <dispatch/dispatch.h>
+typedef dispatch_semaphore_t SEM_HANDLE;
+
+#elif defined(USE_POSIX_SEMAPHORE)
 
 #	include <semaphore.h>
 typedef sem_t SEM_HANDLE;
@@ -91,7 +99,11 @@ typedef sem_t SEM_HANDLE;
 #if defined(USE_PTHREAD)
 
 #	include <pthread.h>
+
+#if defined(USE_PRCTL)
 #	include <sys/prctl.h>
+#endif
+
 typedef pthread_t THREAD_HANDLE;
 
 #elif defined(USE_WIN_THREAD)
@@ -314,8 +326,10 @@ namespace OS {
 	 */
 	class File {
 	private:
+		std::string path;
 	public:
 		File();
+		File(std::string path);
 		virtual ~File();
 		static bool isRootPath(std::string path);
 		static bool isFullpath(std::string path);
@@ -333,6 +347,11 @@ namespace OS {
 		static std::string fullpath(std::string dir, std::string filename);
 		static std::string getCreationDate(std::string path, std::string fmt = Date::DEFAULT_FORMAT);
 		static std::string getModifiedDate(std::string path, std::string fmt = Date::DEFAULT_FORMAT);
+
+		static std::vector<File> list(std::string path);
+
+		std::string getName();
+		virtual std::string toString();
 	};
 	
 }

@@ -44,7 +44,27 @@ namespace OS {
 
 
 	/* SEMAPHORE */
-#if defined(USE_POSIX_SEMAPHORE)
+
+#if defined(USE_APPLE_SEMAPHORE)
+
+	static void s_sem_init(SEM_HANDLE * handle, int initial) {
+		*handle = dispatch_semaphore_create(initial);
+	}
+
+	static void s_sem_wait(SEM_HANDLE * handle) {
+		dispatch_semaphore_wait(*handle, DISPATCH_TIME_FOREVER);
+	}
+
+	static void s_sem_post(SEM_HANDLE * handle) {
+		dispatch_semaphore_signal(*handle);
+	}
+
+	static void s_sem_destroy(SEM_HANDLE * handle) {
+		SUPPRESS_WARNING(handle);
+		// ???
+	}
+
+#elif defined(USE_POSIX_SEMAPHORE)
 
 	static void s_sem_init(SEM_HANDLE * handle, int initial) {
 		sem_init(handle, 0, initial);
@@ -116,11 +136,16 @@ namespace OS {
 	
 	static void * s_thread_wrapper(void * arg) {
 
-		char name[16] = {0,};
+		
 		Thread * thread = (Thread*)arg;
 
-		snprintf(name, sizeof(name), "tid:0x%x", (unsigned int)thread->getId());
-		prctl(PR_SET_NAME, name, 0, 0, 0);
+#if defined(USE_PRCTL)
+		{
+			char name[16] = {0,};
+			snprintf(name, sizeof(name), "tid:0x%x", (unsigned int)thread->getId());
+			prctl(PR_SET_NAME, name, 0, 0, 0);
+		}
+#endif
 
 		thread->run();
 
@@ -1167,6 +1192,24 @@ namespace OS {
 
 		return (long int)st.st_mtime;
 	}
+
+	static std::vector<File> s_list(string path) {
+		std::vector<File> ret;
+		struct dirent * ent = NULL;
+		struct dirent ** list = NULL;
+		int cnt;
+		cnt = scandir(path.c_str(), &list, NULL, alphasort);
+		if (cnt < 0) {
+			return ret;
+		}
+		for (int i = 0; i < cnt; i++) {
+			ent = list[i];
+			ret.push_back(File::fullpath(path, ent->d_name));
+			free(ent);
+		}
+		free(list);
+		return ret;
+	}
 	
 #elif defined(USE_MS_WIN)
 
@@ -1221,14 +1264,7 @@ namespace OS {
 		if (path.empty()) {
 			return false;
 		}
-		
-		//// http://stackoverflow.com/questions/146924/how-can-i-tell-if-a-given-path-is-a-directory-or-a-file-c-c
-		//if (GetFileAttributes(path.c_str()) == FILE_ATTRIBUTE_NORMAL) {
-		//	return true;
-		//}
-		//return false;
 
-		// http://stackoverflow.com/questions/146924/how-can-i-tell-if-a-given-path-is-a-directory-or-a-file-c-c
 		struct stat s;
 		if (stat(path.c_str(), &s) != 0) {
 			// error
@@ -1243,12 +1279,6 @@ namespace OS {
 			return false;
 		}
 		
-		//// http://stackoverflow.com/questions/146924/how-can-i-tell-if-a-given-path-is-a-directory-or-a-file-c-c
-		//if (GetFileAttributes(path.c_str()) == FILE_ATTRIBUTE_DIRECTORY) {
-		//	return true;
-		//}
-
-		// http://stackoverflow.com/questions/146924/how-can-i-tell-if-a-given-path-is-a-directory-or-a-file-c-c
 		struct stat s;
 		if (stat(path.c_str(), &s) != 0) {
 			// error
@@ -1401,12 +1431,21 @@ namespace OS {
 
 		return ftWrite;
 	}
+
+	static std::vector<File> s_list(string path) {
+		std::vector<File> ret;
+		return ret;
+	}
+	
 #endif
 
 	/**
 	 * @brief file constructor
 	 */
 	File::File() {
+	}
+	
+	File::File(string path) : path(path) {
 	}
 
 	File::~File() {
@@ -1496,6 +1535,18 @@ namespace OS {
 	string File::getModifiedDate(string path, string fmt) {
 		TIME t = s_get_modified_date(path);
 		return Date::format(fmt, t);
+	}
+
+	vector<File> File::list(string path) {
+		return s_list(path);
+	}
+
+	string File::getName() {
+		return getEntityNamePart(path);
+	}
+
+	string File::toString() {
+		return path;
 	}
 	
 } /* OS */

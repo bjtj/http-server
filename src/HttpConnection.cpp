@@ -173,7 +173,6 @@ namespace HTTP {
 		// content buffer manipulation
 	}
 	void HttpConnection::onRequest(HttpRequest & request, HttpResponse & response) {
-		// protocol.onRequest(request, response);
 		if (getHandler()) {
 			getHandler()->onRequest(request, response);
 		}

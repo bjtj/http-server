@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Text.hpp"
 #include "HttpHeader.hpp"
 
@@ -267,6 +266,39 @@ namespace HTTP {
 		while (parseParam(header, params, f) != string::npos) {
 		}
 	}
+	int HttpHeaderParser::parse(const string & rawHeader) {
+
+		HttpHeader & httpHeader = result.getHeader();
+		
+		size_t f = 0;
+		string line = readLine(rawHeader, f);
+		if (line.empty()) {
+			return result.setResult(false, -1, "invalid header");
+		}
+
+		if (parseFirstLine(httpHeader, line) < 0) {
+			return result.setResult(false, -1, "invalid first line - " + line);
+		}
+
+		while (!isEmptyLine((line = readLine(rawHeader, f)))) {
+			if (parseHeaderField(httpHeader, line) < 0) {
+				return result.setResult(false, -1, "invalid param - " + line);
+			}
+		}
+		return result.setResult(true, 0, "valid header");
+	}
+	bool HttpHeaderParser::isEmptyLine(string & line) {
+		return (line.empty() || !line.compare("\r\n")) ? true : false;
+	}
+	string HttpHeaderParser::readLine(const string & full, size_t & f) {
+		string ret;
+		size_t nr = full.find("\r\n", f);
+		if (nr != string::npos) {
+			ret = full.substr(f, (nr + 2) - f);
+			f = nr + 2;
+		}
+		return ret;
+	}
 	int HttpHeaderParser::parseFirstLine(HttpHeader & header, string & line) {
 		vector<string> parts;
 		string spaces = " \t";
@@ -310,36 +342,6 @@ namespace HTTP {
 		string value = line.substr(f+1);
 		header.setParameter(Text::trim(name), Text::trim(value));
 		return 0;
-	}
-	string HttpHeaderParser::readLine(const string & full, size_t & f) {
-		string ret;
-		size_t nr = full.find("\r\n", f);
-		if (nr != string::npos) {
-			ret = full.substr(f, nr + 2);
-			f = nr + 2;
-		}
-		return ret;
-	}
-	int HttpHeaderParser::parse(const string & rawHeader) {
-
-		HttpHeader & httpHeader = result.getHeader();
-		
-		size_t f = 0;
-		string line = readLine(rawHeader, f);
-		if (line.empty()) {
-			return result.setResult(false, -1, "invalid header");
-		}
-
-		if (parseFirstLine(httpHeader, line) < 0) {
-			return result.setResult(false, -1, "invalid first line - " + line);
-		}
-
-		while (!(line = readLine(rawHeader, f)).empty()) {
-			if (parseHeaderField(httpHeader, line) < 0) {
-				return result.setResult(false, -1, "invalid param - " + line);
-			}
-		}
-		return result.setResult(true, 0, "valid header");
 	}
 	HttpHeaderParseResult & HttpHeaderParser::getResult() {
 		return result;

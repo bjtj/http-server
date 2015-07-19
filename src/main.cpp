@@ -32,8 +32,10 @@ public:
 
 
 static void s_run_multiconn() {
+	
 	bool done = false;
-	MultiConnMultiplexServer server(8082);
+	int port = 8082;
+	MultiConnMultiplexServer server(port);
 
 	MyListener listener;
 	server.setOnConnectListener(&listener);
@@ -104,9 +106,9 @@ public:
 static void s_run_server() {
 	
 	bool done = false;
+	int port = 8082;
 	
-	// MultiConnMultiplexServer server(8082);
-	MultiConnThreadedServer server(8082);
+	MultiConnThreadedServer server(port);
 	
 	HttpProtocol http;
 	
@@ -119,6 +121,9 @@ static void s_run_server() {
 	
 	server.setProtocol(&http);
 	server.start();
+
+	std::cout << "Running: " << (server.isRunning() ? "running" : "stopped") << 
+		", Listen port : " << port << std::endl;
 
 	while(!done) {
 		server.poll(1000);
@@ -133,8 +138,8 @@ static void s_run_server() {
  */
 int main(int argc, char *args[]) {
 	
-	if (1) s_run_server();
 	if (0) s_run_multiconn();
+	if (1) s_run_server();
 	
     return 0;
 }
