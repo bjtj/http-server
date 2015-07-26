@@ -9,5 +9,6 @@ for ITEM in $DEPS; do
 		cd "$TARGET"
 		git submodule init
 		git submodule update
+		git pull
 	fi
 done
