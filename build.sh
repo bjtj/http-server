@@ -13,6 +13,11 @@ fi
 case $OPT in
 	build)
 		autoreconf -i
+		RET=$?
+		if [ "$RET" != 0 ]; then
+			echo "autoreconf failed..."
+			exit 1
+		fi
 		
 		mkdir -p $DIR_BUILD
 		mkdir -p $DIR_WORLD

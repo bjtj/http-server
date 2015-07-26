@@ -2,9 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([http-server], [0.1], [bjtj10@gmail.com])
-
-AC_CONFIG_MACRO_DIR([m4])
+AC_INIT([libhttp-server], [0.1], [bjtj10@gmail.com])
 
 AM_INIT_AUTOMAKE
 LT_PREREQ([2.2])
@@ -12,6 +10,8 @@ LT_INIT([dlopen])
 
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
+
+AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -42,4 +42,7 @@ AC_CONFIG_FILES([Makefile
                  include/Makefile
 				 libhttp-server/Makefile
                  app/Makefile])
+
+AC_CONFIG_SUBDIRS([deps/oslayer])
+
 AC_OUTPUT
