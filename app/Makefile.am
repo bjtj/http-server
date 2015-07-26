@@ -1,4 +1,4 @@
-bin_PROGRAMS=http-server
+noinst_PROGRAMS=http-server
 http_server_SOURCES= \
 	HttpRequestHandlers.hpp HttpRequestHandlers.cpp \
 	main.cpp
