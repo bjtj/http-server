@@ -2,7 +2,7 @@
 #define __HTTP_CONNECTION_HPP__
 
 #include <string>
-#include "os.hpp"
+#include <liboslayer/os.hpp>
 #include "MultiConn.hpp"
 #include "HttpHeader.hpp"
 

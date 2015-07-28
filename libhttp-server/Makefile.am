@@ -8,7 +8,6 @@ libhttp_server_la_SOURCES = \
 	HttpProtocol.cpp \
 	HttpStatusCodes.cpp
 
-libhttp_server_la_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/deps/oslayer/liboslayer
-libhttp_server_la_CXXFLAGS = $(PTHREAD_CXXFLAGS)
-libhttp_server_la_LIBADD = ../deps/oslayer/liboslayer/liboslayer.la
-
+libhttp_server_la_CPPFLAGS = -I$(top_srcdir)/include
+libhttp_server_la_CXXFLAGS = $(PTHREAD_CXXFLAGS) $(LIBOSLAYER_CFLAGS)
+libhttp_server_la_LIBADD = $(LIBOSLAYER_LIBS)

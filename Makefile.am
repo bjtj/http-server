@@ -1,3 +1,3 @@
 ACLOCAL_AMFLAGS=-I m4 ${ACLOCAL_FLAGS}
 
-SUBDIRS=deps/oslayer include libhttp-server app
+SUBDIRS=include libhttp-server app

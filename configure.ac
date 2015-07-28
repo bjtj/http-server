@@ -14,6 +14,8 @@ AM_INIT_AUTOMAKE
 LT_PREREQ([2.2])
 LT_INIT([dlopen])
 
+AC_LANG([C++])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
@@ -24,6 +26,8 @@ AC_PROG_MKDIR_P
 
 # Checks for libraries.
 ACX_PTHREAD
+# AC_SEARCH_LIBS([OS::idle], [oslayer], [], [AC_MSG_ERROR([oslayer not found!!!])])
+PKG_CHECK_MODULES([LIBOSLAYER], [oslayer])
 
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h sys/time.h unistd.h])
@@ -43,7 +47,5 @@ AC_CONFIG_FILES([Makefile
                  include/Makefile
 				 libhttp-server/Makefile
                  app/Makefile])
-
-AC_CONFIG_SUBDIRS([deps/oslayer])
 
 AC_OUTPUT

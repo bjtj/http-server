@@ -23,8 +23,8 @@ case $OPT in
 		mkdir -p $DIR_WORLD
 		
 		cd $DIR_BUILD
-		
-		$BASE/configure --prefix "$DIR_WORLD" && make && make install
+
+		$BASE/configure LDFLAGS=-L/usr/local/lib CPPFLAGS=-I/usr/local/include --prefix "$DIR_WORLD" && make && make install
 		;;
 	make)
 		cd $DIR_BUILD && make && make install
