@@ -1,3 +1,6 @@
 ACLOCAL_AMFLAGS=-I m4 ${ACLOCAL_FLAGS}
 
-SUBDIRS=include libhttp-server app
+pkgconfigdir=$(libdir)/pkgconfig
+pkgconfig_DATA = http-server.pc
+
+SUBDIRS=libhttp-server examples

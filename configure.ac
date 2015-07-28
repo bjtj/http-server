@@ -44,8 +44,8 @@ AC_FUNC_MALLOC
 AC_CHECK_FUNCS([gettimeofday memset mkdir socket strcasecmp])
 
 AC_CONFIG_FILES([Makefile
-                 include/Makefile
 				 libhttp-server/Makefile
-                 app/Makefile])
+                 examples/Makefile
+				 http-server.pc])
 
 AC_OUTPUT

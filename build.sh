@@ -10,24 +10,38 @@ if [ -n "$1" ]; then
 	OPT=$1
 fi
 
-case $OPT in
-	build)
-		autoreconf -i
-		RET=$?
-		if [ "$RET" != 0 ]; then
-			echo "autoreconf failed..."
-			exit 1
-		fi
-		
-		mkdir -p $DIR_BUILD
-		mkdir -p $DIR_WORLD
-		
-		cd $DIR_BUILD
+reconf() {
+	autoreconf -i
+}
 
-		$BASE/configure LDFLAGS=-L/usr/local/lib CPPFLAGS=-I/usr/local/include --prefix "$DIR_WORLD" && make && make install
+build() {
+	mkdir -p $DIR_BUILD
+	mkdir -p $DIR_WORLD
+	cd $DIR_BUILD
+	$BASE/configure --prefix "$DIR_WORLD" && make && make install
+}
+
+install() {
+	cd $DIR_BUILD
+	$BASE/configure && make && sudo make install
+}
+
+case $OPT in
+	reconf)
+		reconf
+		;;
+	build)
+		build
+		;;
+	all)
+		prepare
+		build
 		;;
 	make)
 		cd $DIR_BUILD && make && make install
+		;;
+	install)
+		install
 		;;
 	dist)
 		cd $DIR_BUILD && make dist
