@@ -10,6 +10,10 @@ if [ -n "$1" ]; then
 	OPT=$1
 fi
 
+clean() {
+	rm -rf $DIR_BUILD $DIR_WORLD
+}
+
 reconf() {
 	autoreconf -i
 }
@@ -22,6 +26,8 @@ build() {
 }
 
 install() {
+	clean
+	mkdir -p $DIR_BUILD
 	cd $DIR_BUILD
 	$BASE/configure && make && sudo make install
 }
@@ -47,7 +53,7 @@ case $OPT in
 		cd $DIR_BUILD && make dist
 		;;
 	clean)
-		rm -rf $DIR_BUILD $DIR_WORLD
+		clean
 		;;
 	*)
 		echo "unknown option - $OPT"
