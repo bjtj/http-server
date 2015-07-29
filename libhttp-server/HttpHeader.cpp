@@ -343,7 +343,9 @@ namespace HTTP {
 		}
 		string name = line.substr(0, f);
 		string value = line.substr(f+1);
-		header.setParameter(Text::trim(name), Text::trim(value));
+		name = Text::trim(name);
+		value = Text::trim(value);
+		header.setHeaderField(name, value);
 		return 0;
 	}
 	HttpHeaderParseResult & HttpHeaderParser::getResult() {
