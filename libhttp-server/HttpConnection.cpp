@@ -25,6 +25,9 @@ namespace HTTP {
 	string HttpRequest::getHeaderField(string & name) {
 		return header.getHeaderField(name);
 	}
+	map<string, string> & HttpRequest::getHeaderFields() {
+		return header.getHeaderFields();
+	}
 	string HttpRequest::getParameter(const string & name) {
 		return header.getParameter(name);
 	}

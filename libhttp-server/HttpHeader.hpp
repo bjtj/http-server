@@ -65,6 +65,7 @@ namespace HTTP {
 		
 		virtual std::string getHeaderField(std::string name);
 		virtual void setHeaderField(std::string name, std::string value);
+		virtual std::map<std::string, std::string> & getHeaderFields();
 		
 		virtual std::string getParameter(std::string name);
 		virtual std::vector<std::string> getParameters(std::string name);
@@ -205,8 +206,8 @@ namespace HTTP {
 		bool complete();
 		int cutEndPos();
 		void append(char * data, int size);
-		bool parse();
 		int read(char * data, int size);
+		bool parse();
 		HttpHeader & getHeader();
 	};
 

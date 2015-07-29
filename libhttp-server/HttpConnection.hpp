@@ -1,8 +1,11 @@
 #ifndef __HTTP_CONNECTION_HPP__
 #define __HTTP_CONNECTION_HPP__
 
-#include <string>
 #include <liboslayer/os.hpp>
+#include <string>
+#include <map>
+#include <vector>
+
 #include "MultiConn.hpp"
 #include "HttpHeader.hpp"
 
@@ -24,6 +27,7 @@ namespace HTTP {
 		std::string getMethod();
 		std::string getPath();
 		std::string getHeaderField(std::string & name);
+		std::map<std::string, std::string> & getHeaderFields();
 		std::string getParameter(const std::string & name);
 		std::string getParameter(const char * name);
 		std::vector<std::string> getParameters(std::string & name);

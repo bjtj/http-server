@@ -114,6 +114,9 @@ namespace HTTP {
 	void HttpHeader::setHeaderField(string name, string value) {
 		fields[name] = value;
 	}
+	map<string, string> & HttpHeader::getHeaderFields() {
+		return fields;
+	}
 	string HttpHeader::getParameter(string name) {
 		return params[name].getFirstValue();
 	}
@@ -371,9 +374,6 @@ namespace HTTP {
 		string x = string(data, size);
 		buffer += x;
 	}
-	bool HttpHeaderReader::parse() {
-		return parser.parse(buffer) < 0 ? false : true;
-	}
 	int HttpHeaderReader::read(char * data, int size) {
 		if (complete()) {
 			return 0;
@@ -384,6 +384,9 @@ namespace HTTP {
 			return parse() ? diff : -1;
 		}
 		return size;
+	}
+	bool HttpHeaderReader::parse() {
+		return parser.parse(buffer) < 0 ? false : true;
 	}
 	HttpHeader & HttpHeaderReader::getHeader() {
 		return parser.getHeader();

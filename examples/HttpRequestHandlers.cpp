@@ -1,8 +1,6 @@
-#include <cstring>
-// #include <sys/stat.h>
-// #include <dirent.h>
-
 #include <liboslayer/os.hpp>
+#include <iostream>
+#include <cstring>
 #include "HttpRequestHandlers.hpp"
 #include "Text.hpp"
 
@@ -24,6 +22,16 @@ namespace HTTP {
 			bool found = false;
 			string relativePath = request.getPath();
 			string fullpath = getFullPath(relativePath);
+
+			HttpHeader & header = request.getHeader();
+			map<string, string> fields = header.getHeaderFields();
+			for (map<string,string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
+				string name = iter->first;
+				string value = iter->second;
+
+				std::cout << name << " : " << value << std::endl;
+			}
+			std::cout << std::endl;
 
 			if (OS::File::isFile(fullpath)) {
 				found = onFile(relativePath, response);
