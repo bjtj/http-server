@@ -8,6 +8,7 @@
 
 #include "MultiConn.hpp"
 #include "HttpHeader.hpp"
+#include "HttpHeaderReader.hpp"
 
 namespace HTTP {
 

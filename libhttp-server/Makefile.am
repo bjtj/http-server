@@ -3,7 +3,10 @@ libhttp_serverinc_HEADERS = \
 	Text.hpp \
 	Url.hpp \
 	MultiConn.hpp \
+	HttpParameter.hpp \
 	HttpHeader.hpp \
+	HttpHeaderParser.hpp \
+	HttpHeaderReader.hpp \
 	HttpProtocol.hpp \
 	HttpStatusCodes.hpp \
 	HttpConnection.hpp
@@ -13,7 +16,10 @@ libhttp_server_la_SOURCES = \
 	Text.hpp \
 	Url.hpp \
 	MultiConn.hpp \
+	HttpParameter.hpp \
 	HttpHeader.hpp \
+	HttpHeaderParser.hpp \
+	HttpHeaderReader.hpp \
 	HttpProtocol.hpp \
 	HttpStatusCodes.hpp \
 	HttpConnection.hpp \
@@ -21,7 +27,10 @@ libhttp_server_la_SOURCES = \
 	Url.cpp \
 	MultiConn.cpp \
 	HttpConnection.cpp \
+	HttpParameter.cpp \
 	HttpHeader.cpp \
+	HttpHeaderParser.cpp \
+	HttpHeaderReader.cpp \
 	HttpProtocol.cpp \
 	HttpStatusCodes.cpp
 

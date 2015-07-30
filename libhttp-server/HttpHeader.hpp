@@ -1,5 +1,5 @@
-#ifndef __HTTP_HPP__
-#define __HTTP_HPP__
+#ifndef __HTTP_HEADER_HPP__
+#define __HTTP_HEADER_HPP__
 
 #include <string>
 #include <utility>
@@ -7,36 +7,9 @@
 #include <map>
 #include <cstdlib>
 
+#include "HttpParameter.hpp"
+
 namespace HTTP {
-
-	/**
-	 * @brief http header field
-	 */
-	class HttpParameter {
-	private:
-		std::string name;
-		std::vector<std::string> values;
-	public:
-		HttpParameter();
-		HttpParameter(std::string name);
-		HttpParameter(std::string name, std::string value);
-		virtual ~HttpParameter();
-		
-		bool empty();
-		size_t size();
-		std::string & getName();
-		void setName(std::string name);
-		std::string getFirstValue();
-		std::vector<std::string> & getValues();
-		std::string & getValue(int index);
-		void setValue(std::string value);
-		void setValues(std::vector<std::string> & values);
-		void appendValue(std::string value);
-		void appendValues(std::vector<std::string> & values);
-
-		std::string & operator[](int index);
-		virtual std::string toString();
-	};
 
 	/**
 	 * @breif http header
@@ -124,6 +97,9 @@ namespace HTTP {
 		void parsePath();
 		void parseParams(const std::string & params, size_t offset);
 
+		static size_t parseParam(HttpHeader & header, const std::string & param, size_t & f);
+		static void parseParams(HttpHeader & header, std::string params, size_t offset);
+
 		virtual void setPart2(std::string part);
 
 		std::string getMethod();
@@ -147,68 +123,6 @@ namespace HTTP {
 		void setStatusCode(int status);
 		std::string getMessage();
 		void setMessage(std::string message);
-	};
-
-	/**
-	 * @brief http header parse result
-	 */
-	class HttpHeaderParseResult {
-	private:
-		bool success;
-		int errorCode;
-		std::string errorMessage;
-        HttpHeader header;
-	public:
-		HttpHeaderParseResult();
-		HttpHeaderParseResult(bool success, int errorCode, std::string errorMessage);
-		virtual ~HttpHeaderParseResult();
-
-		int setResult(bool success, int errorCode, std::string errorMessage);
-		HttpHeader & getHeader();
-		bool succeeded();
-		int getErrorCode();
-		std::string getErrorMessage();
-	};
-
-	/**
-	 * @brief http header parser
-	 */
-	class HttpHeaderParser {
-	private:
-        HttpHeaderParseResult result;
-	public:
-		HttpHeaderParser();
-		virtual ~HttpHeaderParser();
-
-		static size_t parseParam(HttpHeader & header, const std::string & param, size_t & f);
-		static void parseParams(HttpHeader & header, std::string params, size_t offset);
-		
-		int parse(const std::string & header);
-		bool isEmptyLine(std::string & line);
-		std::string readLine(const std::string & full, size_t & f);
-		int parseFirstLine(HttpHeader & header, std::string & line);
-		int parseHeaderField(HttpHeader & header, std::string line);
-		HttpHeaderParseResult & getResult();
-		HttpHeader & getHeader();
-	};
-
-	/**
-	 * @brief http header reader
-	 */
-	class HttpHeaderReader {
-	private:
-		HttpHeaderParser parser;
-		std::string buffer;
-	public:
-		HttpHeaderReader();
-		virtual ~HttpHeaderReader();
-
-		bool complete();
-		int cutEndPos();
-		void append(char * data, int size);
-		int read(char * data, int size);
-		bool parse();
-		HttpHeader & getHeader();
 	};
 
 }
