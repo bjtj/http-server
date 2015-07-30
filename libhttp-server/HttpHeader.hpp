@@ -8,6 +8,8 @@
 #include <cstdlib>
 
 #include "HttpParameter.hpp"
+#include "Text.hpp"
+
 
 namespace HTTP {
 
@@ -37,6 +39,7 @@ namespace HTTP {
 		virtual void setPart3(std::string part);
 		
 		virtual std::string getHeaderField(std::string name);
+		virtual std::string getHeaderFieldIgnoreCase(std::string name);
 		virtual void setHeaderField(std::string name, std::string value);
 		virtual std::map<std::string, std::string> & getHeaderFields();
 		
@@ -71,6 +74,8 @@ namespace HTTP {
 		virtual void setPart3(std::string part) {getHeader().setPart3(part);}
 		
 		virtual std::string getHeaderField(std::string name) {return getHeader().getHeaderField(name);}
+		virtual std::string getHeaderFieldIgnoreCase(std::string name) {
+			return getHeader().getHeaderFieldIgnoreCase(name);}
 		virtual void setHeaderField(std::string name, std::string value) {
 			getHeader().setHeaderField(name, value);}
 		

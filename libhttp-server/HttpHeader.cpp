@@ -46,6 +46,14 @@ namespace HTTP {
 	string HttpHeader::getHeaderField(string name) {
 		return fields[name];
 	}
+	string HttpHeader::getHeaderFieldIgnoreCase(string name) {
+		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
+			if (Text::equalsIgnoreCase(iter->first, name)) {
+				return iter->second;
+			}
+		}
+		return "";
+	}
 	void HttpHeader::setHeaderField(string name, string value) {
 		fields[name] = value;
 	}
