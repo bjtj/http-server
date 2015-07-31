@@ -1,15 +1,20 @@
-#ifndef __HTTP_SERVER_HPP__
-#define __HTTP_SERVER_HPP__
+#ifndef __HTTP_PROTOCOL_HPP__
+#define __HTTP_PROTOCOL_HPP__
 
 #include <vector>
 #include <string>
 #include <map>
-#include "HttpHeader.hpp"
+
 #include "MultiConn.hpp"
+#include "HttpHeader.hpp"
+#include "OnHttpRequestHandler.hpp"
 #include "HttpConnection.hpp"
 
 namespace HTTP {
 
+	/**
+	 * @brief vpath comparator
+	 */
 	struct vpath_comp {
 		bool operator() (const std::string & lhs, const std::string & rhs) const {
 			return lhs > rhs;

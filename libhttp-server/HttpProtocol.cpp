@@ -1,4 +1,3 @@
-#include <iostream>
 #include "HttpProtocol.hpp"
 #include "HttpStatusCodes.hpp"
 #include "Text.hpp"
