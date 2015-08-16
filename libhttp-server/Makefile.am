@@ -13,6 +13,7 @@ libhttp_serverinc_HEADERS = \
 	HttpProtocol.hpp \
 	HttpStatusCodes.hpp \
 	HttpConnection.hpp \
+	HttpServer.hpp \
 	Http.hpp
 
 lib_LTLIBRARIES = libhttp-server.la
@@ -41,6 +42,8 @@ libhttp_server_la_SOURCES = \
 	HttpHeaderReader.cpp \
 	HttpProtocol.cpp \
 	HttpStatusCodes.cpp \
+	HttpServer.hpp \
+	HttpServer.cpp \
 	Http.hpp
 
 libhttp_server_la_CXXFLAGS = $(PTHREAD_CXXFLAGS) $(LIBOSLAYER_CFLAGS)

@@ -10,5 +10,6 @@
 #include "OnHttpRequestHandler.hpp"
 #include "HttpConnection.hpp"
 #include "HttpProtocol.hpp"
+#include "HttpServer.hpp"
 
 #endif
