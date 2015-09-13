@@ -1,7 +1,8 @@
 #include <liboslayer/os.hpp>
+#include <liboslayer/Text.hpp>
+
 #include <cstring>
 #include "HttpRequestHandlers.hpp"
-#include "Text.hpp"
 
 namespace HTTP {
 

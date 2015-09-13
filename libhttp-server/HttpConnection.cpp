@@ -1,6 +1,7 @@
+#include <liboslayer/Text.hpp>
+
 #include "HttpConnection.hpp"
 #include "HttpStatusCodes.hpp"
-#include "Text.hpp"
 
 namespace HTTP {
 

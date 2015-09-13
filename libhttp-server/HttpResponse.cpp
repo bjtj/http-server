@@ -1,6 +1,6 @@
-#include "HttpResponse.hpp"
-#include "Text.hpp"
+#include <liboslayer/Text.hpp>
 
+#include "HttpResponse.hpp"
 #include "HttpStatusCodes.hpp"
 
 namespace HTTP {

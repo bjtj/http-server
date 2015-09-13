@@ -1,4 +1,5 @@
-#include "Text.hpp"
+#include <liboslayer/Text.hpp>
+
 #include "HttpHeaderReader.hpp"
 
 namespace HTTP {

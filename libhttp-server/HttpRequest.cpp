@@ -1,5 +1,6 @@
+#include <liboslayer/Text.hpp>
+
 #include "HttpRequest.hpp"
-#include "Text.hpp"
 
 namespace HTTP {
 

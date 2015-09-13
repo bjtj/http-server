@@ -1,5 +1,6 @@
+#include <liboslayer/Text.hpp>
+
 #include "Url.hpp"
-#include "Text.hpp"
 
 namespace URL {
 
