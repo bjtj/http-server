@@ -31,6 +31,7 @@ namespace HTTP {
 		delete conns[&client];
 		conns.erase(&client);
 	}
+	
 	string HttpProtocol::pathOnly(string unclearPath) {
 		size_t f = unclearPath.find("?");
 		if (f == string::npos) {
@@ -38,7 +39,8 @@ namespace HTTP {
 		}
 		return unclearPath.substr(0, f);
 	}
-	void HttpProtocol::vpath(string path, HttpRequestHandler * handler) {
+	
+	void HttpProtocol::vpath(string path, OnHttpRequestHandler * handler) {
 		if (!handler) {
 			handlers.erase(path);
 		} else {
@@ -46,8 +48,8 @@ namespace HTTP {
 		}
 	}
 	
-	HttpRequestHandler * HttpProtocol::getHandler(string path) {
-		map<string, HttpRequestHandler*>::iterator iter;
+	OnHttpRequestHandler * HttpProtocol::getHandler(string path) {
+		map<string, OnHttpRequestHandler*>::iterator iter;
 		string p = pathOnly(path);
 		for (iter = handlers.begin(); iter != handlers.end(); iter++) {
 			if (Text::match(iter->first, p)) {
@@ -58,7 +60,7 @@ namespace HTTP {
 	}
 
 	void HttpProtocol::onRequest(HttpRequest & request, HttpResponse & response) {
-		HttpRequestHandler * handler = getHandler(request.getPath());
+		OnHttpRequestHandler * handler = getHandler(request.getPath());
 		if (handler) {
 			handler->onRequest(request, response);
 		} else {

@@ -12,8 +12,8 @@ namespace HTTP {
 	/**
 	 * @brief http connection constructor
 	 */
-	HttpConnection::HttpConnection(HttpRequestHandler * handler)
-		: HttpRequestHandlerDecorator(handler), request(NULL), response(NULL) {
+	HttpConnection::HttpConnection(OnHttpRequestHandler * handler)
+		: OnHttpRequestHandlerDecorator(handler), request(NULL), response(NULL) {
 	}
 	HttpConnection::~HttpConnection() {
 		releaseRequest();

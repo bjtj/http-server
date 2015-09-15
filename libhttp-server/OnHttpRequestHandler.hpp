@@ -9,10 +9,10 @@ namespace HTTP {
 	/**
 	 * @brief http request handler
 	 */
-	class HttpRequestHandler {
+	class OnHttpRequestHandler {
 	public:
-		HttpRequestHandler() {}
-		virtual ~HttpRequestHandler() {}
+		OnHttpRequestHandler() {}
+		virtual ~OnHttpRequestHandler() {}
 
 		virtual void onRequest(HttpRequest & request, HttpResponse & response) = 0;
 	};
@@ -20,16 +20,16 @@ namespace HTTP {
 	/**
 	 * @brief http request handler
 	 */
-	class HttpRequestHandlerDecorator {
+	class OnHttpRequestHandlerDecorator : public OnHttpRequestHandler {
 	private:
-        HttpRequestHandler * handler;
+        OnHttpRequestHandler * handler;
 	public:
-		HttpRequestHandlerDecorator(HttpRequestHandler * handler) : handler(handler) {}
-		virtual ~HttpRequestHandlerDecorator() {}
+		OnHttpRequestHandlerDecorator(HttpRequestHandler * handler) : handler(handler) {}
+		virtual ~OnHttpRequestHandlerDecorator() {}
 
 		virtual void onRequest(HttpRequest & request, HttpResponse & response) = 0;
 
-		HttpRequestHandler * getHandler() {return handler;}
+		OnHttpRequestHandler * getHandler() {return handler;}
 	};
 }
 

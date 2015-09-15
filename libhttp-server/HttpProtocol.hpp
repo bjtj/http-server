@@ -24,10 +24,10 @@ namespace HTTP {
 	/**
 	 * @brief http protocol
 	 */
-	class HttpProtocol : public MultiConnProtocol, public HttpRequestHandler {
+	class HttpProtocol : public MultiConnProtocol, public OnHttpRequestHandler {
 	private:
 		std::map<OS::Socket*, HttpConnection*> conns;
-		std::map<std::string, HttpRequestHandler*, vpath_comp> handlers;
+		std::map<std::string, OnHttpRequestHandler*, vpath_comp> handlers;
 		HttpRequest * request;
 		HttpResponse * response;
 	public:
@@ -39,8 +39,8 @@ namespace HTTP {
 		virtual void onDisconnect(MultiConn & server, OS::Socket & client);
 
 		std::string pathOnly(std::string unclearPath);
-		void vpath(std::string path, HttpRequestHandler * handler);
-		HttpRequestHandler * getHandler(std::string path);
+		void vpath(std::string path, OnHttpRequestHandler * handler);
+		OnHttpRequestHandler * getHandler(std::string path);
 
 		virtual void onRequest(HttpRequest & request, HttpResponse & response);
 	};
