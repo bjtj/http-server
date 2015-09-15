@@ -28,9 +28,9 @@ namespace HTTP {
 		HttpConnection(OnHttpRequestHandler * handler);
 		virtual ~HttpConnection();
 
-		virtual void onConnect(MultiConn & server, OS::Socket & client);
-		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet);
-		virtual void onDisconnect(MultiConn & server, OS::Socket & client);
+		virtual void onConnect(MultiConn & server, ClientSession & client);
+		virtual void onReceive(MultiConn & server, ClientSession & client, Packet & packet);
+		virtual void onDisconnect(MultiConn & server, ClientSession & client);
 
 		virtual void readContent(char * buffer, size_t size);
 		virtual void onRequest(HttpRequest & request, HttpResponse & response);

@@ -13,20 +13,20 @@ public:
     virtual ~MyListener() {}
 
 	// virtual void onConnect(MultiConnMultiplexServer & server, OS::Socket & client) {
-	virtual void onConnect(MultiConn & server, OS::Socket & client) {
-		cout << " ++ " << client.getFd() << endl;
+	virtual void onConnect(MultiConn & server, ClientSession & client) {
+		cout << " ++ " << client.getId() << endl;
 	}
 
 	// virtual void onReceive(MultiConnMultiplexServer & server, OS::Socket & client, Packet & packet) {
-	virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet) {
+	virtual void onReceive(MultiConn & server, ClientSession & client, Packet & packet) {
 		const char * data = "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nhello";
-		client.send((char*)data, strlen(data));
+		client.getSocket()->send((char*)data, strlen(data));
 		server.disconnect(client);
 	}
 
 	// virtual void onDisconnect(MultiConnMultiplexServer & server, OS::Socket & client) {
-	virtual void onDisconnect(MultiConn & server, OS::Socket & client) {
-		cout << " -- " << client.getFd() << endl;
+	virtual void onDisconnect(MultiConn & server, ClientSession & client) {
+		cout << " -- " << client.getId() << endl;
 	}
 };
 
@@ -52,8 +52,7 @@ static void s_run_multiconn() {
 	cout << "bye~" << endl;
 }
 
-class Hello : public HttpRequestHandler
-{
+class Hello : public OnHttpRequestHandler {
 public:
     Hello() {
 	}
@@ -70,8 +69,7 @@ public:
 	}
 };
 
-class ParamHandle : public HttpRequestHandler
-{
+class ParamHandle : public OnHttpRequestHandler {
 public:
     ParamHandle() {
 	}

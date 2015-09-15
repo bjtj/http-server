@@ -16,20 +16,28 @@ namespace HTTP {
 	HttpProtocol::~HttpProtocol() {
 	}
 	
-	void HttpProtocol::onConnect(MultiConn & server, OS::Socket & client) {
-		conns[&client] = new HttpConnection(this);
+	void HttpProtocol::onConnect(MultiConn & server, ClientSession & client) {
+		HttpConnection * conn = new HttpConnection(this);
+		conns[client.getId()] = conn;
+
+		conn->onConnect(server, client);
 	}
 
-	void HttpProtocol::onReceive(MultiConn & server, OS::Socket & client, Packet & packet) {
-		HttpConnection * conn = conns[&client];
+	void HttpProtocol::onReceive(MultiConn & server, ClientSession & client, Packet & packet) {
+		HttpConnection * conn = conns[client.getId()];
 		if (conn) {
 			conn->onReceive(server, client, packet);
 		}
 	}
 
-	void HttpProtocol::onDisconnect(MultiConn & server, OS::Socket & client) {
-		delete conns[&client];
-		conns.erase(&client);
+	void HttpProtocol::onDisconnect(MultiConn & server, ClientSession & client) {
+
+		HttpConnection * conn = conns[client.getId()];
+
+		conn->onDisconnect(server, client);
+		
+		delete conn;
+		conns.erase(client.getId());
 	}
 	
 	string HttpProtocol::pathOnly(string unclearPath) {

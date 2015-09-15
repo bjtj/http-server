@@ -26,17 +26,18 @@ namespace HTTP {
 	 */
 	class HttpProtocol : public MultiConnProtocol, public OnHttpRequestHandler {
 	private:
-		std::map<OS::Socket*, HttpConnection*> conns;
+		std::map<int, HttpConnection*> conns;
 		std::map<std::string, OnHttpRequestHandler*, vpath_comp> handlers;
 		HttpRequest * request;
 		HttpResponse * response;
+		
 	public:
 		HttpProtocol();
 		virtual ~HttpProtocol();
 
-		virtual void onConnect(MultiConn & server, OS::Socket & client);
-		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet);
-		virtual void onDisconnect(MultiConn & server, OS::Socket & client);
+		virtual void onConnect(MultiConn & server, ClientSession & client);
+		virtual void onReceive(MultiConn & server, ClientSession & client, Packet & packet);
+		virtual void onDisconnect(MultiConn & server, ClientSession & client);
 
 		std::string pathOnly(std::string unclearPath);
 		void vpath(std::string path, OnHttpRequestHandler * handler);

@@ -20,10 +20,11 @@ namespace HTTP {
 		releaseResponse();
 	}
 
-	void HttpConnection::onConnect(MultiConn & server, OS::Socket & client) {
+	void HttpConnection::onConnect(MultiConn & server, ClientSession & client) {
+		client.setBufferSize(1);
 	}
 
-	void HttpConnection::onReceive(MultiConn & server, OS::Socket & client, Packet & packet) {
+	void HttpConnection::onReceive(MultiConn & server, ClientSession & client, Packet & packet) {
 
 		if (!headerReader.complete()) {
 			int offset = headerReader.read(packet.getBuffer(), packet.size());
@@ -33,13 +34,15 @@ namespace HTTP {
 		}
 
 		if (headerReader.complete()) {
+
+			OS::Socket * socket = client.getSocket();
 			
 			if (!request) {
-				request = new HttpRequest(headerReader.getHeader(), client);
+				request = new HttpRequest(headerReader.getHeader(), *socket);
 			}
 			
 			if (!response) {
-				response = new HttpResponse(client);
+				response = new HttpResponse(*socket);
 			}
 			
 			onRequest(*request, *response);
@@ -50,8 +53,9 @@ namespace HTTP {
 		}
 	}
 
-	void HttpConnection::onDisconnect(MultiConn & server, OS::Socket & client) {
+	void HttpConnection::onDisconnect(MultiConn & server, ClientSession & client) {
 	}
+	
 	void HttpConnection::readContent(char * buffer, size_t size) {
 		// content buffer manipulation
 	}

@@ -5,8 +5,7 @@ using namespace std;
 using namespace HTTP;
 
 
-class Hello : public HttpRequestHandler
-{
+class Hello : public OnHttpRequestHandler {
 public:
     Hello() {
 	}

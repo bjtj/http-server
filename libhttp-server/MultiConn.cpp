@@ -48,26 +48,60 @@ namespace HTTP {
 		return _length;
 	}
 
+	/**
+	 * @brief client session
+	 */
+	ClientSession::ClientSession(OS::Socket * socket, int maxBufferSize)
+		: socket(socket), maxBufferSize(maxBufferSize), bufferSize(maxBufferSize) {
+	}
+	
+	ClientSession::~ClientSession() {
+	}
 
+	int ClientSession::getId() {
+		return socket->getFd();
+	}
+	
+	Socket * ClientSession::getSocket() {
+		return socket;
+	}
+	
+	void ClientSession::setBufferSize(int bufferSize) {
+		this->bufferSize = bufferSize;
+	}
+	
+	int ClientSession::getBufferSize() {
+		return bufferSize;
+	}
+	
+	int ClientSession::getMaxBufferSize() {
+		return maxBufferSize;
+	}
+	
+	bool ClientSession::operator==(const ClientSession &other) const {
+		return (this->socket == other.socket);
+	}
+	
 
-
-
+	/**
+	 * @brief multi connectino constructor
+	 */
 	MultiConn::MultiConn() : onConnectListener(NULL), onReceiveListener(NULL), onDisconnectListener(NULL) {
 	}
 	MultiConn::~MultiConn() {
 	}
 	
-	void MultiConn::onConnect(OS::Socket & client) {
+	void MultiConn::onConnect(ClientSession & client) {
 		if (onConnectListener) {
 			onConnectListener->onConnect(*this, client);
 		}
 	}
-	void MultiConn::onReceive(OS::Socket & client, Packet & packet) {
+	void MultiConn::onReceive(ClientSession & client, Packet & packet) {
 		if (onReceiveListener) {
 			onReceiveListener->onReceive(*this, client, packet);
 		}
 	}
-	void MultiConn::onDisconnect(OS::Socket & client) {
+	void MultiConn::onDisconnect(ClientSession & client) {
 		if (onDisconnectListener) {
 			onDisconnectListener->onDisconnect(*this, client);
 		}
@@ -88,8 +122,6 @@ namespace HTTP {
 		setOnReceiveListener(protocol);
 		setOnDisconnectListener(protocol);
 	}
-	
-
 	
 
 	/**
@@ -125,13 +157,14 @@ namespace HTTP {
 					Socket * client = server->accept();
 					
 					if (client) {
-						onConnect(*client);
+						ClientSession * session = new ClientSession(client, 1024);
+						onConnect(*session);
 					}
 				} else {
-					Socket * client = clients[fd];
+					ClientSession * client = clients[fd];
 					if (client) {
 						char buffer[1024] = {0,};
-						int len = client->recv(buffer, sizeof(buffer));
+						int len = client->getSocket()->recv(buffer, client->getBufferSize());
 						if (len <= 0) {
 							onDisconnect(*client);
 						} else {
@@ -144,9 +177,10 @@ namespace HTTP {
 		}
 	}
 	void MultiConnMultiplexServer::stop() {
-		vector<Socket*> vec;
+		vector<ClientSession*> vec;
 
-		for (map<int, Socket*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
+		for (map<int, ClientSession*>::iterator iter = clients.begin();
+			 iter != clients.end(); iter++) {
 			vec.push_back(iter->second);
 		}
 		
@@ -163,7 +197,7 @@ namespace HTTP {
 		return server != NULL;
 	}
 
-	bool MultiConnMultiplexServer::isDisconnected(Socket & client) {
+	bool MultiConnMultiplexServer::isDisconnected(ClientSession & client) {
 		for (size_t i = 0; i < clients.size(); i++) {
 			if (clients[i] == &client) {
 				return false;
@@ -172,32 +206,34 @@ namespace HTTP {
 		return true;
 	}
 	
-	void MultiConnMultiplexServer::disconnect(Socket & client) {
+	void MultiConnMultiplexServer::disconnect(ClientSession & client) {
 		onDisconnect(client);
 	}
 
-	void MultiConnMultiplexServer::onConnect(Socket & client) {
-
-		clients[client.getFd()] = &client;
-		client.registerSelector(selector);
+	void MultiConnMultiplexServer::onConnect(ClientSession & client) {
+		Socket * socket = client.getSocket();
+		clients[client.getId()] = &client;
+		socket->registerSelector(selector);
 		
 		MultiConn::onConnect(client);
 	}
 	
-	void MultiConnMultiplexServer::onReceive(Socket & client, Packet & packet) {
+	void MultiConnMultiplexServer::onReceive(ClientSession & client, Packet & packet) {
 		
 		MultiConn::onReceive(client, packet);
 	}
 
-	void MultiConnMultiplexServer::onDisconnect(Socket & client) {
-		
-		int fd = client.getFd();
+	void MultiConnMultiplexServer::onDisconnect(ClientSession & client) {
+
+		Socket * socket = client.getSocket();
+		int fd = client.getId();
 
 		MultiConn::onDisconnect(client);
 		
 		clients.erase(fd);
 		selector.unset(fd);
-		client.close();
+		socket->close();
+		delete socket;
 		delete &client;
 	}
 
@@ -205,21 +241,22 @@ namespace HTTP {
 	/**
 	 * @brief client thread
 	 */
-	ClientThread::ClientThread(MultiConnThreadedServer & server, OS::Socket & socket)
-		: server(server), socket(socket) {
+	ClientHandlerThread::ClientHandlerThread(MultiConnThreadedServer & server, ClientSession & client)
+		: server(server), client(client) {
 	}
-	ClientThread::~ClientThread() {
+	ClientHandlerThread::~ClientHandlerThread() {
 	}
-	void ClientThread::run() {
+	void ClientHandlerThread::run() {
+		Socket * socket = client.getSocket();
 		char buffer[1024] = {0,};
 		int len = 0;
-		while ((len = socket.recv(buffer, sizeof(buffer))) > 0) {
+		while ((len = socket->recv(buffer, client.getBufferSize())) > 0) {
 			Packet packet(buffer, len);
-			server.onReceive(socket, packet);
+			server.onReceive(client, packet);
 		}
 	}
-	OS::Socket & ClientThread::getSocket() {
-		return socket;
+	ClientSession & ClientHandlerThread::getClient() {
+		return client;
 	}
 	
 
@@ -253,7 +290,8 @@ namespace HTTP {
 					Socket * client = server->accept();
 					
 					if (client) {
-						onConnect(*client);
+						ClientSession * session = new ClientSession(client, 1024);
+						onConnect(*session);
 					}
 					break;
 				}
@@ -263,14 +301,14 @@ namespace HTTP {
 		releaseInvalidThreads();
 	}
 	void MultiConnThreadedServer::stop() {
-		vector<ClientThread*> vec;
+		vector<ClientHandlerThread*> vec;
 
-		for (map<int, ClientThread*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
+		for (map<int, ClientHandlerThread*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
 			vec.push_back(iter->second);
 		}
 		
 		for (size_t i = 0; i < vec.size(); i++) {
-			disconnect(vec[i]->getSocket());
+			disconnect(vec[i]->getClient());
 		}
 		
 		clients.clear();
@@ -282,27 +320,27 @@ namespace HTTP {
 		return server != NULL;
 	}
 	
-	bool MultiConnThreadedServer::isDisconnected(OS::Socket & client) {
-		for (map<int, ClientThread*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
-			if (&(iter->second->getSocket()) == &client) {
+	bool MultiConnThreadedServer::isDisconnected(ClientSession & client) {
+		for (map<int, ClientHandlerThread*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
+			if (&(iter->second->getClient()) == &client) {
 				return false;
 			}
 		}
 		return true;
 	}
-	void MultiConnThreadedServer::disconnect(OS::Socket & client) {
+	void MultiConnThreadedServer::disconnect(ClientSession & client) {
 		onDisconnect(client);
-		client.close();
+		client.getSocket()->close();
 	}
 
 	void MultiConnThreadedServer::releaseInvalidThreads() {
-		map<int, ClientThread*>::iterator iter = clients.begin();
+		map<int, ClientHandlerThread*>::iterator iter = clients.begin();
 		while (iter != clients.end()) {
-			ClientThread * thread = iter->second;
+			ClientHandlerThread * thread = iter->second;
 			if (!thread) {
 				clients.erase(iter++);
 			} else if (!thread->isRunning()) {
-				disconnect(thread->getSocket());
+				disconnect(thread->getClient());
 				delete thread;
 				clients.erase(iter++);
 			} else {
@@ -311,16 +349,16 @@ namespace HTTP {
 		}
 	}
 	
-	void MultiConnThreadedServer::onConnect(OS::Socket & client) {
-		ClientThread * thread = new ClientThread(*this, client);
-		clients[client.getFd()] = thread;
+	void MultiConnThreadedServer::onConnect(ClientSession & client) {
+		ClientHandlerThread * thread = new ClientHandlerThread(*this, client);
+		clients[client.getId()] = thread;
 		thread->start();
 		MultiConn::onConnect(client);
 	}
-	void MultiConnThreadedServer::onReceive(OS::Socket & client, Packet & packet) {
+	void MultiConnThreadedServer::onReceive(ClientSession & client, Packet & packet) {
 		MultiConn::onReceive(client, packet);
 	}
-	void MultiConnThreadedServer::onDisconnect(OS::Socket & client) {
+	void MultiConnThreadedServer::onDisconnect(ClientSession & client) {
 		MultiConn::onDisconnect(client);
 	}
 }

@@ -24,7 +24,7 @@ namespace HTTP {
 	private:
         OnHttpRequestHandler * handler;
 	public:
-		OnHttpRequestHandlerDecorator(HttpRequestHandler * handler) : handler(handler) {}
+		OnHttpRequestHandlerDecorator(OnHttpRequestHandler * handler) : handler(handler) {}
 		virtual ~OnHttpRequestHandlerDecorator() {}
 
 		virtual void onRequest(HttpRequest & request, HttpResponse & response) = 0;

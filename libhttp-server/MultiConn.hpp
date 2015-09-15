@@ -32,6 +32,28 @@ namespace HTTP {
 		int length();
 	};
 
+	/**
+	 * @brief client session
+	 */
+	class ClientSession {
+	private:
+		OS::Socket * socket;
+		int bufferSize;
+		int maxBufferSize;
+		
+	public:
+		ClientSession(OS::Socket * socket, int maxBufferSize);
+		virtual ~ClientSession();
+
+		int getId();
+		OS::Socket * getSocket();
+		void setBufferSize(int bufferSize);
+		int getBufferSize();
+		int getMaxBufferSize();
+
+		bool operator==(const ClientSession &other) const;
+	};
+
 
 	/**
 	 * @brief on connect listener
@@ -41,7 +63,7 @@ namespace HTTP {
 		OnConnectListener() {}
 		virtual ~OnConnectListener() {}
 
-		virtual void onConnect(MultiConn & server, OS::Socket & client) = 0;
+		virtual void onConnect(MultiConn & server, ClientSession & client) = 0;
 	};
 
 	/**
@@ -52,7 +74,7 @@ namespace HTTP {
 		OnReceiveListener() {}
 		virtual ~OnReceiveListener() {}
 
-		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet) = 0;
+		virtual void onReceive(MultiConn & server, ClientSession & client, Packet & packet) = 0;
 	};
 
 	/**
@@ -63,7 +85,7 @@ namespace HTTP {
 		OnDisconnectListener() {}
 		virtual ~OnDisconnectListener() {}
 
-		virtual void onDisconnect(MultiConn & server, OS::Socket & client) = 0;
+		virtual void onDisconnect(MultiConn & server, ClientSession & client) = 0;
 	};
 
 	/**
@@ -75,11 +97,10 @@ namespace HTTP {
 	public:
         MultiConnProtocol() {}
 		virtual ~MultiConnProtocol() {}
-		virtual void onConnect(MultiConn & server, OS::Socket & client) = 0;
-		virtual void onReceive(MultiConn & server, OS::Socket & client, Packet & packet) = 0;
-		virtual void onDisconnect(MultiConn & server, OS::Socket & client) = 0;
+		virtual void onConnect(MultiConn & server, ClientSession & client) = 0;
+		virtual void onReceive(MultiConn & server, ClientSession & client, Packet & packet) = 0;
+		virtual void onDisconnect(MultiConn & server, ClientSession & client) = 0;
 	};
-
 
 
 	/**
@@ -90,6 +111,7 @@ namespace HTTP {
         OnConnectListener * onConnectListener;
 		OnReceiveListener * onReceiveListener;
 		OnDisconnectListener * onDisconnectListener;
+		
 	public:
 		MultiConn();
 		virtual ~MultiConn();
@@ -99,12 +121,12 @@ namespace HTTP {
 		virtual void stop() = 0;
 		virtual bool isRunning() = 0;
 
-		virtual bool isDisconnected(OS::Socket & client) = 0;
-		virtual void disconnect(OS::Socket & client) = 0;
+		virtual bool isDisconnected(ClientSession & client) = 0;
+		virtual void disconnect(ClientSession & client) = 0;
 
-		virtual void onConnect(OS::Socket & client);
-		virtual void onReceive(OS::Socket & client, Packet & packet);
-		virtual void onDisconnect(OS::Socket & client);
+		virtual void onConnect(ClientSession & client);
+		virtual void onReceive(ClientSession & client, Packet & packet);
+		virtual void onDisconnect(ClientSession & client);
 
 		void setOnConnectListener(OnConnectListener * onConnectListener);
 		void setOnReceiveListener(OnReceiveListener * onReceiveListener);
@@ -122,7 +144,7 @@ namespace HTTP {
 		int port;
 
 		OS::Selector selector;
-		std::map<int, OS::Socket*> clients;
+		std::map<int, ClientSession*> clients;
 		OS::ServerSocket * server;
 
 	public:
@@ -134,26 +156,27 @@ namespace HTTP {
 		virtual void stop();
 		virtual bool isRunning();
 
-		virtual bool isDisconnected(OS::Socket & client);
-		virtual void disconnect(OS::Socket & client);
+		virtual bool isDisconnected(ClientSession & client);
+		virtual void disconnect(ClientSession & client);
 
-		virtual void onConnect(OS::Socket & client);
-		virtual void onReceive(OS::Socket & client, Packet & packet);
-		virtual void onDisconnect(OS::Socket & client);
+		virtual void onConnect(ClientSession & client);
+		virtual void onReceive(ClientSession & client, Packet & packet);
+		virtual void onDisconnect(ClientSession & client);
 	};
 
 	/**
 	 * @brief client thread
 	 */
-	class ClientThread : public OS::Thread {
+	class ClientHandlerThread : public OS::Thread {
 	private:
 		MultiConnThreadedServer & server;
-		OS::Socket & socket;
+		ClientSession & client;
+		
 	public:
-		ClientThread(MultiConnThreadedServer & server, OS::Socket & socket);
-		virtual ~ClientThread();
+		ClientHandlerThread(MultiConnThreadedServer & server, ClientSession & client);
+		virtual ~ClientHandlerThread();
 		virtual void run();
-		OS::Socket & getSocket();
+		ClientSession & getClient();
 	};
 	
 	/**
@@ -163,8 +186,9 @@ namespace HTTP {
 	private:
 		int port;
 		OS::Selector selector;
-        std::map<int, ClientThread *> clients;
+        std::map<int, ClientHandlerThread *> clients;
 		OS::ServerSocket * server;
+		
 	public:
 		MultiConnThreadedServer(int port);
 		virtual ~MultiConnThreadedServer();
@@ -176,12 +200,12 @@ namespace HTTP {
 
 		void releaseInvalidThreads();
 
-		virtual bool isDisconnected(OS::Socket & client);
-		virtual void disconnect(OS::Socket & client);
+		virtual bool isDisconnected(ClientSession & client);
+		virtual void disconnect(ClientSession & client);
 
-		virtual void onConnect(OS::Socket & client);
-		virtual void onReceive(OS::Socket & client, Packet & packet);
-		virtual void onDisconnect(OS::Socket & client);
+		virtual void onConnect(ClientSession & client);
+		virtual void onReceive(ClientSession & client, Packet & packet);
+		virtual void onDisconnect(ClientSession & client);
 	};
 
 }

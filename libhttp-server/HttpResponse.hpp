@@ -21,6 +21,7 @@ namespace HTTP {
 		std::string content;
 		bool headerSent;
 		int contentLength;
+		
 	public:
 		HttpResponse(OS::Socket & socket);
 		virtual ~HttpResponse();

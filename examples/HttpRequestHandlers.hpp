@@ -9,7 +9,7 @@ namespace HTTP {
 	/**
 	 * @brief file redirect handler
 	 */
-	class FileRedirectHandler : public HttpRequestHandler {
+	class FileRedirectHandler : public OnHttpRequestHandler {
 	private:
 		std::string basePath;
 	public:
@@ -28,7 +28,7 @@ namespace HTTP {
 	/**
 	 * @brief REST handler
 	 */
-	class RESThandler : public HttpRequestHandler {
+	class RESThandler : public OnHttpRequestHandler {
 	public:
 		RESThandler();
 		virtual ~RESThandler();
