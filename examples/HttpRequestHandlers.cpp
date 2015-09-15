@@ -85,6 +85,9 @@ namespace HTTP {
 		
 		response.write("<html>");
 		response.write("<body>");
+		response.write("<pre>Current Path: ");
+		response.write(fullpath);
+		response.write("</pre>");
 		response.write("<ul>");
 		for (size_t i = 0; i < list.size(); i++) {
 			OS::File file = list[i];
@@ -106,11 +109,6 @@ namespace HTTP {
 	string FileRedirectHandler::getFullPath(const string & path) {
 		return OS::File::fullpath(basePath, path);
 	}
-
-
-	
-
-
 
 
 	RESThandler::RESThandler() {

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <liboslayer/Text.hpp>
 
 #include "HttpConnection.hpp"
@@ -27,23 +28,13 @@ namespace HTTP {
 	void HttpConnection::onReceive(MultiConn & server, ClientSession & client, Packet & packet) {
 
 		if (!headerReader.complete()) {
-			int offset = headerReader.read(packet.getBuffer(), packet.size());
-			readContent(packet.getBuffer() + offset, packet.length() - offset);
-		} else {
-			readContent(packet.getBuffer(), packet.length());
+			headerReader.read(packet.getBuffer(), packet.size());
 		}
 
 		if (headerReader.complete()) {
 
-			OS::Socket * socket = client.getSocket();
-			
-			if (!request) {
-				request = new HttpRequest(headerReader.getHeader(), *socket);
-			}
-			
-			if (!response) {
-				response = new HttpResponse(*socket);
-			}
+			client.setBufferSize(client.getMaxBufferSize());
+			prepareRequestAndResponse(client);
 			
 			onRequest(*request, *response);
 
@@ -55,21 +46,34 @@ namespace HTTP {
 
 	void HttpConnection::onDisconnect(MultiConn & server, ClientSession & client) {
 	}
+
+	void HttpConnection::prepareRequestAndResponse(ClientSession & client) {
+		OS::Socket * socket = client.getSocket();
+		if (!request) {
+			request = new HttpRequest(headerReader.getHeader(), *socket);
+		}
+		if (!response) {
+			response = new HttpResponse(*socket);
+		}
+	}
 	
 	void HttpConnection::readContent(char * buffer, size_t size) {
 		// content buffer manipulation
 	}
+	
 	void HttpConnection::onRequest(HttpRequest & request, HttpResponse & response) {
 		if (getHandler()) {
 			getHandler()->onRequest(request, response);
 		}
 	}
+	
 	void HttpConnection::releaseRequest() {
 		if (request) {
 			delete request;
 			request = NULL;
 		}
 	}
+	
 	void HttpConnection::releaseResponse() {
 		if (response) {
 			delete response;

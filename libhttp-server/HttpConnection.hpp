@@ -32,6 +32,8 @@ namespace HTTP {
 		virtual void onReceive(MultiConn & server, ClientSession & client, Packet & packet);
 		virtual void onDisconnect(MultiConn & server, ClientSession & client);
 
+		void prepareRequestAndResponse(ClientSession & client);
+
 		virtual void readContent(char * buffer, size_t size);
 		virtual void onRequest(HttpRequest & request, HttpResponse & response);
 

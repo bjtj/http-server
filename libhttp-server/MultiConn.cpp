@@ -254,9 +254,13 @@ namespace HTTP {
 			Packet packet(buffer, len);
 			server.onReceive(client, packet);
 		}
+		server.onDisconnect(client);
 	}
 	ClientSession & ClientHandlerThread::getClient() {
 		return client;
+	}
+	void ClientHandlerThread::quit() {
+		client.getSocket()->close();
 	}
 	
 
@@ -330,7 +334,6 @@ namespace HTTP {
 	}
 	void MultiConnThreadedServer::disconnect(ClientSession & client) {
 		onDisconnect(client);
-		client.getSocket()->close();
 	}
 
 	void MultiConnThreadedServer::releaseInvalidThreads() {
@@ -359,6 +362,15 @@ namespace HTTP {
 		MultiConn::onReceive(client, packet);
 	}
 	void MultiConnThreadedServer::onDisconnect(ClientSession & client) {
+		int id = client.getId();
+		ClientHandlerThread * thread = clients[id];
+		
 		MultiConn::onDisconnect(client);
+
+		clients.erase(id);
+		thread->quit();
+		thread->join();
+		delete client.getSocket();
+		delete &client;
 	}
 }

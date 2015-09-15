@@ -177,6 +177,7 @@ namespace HTTP {
 		virtual ~ClientHandlerThread();
 		virtual void run();
 		ClientSession & getClient();
+		void quit();
 	};
 	
 	/**
