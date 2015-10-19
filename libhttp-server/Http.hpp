@@ -11,5 +11,6 @@
 #include "HttpConnection.hpp"
 #include "HttpProtocol.hpp"
 #include "HttpServer.hpp"
+#include "Url.hpp"
 
 #endif
