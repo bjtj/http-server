@@ -1,6 +1,5 @@
 #include <liboslayer/Text.hpp>
 #include "HttpClient.hpp"
-#include <iostream>
 
 using namespace std;;
 using namespace OS;
@@ -8,11 +7,16 @@ using namespace UTIL;
 
 namespace HTTP {
 	
-	HttpClient::HttpClient() : responseHandler(NULL), socket(NULL) {
+	HttpClient::HttpClient() : responseHandler(NULL), socket(NULL), followRedirect(false) {
+		httpProtocol = "HTTP/1.1";
 		defaultHeaderFields["User-Agent"] = "Cross-Platform/0.1 HTTP/1.1 HttpClient/0.1";
 	}
 	
 	HttpClient::~HttpClient() {
+	}
+
+	void HttpClient::setFollowRedirect(bool followRedirect) {
+		this->followRedirect = followRedirect;
 	}
 
 	void HttpClient::setHttpResponseHandler(HttpResponseHandler * responseHandler) {
@@ -20,15 +24,43 @@ namespace HTTP {
 	}
 
 	void HttpClient::request(Url & url) {
-		socket = connect(url);
-		HttpHeader requestHeader = makeRequestHeader("GET", url.getPath(), "HTTP/1.1");
-		sendRequestPacket(*socket, requestHeader, NULL, 0);
-		HttpHeader responseHeader = readResponseHeader(*socket);
-		if (responseHandler) {
-			responseHandler->onResponse(*this, responseHeader, *socket);
+		map<string, string> empty;
+		request(url, "GET", empty, NULL, 0);
+	}
+
+	void HttpClient::request(Url & url, string method, char * data, int len) {
+		map<string, string> empty;
+		request(url, method, empty, data, len);
+	}
+
+	void HttpClient::request(Url & url, string method, map<string, string> & additionalHeaderFields, char * data, int len) {
+
+		if (!socket) {
+
+			HttpHeader requestHeader =
+				makeRequestHeader(method, url.getPath(), httpProtocol, url.getAddress());
+			requestHeader.appendHeaderFields(additionalHeaderFields);
+			
+			socket = connect(url);
+			sendRequestPacket(*socket, requestHeader, data, len);
+		
+			HttpHeader responseHeader = readResponseHeader(*socket);
+			// while (followRedirect && checkIf302(responseHeader)) {
+			// 	string locStr = responseHeader.getHeaderFieldIgnoreCase("Location");
+			// 	Url loc(locStr);
+			// 	requestHeader.setPart2(loc.getPath());
+			// 	disconnect(socket);
+			// 	socket = connect(loc);
+			// 	sendRequestPacket(*socket, requestHeader, data, len);
+			// 	responseHeader = readResponseHeader(*socket);
+			// }
+			if (responseHandler) {
+				responseHandler->onResponse(*this, responseHeader, *socket);
+			}
+			disconnect(socket);
+		
+			socket = NULL;
 		}
-		disconnect(socket);
-		socket = NULL;
 	}
 
 	Socket * HttpClient::connect(Url & url) {
@@ -42,13 +74,15 @@ namespace HTTP {
 		delete socket;
 	}
 
-	HttpHeader HttpClient::makeRequestHeader(string method, string path, string protocol) {
+	HttpHeader HttpClient::makeRequestHeader(string method, string path, string protocol, string targetHost) {
 		HttpHeader header;
 		header.setPart1(method);
 		header.setPart2(path);
 		header.setPart3(protocol);
-		// header.setHeaderField("", "");
-		cout << "Header: " << header.toString();
+		if (!targetHost.empty()) {
+			header.setHeaderField("Host", targetHost);
+		}
+		header.appendHeaderFields(defaultHeaderFields);
 		return header;
 	}
 
@@ -69,5 +103,9 @@ namespace HTTP {
 		}
 		return headerReader.getHeader();
 	}
-	
+
+	bool HttpClient::checkIf302(HttpHeader & responseHeader) {
+		int statusCode = Text::toInt(responseHeader.getPart2());
+		return (statusCode == 302);
+	}
 }

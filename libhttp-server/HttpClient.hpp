@@ -12,6 +12,10 @@ namespace HTTP {
 
 	class HttpClient;
 
+	/**
+	 * @brief http response handler
+	 * it'll be set to http client
+	 */
 	class HttpResponseHandler {
 	private:
 	public:
@@ -20,28 +24,40 @@ namespace HTTP {
 
 		virtual void onResponse(HttpClient & httpClient, HttpHeader & responseHeader, OS::Socket & socket) = 0;
 	};
-	
+
+	/**
+	 * @brief http client
+	 */
 	class HttpClient {
 	private:
-		HttpHeaderReader reader;
+		std::string httpProtocol;
 		HttpResponseHandler * responseHandler;
 		OS::Socket * socket;
 		std::map<std::string, std::string> defaultHeaderFields;
+		bool followRedirect;
 		
 	public:
 		HttpClient();
 		virtual ~HttpClient();
 
+		void setFollowRedirect(bool followRedirect);
 		void setHttpResponseHandler(HttpResponseHandler * responseHandler);
 		void request(Url & url);
+		void request(Url & url, std::string method, char * data, int len);
+		void request(Url & url, std::string method,
+					 std::map<std::string, std::string> & additionalHeaderFields,
+					 char * data, int len);
 		OS::Socket *  connect(Url & url);
 		void disconnect(OS::Socket * socket);
 
 	private:
-		HttpHeader makeRequestHeader(std::string method, std::string path, std::string protocol);
+		HttpHeader makeRequestHeader(std::string method,
+									 std::string path,
+									 std::string protocol,
+									 std::string targetHost);
 		void sendRequestPacket(OS::Socket & socket, HttpHeader & header, char * buffer, int len);
 		HttpHeader readResponseHeader(OS::Socket & socket);
-		
+		bool checkIf302(HttpHeader & responseHeader);
 	};
 }
 

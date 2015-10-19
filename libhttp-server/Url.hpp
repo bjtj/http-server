@@ -38,6 +38,8 @@ namespace HTTP {
 		std::vector<std::string> parseAddress(std::string address);
 		void setAddress(std::vector<std::string> & addr);
 
+		std::string getAddress();
+
 		virtual std::string toString();
 
 		Url& operator=(const std::string & urlStr);

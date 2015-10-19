@@ -18,6 +18,9 @@ public:
 		char buffer[1024] = {0,};
 		int len;
 		int contentLength = responseHeader.getHeaderFieldIgnoreCaseAsInteger("Content-Length");
+
+		cout << responseHeader.toString();
+		
 		while ((len = socket.recv(buffer, sizeof(buffer))) > 0) {
 			total += len;
 			if (total > contentLength) {
@@ -76,5 +79,6 @@ void test_request(Url & url) {
 	HttpClient client;
 	MyResponseHandler handler;
 	client.setHttpResponseHandler(&handler);
+	client.setFollowRedirect(true);
 	client.request(url);
 }

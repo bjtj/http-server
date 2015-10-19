@@ -101,6 +101,10 @@ namespace HTTP {
 		}
 	}
 
+	string Url::getAddress() {
+		return host + (port.empty() ? "" : ":" + port);
+	}
+
 	string Url::toString() {
 		string p;
 		p = UTIL::Text::toMapString(params, "=", "&");
