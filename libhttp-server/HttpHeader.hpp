@@ -23,6 +23,7 @@ namespace HTTP {
 		std::vector<std::string> parts;
 		std::map<std::string, std::string> fields;
 		std::map<std::string, HttpParameter> params;
+		
 	public:
 		HttpHeader();
 		virtual ~HttpHeader();
@@ -40,7 +41,11 @@ namespace HTTP {
 		
 		virtual std::string getHeaderField(std::string name);
 		virtual std::string getHeaderFieldIgnoreCase(std::string name);
+		virtual int getHeaderFieldAsInteger(std::string name);
+		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name);
 		virtual void setHeaderField(std::string name, std::string value);
+		virtual void setHeaderFields(std::map<std::string, std::string> & fields);
+		virtual void appendHeaderFields(std::map<std::string, std::string> & fields);
 		virtual std::map<std::string, std::string> & getHeaderFields();
 		
 		virtual std::string getParameter(std::string name);

@@ -14,11 +14,20 @@ public:
 	}
 
 	virtual void onResponse(HttpClient & httpClient, HttpHeader & responseHeader, OS::Socket & socket) {
+		int total = 0;
 		char buffer[1024] = {0,};
 		int len;
+		int contentLength = responseHeader.getHeaderFieldIgnoreCaseAsInteger("Content-Length");
 		while ((len = socket.recv(buffer, sizeof(buffer))) > 0) {
+			total += len;
+			if (total > contentLength) {
+				len -= (total - contentLength);
+			}
 			string msg(buffer, len);
 			cout << msg;
+			if (total >= contentLength) {
+				break;
+			}
 		}
 	}
 };

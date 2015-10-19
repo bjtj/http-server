@@ -55,8 +55,20 @@ namespace HTTP {
 		}
 		return "";
 	}
+	int HttpHeader::getHeaderFieldAsInteger(string name) {
+		return Text::toInt(getHeaderField(name));
+	}
+	int HttpHeader::getHeaderFieldIgnoreCaseAsInteger(string name) {
+		return Text::toInt(getHeaderFieldIgnoreCase(name));
+	}
 	void HttpHeader::setHeaderField(string name, string value) {
 		fields[name] = value;
+	}
+	void HttpHeader::setHeaderFields(map<string, string> & fields) {
+		this->fields = fields;
+	}
+	void HttpHeader::appendHeaderFields(map<string, string> & fields) {
+		this->fields.insert(fields.begin(), fields.end());
 	}
 	map<string, string> & HttpHeader::getHeaderFields() {
 		return fields;
@@ -110,7 +122,7 @@ namespace HTTP {
 		HttpHeader & header = getHeader();
 		parseParams(header, params, offset);
 	}
-	void HttpRequestHeader::parseParams(HttpHeader & header, std::string params, size_t offset) {
+	void HttpRequestHeader::parseParams(HttpHeader & header, string params, size_t offset) {
 		size_t f = offset;
 		while (parseParam(header, params, f) != string::npos) {}
 	}
