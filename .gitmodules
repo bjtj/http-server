@@ -1,3 +1,0 @@
-[submodule "deps/oslayer"]
-	path = deps/oslayer
-	url = https://github.com/bjtj/oslayer.git

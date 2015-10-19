@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.69])
+#AC_PREREQ([2.69])
 AC_INIT([libhttp-server], [0.1], [bjtj10@gmail.com])
 
 AC_CONFIG_SRCDIR([config.h.in])
@@ -33,7 +33,7 @@ PKG_CHECK_MODULES([LIBOSLAYER], [oslayer])
 AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
+#AC_CHECK_HEADER_STDBOOL
 AC_TYPE_MODE_T
 AC_TYPE_SIZE_T
 
