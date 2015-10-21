@@ -28,7 +28,7 @@ namespace HTTP {
 	void HttpConnection::onReceive(MultiConn & server, ClientSession & client, Packet & packet) {
 
 		if (!headerReader.complete()) {
-			headerReader.read(packet.getBuffer(), packet.size());
+			headerReader.read(packet.getBuffer(), (int)packet.size());
 		}
 
 		if (headerReader.complete()) {

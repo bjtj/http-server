@@ -34,7 +34,7 @@ namespace HTTP {
 	}
 	int ChunkedReader::readChunkData(int chunkSize, char * out, int max) {
 		
-		int len;
+		int len = 0;
 		char readBuf[1024] = {0,};
 		int readSize;
 		int readPos = 0;

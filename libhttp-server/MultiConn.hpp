@@ -17,17 +17,17 @@ namespace HTTP {
 	class Packet {
 	private:
 		char * buffer;
-		size_t _size;
+		int _size;
 		int _length;
 
 	public:
 		Packet(int size);
-		Packet(char * buffer, size_t size);
+		Packet(char * buffer, int size);
 		virtual ~Packet();
 
 		char * getBuffer();
 		int put(char * data, int len);
-		size_t size();
+		int size();
 		void resize(int size);
 		int length();
 	};

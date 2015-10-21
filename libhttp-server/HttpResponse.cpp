@@ -46,7 +46,7 @@ namespace HTTP {
 	}
 	int HttpResponse::write(const string & content) {
 		this->content += content;
-		return content.length();
+		return (int)content.length();
 	}
 	int HttpResponse::write(const char * buf, int size) {
 		this->content += string(buf, size);
@@ -65,7 +65,7 @@ namespace HTTP {
 	}
 	void HttpResponse::setComplete() {
 		if (!complete) {
-			setContentLength(content.length());
+			setContentLength((int)content.length());
 			sendHeaderOnce();
 			sendContent();
 			complete = true;

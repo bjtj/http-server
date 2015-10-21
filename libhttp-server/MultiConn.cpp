@@ -10,7 +10,7 @@ namespace HTTP {
 		buffer = (char*)malloc(_size);
 		memset(buffer, 0, _size);
 	}
-	Packet::Packet(char * buffer, size_t size) : _size(size), _length(_size) {
+	Packet::Packet(char * buffer, int size) : _size(size), _length(_size) {
 		this->buffer = (char*)malloc(_size);
 		memcpy(this->buffer, buffer, _size);
 	}
@@ -33,7 +33,7 @@ namespace HTTP {
 
 		return _length;
 	}
-	size_t Packet::size() {
+	int Packet::size() {
 		return _size;
 	}
 	void Packet::resize(int size) {
@@ -199,7 +199,7 @@ namespace HTTP {
 
 	bool MultiConnMultiplexServer::isDisconnected(ClientSession & client) {
 		for (size_t i = 0; i < clients.size(); i++) {
-			if (clients[i] == &client) {
+			if (clients[(int)i] == &client) {
 				return false;
 			}
 		}

@@ -21,7 +21,7 @@ namespace HTTP {
 		size_t f = buffer.find("\r\n\r\n");
 		size_t diff = buffer.size() - (f + 4);
 		buffer = buffer.substr(0, f + 4);
-		return diff;
+		return (int)diff;
 	}
 	void HttpHeaderReader::append(char * data, int size) {
 		string x = string(data, size);
