@@ -20,7 +20,9 @@ namespace HTTP {
 	private:
 		bool valid;
 		std::string firstline;
-		std::vector<std::string> parts;
+		std::string part1;
+		std::string part2;
+		std::string part3;
 		std::map<std::string, std::string> fields;
 		std::map<std::string, HttpParameter> params;
 		
@@ -38,6 +40,8 @@ namespace HTTP {
 		virtual void setPart1(std::string part);
 		virtual void setPart2(std::string part);
 		virtual void setPart3(std::string part);
+
+		std::string makeFirstLine();
 		
 		virtual std::string getHeaderField(std::string name);
 		virtual std::string getHeaderFieldIgnoreCase(std::string name);

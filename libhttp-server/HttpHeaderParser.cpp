@@ -78,7 +78,9 @@ namespace HTTP {
 		return ret;
 	}
 	int HttpHeaderParser::parseFirstLine(HttpHeader & header, string & line) {
-		vector<string> parts;
+		string part1;
+		string part2;
+		string part3;
 		string spaces = " \t";
 		size_t e = 0;
 		size_t f = line.find_first_of(spaces);
@@ -87,8 +89,8 @@ namespace HTTP {
 		}
 		// first
 		string part = line.substr(0, f);
-		parts.push_back(part);
-
+		part1 = part;
+		
 		// second
 		f = line.find_first_not_of(spaces, f);
 		if (f == string::npos) {
@@ -96,7 +98,7 @@ namespace HTTP {
 		}
 		e = line.find_first_of(spaces, f);
 		part = (e != string::npos) ? line.substr(f, e - f) : line.substr(f);
-		parts.push_back(part);
+		part2 = part;
 
 		// third
 		f = line.find_first_not_of(spaces, e);
@@ -105,10 +107,12 @@ namespace HTTP {
 		}
 		e = line.find_first_of("\r\n", f);
 		part = (e != string::npos) ? line.substr(f, e - f) : line.substr(f);
-		parts.push_back(part);
+		part3 = part;
 
 		header.setFirstLine(line);
-		header.setParts(parts);
+		header.setPart1(part1);
+		header.setPart2(part2);
+		header.setPart3(part3);
 		return 0;
 	}
 	int HttpHeaderParser::parseHeaderField(HttpHeader & header, string line) {

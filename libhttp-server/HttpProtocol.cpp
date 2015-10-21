@@ -57,7 +57,7 @@ namespace HTTP {
 	}
 	
 	OnHttpRequestHandler * HttpProtocol::getHandler(string path) {
-		map<string, OnHttpRequestHandler*>::iterator iter;
+		map<string, OnHttpRequestHandler*, vpath_comp>::iterator iter;
 		string p = pathOnly(path);
 		for (iter = handlers.begin(); iter != handlers.end(); iter++) {
 			if (Text::match(iter->first, p)) {

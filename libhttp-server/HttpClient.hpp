@@ -58,6 +58,7 @@ namespace HTTP {
 		void sendRequestPacket(OS::Socket & socket, HttpHeader & header, char * buffer, int len);
 		HttpHeader readResponseHeader(OS::Socket & socket);
 		bool checkIf302(HttpHeader & responseHeader);
+		int consume(OS::Socket & socket, int length);
 	};
 }
 

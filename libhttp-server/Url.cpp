@@ -112,7 +112,7 @@ namespace HTTP {
 			p = "?" + p;
 		}
 
-		scheme + "://" + host + "/" + path + p;
+		return scheme + "://" + host + ":" + port + "/" + path + p;
 	}
 
 	Url& Url::operator=(const char * urlStr) {

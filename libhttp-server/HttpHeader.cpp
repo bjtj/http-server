@@ -11,9 +11,6 @@ namespace HTTP {
 	 * @brief http header constructor
 	 */
 	HttpHeader::HttpHeader() : valid(false) {
-		parts.push_back("");
-		parts.push_back("");
-		parts.push_back("");
 	}
 	HttpHeader::~HttpHeader() {
 	}
@@ -24,25 +21,30 @@ namespace HTTP {
 		this->firstline = firstline;
 	}
 	void HttpHeader::setParts(vector<string> & parts) {
-		this->parts = parts;
+		setPart1(parts[0]);
+		setPart2(parts[1]);
+		setPart3(parts[2]);
 	}
 	string HttpHeader::getPart1() {
-		return parts[0];
+		return part1;
 	}
 	string HttpHeader::getPart2() {
-		return parts[1];
+		return part2;
 	}
 	string HttpHeader::getPart3() {
-		return parts[2];
+		return part2;
 	}
 	void HttpHeader::setPart1(string part) {
-		parts[0] = part;
+		part1 = part;
 	}
 	void HttpHeader::setPart2(string part) {
-		parts[1] = part;
+		part2 = part;
 	}
 	void HttpHeader::setPart3(string part) {
-		parts[2] = part;
+		part3 = part;
+	}
+	string HttpHeader::makeFirstLine() {
+		return (part1 + " " + part2 + " " + part3);
 	}
 	string HttpHeader::getHeaderField(string name) {
 		return fields[name];
@@ -88,7 +90,7 @@ namespace HTTP {
 		params[name].appendValue(value);
 	}
 	string HttpHeader::toString() {
-		string ret = parts[0] + " " + parts[1] + " " +  parts[2] + "\r\n";
+		string ret = makeFirstLine() + "\r\n";
 		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
 			ret += (iter->first + ": " + iter->second + "\r\n");
 		}

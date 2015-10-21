@@ -33,7 +33,11 @@ namespace HTTP {
 		request(url, method, empty, data, len);
 	}
 
-	void HttpClient::request(Url & url, string method, map<string, string> & additionalHeaderFields, char * data, int len) {
+	void HttpClient::request(Url & url,
+							 string method,
+							 map<string, string> & additionalHeaderFields,
+							 char * data,
+							 int len) {
 
 		if (!socket) {
 
@@ -45,15 +49,20 @@ namespace HTTP {
 			sendRequestPacket(*socket, requestHeader, data, len);
 		
 			HttpHeader responseHeader = readResponseHeader(*socket);
-			// while (followRedirect && checkIf302(responseHeader)) {
-			// 	string locStr = responseHeader.getHeaderFieldIgnoreCase("Location");
-			// 	Url loc(locStr);
-			// 	requestHeader.setPart2(loc.getPath());
-			// 	disconnect(socket);
-			// 	socket = connect(loc);
-			// 	sendRequestPacket(*socket, requestHeader, data, len);
-			// 	responseHeader = readResponseHeader(*socket);
-			// }
+			while (followRedirect && checkIf302(responseHeader)) {
+
+				string locStr = responseHeader.getHeaderFieldIgnoreCase("Location");
+				Url loc(locStr);
+				int contentLength = responseHeader.getHeaderFieldIgnoreCaseAsInteger("Content-Length");
+				consume(*socket, contentLength);
+
+				string path = loc.getPath();
+				requestHeader.setPart2(path);
+				
+				requestHeader.setHeaderField("Host", loc.getAddress());
+				sendRequestPacket(*socket, requestHeader, data, len);
+				responseHeader = readResponseHeader(*socket);
+			}
 			if (responseHandler) {
 				responseHandler->onResponse(*this, responseHeader, *socket);
 			}
@@ -101,11 +110,28 @@ namespace HTTP {
 		while (!headerReader.complete() && socket.recv(&buffer, 1) > 0) {
 			headerReader.read(&buffer, 1);
 		}
+		if (!headerReader.complete()) {
+			throw -1;
+		}
 		return headerReader.getHeader();
 	}
 
 	bool HttpClient::checkIf302(HttpHeader & responseHeader) {
 		int statusCode = Text::toInt(responseHeader.getPart2());
 		return (statusCode == 302);
+	}
+
+	int HttpClient::consume(OS::Socket & socket, int length) {
+		char buffer[1024] = {0,};
+		int len;
+		int total = 0;
+		while ((len = socket.recv(buffer, sizeof(buffer))) > 0) {
+			string str(buffer, len);
+			total += len;
+			if (total >= length) {
+				break;
+			}
+		}
+		return total;
 	}
 }

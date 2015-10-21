@@ -18,33 +18,43 @@ reconf() {
 	autoreconf -i
 }
 
-build() {
+config_debug() {
+	clean
 	mkdir -p $DIR_BUILD
 	mkdir -p $DIR_WORLD
 	cd $DIR_BUILD
-	$BASE/configure --prefix "$DIR_WORLD" && make && make install
+	$BASE/configure --prefix "$DIR_WORLD"
 }
 
-install() {
+config_install() {
 	clean
 	mkdir -p $DIR_BUILD
 	cd $DIR_BUILD
-	$BASE/configure && make && sudo make install
+	$BASE/configure
+}
+
+debug_install() {
+	cd $DIR_BUILD
+	make && make install
+}
+
+install() {
+	cd $DIR_BUILD
+	make && sudo make install
 }
 
 case $OPT in
 	reconf)
 		reconf
 		;;
-	build)
-		build
+	config-debug)
+		config_debug
 		;;
-	all)
-		prepare
-		build
+	config-install)
+		config_install
 		;;
-	make)
-		cd $DIR_BUILD && make && make install
+	debug-install)
+		debug_install
 		;;
 	install)
 		install
