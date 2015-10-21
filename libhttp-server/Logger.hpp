@@ -6,9 +6,7 @@
 namespace HTTP {
 	
 	class Logger {
-	private:
-		static Logger * logger;
-		
+	private:		
 	public:
 		Logger();
 		virtual ~Logger();

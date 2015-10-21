@@ -22,7 +22,7 @@ namespace HTTP {
 		}
 	};
 
-	Logger * Logger::logger = new VerboseLogger;
+	VerboseLogger verboseLogger;
 
 	Logger::Logger() {
 	}
@@ -31,9 +31,7 @@ namespace HTTP {
 	}
 
 	Logger & Logger::getLogger() {
-		return *logger;
-	}
-
-	
+		return verboseLogger;
+	}	
 }
 
