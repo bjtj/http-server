@@ -59,6 +59,11 @@ namespace HTTP {
 		HttpHeader readResponseHeader(OS::Socket & socket);
 		bool checkIf302(HttpHeader & responseHeader);
 		int consume(OS::Socket & socket, int length);
+		HttpHeader processRedirect(OS::Socket & socket,
+								   HttpHeader requestHeader,
+								   HttpHeader responseHeader,
+								   char * data,
+								   int len);
 	};
 }
 

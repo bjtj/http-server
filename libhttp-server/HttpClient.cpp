@@ -52,25 +52,14 @@ namespace HTTP {
 			sendRequestPacket(*socket, requestHeader, data, len);
 		
 			HttpHeader responseHeader = readResponseHeader(*socket);
-			while (followRedirect && checkIf302(responseHeader)) {
-
-				string locStr = responseHeader.getHeaderFieldIgnoreCase("Location");
-				Url loc(locStr);
-				int contentLength = responseHeader.getHeaderFieldIgnoreCaseAsInteger("Content-Length");
-				consume(*socket, contentLength);
-
-				string path = loc.getPath();
-				requestHeader.setPart2(path);
-				
-				requestHeader.setHeaderField("Host", loc.getAddress());
-				sendRequestPacket(*socket, requestHeader, data, len);
-				responseHeader = readResponseHeader(*socket);
+			if (followRedirect && checkIf302(responseHeader)) {
+				responseHeader = processRedirect(*socket, requestHeader, responseHeader, data, len);
 			}
+			
 			if (responseHandler) {
 				responseHandler->onResponse(*this, responseHeader, *socket);
 			}
 			disconnect(socket);
-		
 			socket = NULL;
 		}
 	}
@@ -99,7 +88,7 @@ namespace HTTP {
 	}
 
 	void HttpClient::sendRequestPacket(Socket & socket, HttpHeader & header, char * buffer, int len) {
-		header.setHeaderField("Content-Length", Text::toString(len));
+		header.setContentLength(len);
 		string headerStr = header.toString();
 		logger.logd(headerStr);
 		socket.send(headerStr.c_str(), headerStr.length());
@@ -139,5 +128,28 @@ namespace HTTP {
 			}
 		}
 		return total;
+	}
+
+	HttpHeader HttpClient::processRedirect(OS::Socket & socket,
+										   HttpHeader requestHeader,
+										   HttpHeader responseHeader,
+										   char * data,
+										   int len) {
+
+		while (checkIf302(responseHeader)) {
+
+			string locStr = responseHeader["Location"];
+			Url loc(locStr);
+			int contentLength = responseHeader.getContentLength();
+			consume(socket, contentLength);
+
+			string path = loc.getPath();
+			requestHeader.setPart2(path);
+				
+			requestHeader.setHeaderField("Host", loc.getAddress());
+			sendRequestPacket(socket, requestHeader, data, len);
+			responseHeader = readResponseHeader(socket);
+		}
+		return responseHeader;
 	}
 }
