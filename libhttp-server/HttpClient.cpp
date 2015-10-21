@@ -1,11 +1,14 @@
 #include <liboslayer/Text.hpp>
 #include "HttpClient.hpp"
+#include "Logger.hpp"
 
 using namespace std;;
 using namespace OS;
 using namespace UTIL;
 
 namespace HTTP {
+
+	Logger & logger = Logger::getLogger();
 	
 	HttpClient::HttpClient() : responseHandler(NULL), socket(NULL), followRedirect(false) {
 		httpProtocol = "HTTP/1.1";
@@ -98,6 +101,7 @@ namespace HTTP {
 	void HttpClient::sendRequestPacket(Socket & socket, HttpHeader & header, char * buffer, int len) {
 		header.setHeaderField("Content-Length", Text::toString(len));
 		string headerStr = header.toString();
+		logger.logd(headerStr);
 		socket.send(headerStr.c_str(), headerStr.length());
 		if (buffer && len > 0) {
 			socket.send(buffer, len);
@@ -113,6 +117,7 @@ namespace HTTP {
 		if (!headerReader.complete()) {
 			throw -1;
 		}
+		logger.logd(headerReader.getHeader().toString());
 		return headerReader.getHeader();
 	}
 
@@ -127,6 +132,7 @@ namespace HTTP {
 		int total = 0;
 		while ((len = socket.recv(buffer, sizeof(buffer))) > 0) {
 			string str(buffer, len);
+			logger.logd(str);
 			total += len;
 			if (total >= length) {
 				break;

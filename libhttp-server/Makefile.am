@@ -1,5 +1,6 @@
 libhttp_serverincdir=${includedir}/libhttp-server
 libhttp_serverinc_HEADERS = \
+	Logger.hpp \
 	Url.hpp \
 	MultiConn.hpp \
 	HttpParameter.hpp \
@@ -18,6 +19,7 @@ libhttp_serverinc_HEADERS = \
 
 lib_LTLIBRARIES = libhttp-server.la
 libhttp_server_la_SOURCES = \
+	Logger.hpp \
 	Url.hpp \
 	MultiConn.hpp \
 	HttpParameter.hpp \
@@ -32,6 +34,7 @@ libhttp_server_la_SOURCES = \
 	HttpStatusCodes.hpp \
 	HttpConnection.hpp \
 	HttpClient.hpp \
+	Logger.cpp \
 	Url.cpp \
 	MultiConn.cpp \
 	HttpConnection.cpp \
