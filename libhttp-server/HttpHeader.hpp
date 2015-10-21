@@ -7,8 +7,6 @@
 #include <map>
 #include <cstdlib>
 
-#include <liboslayer/Text.hpp>
-
 #include "HttpParameter.hpp"
 
 namespace HTTP {
