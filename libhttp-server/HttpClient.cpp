@@ -8,7 +8,7 @@ using namespace UTIL;
 
 namespace HTTP {
 
-	Logger & logger = Logger::getLogger();
+	static Logger & logger = Logger::getLogger();
 	
 	HttpClient::HttpClient() : responseHandler(NULL), socket(NULL), followRedirect(false) {
 		httpProtocol = "HTTP/1.1";

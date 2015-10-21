@@ -1,10 +1,13 @@
 #include <liboslayer/Text.hpp>
+#include "Logger.hpp"
 
 #include "Url.hpp"
 
 namespace HTTP {
 
 	using namespace std;
+
+	static Logger & logger = Logger::getLogger();
 
 	Url::Url(const char * urlStr) {
 		parseUrlString(urlStr);

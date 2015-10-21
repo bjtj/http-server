@@ -36,7 +36,6 @@ namespace HTTP {
 		return errorMessage;
 	}
 
-
 	/**
 	 * @brief http header parser constructor
 	 */
@@ -116,6 +115,7 @@ namespace HTTP {
 		return 0;
 	}
 	int HttpHeaderParser::parseHeaderField(HttpHeader & header, string line) {
+		line = removeCarriageReturnNewLine(line);
 		size_t f = line.find(":");
 		if (f == string::npos) {
 			return -1;
@@ -132,5 +132,13 @@ namespace HTTP {
 	}
 	HttpHeader & HttpHeaderParser::getHeader() {
 		return result.getHeader();
+	}
+
+	string HttpHeaderParser::removeCarriageReturnNewLine(string line) {
+		size_t f = line.find("\r\n");
+		if (f != string::npos) {
+			line = line.substr(0, f);
+		}
+		return line;
 	}
 }

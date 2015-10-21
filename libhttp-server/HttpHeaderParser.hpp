@@ -49,6 +49,7 @@ namespace HTTP {
 		int parseHeaderField(HttpHeader & header, std::string line);
 		HttpHeaderParseResult & getResult();
 		HttpHeader & getHeader();
+		std::string removeCarriageReturnNewLine(std::string line);
 	};
 }
 
