@@ -4,7 +4,7 @@ BASE=$PWD
 DIR_BUILD=$PWD/build
 DIR_WORLD=$PWD/world
 
-OPT=build
+OPT=debug-install
 
 if [ -n "$1" ]; then
 	OPT=$1
