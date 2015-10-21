@@ -26,12 +26,14 @@ namespace HTTP {
 		
 	public:
 		HttpHeader();
+		HttpHeader(std::string par1, std::string part2, std::string part3);
 		virtual ~HttpHeader();
 
 		virtual bool isValid();
 		
 		virtual void setFirstLine(std::string & firstline);
 		virtual void setParts(std::vector<std::string> & parts);
+		virtual void setParts(std::string par1, std::string part2, std::string part3);
 		virtual std::string getPart1();
 		virtual std::string getPart2();
 		virtual std::string getPart3();
@@ -49,12 +51,23 @@ namespace HTTP {
 		virtual void setHeaderFields(std::map<std::string, std::string> & fields);
 		virtual void appendHeaderFields(std::map<std::string, std::string> & fields);
 		virtual std::map<std::string, std::string> & getHeaderFields();
+		virtual void removeHeaderField(std::string name);
+		virtual void removeHeaderFieldIgnoreCase(std::string name);
+
+		std::string getContentType();
+		void setContentType(std::string contentType);
+		int getContentLength();
+		void setContentLength(int contentLength);
+		bool isChunkedTransfer();
+		void setChunkedTransfer(bool chunked);
 		
 		virtual std::string getParameter(std::string name);
 		virtual std::vector<std::string> getParameters(std::string name);
 		virtual void setParameter(std::string name, std::string value);
 
 		virtual std::string toString();
+
+		std::string operator[] (const std::string & headerFieldName);
 	};
 
 	/**

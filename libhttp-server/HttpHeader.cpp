@@ -12,6 +12,9 @@ namespace HTTP {
 	 */
 	HttpHeader::HttpHeader() : valid(false) {
 	}
+	HttpHeader::HttpHeader(std::string par1, std::string part2, std::string part3) : valid(false) {
+		setParts(part1, part2, part3);
+	}
 	HttpHeader::~HttpHeader() {
 	}
 	bool HttpHeader::isValid() {
@@ -24,6 +27,11 @@ namespace HTTP {
 		setPart1(parts[0]);
 		setPart2(parts[1]);
 		setPart3(parts[2]);
+	}
+	void HttpHeader::setParts(std::string par1, std::string part2, std::string part3) {
+		setPart1(part1);
+		setPart2(part2);
+		setPart3(part3);
 	}
 	string HttpHeader::getPart1() {
 		return part1;
@@ -75,6 +83,42 @@ namespace HTTP {
 	map<string, string> & HttpHeader::getHeaderFields() {
 		return fields;
 	}
+	void HttpHeader::removeHeaderField(string name) {
+		fields.erase(name);
+	}
+	void HttpHeader::removeHeaderFieldIgnoreCase(string name) {
+		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
+			if (Text::equalsIgnoreCase(iter->first, name)) {
+				fields.erase(iter);
+				break;
+			}
+		}
+	}
+
+	string HttpHeader::getContentType() {
+		return getHeaderFieldIgnoreCase("Content-Type");
+	}
+	void HttpHeader::setContentType(string contentType) {
+		setHeaderField("Content-Type", contentType);
+	}
+	int HttpHeader::getContentLength() {
+		return getHeaderFieldIgnoreCaseAsInteger("Content-Length");
+	}
+	void HttpHeader::setContentLength(int contentLength) {
+		setHeaderField("Content-Length", Text::toString(contentLength));
+	}
+	bool HttpHeader::isChunkedTransfer() {
+		string transferEncoding = getHeaderFieldIgnoreCase("Transfer-Encoding");
+		return Text::equalsIgnoreCase(transferEncoding, "chunked");
+	}
+	void HttpHeader::setChunkedTransfer(bool chunked) {
+		if (chunked) {
+			setHeaderField("Transfer-Encoding", "chunked");
+		} else {
+			removeHeaderFieldIgnoreCase("Transfer-Encoding");
+		}
+	}
+
 	string HttpHeader::getParameter(string name) {
 		return params[name].getFirstValue();
 	}
@@ -98,7 +142,9 @@ namespace HTTP {
 		return ret;
 	}
 
-
+	string HttpHeader::operator[] (const string & headerFieldName) {
+		return getHeaderFieldIgnoreCase(headerFieldName);
+	}
 
 
 	/**
