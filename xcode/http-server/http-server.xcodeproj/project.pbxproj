@@ -7,6 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E8E0FEA91BD848EB00292C54 /* http_server.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB23D1BD7D29800E89DC5 /* http_server.mm */; };
+		E8E0FEAA1BD848EB00292C54 /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB25F1BD7D2CE00E89DC5 /* Logger.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEAB1BD848EB00292C54 /* HttpHeaderReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2501BD7D2CE00E89DC5 /* HttpHeaderReader.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEAC1BD848EB00292C54 /* HttpServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB25A1BD7D2CE00E89DC5 /* HttpServer.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEAD1BD848EB00292C54 /* ChunkedReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2451BD7D2CE00E89DC5 /* ChunkedReader.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEAE1BD848EB00292C54 /* HttpParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2521BD7D2CE00E89DC5 /* HttpParameter.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEAF1BD848EB00292C54 /* HttpResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2581BD7D2CE00E89DC5 /* HttpResponse.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEB01BD848EB00292C54 /* HttpClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2481BD7D2CE00E89DC5 /* HttpClient.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEB11BD848EB00292C54 /* HttpRequest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2561BD7D2CE00E89DC5 /* HttpRequest.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEB21BD848EB00292C54 /* MultiConn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2611BD7D2CE00E89DC5 /* MultiConn.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEB31BD848EB00292C54 /* HttpProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2541BD7D2CE00E89DC5 /* HttpProtocol.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEB41BD848EB00292C54 /* Url.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2641BD7D2CE00E89DC5 /* Url.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEB51BD848EB00292C54 /* HttpHeader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB24C1BD7D2CE00E89DC5 /* HttpHeader.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEB61BD848EB00292C54 /* HttpConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB24A1BD7D2CE00E89DC5 /* HttpConnection.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEB71BD848EB00292C54 /* HttpHeaderParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB24E1BD7D2CE00E89DC5 /* HttpHeaderParser.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEB81BD848EB00292C54 /* HttpStatusCodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB25C1BD7D2CE00E89DC5 /* HttpStatusCodes.cpp */; settings = {ASSET_TAGS = (); }; };
+		E8E0FEBC1BD848EB00292C54 /* http_server.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB23B1BD7D29800E89DC5 /* http_server.h */; };
+		E8E0FEE21BD8496300292C54 /* liboslayer-cocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E8FAB2981BD7D39000E89DC5 /* liboslayer-cocoa.a */; };
 		E8FAB23C1BD7D29800E89DC5 /* http_server.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB23B1BD7D29800E89DC5 /* http_server.h */; };
 		E8FAB23E1BD7D29800E89DC5 /* http_server.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB23D1BD7D29800E89DC5 /* http_server.mm */; };
 		E8FAB2661BD7D2CE00E89DC5 /* ChunkedReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2451BD7D2CE00E89DC5 /* ChunkedReader.cpp */; settings = {ASSET_TAGS = (); }; };
@@ -28,6 +46,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		E8E0FEA71BD848EB00292C54 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E8FAB2901BD7D39000E89DC5 /* oslayer.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = E882FE7D1BD5312600E1C8C7;
+			remoteInfo = oslayer;
+		};
 		E8FAB2951BD7D39000E89DC5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E8FAB2901BD7D39000E89DC5 /* oslayer.xcodeproj */;
@@ -52,6 +77,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		E8E0FEBB1BD848EB00292C54 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				E8E0FEBC1BD848EB00292C54 /* http_server.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E8FAB2361BD7D29800E89DC5 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -65,6 +100,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E8E0FEC01BD848EB00292C54 /* libhttp-server cocoa.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libhttp-server cocoa.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8FAB2381BD7D29800E89DC5 /* libhttp-server.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libhttp-server.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8FAB23B1BD7D29800E89DC5 /* http_server.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = http_server.h; sourceTree = "<group>"; };
 		E8FAB23D1BD7D29800E89DC5 /* http_server.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = http_server.mm; sourceTree = "<group>"; };
@@ -105,6 +141,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		E8E0FEB91BD848EB00292C54 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8E0FEE21BD8496300292C54 /* liboslayer-cocoa.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E8FAB2351BD7D29800E89DC5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -130,6 +174,7 @@
 			isa = PBXGroup;
 			children = (
 				E8FAB2381BD7D29800E89DC5 /* libhttp-server.a */,
+				E8E0FEC01BD848EB00292C54 /* libhttp-server cocoa.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -195,6 +240,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		E8E0FEA51BD848EB00292C54 /* http-server cocoa */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E8E0FEBD1BD848EB00292C54 /* Build configuration list for PBXNativeTarget "http-server cocoa" */;
+			buildPhases = (
+				E8E0FEA81BD848EB00292C54 /* Sources */,
+				E8E0FEB91BD848EB00292C54 /* Frameworks */,
+				E8E0FEBB1BD848EB00292C54 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E8E0FEA61BD848EB00292C54 /* PBXTargetDependency */,
+			);
+			name = "http-server cocoa";
+			productName = "http-server";
+			productReference = E8E0FEC01BD848EB00292C54 /* libhttp-server cocoa.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 		E8FAB2371BD7D29800E89DC5 /* http-server */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E8FAB2411BD7D29800E89DC5 /* Build configuration list for PBXNativeTarget "http-server" */;
@@ -246,6 +309,7 @@
 			projectRoot = "";
 			targets = (
 				E8FAB2371BD7D29800E89DC5 /* http-server */,
+				E8E0FEA51BD848EB00292C54 /* http-server cocoa */,
 			);
 		};
 /* End PBXProject section */
@@ -268,6 +332,29 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
+		E8E0FEA81BD848EB00292C54 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8E0FEA91BD848EB00292C54 /* http_server.mm in Sources */,
+				E8E0FEAA1BD848EB00292C54 /* Logger.cpp in Sources */,
+				E8E0FEAB1BD848EB00292C54 /* HttpHeaderReader.cpp in Sources */,
+				E8E0FEAC1BD848EB00292C54 /* HttpServer.cpp in Sources */,
+				E8E0FEAD1BD848EB00292C54 /* ChunkedReader.cpp in Sources */,
+				E8E0FEAE1BD848EB00292C54 /* HttpParameter.cpp in Sources */,
+				E8E0FEAF1BD848EB00292C54 /* HttpResponse.cpp in Sources */,
+				E8E0FEB01BD848EB00292C54 /* HttpClient.cpp in Sources */,
+				E8E0FEB11BD848EB00292C54 /* HttpRequest.cpp in Sources */,
+				E8E0FEB21BD848EB00292C54 /* MultiConn.cpp in Sources */,
+				E8E0FEB31BD848EB00292C54 /* HttpProtocol.cpp in Sources */,
+				E8E0FEB41BD848EB00292C54 /* Url.cpp in Sources */,
+				E8E0FEB51BD848EB00292C54 /* HttpHeader.cpp in Sources */,
+				E8E0FEB61BD848EB00292C54 /* HttpConnection.cpp in Sources */,
+				E8E0FEB71BD848EB00292C54 /* HttpHeaderParser.cpp in Sources */,
+				E8E0FEB81BD848EB00292C54 /* HttpStatusCodes.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E8FAB2341BD7D29800E89DC5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -294,6 +381,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		E8E0FEA61BD848EB00292C54 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = oslayer;
+			targetProxy = E8E0FEA71BD848EB00292C54 /* PBXContainerItemProxy */;
+		};
 		E8FAB29A1BD7D3B000E89DC5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = oslayer;
@@ -302,6 +394,28 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		E8E0FEBE1BD848EB00292C54 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = ../../../oslayer;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		E8E0FEBF1BD848EB00292C54 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = ../../../oslayer;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
 		E8FAB23F1BD7D29800E89DC5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -403,6 +517,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E8E0FEBD1BD848EB00292C54 /* Build configuration list for PBXNativeTarget "http-server cocoa" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8E0FEBE1BD848EB00292C54 /* Debug */,
+				E8E0FEBF1BD848EB00292C54 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E8FAB2331BD7D29800E89DC5 /* Build configuration list for PBXProject "http-server" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -419,6 +542,7 @@
 				E8FAB2431BD7D29800E89DC5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
