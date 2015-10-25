@@ -75,12 +75,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\http-server.vcxproj">
-      <Project>{a86aea6e-750b-7c94-4188-77b9d2fcd973}</Project>
-    </ProjectReference>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ProjectReference Include="..\http-server.vcxproj">
+      <Project>{a8ae25bb-c71f-a261-60d4-5a82f496550a}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
