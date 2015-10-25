@@ -15,8 +15,7 @@ libhttp_serverinc_HEADERS = \
 	HttpConnection.hpp \
 	HttpServer.hpp \
 	HttpClient.hpp \
-	ChunkedReader.hpp \
-	Http.hpp
+	ChunkedReader.hpp
 
 lib_LTLIBRARIES = libhttp-server.la
 libhttp_server_la_SOURCES = \
@@ -49,8 +48,7 @@ libhttp_server_la_SOURCES = \
 	HttpServer.hpp \
 	HttpServer.cpp \
 	HttpClient.cpp \
-	ChunkedReader.cpp \
-	Http.hpp
+	ChunkedReader.cpp
 
 libhttp_server_la_CXXFLAGS = $(PTHREAD_CXXFLAGS) $(LIBOSLAYER_CFLAGS)
 libhttp_server_la_LIBADD = $(LIBOSLAYER_LIBS)

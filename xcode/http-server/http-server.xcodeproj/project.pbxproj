@@ -106,7 +106,6 @@
 		E8FAB23D1BD7D29800E89DC5 /* http_server.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = http_server.mm; sourceTree = "<group>"; };
 		E8FAB2451BD7D2CE00E89DC5 /* ChunkedReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChunkedReader.cpp; path = "../../libhttp-server/ChunkedReader.cpp"; sourceTree = "<group>"; };
 		E8FAB2461BD7D2CE00E89DC5 /* ChunkedReader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ChunkedReader.hpp; path = "../../libhttp-server/ChunkedReader.hpp"; sourceTree = "<group>"; };
-		E8FAB2471BD7D2CE00E89DC5 /* Http.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Http.hpp; path = "../../libhttp-server/Http.hpp"; sourceTree = "<group>"; };
 		E8FAB2481BD7D2CE00E89DC5 /* HttpClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpClient.cpp; path = "../../libhttp-server/HttpClient.cpp"; sourceTree = "<group>"; };
 		E8FAB2491BD7D2CE00E89DC5 /* HttpClient.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpClient.hpp; path = "../../libhttp-server/HttpClient.hpp"; sourceTree = "<group>"; };
 		E8FAB24A1BD7D2CE00E89DC5 /* HttpConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpConnection.cpp; path = "../../libhttp-server/HttpConnection.cpp"; sourceTree = "<group>"; };
@@ -193,7 +192,6 @@
 			children = (
 				E8FAB2451BD7D2CE00E89DC5 /* ChunkedReader.cpp */,
 				E8FAB2461BD7D2CE00E89DC5 /* ChunkedReader.hpp */,
-				E8FAB2471BD7D2CE00E89DC5 /* Http.hpp */,
 				E8FAB2481BD7D2CE00E89DC5 /* HttpClient.cpp */,
 				E8FAB2491BD7D2CE00E89DC5 /* HttpClient.hpp */,
 				E8FAB24A1BD7D2CE00E89DC5 /* HttpConnection.cpp */,

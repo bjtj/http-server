@@ -3,7 +3,18 @@
 
 #include <liboslayer/os.hpp>
 #include "MultiConn.hpp"
+
+#include "HttpParameter.hpp"
+#include "HttpHeader.hpp"
+#include "HttpHeaderParser.hpp"
+#include "HttpHeaderReader.hpp"
+#include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
+#include "OnHttpRequestHandler.hpp"
+#include "HttpConnection.hpp"
 #include "HttpProtocol.hpp"
+#include "HttpServer.hpp"
+#include "Url.hpp"
 
 namespace HTTP {
 
