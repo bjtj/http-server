@@ -11,7 +11,15 @@
 namespace HTTP {
 
 	class HttpClient;
-
+    
+    class HttpResponseDump {
+    private:
+    public:
+        HttpResponseDump();
+        virtual ~HttpResponseDump();
+        std::string dump(HttpHeader & responseHeader, OS::Socket & socket);
+    };
+    
 	/**
 	 * @brief http response handler
 	 * it'll be set to http client

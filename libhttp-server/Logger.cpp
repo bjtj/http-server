@@ -5,6 +5,17 @@
 namespace HTTP {
 
 	using namespace std;
+    
+    class SilentLogger : public Logger {
+        virtual void logd(const char * msg) {
+        }
+        virtual void logd(const string & msg) {
+        }
+        virtual void loge(const char * msg) {
+        }
+        virtual void loge(const string & msg) {
+        }
+    };
 
 	class VerboseLogger : public Logger {
 	public:
@@ -23,6 +34,7 @@ namespace HTTP {
 	};
 
 	VerboseLogger verboseLogger;
+    SilentLogger silentLogger;
 
 	Logger::Logger() {
 	}
@@ -31,7 +43,7 @@ namespace HTTP {
 	}
 
 	Logger & Logger::getLogger() {
-		return verboseLogger;
+		return silentLogger;
 	}	
 }
 

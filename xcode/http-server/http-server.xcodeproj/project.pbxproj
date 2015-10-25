@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E82789141BDCDFC30009E46A /* HttpClientThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E82789131BDCDFC30009E46A /* HttpClientThreadPool.cpp */; settings = {ASSET_TAGS = (); }; };
 		E8E0FEA91BD848EB00292C54 /* http_server.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB23D1BD7D29800E89DC5 /* http_server.mm */; };
 		E8E0FEAA1BD848EB00292C54 /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB25F1BD7D2CE00E89DC5 /* Logger.cpp */; settings = {ASSET_TAGS = (); }; };
 		E8E0FEAB1BD848EB00292C54 /* HttpHeaderReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2501BD7D2CE00E89DC5 /* HttpHeaderReader.cpp */; settings = {ASSET_TAGS = (); }; };
@@ -100,6 +101,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E82789111BDCDDA90009E46A /* HttpClientThreadPool.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpClientThreadPool.hpp; path = "../../libhttp-server/HttpClientThreadPool.hpp"; sourceTree = "<group>"; };
+		E82789131BDCDFC30009E46A /* HttpClientThreadPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpClientThreadPool.cpp; path = "../../libhttp-server/HttpClientThreadPool.cpp"; sourceTree = "<group>"; };
 		E8E0FEC01BD848EB00292C54 /* libhttp-server cocoa.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libhttp-server cocoa.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8FAB2381BD7D29800E89DC5 /* libhttp-server.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libhttp-server.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8FAB23B1BD7D29800E89DC5 /* http_server.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = http_server.h; sourceTree = "<group>"; };
@@ -190,6 +193,8 @@
 		E8FAB2441BD7D2A500E89DC5 /* http-server-c++ */ = {
 			isa = PBXGroup;
 			children = (
+				E82789131BDCDFC30009E46A /* HttpClientThreadPool.cpp */,
+				E82789111BDCDDA90009E46A /* HttpClientThreadPool.hpp */,
 				E8FAB2451BD7D2CE00E89DC5 /* ChunkedReader.cpp */,
 				E8FAB2461BD7D2CE00E89DC5 /* ChunkedReader.hpp */,
 				E8FAB2481BD7D2CE00E89DC5 /* HttpClient.cpp */,
@@ -357,6 +362,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E82789141BDCDFC30009E46A /* HttpClientThreadPool.cpp in Sources */,
 				E8FAB23E1BD7D29800E89DC5 /* http_server.mm in Sources */,
 				E8FAB2721BD7D2CE00E89DC5 /* Logger.cpp in Sources */,
 				E8FAB26B1BD7D2CE00E89DC5 /* HttpHeaderReader.cpp in Sources */,
