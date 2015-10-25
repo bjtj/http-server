@@ -15,6 +15,7 @@ namespace HTTP {
 		std::vector<std::pair<std::string, std::string> > params;
 
 	public:
+        Url();
 		Url(const char * urlStr);
 		Url(const std::string & urlStr);
 		virtual ~Url();

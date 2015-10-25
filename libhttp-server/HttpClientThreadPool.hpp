@@ -40,6 +40,7 @@ namespace HTTP {
      */
     class HttpClientThread : public OS::Thread {
     private:
+        HttpClient client;
         std::queue<HttpClientRequest> & requestQueue;
         OS::Semaphore & sem;
         
@@ -47,6 +48,7 @@ namespace HTTP {
         HttpClientThread(std::queue<HttpClientRequest> & requestQueue, OS::Semaphore & sem);
         virtual ~HttpClientThread();
         virtual void run();
+        HttpClient & getHttpClient();
     };
 
     /**
@@ -64,6 +66,7 @@ namespace HTTP {
 		HttpClientThreadPool(int max);
 		virtual ~HttpClientThreadPool();
         void setHttpResponseHandler(HttpResponseHandler * handler);
+        void setFollowRedirect(bool followRedirect);
         void request(Url & url, std::string & method, char * data, int len);
         void start();
         void stop();

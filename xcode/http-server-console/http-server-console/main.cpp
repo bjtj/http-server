@@ -9,6 +9,7 @@
 #include <iostream>
 #include <string>
 #include <libhttp-server/HttpClient.hpp>
+#include <libhttp-server/HttpClientThreadPool.hpp>
 
 using namespace HTTP;
 using namespace std;
@@ -24,12 +25,28 @@ public:
 
 int main(int argc, const char * argv[]) {
 
-    HttpClient client;
     Url url("http://www.google.com");
     MyHttpResponseHandler handler;
-    client.setFollowRedirect(true);
-    client.setHttpResponseHandler(&handler);
-    client.request(url);
+    
+//    HttpClient client;
+//    client.setFollowRedirect(true);
+//    client.setHttpResponseHandler(&handler);
+//    client.request(url);
+    
+    HttpClientThreadPool pool(5);
+    pool.setFollowRedirect(true);
+    pool.setHttpResponseHandler(&handler);
+    pool.start();
+    string method = "GET";
+    pool.request(url, method, NULL, 0);
+    pool.request(url, method, NULL, 0);
+    pool.request(url, method, NULL, 0);
+    pool.request(url, method, NULL, 0);
+    pool.request(url, method, NULL, 0);
+    
+    getchar();
+    
+    pool.stop();
     
     return 0;
 }

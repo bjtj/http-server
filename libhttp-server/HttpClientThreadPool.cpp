@@ -5,7 +5,7 @@ namespace HTTP {
     using namespace std;
     using namespace OS;
 	
-    HttpClientRequest::HttpClientRequest() : url(""), data(NULL), len(0) {
+    HttpClientRequest::HttpClientRequest() : data(NULL), len(0) {
     }
     
     HttpClientRequest::HttpClientRequest(Url & url, string & method, char * data, int len) :
@@ -56,19 +56,22 @@ namespace HTTP {
             HttpClientRequest req;
             sem.wait();
             empty = requestQueue.empty();
-            if (empty) {
+            if (!empty) {
                 req = requestQueue.front();
                 requestQueue.pop();
             }
             sem.post();
             
             if (!empty) {
-                HttpClient client;
                 client.request(req.getUrl(), req.getMethod(), req.getData(), req.getDataLength());
             } else {
                 idle(10);
             }
         }
+    }
+    
+    HttpClient & HttpClientThread::getHttpClient() {
+        return client;
     }
     
     
@@ -84,6 +87,16 @@ namespace HTTP {
     
     void HttpClientThreadPool::setHttpResponseHandler(HttpResponseHandler * handler) {
         this->handler = handler;
+        
+        for (size_t i = 0; i < pool.size(); i++) {
+            pool[i].getHttpClient().setHttpResponseHandler(handler);
+        }
+    }
+    
+    void HttpClientThreadPool::setFollowRedirect(bool followRedirect) {
+        for (size_t i = 0; i < pool.size(); i++) {
+            pool[i].getHttpClient().setFollowRedirect(followRedirect);
+        }
     }
     
     void HttpClientThreadPool::request(Url & url, string & method, char * data, int len) {

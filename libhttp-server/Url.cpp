@@ -9,6 +9,9 @@ namespace HTTP {
 
 	static Logger & logger = Logger::getLogger();
 
+    Url::Url() {
+    }
+    
 	Url::Url(const char * urlStr) {
 		parseUrlString(urlStr);
 	}
