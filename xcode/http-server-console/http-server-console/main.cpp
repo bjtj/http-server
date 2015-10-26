@@ -14,12 +14,12 @@
 using namespace HTTP;
 using namespace std;
 
-class MyHttpResponseHandler : public HttpResponseHandler {
+class MyHttpResponseHandler : public HttpResponseHandler<int> {
 public:
-    virtual void onResponse(HttpClient & httpClient, HttpHeader & responseHeader, OS::Socket & socket) {
+    virtual void onResponse(HttpClient<int> & httpClient, HttpHeader & responseHeader, OS::Socket & socket, int userData) {
         HttpResponseDump dump;
         string ret = dump.dump(responseHeader, socket);
-        cout << ret << endl;
+        cout << userData << ret << endl;
     }
 };
 
@@ -28,21 +28,22 @@ int main(int argc, const char * argv[]) {
     Url url("http://www.google.com");
     MyHttpResponseHandler handler;
     
-//    HttpClient client;
+//    HttpClient<int> client;
 //    client.setFollowRedirect(true);
 //    client.setHttpResponseHandler(&handler);
-//    client.request(url);
+//    client.request(url, 0);
     
-    HttpClientThreadPool pool(5);
+    HttpClientThreadPool<int> pool(5);
     pool.setFollowRedirect(true);
     pool.setHttpResponseHandler(&handler);
     pool.start();
     string method = "GET";
-    pool.request(url, method, NULL, 0);
-    pool.request(url, method, NULL, 0);
-    pool.request(url, method, NULL, 0);
-    pool.request(url, method, NULL, 0);
-    pool.request(url, method, NULL, 0);
+    int tag;
+    pool.request(url, method, NULL, 0, tag);
+    pool.request(url, method, NULL, 0, tag);
+    pool.request(url, method, NULL, 0, tag);
+    pool.request(url, method, NULL, 0, tag);
+    pool.request(url, method, NULL, 0, tag);
     
     getchar();
     

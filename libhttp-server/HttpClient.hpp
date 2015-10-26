@@ -2,6 +2,7 @@
 #define __HTTP_CLIENT_HPP__
 
 #include <liboslayer/os.hpp>
+#include <liboslayer/Text.hpp>
 #include <map>
 #include <string>
 #include "Url.hpp"
@@ -10,8 +11,12 @@
 
 namespace HTTP {
 
+    template <typename T>
 	class HttpClient;
     
+    /**
+     * @brief http response dump utility
+     */
     class HttpResponseDump {
     private:
     public:
@@ -24,22 +29,24 @@ namespace HTTP {
 	 * @brief http response handler
 	 * it'll be set to http client
 	 */
+    template <typename T>
 	class HttpResponseHandler {
 	private:
 	public:
 		HttpResponseHandler() {}
 		virtual ~HttpResponseHandler() {}
 
-		virtual void onResponse(HttpClient & httpClient, HttpHeader & responseHeader, OS::Socket & socket) = 0;
+		virtual void onResponse(HttpClient<T> & httpClient, HttpHeader & responseHeader, OS::Socket & socket, T t) = 0;
 	};
 
 	/**
 	 * @brief http client
 	 */
+    template <typename T>
 	class HttpClient {
 	private:
 		std::string httpProtocol;
-		HttpResponseHandler * responseHandler;
+		HttpResponseHandler<T> * responseHandler;
 		OS::Socket * socket;
 		std::map<std::string, std::string> defaultHeaderFields;
 		bool followRedirect;
@@ -49,12 +56,12 @@ namespace HTTP {
 		virtual ~HttpClient();
 
 		void setFollowRedirect(bool followRedirect);
-		void setHttpResponseHandler(HttpResponseHandler * responseHandler);
-		void request(Url & url);
-		void request(Url & url, std::string method, char * data, int len);
+		void setHttpResponseHandler(HttpResponseHandler<T> * responseHandler);
+		void request(Url & url, T userData);
+		void request(Url & url, std::string method, char * data, int len, T userData);
 		void request(Url & url, std::string method,
 					 std::map<std::string, std::string> & additionalHeaderFields,
-					 char * data, int len);
+					 char * data, int len, T userData);
 		OS::Socket *  connect(Url & url);
 		void disconnect(OS::Socket * socket);
 
@@ -73,6 +80,164 @@ namespace HTTP {
 								   char * data,
 								   int len);
 	};
+    
+    
+    template<typename T>
+    HttpClient<T>::HttpClient() : responseHandler(NULL), socket(NULL), followRedirect(false) {
+        httpProtocol = "HTTP/1.1";
+        defaultHeaderFields["User-Agent"] = "Cross-Platform/0.1 HTTP/1.1 HttpClient/0.1";
+    }
+    
+    template<typename T>
+    HttpClient<T>::~HttpClient() {
+    }
+    
+    template<typename T>
+    void HttpClient<T>::setFollowRedirect(bool followRedirect) {
+        this->followRedirect = followRedirect;
+    }
+    
+    template<typename T>
+    void HttpClient<T>::setHttpResponseHandler(HttpResponseHandler<T> * responseHandler) {
+        this->responseHandler = responseHandler;
+    }
+    
+    template<typename T>
+    void HttpClient<T>::request(Url & url, T userData) {
+        std::map<std::string, std::string> empty;
+        request(url, "GET", empty, NULL, 0, userData);
+    }
+    
+    template<typename T>
+    void HttpClient<T>::request(Url & url, std::string method, char * data, int len, T userData) {
+        std::map<std::string, std::string> empty;
+        request(url, method, empty, data, len, userData);
+    }
+    
+    template<typename T>
+    void HttpClient<T>::request(Url & url,
+                                std::string method,
+                                std::map<std::string, std::string> & additionalHeaderFields,
+                                char * data,
+                                int len,
+                                T userData) {
+        
+        if (!socket) {
+            
+            HttpHeader requestHeader =
+            makeRequestHeader(method, url.getPath(), httpProtocol, url.getAddress());
+            requestHeader.appendHeaderFields(additionalHeaderFields);
+            
+            socket = connect(url);
+            sendRequestPacket(*socket, requestHeader, data, len);
+            
+            HttpHeader responseHeader = readResponseHeader(*socket);
+            if (followRedirect && checkIf302(responseHeader)) {
+                responseHeader = processRedirect(*socket, requestHeader, responseHeader, data, len);
+            }
+            
+            if (responseHandler) {
+                responseHandler->onResponse(*this, responseHeader, *socket, userData);
+            }
+            disconnect(socket);
+            socket = NULL;
+        }
+    }
+    
+    template<typename T>
+    OS::Socket * HttpClient<T>::connect(Url & url) {
+        OS::Socket * socket = new OS::Socket(url.getHost().c_str(), url.getIntegerPort());
+        socket->connect();
+        return socket;
+    }
+    
+    template<typename T>
+    void HttpClient<T>::disconnect(OS::Socket * socket) {
+        socket->close();
+        delete socket;
+    }
+    
+    
+    template<typename T>
+    HttpHeader HttpClient<T>::makeRequestHeader(std::string method, std::string path, std::string protocol, std::string targetHost) {
+        HttpHeader header;
+        header.setPart1(method);
+        header.setPart2(path);
+        header.setPart3(protocol);
+        if (!targetHost.empty()) {
+            header.setHeaderField("Host", targetHost);
+        }
+        header.appendHeaderFields(defaultHeaderFields);
+        return header;
+    }
+    
+    template<typename T>
+    void HttpClient<T>::sendRequestPacket(OS::Socket & socket, HttpHeader & header, char * buffer, int len) {
+        header.setContentLength(len);
+        std::string headerStr = header.toString();
+        socket.send(headerStr.c_str(), headerStr.length());
+        if (buffer && len > 0) {
+            socket.send(buffer, len);
+        }
+    }
+    
+    template<typename T>
+    HttpHeader HttpClient<T>::readResponseHeader(OS::Socket & socket) {
+        HttpHeaderReader headerReader;
+        char buffer;
+        while (!headerReader.complete() && socket.recv(&buffer, 1) > 0) {
+            headerReader.read(&buffer, 1);
+        }
+        if (!headerReader.complete()) {
+            throw -1;
+        }
+        return headerReader.getHeader();
+    }
+    
+    template<typename T>
+    bool HttpClient<T>::checkIf302(HttpHeader & responseHeader) {
+        int statusCode = UTIL::Text::toInt(responseHeader.getPart2());
+        return (statusCode == 302);
+    }
+    
+    template<typename T>
+    int HttpClient<T>::consume(OS::Socket & socket, int length) {
+        char buffer[1024] = {0,};
+        int len;
+        int total = 0;
+        while ((len = socket.recv(buffer, sizeof(buffer))) > 0) {
+            std::string str(buffer, len);
+            total += len;
+            if (total >= length) {
+                break;
+            }
+        }
+        return total;
+    }
+    
+    template<typename T>
+    HttpHeader HttpClient<T>::processRedirect(OS::Socket & socket,
+                                              HttpHeader requestHeader,
+                                              HttpHeader responseHeader,
+                                              char * data,
+                                              int len) {
+        
+        while (checkIf302(responseHeader)) {
+            
+            std::string locStr = responseHeader["Location"];
+            Url loc(locStr);
+            int contentLength = responseHeader.getContentLength();
+            consume(socket, contentLength);
+            
+            std::string path = loc.getPath();
+            requestHeader.setPart2(path);
+            
+            requestHeader.setHeaderField("Host", loc.getAddress());
+            sendRequestPacket(socket, requestHeader, data, len);
+            responseHeader = readResponseHeader(socket);
+        }
+        return responseHeader;
+    }
 }
 
 #endif
