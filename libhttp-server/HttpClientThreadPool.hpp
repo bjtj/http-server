@@ -56,14 +56,14 @@ namespace HTTP {
      */
 	class HttpClientThreadPool {
 	private:
-		int max;
+		int maxThread;
         OS::Semaphore sem;
         std::queue<HttpClientRequest> requestQueue;
         HttpResponseHandler * handler;
         std::vector<HttpClientThread> pool;
         
 	public:
-		HttpClientThreadPool(int max);
+		HttpClientThreadPool(int maxThread);
 		virtual ~HttpClientThreadPool();
         void setHttpResponseHandler(HttpResponseHandler * handler);
         void setFollowRedirect(bool followRedirect);

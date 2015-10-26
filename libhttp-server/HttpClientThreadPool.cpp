@@ -75,8 +75,8 @@ namespace HTTP {
     }
     
     
-    HttpClientThreadPool::HttpClientThreadPool(int max) : max(max), sem(1), handler(NULL) {
-        for (int i = 0; i < max; i++) {
+    HttpClientThreadPool::HttpClientThreadPool(int maxThread) : maxThread(maxThread), sem(1), handler(NULL) {
+        for (int i = 0; i < maxThread; i++) {
             pool.push_back(HttpClientThread(requestQueue, sem));
         }
     }
