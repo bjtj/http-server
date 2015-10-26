@@ -1,54 +1,60 @@
 libhttp_serverincdir=${includedir}/libhttp-server
 libhttp_serverinc_HEADERS = \
-	Logger.hpp \
-	Url.hpp \
-	MultiConn.hpp \
-	HttpParameter.hpp \
+	ChunkedReader.hpp \
+	HttpClient.hpp \
+	HttpClientThreadPool.hpp \
+	HttpConnection.hpp \
 	HttpHeader.hpp \
 	HttpHeaderParser.hpp \
 	HttpHeaderReader.hpp \
+	HttpParameter.hpp \
+	HttpProtocol.hpp \
 	HttpRequest.hpp \
 	HttpResponse.hpp \
-	OnHttpRequestHandler.hpp \
-	HttpProtocol.hpp \
-	HttpStatusCodes.hpp \
-	HttpConnection.hpp \
 	HttpServer.hpp \
-	HttpClient.hpp \
-	ChunkedReader.hpp
+	HttpStatusCodes.hpp \
+	InetAddress.hpp \
+	Logger.hpp \
+	MultiConn.hpp \
+	OnHttpRequestHandler.hpp \
+	Url.hpp
 
 lib_LTLIBRARIES = libhttp-server.la
 libhttp_server_la_SOURCES = \
-	Logger.hpp \
-	Url.hpp \
-	MultiConn.hpp \
-	HttpParameter.hpp \
-	HttpHeader.hpp \
-	HttpHeaderParser.hpp \
-	HttpHeaderReader.hpp \
-	HttpRequest.hpp \
-	HttpRequest.cpp \
-	HttpResponse.hpp \
-	HttpResponse.cpp \
-	HttpProtocol.hpp \
-	HttpStatusCodes.hpp \
-	HttpConnection.hpp \
-	HttpClient.hpp \
+	ChunkedReader.cpp \
 	ChunkedReader.hpp \
-	Logger.cpp \
-	Url.cpp \
-	MultiConn.cpp \
-	HttpConnection.cpp \
-	HttpParameter.cpp \
-	HttpHeader.cpp \
-	HttpHeaderParser.cpp \
-	HttpHeaderReader.cpp \
-	HttpProtocol.cpp \
-	HttpStatusCodes.cpp \
-	HttpServer.hpp \
-	HttpServer.cpp \
 	HttpClient.cpp \
-	ChunkedReader.cpp
+	HttpClient.hpp \
+	HttpClientThreadPool.cpp \
+	HttpClientThreadPool.hpp \
+	HttpConnection.cpp \
+	HttpConnection.hpp \
+	HttpHeader.cpp \
+	HttpHeader.hpp \
+	HttpHeaderParser.cpp \
+	HttpHeaderParser.hpp \
+	HttpHeaderReader.cpp \
+	HttpHeaderReader.hpp \
+	HttpParameter.cpp \
+	HttpParameter.hpp \
+	HttpProtocol.cpp \
+	HttpProtocol.hpp \
+	HttpRequest.cpp \
+	HttpRequest.hpp \
+	HttpResponse.cpp \
+	HttpResponse.hpp \
+	HttpServer.cpp \
+	HttpServer.hpp \
+	HttpStatusCodes.cpp \
+	HttpStatusCodes.hpp \
+	InetAddress.hpp \
+	Logger.cpp \
+	Logger.hpp \
+	MultiConn.cpp \
+	MultiConn.hpp \
+	OnHttpRequestHandler.hpp \
+	Url.cpp \
+	Url.hpp
 
 libhttp_server_la_CXXFLAGS = $(PTHREAD_CXXFLAGS) $(LIBOSLAYER_CFLAGS)
 libhttp_server_la_LIBADD = $(LIBOSLAYER_LIBS)

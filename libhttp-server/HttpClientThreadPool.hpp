@@ -41,11 +41,11 @@ namespace HTTP {
     class HttpClientThread : public OS::Thread {
     private:
         HttpClient client;
-        std::queue<HttpClientRequest> & requestQueue;
-        OS::Semaphore & sem;
+        std::queue<HttpClientRequest> * requestQueue;
+        OS::Semaphore * sem;
         
     public:
-        HttpClientThread(std::queue<HttpClientRequest> & requestQueue, OS::Semaphore & sem);
+        HttpClientThread(std::queue<HttpClientRequest> * requestQueue, OS::Semaphore * sem);
         virtual ~HttpClientThread();
         virtual void run();
         HttpClient & getHttpClient();

@@ -8,8 +8,8 @@ namespace HTTP {
     HttpClientRequest::HttpClientRequest() : data(NULL), len(0) {
     }
     
-    HttpClientRequest::HttpClientRequest(Url & url, string & method, char * data, int len) :
-        url(url), method(method), data(data), len(len) {
+    HttpClientRequest::HttpClientRequest(Url & url, string & method, char * data, int len)
+		: url(url), method(method), data(data), len(len) {
 	}
 	HttpClientRequest::~HttpClientRequest() {
 	}
@@ -41,12 +41,11 @@ namespace HTTP {
     
     
     
-    HttpClientThread::HttpClientThread(std::queue<HttpClientRequest> & requestQueue, Semaphore & sem) : requestQueue(requestQueue), sem(sem) {
-        
+    HttpClientThread::HttpClientThread(queue<HttpClientRequest> * requestQueue, Semaphore * sem)
+		: requestQueue(requestQueue), sem(sem) {
     }
     
     HttpClientThread::~HttpClientThread() {
-        
     }
     
     void HttpClientThread::run() {
@@ -54,13 +53,13 @@ namespace HTTP {
         while (!interrupted()) {
             bool empty = false;
             HttpClientRequest req;
-            sem.wait();
-            empty = requestQueue.empty();
+            sem->wait();
+            empty = requestQueue->empty();
             if (!empty) {
-                req = requestQueue.front();
-                requestQueue.pop();
+                req = requestQueue->front();
+                requestQueue->pop();
             }
-            sem.post();
+            sem->post();
             
             if (!empty) {
                 client.request(req.getUrl(), req.getMethod(), req.getData(), req.getDataLength());
@@ -77,7 +76,7 @@ namespace HTTP {
     
     HttpClientThreadPool::HttpClientThreadPool(int maxThread) : maxThread(maxThread), sem(1), handler(NULL) {
         for (int i = 0; i < maxThread; i++) {
-            pool.push_back(HttpClientThread(requestQueue, sem));
+            pool.push_back(HttpClientThread(&requestQueue, &sem));
         }
     }
     

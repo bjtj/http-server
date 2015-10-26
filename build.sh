@@ -4,7 +4,7 @@ BASE=$PWD
 DIR_BUILD=$PWD/build
 DIR_WORLD=$PWD/world
 
-OPT=debug-install
+OPT=build
 
 if [ -n "$1" ]; then
 	OPT=$1
@@ -18,43 +18,33 @@ reconf() {
 	autoreconf -i
 }
 
-config_debug() {
-	clean
+build() {
 	mkdir -p $DIR_BUILD
 	mkdir -p $DIR_WORLD
 	cd $DIR_BUILD
-	$BASE/configure --prefix "$DIR_WORLD"
-}
-
-config_install() {
-	clean
-	mkdir -p $DIR_BUILD
-	cd $DIR_BUILD
-	$BASE/configure
-}
-
-debug_install() {
-	cd $DIR_BUILD
-	make && make install
+	$BASE/configure --prefix "$DIR_WORLD" && make && make install
 }
 
 install() {
+	clean
+	mkdir -p $DIR_BUILD
 	cd $DIR_BUILD
-	make && sudo make install
+	$BASE/configure && make && sudo make install
 }
 
 case $OPT in
 	reconf)
 		reconf
 		;;
-	config-debug)
-		config_debug
+	build)
+		build
 		;;
-	config-install)
-		config_install
+	all)
+		prepare
+		build
 		;;
-	debug-install)
-		debug_install
+	make)
+		cd $DIR_BUILD && make && make install
 		;;
 	install)
 		install
