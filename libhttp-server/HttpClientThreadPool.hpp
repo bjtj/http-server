@@ -193,6 +193,12 @@ namespace HTTP {
     }
     template <typename T>
     void HttpClientThreadPool<T>::stop() {
+        
+        sem.wait();
+        std::queue<HttpClientRequest<T> > empty;
+        std::swap(requestQueue, empty);
+        sem.post();
+        
         for (size_t i = 0; i < pool.size(); i++) {
             pool[i].interrupt();
             pool[i].join();
