@@ -45,11 +45,11 @@ namespace HTTP {
     class HttpClientThread : public OS::Thread {
     private:
         HttpClient<T> client;
-        std::queue<HttpClientRequest<T>> * requestQueue;
+        std::queue<HttpClientRequest<T> > * requestQueue;
         OS::Semaphore * sem;
         
     public:
-        HttpClientThread(std::queue<HttpClientRequest<T>> * requestQueue, OS::Semaphore * sem);
+        HttpClientThread(std::queue<HttpClientRequest<T> > * requestQueue, OS::Semaphore * sem);
         virtual ~HttpClientThread();
         virtual void run();
         HttpClient<T> & getHttpClient();
@@ -63,9 +63,9 @@ namespace HTTP {
 	private:
 		int maxThread;
         OS::Semaphore sem;
-        std::queue<HttpClientRequest<T>> requestQueue;
+        std::queue<HttpClientRequest<T> > requestQueue;
         HttpResponseHandler<T> * handler;
-        std::vector<HttpClientThread<T>> pool;
+        std::vector<HttpClientThread<T> > pool;
         
 	public:
 		HttpClientThreadPool(int maxThread);
@@ -120,7 +120,7 @@ namespace HTTP {
     
     
     template <typename T>
-    HttpClientThread<T>::HttpClientThread(std::queue<HttpClientRequest<T>> * requestQueue, OS::Semaphore * sem)
+    HttpClientThread<T>::HttpClientThread(std::queue<HttpClientRequest<T> > * requestQueue, OS::Semaphore * sem)
     : requestQueue(requestQueue), sem(sem) {
     }
     

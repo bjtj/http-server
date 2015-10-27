@@ -6,7 +6,7 @@
 using namespace std;
 using namespace HTTP;
 
-class MyResponseHandler : public HttpResponseHandler {
+class MyResponseHandler : public HttpResponseHandler<int> {
 private:
 public:
     MyResponseHandler() {
@@ -14,7 +14,8 @@ public:
     virtual ~MyResponseHandler() {
 	}
 
-	virtual void onResponse(HttpClient & httpClient, HttpHeader & responseHeader, OS::Socket & socket) {
+	virtual void onResponse(HttpClient<int> & httpClient, HttpHeader & responseHeader, OS::Socket & socket,
+							int userData) {
 
 		if (responseHeader.isChunkedTransfer()) {
 
@@ -98,9 +99,9 @@ void print_url(Url & url) {
 }
 
 void test_request(Url & url) {
-	HttpClient client;
+	HttpClient<int> client;
 	MyResponseHandler handler;
 	client.setHttpResponseHandler(&handler);
 	client.setFollowRedirect(true);
-	client.request(url);
+	client.request(url, 0);
 }
