@@ -116,8 +116,5 @@
     <ClCompile Include="..\libhttp-server\ChunkedReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\libhttp-server\HttpClientThreadPool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

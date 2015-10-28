@@ -33,7 +33,6 @@
   <ItemGroup>
     <ClCompile Include="..\libhttp-server\ChunkedReader.cpp" />
     <ClCompile Include="..\libhttp-server\HttpClient.cpp" />
-    <ClCompile Include="..\libhttp-server\HttpClientThreadPool.cpp" />
     <ClCompile Include="..\libhttp-server\HttpConnection.cpp" />
     <ClCompile Include="..\libhttp-server\HttpHeader.cpp" />
     <ClCompile Include="..\libhttp-server\HttpHeaderParser.cpp" />
