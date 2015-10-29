@@ -77,6 +77,10 @@ namespace HTTP {
         void stop();
 	};
     
+
+	/**
+	 * @brief Http Client Request
+	 */
     
     template <typename T>
     HttpClientRequest<T>::HttpClientRequest() : data(NULL), len(0) {
@@ -118,6 +122,9 @@ namespace HTTP {
         return userData;
     }
     
+	/**
+	 * @brief Http Client Thread
+	 */
     
     template <typename T>
     HttpClientThread<T>::HttpClientThread(std::queue<HttpClientRequest<T> > * requestQueue, OS::Semaphore * sem)
@@ -154,6 +161,10 @@ namespace HTTP {
     HttpClient<T> & HttpClientThread<T>::getHttpClient() {
         return client;
     }
+
+	/**
+	 * @brief Http Client Thread Pool
+	 */
     
     template <typename T>
     HttpClientThreadPool<T>::HttpClientThreadPool(int maxThread) : maxThread(maxThread), sem(1), handler(NULL) {

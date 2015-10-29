@@ -55,6 +55,8 @@ namespace HTTP {
 		HttpClient();
 		virtual ~HttpClient();
 
+		OS::Socket *  connect(Url & url);
+		void disconnect();
 		void setFollowRedirect(bool followRedirect);
 		void setHttpResponseHandler(HttpResponseHandler<T> * responseHandler);
 		void request(Url & url, T userData);
@@ -62,10 +64,9 @@ namespace HTTP {
 		void request(Url & url, std::string method,
 					 std::map<std::string, std::string> & additionalHeaderFields,
 					 char * data, int len, T userData);
-		OS::Socket *  connect(Url & url);
-		void disconnect(OS::Socket * socket);
 
 	private:
+		void disconnect(OS::Socket * socket);
 		HttpHeader makeRequestHeader(std::string method,
 									 std::string path,
 									 std::string protocol,
@@ -90,6 +91,29 @@ namespace HTTP {
     
     template<typename T>
     HttpClient<T>::~HttpClient() {
+    }
+
+	template<typename T>
+    OS::Socket * HttpClient<T>::connect(Url & url) {
+        OS::Socket * socket = new OS::Socket(url.getHost().c_str(), url.getIntegerPort());
+        socket->connect();
+        return socket;
+    }
+
+	template<typename T>
+    void HttpClient<T>::disconnect() {
+		if (this->socket) {
+			this->socket->close();
+			delete socket;
+		}
+    }
+    
+    template<typename T>
+    void HttpClient<T>::disconnect(OS::Socket * socket) {
+		if (socket) {
+			socket->close();
+			delete socket;
+		}
     }
     
     template<typename T>
@@ -143,20 +167,6 @@ namespace HTTP {
             socket = NULL;
         }
     }
-    
-    template<typename T>
-    OS::Socket * HttpClient<T>::connect(Url & url) {
-        OS::Socket * socket = new OS::Socket(url.getHost().c_str(), url.getIntegerPort());
-        socket->connect();
-        return socket;
-    }
-    
-    template<typename T>
-    void HttpClient<T>::disconnect(OS::Socket * socket) {
-        socket->close();
-        delete socket;
-    }
-    
     
     template<typename T>
     HttpHeader HttpClient<T>::makeRequestHeader(std::string method, std::string path, std::string protocol, std::string targetHost) {

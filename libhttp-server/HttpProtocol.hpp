@@ -30,6 +30,8 @@ namespace HTTP {
 		std::map<std::string, OnHttpRequestHandler*, vpath_comp> handlers;
 		HttpRequest * request;
 		HttpResponse * response;
+		std::string page404;
+		std::string page500;
 		
 	public:
 		HttpProtocol();
@@ -44,6 +46,9 @@ namespace HTTP {
 		OnHttpRequestHandler * getHandler(std::string path);
 
 		virtual void onRequest(HttpRequest & request, HttpResponse & response);
+
+		void setPage404(const std::string & html);
+		void setPage500(const std::string & html);
 	};
 }
 

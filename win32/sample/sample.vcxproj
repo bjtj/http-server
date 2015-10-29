@@ -75,11 +75,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="..\..\examples\HttpServer.cpp" />
+    <ClCompile Include="main.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\oslayer\win32\oslayer.vcxproj">
+      <Project>{62f62888-b617-d1c5-dd02-0cc27e78a455}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\http-server.vcxproj">
-      <Project>{a8ae25bb-c71f-a261-60d4-5a82f496550a}</Project>
+      <Project>{a86aea6e-750b-7c94-4188-77b9d2fcd973}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,11 +1,10 @@
 #include <iostream>
-#include <libhttp-server/Http.hpp>
 #include <libhttp-server/HttpClient.hpp>
 
 using namespace std;
 using namespace HTTP;
 
-class MyResponseHandler : public HttpResponseHandler {
+class MyResponseHandler : public HttpResponseHandler<int> {
 private:
 public:
     MyResponseHandler() {
@@ -13,7 +12,7 @@ public:
     virtual ~MyResponseHandler() {
 	}
 
-	virtual void onResponse(HttpClient & httpClient, HttpHeader & responseHeader, OS::Socket & socket) {
+	virtual void onResponse(HttpClient<int> & httpClient, HttpHeader & responseHeader, OS::Socket & socket, int userData) {
 		int total = 0;
 		char buffer[1024] = {0,};
 		int len;
@@ -76,9 +75,9 @@ void print_url(Url & url) {
 }
 
 void test_request(Url & url) {
-	HttpClient client;
+	HttpClient<int> client;
 	MyResponseHandler handler;
 	client.setHttpResponseHandler(&handler);
 	client.setFollowRedirect(true);
-	client.request(url);
+	client.request(url, 0);
 }
