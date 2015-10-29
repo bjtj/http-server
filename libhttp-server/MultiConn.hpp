@@ -63,7 +63,7 @@ namespace HTTP {
 		OnConnectListener() {}
 		virtual ~OnConnectListener() {}
 
-		virtual void onConnect(MultiConn & server, ClientSession & client) = 0;
+		virtual void onClientConnect(MultiConn & server, ClientSession & client) = 0;
 	};
 
 	/**
@@ -74,7 +74,7 @@ namespace HTTP {
 		OnReceiveListener() {}
 		virtual ~OnReceiveListener() {}
 
-		virtual void onReceive(MultiConn & server, ClientSession & client, Packet & packet) = 0;
+		virtual void onClientReceive(MultiConn & server, ClientSession & client, Packet & packet) = 0;
 	};
 
 	/**
@@ -85,7 +85,7 @@ namespace HTTP {
 		OnDisconnectListener() {}
 		virtual ~OnDisconnectListener() {}
 
-		virtual void onDisconnect(MultiConn & server, ClientSession & client) = 0;
+		virtual void onClientDisconnect(MultiConn & server, ClientSession & client) = 0;
 	};
 
 	/**
@@ -97,9 +97,9 @@ namespace HTTP {
 	public:
         MultiConnProtocol() {}
 		virtual ~MultiConnProtocol() {}
-		virtual void onConnect(MultiConn & server, ClientSession & client) = 0;
-		virtual void onReceive(MultiConn & server, ClientSession & client, Packet & packet) = 0;
-		virtual void onDisconnect(MultiConn & server, ClientSession & client) = 0;
+		virtual void onClientConnect(MultiConn & server, ClientSession & client) = 0;
+		virtual void onClientReceive(MultiConn & server, ClientSession & client, Packet & packet) = 0;
+		virtual void onClientDisconnect(MultiConn & server, ClientSession & client) = 0;
 	};
 
 
@@ -121,12 +121,12 @@ namespace HTTP {
 		virtual void stop() = 0;
 		virtual bool isRunning() = 0;
 
-		virtual bool isDisconnected(ClientSession & client) = 0;
+		virtual bool isClientDisconnected(ClientSession & client) = 0;
 		virtual void disconnect(ClientSession & client) = 0;
 
-		virtual void onConnect(ClientSession & client);
-		virtual void onReceive(ClientSession & client, Packet & packet);
-		virtual void onDisconnect(ClientSession & client);
+		virtual void onClientConnect(ClientSession & client);
+		virtual void onClientReceive(ClientSession & client, Packet & packet);
+		virtual void onClientDisconnect(ClientSession & client);
 
 		void setOnConnectListener(OnConnectListener * onConnectListener);
 		void setOnReceiveListener(OnReceiveListener * onReceiveListener);
@@ -156,12 +156,12 @@ namespace HTTP {
 		virtual void stop();
 		virtual bool isRunning();
 
-		virtual bool isDisconnected(ClientSession & client);
+		virtual bool isClientDisconnected(ClientSession & client);
 		virtual void disconnect(ClientSession & client);
 
-		virtual void onConnect(ClientSession & client);
-		virtual void onReceive(ClientSession & client, Packet & packet);
-		virtual void onDisconnect(ClientSession & client);
+		virtual void onClientConnect(ClientSession & client);
+		virtual void onClientReceive(ClientSession & client, Packet & packet);
+		virtual void onClientDisconnect(ClientSession & client);
 	};
 
 	/**
@@ -201,12 +201,12 @@ namespace HTTP {
 
 		void releaseInvalidThreads();
 
-		virtual bool isDisconnected(ClientSession & client);
+		virtual bool isClientDisconnected(ClientSession & client);
 		virtual void disconnect(ClientSession & client);
 
-		virtual void onConnect(ClientSession & client);
-		virtual void onReceive(ClientSession & client, Packet & packet);
-		virtual void onDisconnect(ClientSession & client);
+		virtual void onClientConnect(ClientSession & client);
+		virtual void onClientReceive(ClientSession & client, Packet & packet);
+		virtual void onClientDisconnect(ClientSession & client);
 	};
 
 }

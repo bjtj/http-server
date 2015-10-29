@@ -53,6 +53,7 @@ namespace HTTP {
         virtual ~HttpClientThread();
         virtual void run();
         HttpClient<T> & getHttpClient();
+        void disconnect();
     };
 
     /**
@@ -150,7 +151,14 @@ namespace HTTP {
             sem->post();
             
             if (!empty) {
-                client.request(req.getUrl(), req.getMethod(), req.getData(), req.getDataLength(), req.getUserData());
+                
+                try {
+                    client.request(req.getUrl(), req.getMethod(),
+                                   req.getData(), req.getDataLength(),
+                                   req.getUserData());
+                } catch (OS::IOException e) {
+                }
+                
             } else {
                 OS::idle(10);
             }
@@ -160,6 +168,11 @@ namespace HTTP {
     template <typename T>
     HttpClient<T> & HttpClientThread<T>::getHttpClient() {
         return client;
+    }
+    
+    template <typename T>
+    void HttpClientThread<T>::disconnect() {
+        client.disconnect();
     }
 
 	/**
@@ -211,7 +224,11 @@ namespace HTTP {
         sem.post();
         
         for (size_t i = 0; i < pool.size(); i++) {
+            pool[i].disconnect();
             pool[i].interrupt();
+        }
+        
+        for (size_t i = 0; i < pool.size(); i++) {
             pool[i].join();
         }
     }

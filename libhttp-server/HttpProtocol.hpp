@@ -5,6 +5,8 @@
 #include <string>
 #include <map>
 
+#include <liboslayer/os.hpp>
+
 #include "MultiConn.hpp"
 #include "HttpHeader.hpp"
 #include "OnHttpRequestHandler.hpp"
@@ -26,6 +28,8 @@ namespace HTTP {
 	 */
 	class HttpProtocol : public MultiConnProtocol, public OnHttpRequestHandler {
 	private:
+        OS::Semaphore handlerSem;
+        OS::Semaphore connSem;
 		std::map<int, HttpConnection*> conns;
 		std::map<std::string, OnHttpRequestHandler*, vpath_comp> handlers;
 		HttpRequest * request;
@@ -37,9 +41,9 @@ namespace HTTP {
 		HttpProtocol();
 		virtual ~HttpProtocol();
 
-		virtual void onConnect(MultiConn & server, ClientSession & client);
-		virtual void onReceive(MultiConn & server, ClientSession & client, Packet & packet);
-		virtual void onDisconnect(MultiConn & server, ClientSession & client);
+		virtual void onClientConnect(MultiConn & server, ClientSession & client);
+		virtual void onClientReceive(MultiConn & server, ClientSession & client, Packet & packet);
+		virtual void onClientDisconnect(MultiConn & server, ClientSession & client);
 
 		std::string pathOnly(std::string unclearPath);
 		void vpath(std::string path, OnHttpRequestHandler * handler);

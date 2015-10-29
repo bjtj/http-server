@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E82789221BDCED880009E46A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E82789211BDCED880009E46A /* main.cpp */; };
-		E82789341BDCEDB70009E46A /* libhttp-server cocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E82789311BDCED9C0009E46A /* libhttp-server cocoa.a */; };
+		E82789341BDCEDB70009E46A /* libhttp-server-cocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E82789311BDCED9C0009E46A /* libhttp-server-cocoa.a */; };
 		E82789401BDCEE130009E46A /* liboslayer-cocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E827893D1BDCEE050009E46A /* liboslayer-cocoa.a */; };
+		E857BB031BE2A2E900D2022F /* HttpServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E857BAEE1BE246E600D2022F /* HttpServer.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +74,7 @@
 		E82789211BDCED880009E46A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E82789281BDCED9C0009E46A /* http-server.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "http-server.xcodeproj"; path = "../http-server/http-server.xcodeproj"; sourceTree = "<group>"; };
 		E82789351BDCEE050009E46A /* oslayer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oslayer.xcodeproj; path = ../../../oslayer/xcode/oslayer/oslayer.xcodeproj; sourceTree = "<group>"; };
+		E857BAEE1BE246E600D2022F /* HttpServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpServer.cpp; path = ../../../examples/HttpServer.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,7 +83,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E82789401BDCEE130009E46A /* liboslayer-cocoa.a in Frameworks */,
-				E82789341BDCEDB70009E46A /* libhttp-server cocoa.a in Frameworks */,
+				E82789341BDCEDB70009E46A /* libhttp-server-cocoa.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,6 +112,7 @@
 			isa = PBXGroup;
 			children = (
 				E82789211BDCED880009E46A /* main.cpp */,
+				E857BAEE1BE246E600D2022F /* HttpServer.cpp */,
 			);
 			path = "http-server-console";
 			sourceTree = "<group>";
@@ -119,7 +121,7 @@
 			isa = PBXGroup;
 			children = (
 				E827892F1BDCED9C0009E46A /* libhttp-server.a */,
-				E82789311BDCED9C0009E46A /* libhttp-server cocoa.a */,
+				E82789311BDCED9C0009E46A /* libhttp-server-cocoa.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -204,10 +206,10 @@
 			remoteRef = E827892E1BDCED9C0009E46A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		E82789311BDCED9C0009E46A /* libhttp-server cocoa.a */ = {
+		E82789311BDCED9C0009E46A /* libhttp-server-cocoa.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libhttp-server cocoa.a";
+			path = "libhttp-server-cocoa.a";
 			remoteRef = E82789301BDCED9C0009E46A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -232,7 +234,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E82789221BDCED880009E46A /* main.cpp in Sources */,
+				E857BB031BE2A2E900D2022F /* HttpServer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

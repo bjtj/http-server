@@ -44,6 +44,7 @@ public:
 			idle(t);
 			response.write("LATE - " + timeout);
 			response.setComplete();
+            
 		}
 	}
 };
@@ -56,9 +57,13 @@ public:
 	RequestThread() {}
 	virtual ~RequestThread() {}
 	virtual void run() {
-		printf("start\n");
-		client.request(url, "GET", NULL, 0, 0);
-		printf("done\n");
+		printf("Request Start\n");
+        try {
+            client.request(url, "GET", NULL, 0, 0);
+        } catch (IOException e) {
+            cout << e.getMessage() << endl;
+        }
+		printf("Request Done\n");
 	}
 
 	void setUrl(string urlString) {
@@ -71,7 +76,7 @@ public:
 };
 
 size_t readline(char * buffer, size_t max) {
-	fgets(buffer, max - 1, stdin);
+	fgets(buffer, (int)max - 1, stdin);
 	buffer[strlen(buffer) - 1] = 0;
 	return strlen(buffer);
 }
@@ -97,7 +102,7 @@ int main(int argc, char *args[]) {
 		}
 
 		if (!strcmp(buffer, "r")) {
-			rt.setUrl("http://localhost:8082/late?timeout=60000");
+			rt.setUrl("http://127.0.0.1:8082/late?timeout=10000");
 			rt.start();
 		}
 

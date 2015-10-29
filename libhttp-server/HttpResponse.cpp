@@ -66,8 +66,10 @@ namespace HTTP {
 	void HttpResponse::setComplete() {
 		if (!complete) {
 			setContentLength((int)content.length());
-			sendHeaderOnce();
-			sendContent();
+            try {
+                sendHeaderOnce();
+                sendContent();
+            } catch (OS::IOException e) {}
 			complete = true;
 		}
 	}

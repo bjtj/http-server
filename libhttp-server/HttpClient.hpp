@@ -45,6 +45,7 @@ namespace HTTP {
     template <typename T>
 	class HttpClient {
 	private:
+        OS::Semaphore sem;
 		std::string httpProtocol;
 		HttpResponseHandler<T> * responseHandler;
 		OS::Socket * socket;
@@ -84,7 +85,7 @@ namespace HTTP {
     
     
     template<typename T>
-    HttpClient<T>::HttpClient() : responseHandler(NULL), socket(NULL), followRedirect(false) {
+    HttpClient<T>::HttpClient() : sem(1), responseHandler(NULL), socket(NULL), followRedirect(false) {
         httpProtocol = "HTTP/1.1";
         defaultHeaderFields["User-Agent"] = "Cross-Platform/0.1 HTTP/1.1 HttpClient/0.1";
     }
@@ -102,10 +103,10 @@ namespace HTTP {
 
 	template<typename T>
     void HttpClient<T>::disconnect() {
-		if (this->socket) {
-			this->socket->close();
-			delete socket;
-		}
+        sem.wait();
+        disconnect(this->socket);
+        this->socket = NULL;
+        sem.post();
     }
     
     template<typename T>
@@ -139,6 +140,18 @@ namespace HTTP {
     }
     
     template<typename T>
+    class AutoDisconnect {
+    private:
+        HttpClient<T> * client;
+    public:
+        AutoDisconnect(HttpClient<T> * client) : client(client) {
+        }
+        virtual ~AutoDisconnect() {
+            client->disconnect();
+        }
+    };
+    
+    template<typename T>
     void HttpClient<T>::request(Url & url,
                                 std::string method,
                                 std::map<std::string, std::string> & additionalHeaderFields,
@@ -153,6 +166,8 @@ namespace HTTP {
             requestHeader.appendHeaderFields(additionalHeaderFields);
             
             socket = connect(url);
+            AutoDisconnect<T> autoDisconnect(this);
+            
             sendRequestPacket(*socket, requestHeader, data, len);
             
             HttpHeader responseHeader = readResponseHeader(*socket);
@@ -163,8 +178,6 @@ namespace HTTP {
             if (responseHandler) {
                 responseHandler->onResponse(*this, responseHeader, *socket, userData);
             }
-            disconnect(socket);
-            socket = NULL;
         }
     }
     
@@ -195,7 +208,8 @@ namespace HTTP {
     HttpHeader HttpClient<T>::readResponseHeader(OS::Socket & socket) {
         HttpHeaderReader headerReader;
         char buffer;
-        while (!headerReader.complete() && socket.recv(&buffer, 1) > 0) {
+        int len;
+        while (!headerReader.complete() && (len = socket.recv(&buffer, 1)) > 0) {
             headerReader.read(&buffer, 1);
         }
         if (!headerReader.complete()) {

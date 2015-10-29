@@ -7,13 +7,14 @@
 namespace HTTP {
 
 	using namespace std;
+    using namespace OS;
 	using namespace UTIL;
 
 	
 	/**
 	 * @brief http connection constructor
 	 */
-	HttpConnection::HttpConnection(OnHttpRequestHandler * handler)
+    HttpConnection::HttpConnection(OnHttpRequestHandler * handler)
 		: OnHttpRequestHandlerDecorator(handler), request(NULL), response(NULL) {
 	}
 	HttpConnection::~HttpConnection() {
@@ -21,11 +22,11 @@ namespace HTTP {
 		releaseResponse();
 	}
 
-	void HttpConnection::onConnect(MultiConn & server, ClientSession & client) {
+	void HttpConnection::onClientConnect(MultiConn & server, ClientSession & client) {
 		client.setBufferSize(1);
 	}
 
-	void HttpConnection::onReceive(MultiConn & server, ClientSession & client, Packet & packet) {
+	void HttpConnection::onClientReceive(MultiConn & server, ClientSession & client, Packet & packet) {
 
 		if (!headerReader.complete()) {
 			headerReader.read(packet.getBuffer(), (int)packet.size());
@@ -39,12 +40,12 @@ namespace HTTP {
 			onRequest(*request, *response);
 
 			if (response->hasComplete()) {
-				server.disconnect(client);
-			}
+                client.getSocket()->close();
+            }
 		}
 	}
 
-	void HttpConnection::onDisconnect(MultiConn & server, ClientSession & client) {
+	void HttpConnection::onClientDisconnect(MultiConn & server, ClientSession & client) {
 	}
 
 	void HttpConnection::prepareRequestAndResponse(ClientSession & client) {

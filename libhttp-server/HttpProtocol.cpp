@@ -1,5 +1,4 @@
 #include <liboslayer/Text.hpp>
-
 #include "HttpProtocol.hpp"
 #include "HttpStatusCodes.hpp"
 
@@ -7,11 +6,12 @@ namespace HTTP {
 
 	using namespace std;
 	using namespace UTIL;
+    using namespace OS;
 
 	/**
 	 * @brief http protocol
 	 */
-	HttpProtocol::HttpProtocol() {
+    HttpProtocol::HttpProtocol() : handlerSem(1), connSem(1) {
 		string msg404 = HttpStatusCodes::getMessage(404);
 		string msg500 = HttpStatusCodes::getMessage(500);
 		page404 = "<!DOCTYPE html><html><head><title>404 " + msg404 + "</title></head><body><h1>404 " + msg404 + "</h1><p>Page Not Found...</p></body></html>";
@@ -20,27 +20,35 @@ namespace HTTP {
 	HttpProtocol::~HttpProtocol() {
 	}
 	
-	void HttpProtocol::onConnect(MultiConn & server, ClientSession & client) {
+	void HttpProtocol::onClientConnect(MultiConn & server, ClientSession & client) {
+        
+        AutoLock lock(connSem);
+        
 		HttpConnection * conn = new HttpConnection(this);
 		conns[client.getId()] = conn;
 
-		conn->onConnect(server, client);
+		conn->onClientConnect(server, client);
 	}
 
-	void HttpProtocol::onReceive(MultiConn & server, ClientSession & client, Packet & packet) {
+	void HttpProtocol::onClientReceive(MultiConn & server, ClientSession & client, Packet & packet) {
+        
+        AutoLock lock(connSem);
+       
 		HttpConnection * conn = conns[client.getId()];
 		if (conn) {
-			conn->onReceive(server, client, packet);
+			conn->onClientReceive(server, client, packet);
 		}
 	}
 
-	void HttpProtocol::onDisconnect(MultiConn & server, ClientSession & client) {
+	void HttpProtocol::onClientDisconnect(MultiConn & server, ClientSession & client) {
 
+        AutoLock lock(connSem);
+        
 		HttpConnection * conn = conns[client.getId()];
-
-		conn->onDisconnect(server, client);
-		
-		delete conn;
+        if (conn) {
+            conn->onClientDisconnect(server, client);
+            delete conn;
+        }
 		conns.erase(client.getId());
 	}
 	
@@ -53,6 +61,9 @@ namespace HTTP {
 	}
 	
 	void HttpProtocol::vpath(string path, OnHttpRequestHandler * handler) {
+        
+        AutoLock lock(handlerSem);
+        
 		if (!handler) {
 			handlers.erase(path);
 		} else {
@@ -63,6 +74,9 @@ namespace HTTP {
 	OnHttpRequestHandler * HttpProtocol::getHandler(string path) {
 		map<string, OnHttpRequestHandler*, vpath_comp>::iterator iter;
 		string p = pathOnly(path);
+        
+        AutoLock lock(handlerSem);
+        
 		for (iter = handlers.begin(); iter != handlers.end(); iter++) {
 			if (Text::match(iter->first, p)) {
 				return iter->second;

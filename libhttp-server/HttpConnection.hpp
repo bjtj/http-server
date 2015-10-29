@@ -25,12 +25,12 @@ namespace HTTP {
 		HttpHeaderReader headerReader;
 		
 	public:
-		HttpConnection(OnHttpRequestHandler * handler);
+        HttpConnection(OnHttpRequestHandler * handler);
 		virtual ~HttpConnection();
 
-		virtual void onConnect(MultiConn & server, ClientSession & client);
-		virtual void onReceive(MultiConn & server, ClientSession & client, Packet & packet);
-		virtual void onDisconnect(MultiConn & server, ClientSession & client);
+		virtual void onClientConnect(MultiConn & server, ClientSession & client);
+		virtual void onClientReceive(MultiConn & server, ClientSession & client, Packet & packet);
+		virtual void onClientDisconnect(MultiConn & server, ClientSession & client);
 
 		void prepareRequestAndResponse(ClientSession & client);
 
