@@ -22,7 +22,7 @@ namespace HTTP {
     public:
         HttpResponseDump();
         virtual ~HttpResponseDump();
-        std::string dump(HttpHeader & responseHeader, OS::Socket & socket);
+        static std::string dump(HttpHeader & responseHeader, OS::Socket & socket);
     };
     
 	/**
@@ -36,7 +36,7 @@ namespace HTTP {
 		HttpResponseHandler() {}
 		virtual ~HttpResponseHandler() {}
 
-		virtual void onResponse(HttpClient<T> & httpClient, HttpHeader & responseHeader, OS::Socket & socket, T t) = 0;
+		virtual void onResponse(HttpClient<T> & httpClient, HttpHeader & responseHeader, OS::Socket & socket, T userData) = 0;
 	};
 
 	/**

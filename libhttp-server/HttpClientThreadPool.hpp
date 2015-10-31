@@ -26,7 +26,7 @@ namespace HTTP {
         
     public:
         HttpClientRequest();
-        HttpClientRequest(Url & url, std::string & method, char * data, int len, T userData);
+        HttpClientRequest(const Url & url, const std::string & method, char * data, int len, T userData);
         virtual ~HttpClientRequest();
         
         Url & getUrl();
@@ -73,7 +73,7 @@ namespace HTTP {
 		virtual ~HttpClientThreadPool();
         void setHttpResponseHandler(HttpResponseHandler<T> * handler);
         void setFollowRedirect(bool followRedirect);
-        void request(Url & url, std::string & method, char * data, int len, T userData);
+        void request(const Url & url, const std::string & method, char * data, int len, T userData);
         void start();
         void stop();
 	};
@@ -87,7 +87,7 @@ namespace HTTP {
     HttpClientRequest<T>::HttpClientRequest() : data(NULL), len(0) {
     }
     template <typename T>
-    HttpClientRequest<T>::HttpClientRequest(Url & url, std::string & method, char * data, int len, T userData)
+    HttpClientRequest<T>::HttpClientRequest(const Url & url, const std::string & method, char * data, int len, T userData)
     : url(url), method(method), data(data), len(len), userData(userData) {
     }
     template <typename T>
@@ -204,7 +204,7 @@ namespace HTTP {
         }
     }
     template <typename T>
-    void HttpClientThreadPool<T>::request(Url & url, std::string & method, char * data, int len, T userData) {
+    void HttpClientThreadPool<T>::request(const Url & url, const std::string & method, char * data, int len, T userData) {
         sem.wait();
         requestQueue.push(HttpClientRequest<T>(url, method, data, len, userData));
         sem.post();
