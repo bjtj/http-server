@@ -41,6 +41,7 @@ namespace HTTP {
 
 		std::string getAddress();
 
+        std::string enoughPath(const std::string & path);
 		virtual std::string toString();
 
 		Url& operator=(const std::string & urlStr);

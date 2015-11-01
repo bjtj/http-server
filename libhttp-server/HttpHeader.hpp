@@ -21,7 +21,7 @@ namespace HTTP {
 		std::string part1;
 		std::string part2;
 		std::string part3;
-		std::map<std::string, std::string> fields;
+		mutable std::map<std::string, std::string> fields;
 		std::map<std::string, HttpParameter> params;
 		
 	public:
@@ -43,8 +43,8 @@ namespace HTTP {
 
 		std::string makeFirstLine();
 		
-		virtual std::string getHeaderField(std::string name);
-		virtual std::string getHeaderFieldIgnoreCase(std::string name);
+		virtual std::string & getHeaderField(const std::string & name) const;
+		virtual std::string & getHeaderFieldIgnoreCase(const std::string & name) const;
 		virtual int getHeaderFieldAsInteger(std::string name);
 		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name);
 		virtual void setHeaderField(std::string name, std::string value);
@@ -67,7 +67,7 @@ namespace HTTP {
 
 		virtual std::string toString();
 
-		std::string operator[] (const std::string & headerFieldName);
+		std::string operator[] (const std::string & headerFieldName) const;
 	};
 
 	/**

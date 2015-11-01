@@ -6,6 +6,7 @@
 namespace HTTP {
 
 	using namespace std;
+    using namespace UTIL;
 
 	static Logger & logger = Logger::getLogger();
 
@@ -110,6 +111,13 @@ namespace HTTP {
 	string Url::getAddress() {
 		return host + (port.empty() ? "" : ":" + port);
 	}
+    
+    string Url::enoughPath(const string & path) {
+        if (Text::startsWith(this->path, path)) {
+            return this->path.substr(path.length());
+        }
+        return this->path;
+    }
 
 	string Url::toString() {
 		string p;
@@ -118,7 +126,7 @@ namespace HTTP {
 			p = "?" + p;
 		}
 
-		return scheme + "://" + host + ":" + port + "/" + path + p;
+		return scheme + "://" + host + ":" + port + "/" + enoughPath("/") + p;
 	}
 
 	Url& Url::operator=(const char * urlStr) {

@@ -54,16 +54,16 @@ namespace HTTP {
 	string HttpHeader::makeFirstLine() {
 		return (part1 + " " + part2 + " " + part3);
 	}
-	string HttpHeader::getHeaderField(string name) {
+	string & HttpHeader::getHeaderField(const string & name) const {
 		return fields[name];
 	}
-	string HttpHeader::getHeaderFieldIgnoreCase(string name) {
+	string & HttpHeader::getHeaderFieldIgnoreCase(const string & name) const {
 		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
 			if (Text::equalsIgnoreCase(iter->first, name)) {
 				return iter->second;
 			}
 		}
-		return "";
+		return fields[name];
 	}
 	int HttpHeader::getHeaderFieldAsInteger(string name) {
 		return Text::toInt(getHeaderField(name));
@@ -142,7 +142,7 @@ namespace HTTP {
 		return ret;
 	}
 
-	string HttpHeader::operator[] (const string & headerFieldName) {
+	string HttpHeader::operator[] (const string & headerFieldName) const {
 		return getHeaderFieldIgnoreCase(headerFieldName);
 	}
 
