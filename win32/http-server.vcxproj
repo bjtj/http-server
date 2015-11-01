@@ -49,7 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\oslayer\win32\oslayer.vcxproj">
-      <Project>{62f62888-b617-d1c5-dd02-0cc27e78a455}</Project>
+      <Project>{2367396a-6d69-5e61-11dc-66efbb2456d0}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
