@@ -20,20 +20,22 @@ namespace HTTP {
         Url url;
         std::string method;
         HttpHeader header;
-        char * data;
-        int len;
+        StringMap addtionalHeaderFields;
+        const char * data;
+        size_t len;
         T userData;
         
     public:
         HttpClientRequest();
-        HttpClientRequest(const Url & url, const std::string & method, char * data, int len, T userData);
+        HttpClientRequest(const Url & url, const std::string & method, const StringMap & addtionalHeaderFields, const char * data, size_t len, T userData);
         virtual ~HttpClientRequest();
         
         Url & getUrl();
         HttpHeader & getHeader();
+        StringMap & getAdditionalHeaderFields();
         std::string & getMethod();
-        char * getData();
-        int getDataLength();
+        const char * getData();
+        size_t getDataLength();
         void setData(char * data, int len);
         T getUserData();
     };
@@ -73,7 +75,7 @@ namespace HTTP {
 		virtual ~HttpClientThreadPool();
         void setHttpResponseHandler(HttpResponseHandler<T> * handler);
         void setFollowRedirect(bool followRedirect);
-        void request(const Url & url, const std::string & method, char * data, int len, T userData);
+        void request(const Url & url, const std::string & method, const StringMap & additionalHeaderFields, const char * data, size_t len, T userData);
         void start();
         void stop();
 	};
@@ -87,8 +89,8 @@ namespace HTTP {
     HttpClientRequest<T>::HttpClientRequest() : data(NULL), len(0) {
     }
     template <typename T>
-    HttpClientRequest<T>::HttpClientRequest(const Url & url, const std::string & method, char * data, int len, T userData)
-    : url(url), method(method), data(data), len(len), userData(userData) {
+    HttpClientRequest<T>::HttpClientRequest(const Url & url, const std::string & method, const StringMap & additionalHeaderFields, const char * data, size_t len, T userData)
+    : url(url), method(method), addtionalHeaderFields(additionalHeaderFields), data(data), len(len), userData(userData) {
     }
     template <typename T>
     HttpClientRequest<T>::~HttpClientRequest() {
@@ -106,11 +108,11 @@ namespace HTTP {
         return method;
     }
     template <typename T>
-    char * HttpClientRequest<T>::getData() {
+    const char * HttpClientRequest<T>::getData() {
         return data;
     }
     template <typename T>
-    int HttpClientRequest<T>::getDataLength() {
+    size_t HttpClientRequest<T>::getDataLength() {
         return len;
     }
     template <typename T>
@@ -204,9 +206,9 @@ namespace HTTP {
         }
     }
     template <typename T>
-    void HttpClientThreadPool<T>::request(const Url & url, const std::string & method, char * data, int len, T userData) {
+    void HttpClientThreadPool<T>::request(const Url & url, const std::string & method, const StringMap & additionalHeaderFields, const char * data, size_t len, T userData) {
         sem.wait();
-        requestQueue.push(HttpClientRequest<T>(url, method, data, len, userData));
+        requestQueue.push(HttpClientRequest<T>(url, method, additionalHeaderFields, data, len, userData));
         sem.post();
     }
     template <typename T>

@@ -14,6 +14,12 @@ namespace HTTP {
     template <typename T>
 	class HttpClient;
     
+    class StringMap : public std::map<std::string, std::string> {
+    public:
+        StringMap() {}
+        virtual ~StringMap() {}
+    };
+    
     /**
      * @brief http response dump utility
      */
@@ -61,10 +67,10 @@ namespace HTTP {
 		void setFollowRedirect(bool followRedirect);
 		void setHttpResponseHandler(HttpResponseHandler<T> * responseHandler);
 		void request(Url & url, T userData);
-		void request(Url & url, std::string method, char * data, int len, T userData);
+		void request(Url & url, std::string method, const char * data, size_t len, T userData);
 		void request(Url & url, std::string method,
-					 std::map<std::string, std::string> & additionalHeaderFields,
-					 char * data, int len, T userData);
+					 StringMap & additionalHeaderFields,
+					 const char * data, size_t len, T userData);
 
 	private:
 		void disconnect(OS::Socket * socket);
@@ -72,15 +78,15 @@ namespace HTTP {
 									 std::string path,
 									 std::string protocol,
 									 std::string targetHost);
-		void sendRequestPacket(OS::Socket & socket, HttpHeader & header, char * buffer, int len);
+		void sendRequestPacket(OS::Socket & socket, HttpHeader & header, const char * buffer, size_t len);
 		HttpHeader readResponseHeader(OS::Socket & socket);
 		bool checkIf302(HttpHeader & responseHeader);
-		int consume(OS::Socket & socket, int length);
+		int consume(OS::Socket & socket, size_t length);
 		HttpHeader processRedirect(OS::Socket & socket,
 								   HttpHeader requestHeader,
 								   HttpHeader responseHeader,
-								   char * data,
-								   int len);
+								   const char * data,
+								   size_t len);
 	};
     
     
@@ -134,8 +140,8 @@ namespace HTTP {
     }
     
     template<typename T>
-    void HttpClient<T>::request(Url & url, std::string method, char * data, int len, T userData) {
-        std::map<std::string, std::string> empty;
+    void HttpClient<T>::request(Url & url, std::string method, const char * data, size_t len, T userData) {
+        StringMap empty;
         request(url, method, empty, data, len, userData);
     }
     
@@ -154,9 +160,9 @@ namespace HTTP {
     template<typename T>
     void HttpClient<T>::request(Url & url,
                                 std::string method,
-                                std::map<std::string, std::string> & additionalHeaderFields,
-                                char * data,
-                                int len,
+                                StringMap & additionalHeaderFields,
+                                const char * data,
+                                size_t len,
                                 T userData) {
         
         if (!socket) {
@@ -195,8 +201,8 @@ namespace HTTP {
     }
     
     template<typename T>
-    void HttpClient<T>::sendRequestPacket(OS::Socket & socket, HttpHeader & header, char * buffer, int len) {
-        header.setContentLength(len);
+    void HttpClient<T>::sendRequestPacket(OS::Socket & socket, HttpHeader & header, const char * buffer, size_t len) {
+        header.setContentLength((int)len);
         std::string headerStr = header.toString();
         socket.send(headerStr.c_str(), headerStr.length());
         if (buffer && len > 0) {
@@ -225,7 +231,7 @@ namespace HTTP {
     }
     
     template<typename T>
-    int HttpClient<T>::consume(OS::Socket & socket, int length) {
+    int HttpClient<T>::consume(OS::Socket & socket, size_t length) {
         char buffer[1024] = {0,};
         int len;
         int total = 0;
@@ -243,8 +249,8 @@ namespace HTTP {
     HttpHeader HttpClient<T>::processRedirect(OS::Socket & socket,
                                               HttpHeader requestHeader,
                                               HttpHeader responseHeader,
-                                              char * data,
-                                              int len) {
+                                              const char * data,
+                                              size_t len) {
         
         while (checkIf302(responseHeader)) {
             
