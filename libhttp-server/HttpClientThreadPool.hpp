@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 #include <liboslayer/os.hpp>
+#include <liboslayer/StringElement.hpp>
 #include "HttpHeader.hpp"
 #include "HttpClient.hpp"
 #include "Url.hpp"
@@ -20,19 +21,22 @@ namespace HTTP {
         Url url;
         std::string method;
         HttpHeader header;
-        StringMap addtionalHeaderFields;
-        const char * data;
+        UTIL::StringMap addtionalHeaderFields;
+        char * data;
         size_t len;
         T userData;
         
     public:
         HttpClientRequest();
-        HttpClientRequest(const Url & url, const std::string & method, const StringMap & addtionalHeaderFields, const char * data, size_t len, T userData);
+        HttpClientRequest(const Url & url, const std::string & method, const UTIL::StringMap & addtionalHeaderFields, const char * data, size_t len, T userData);
+		HttpClientRequest(const HttpClientRequest<T> & other);
         virtual ~HttpClientRequest();
+
+		char * copyDataChunk(const char * data, size_t len);
         
         Url & getUrl();
         HttpHeader & getHeader();
-        StringMap & getAdditionalHeaderFields();
+        UTIL::StringMap & getAdditionalHeaderFields();
         std::string & getMethod();
         const char * getData();
         size_t getDataLength();
@@ -75,7 +79,7 @@ namespace HTTP {
 		virtual ~HttpClientThreadPool();
         void setHttpResponseHandler(HttpResponseHandler<T> * handler);
         void setFollowRedirect(bool followRedirect);
-        void request(const Url & url, const std::string & method, const StringMap & additionalHeaderFields, const char * data, size_t len, T userData);
+        void request(const Url & url, const std::string & method, const UTIL::StringMap & additionalHeaderFields, const char * data, size_t len, T userData);
         void start();
         void stop();
 	};
@@ -89,12 +93,36 @@ namespace HTTP {
     HttpClientRequest<T>::HttpClientRequest() : data(NULL), len(0) {
     }
     template <typename T>
-    HttpClientRequest<T>::HttpClientRequest(const Url & url, const std::string & method, const StringMap & additionalHeaderFields, const char * data, size_t len, T userData)
-    : url(url), method(method), addtionalHeaderFields(additionalHeaderFields), data(data), len(len), userData(userData) {
+    HttpClientRequest<T>::HttpClientRequest(const Url & url, const std::string & method, const UTIL::StringMap & additionalHeaderFields, const char * data, size_t len, T userData)
+    : url(url), method(method), addtionalHeaderFields(additionalHeaderFields), len(len), userData(userData) {
+		this->data = copyDataChunk(data, len);
     }
+	template <typename T>
+    HttpClientRequest<T>::HttpClientRequest(const HttpClientRequest<T> & other) {
+		url = other.url;
+        method = other.method;
+        header = other.header;
+        addtionalHeaderFields = other.addtionalHeaderFields;
+		data = copyDataChunk(other.data, other.len);
+		len = other.len;
+        userData = other.userData;
+	}
     template <typename T>
     HttpClientRequest<T>::~HttpClientRequest() {
+		if (!data) {
+			free(data);
+		}
     }
+	template <typename T>
+	char * HttpClientRequest<T>::copyDataChunk(const char * data, size_t len) {
+		if (len > 0) {
+			char * chunk = (char*)malloc(len);
+			memcpy(chunk, data, len);
+			return chunk;
+		}
+		return NULL;
+	}
+
     template <typename T>
     Url & HttpClientRequest<T>::getUrl() {
         return url;
@@ -206,7 +234,7 @@ namespace HTTP {
         }
     }
     template <typename T>
-    void HttpClientThreadPool<T>::request(const Url & url, const std::string & method, const StringMap & additionalHeaderFields, const char * data, size_t len, T userData) {
+    void HttpClientThreadPool<T>::request(const Url & url, const std::string & method, const UTIL::StringMap & additionalHeaderFields, const char * data, size_t len, T userData) {
         sem.wait();
         requestQueue.push(HttpClientRequest<T>(url, method, additionalHeaderFields, data, len, userData));
         sem.post();

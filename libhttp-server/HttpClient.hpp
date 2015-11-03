@@ -3,6 +3,7 @@
 
 #include <liboslayer/os.hpp>
 #include <liboslayer/Text.hpp>
+#include <liboslayer/StringElement.hpp>
 #include <map>
 #include <string>
 #include "Url.hpp"
@@ -13,12 +14,6 @@ namespace HTTP {
 
     template <typename T>
 	class HttpClient;
-    
-    class StringMap : public std::map<std::string, std::string> {
-    public:
-        StringMap() {}
-        virtual ~StringMap() {}
-    };
     
     /**
      * @brief http response dump utility
@@ -69,7 +64,7 @@ namespace HTTP {
 		void request(Url & url, T userData);
 		void request(Url & url, std::string method, const char * data, size_t len, T userData);
 		void request(Url & url, std::string method,
-					 StringMap & additionalHeaderFields,
+					 UTIL::StringMap & additionalHeaderFields,
 					 const char * data, size_t len, T userData);
 
 	private:
@@ -141,7 +136,7 @@ namespace HTTP {
     
     template<typename T>
     void HttpClient<T>::request(Url & url, std::string method, const char * data, size_t len, T userData) {
-        StringMap empty;
+        UTIL::StringMap empty;
         request(url, method, empty, data, len, userData);
     }
     
@@ -160,7 +155,7 @@ namespace HTTP {
     template<typename T>
     void HttpClient<T>::request(Url & url,
                                 std::string method,
-                                StringMap & additionalHeaderFields,
+                                UTIL::StringMap & additionalHeaderFields,
                                 const char * data,
                                 size_t len,
                                 T userData) {
@@ -234,7 +229,7 @@ namespace HTTP {
     int HttpClient<T>::consume(OS::Socket & socket, size_t length) {
         char buffer[1024] = {0,};
         int len;
-        int total = 0;
+        size_t total = 0;
         while ((len = socket.recv(buffer, sizeof(buffer))) > 0) {
             std::string str(buffer, len);
             total += len;
