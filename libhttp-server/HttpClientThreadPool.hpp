@@ -21,7 +21,7 @@ namespace HTTP {
         Url url;
         std::string method;
         HttpHeader header;
-        UTIL::StringMap addtionalHeaderFields;
+        UTIL::StringMap additionalHeaderFields;
         char * data;
         size_t len;
         T userData;
@@ -94,7 +94,7 @@ namespace HTTP {
     }
     template <typename T>
     HttpClientRequest<T>::HttpClientRequest(const Url & url, const std::string & method, const UTIL::StringMap & additionalHeaderFields, const char * data, size_t len, T userData)
-    : url(url), method(method), addtionalHeaderFields(additionalHeaderFields), len(len), userData(userData) {
+    : url(url), method(method), additionalHeaderFields(additionalHeaderFields), len(len), userData(userData) {
 		this->data = copyDataChunk(data, len);
     }
 	template <typename T>
@@ -102,7 +102,7 @@ namespace HTTP {
 		url = other.url;
         method = other.method;
         header = other.header;
-        addtionalHeaderFields = other.addtionalHeaderFields;
+        additionalHeaderFields = other.additionalHeaderFields;
 		data = copyDataChunk(other.data, other.len);
 		len = other.len;
         userData = other.userData;
@@ -130,6 +130,10 @@ namespace HTTP {
     template <typename T>
     HttpHeader & HttpClientRequest<T>::getHeader() {
         return header;
+    }
+    template <typename T>
+    UTIL::StringMap & HttpClientRequest<T>::getAdditionalHeaderFields() {
+        return additionalHeaderFields;
     }
     template <typename T>
     std::string & HttpClientRequest<T>::getMethod() {
@@ -184,6 +188,7 @@ namespace HTTP {
                 
                 try {
                     client.request(req.getUrl(), req.getMethod(),
+                                   req.getAdditionalHeaderFields(),
                                    req.getData(), req.getDataLength(),
                                    req.getUserData());
                 } catch (OS::IOException e) {

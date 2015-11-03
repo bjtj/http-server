@@ -76,7 +76,7 @@ namespace HTTP {
 		void sendRequestPacket(OS::Socket & socket, HttpHeader & header, const char * buffer, size_t len);
 		HttpHeader readResponseHeader(OS::Socket & socket);
 		bool checkIf302(HttpHeader & responseHeader);
-		int consume(OS::Socket & socket, size_t length);
+		size_t consume(OS::Socket & socket, size_t length);
 		HttpHeader processRedirect(OS::Socket & socket,
 								   HttpHeader requestHeader,
 								   HttpHeader responseHeader,
@@ -202,6 +202,7 @@ namespace HTTP {
         socket.send(headerStr.c_str(), headerStr.length());
         if (buffer && len > 0) {
             socket.send(buffer, len);
+            std::string s(buffer, len);
         }
     }
     
@@ -226,7 +227,7 @@ namespace HTTP {
     }
     
     template<typename T>
-    int HttpClient<T>::consume(OS::Socket & socket, size_t length) {
+    size_t HttpClient<T>::consume(OS::Socket & socket, size_t length) {
         char buffer[1024] = {0,};
         int len;
         size_t total = 0;
