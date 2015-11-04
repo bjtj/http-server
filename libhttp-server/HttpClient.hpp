@@ -37,8 +37,36 @@ namespace HTTP {
 		HttpResponseHandler() {}
 		virtual ~HttpResponseHandler() {}
 
-		virtual void onResponse(HttpClient<T> & httpClient, HttpHeader & responseHeader, OS::Socket & socket, T userData) = 0;
+		virtual void onResponse(HttpClient<T> & httpClient,
+                                HttpHeader & responseHeader,
+                                OS::Socket & socket,
+                                T userData) = 0;
 	};
+    
+    /**
+     * @brief http request status
+     */
+    class HttpRequestStatus {
+    private:
+        int status;
+    public:
+        static const int IDLE = 0;
+        static const int CONNECTING = 1;
+        static const int SEND_REQUEST_HEADER = 2;
+        static const int SEND_REQUEST_CONTENT = 3;
+        static const int RECV_RESPONSE_HEADER = 4;
+        static const int RECV_RESPONSE_CONTENT = 5;
+        static const int DONE = 6;
+        static const int ERROR = 7;
+    public:
+        HttpRequestStatus() : status(IDLE) {}
+        virtual ~HttpRequestStatus() {}
+        void setStatus(int status) {this->status = status;}
+        int getStatus() {return status;}
+        bool operator== (int status) const {
+            return this->status == status;
+        }
+    };
 
 	/**
 	 * @brief http client
@@ -52,6 +80,16 @@ namespace HTTP {
 		OS::Socket * socket;
 		std::map<std::string, std::string> defaultHeaderFields;
 		bool followRedirect;
+        OS::Selector selector;
+        
+        HttpRequestStatus status;
+        HttpHeader requestHeader;
+        HttpHeaderReader responseHeaderReader;
+        Url url;
+        char * data;
+        size_t dataLen;
+        size_t readLen;
+        size_t readTotalLen;
 		
 	public:
 		HttpClient();
@@ -66,6 +104,8 @@ namespace HTTP {
 		void request(Url & url, std::string method,
 					 UTIL::StringMap & additionalHeaderFields,
 					 const char * data, size_t len, T userData);
+        
+        void poll(unsigned long timeout);
 
 	private:
 		void disconnect(OS::Socket * socket);
@@ -74,6 +114,8 @@ namespace HTTP {
 									 std::string protocol,
 									 std::string targetHost);
 		void sendRequestPacket(OS::Socket & socket, HttpHeader & header, const char * buffer, size_t len);
+        void sendRequestHeaderWithContentLength(OS::Socket & socket, HttpHeader & header, size_t contentLength);
+        void sendRequestContent(OS::Socket & socket, const char * content, size_t contentLength);
 		HttpHeader readResponseHeader(OS::Socket & socket);
 		bool checkIf302(HttpHeader & responseHeader);
 		size_t consume(OS::Socket & socket, size_t length);
@@ -86,7 +128,10 @@ namespace HTTP {
     
     
     template<typename T>
-    HttpClient<T>::HttpClient() : sem(1), responseHandler(NULL), socket(NULL), followRedirect(false) {
+    HttpClient<T>::HttpClient() :
+    sem(1), responseHandler(NULL), socket(NULL), followRedirect(false),
+    data(NULL), dataLen(0), readLen(0), readTotalLen(0) {
+        
         httpProtocol = "HTTP/1.1";
         defaultHeaderFields["User-Agent"] = "Cross-Platform/0.1 HTTP/1.1 HttpClient/0.1";
     }
@@ -179,6 +224,86 @@ namespace HTTP {
             if (responseHandler) {
                 responseHandler->onResponse(*this, responseHeader, *socket, userData);
             }
+            
+            // auto disconnect will remove socket
+        }
+    }
+    
+    template<typename T>
+    void HttpClient<T>::poll(unsigned long timeout) {
+        
+        switch (status) {
+            case HttpRequestStatus::IDLE:
+            {
+                status = HttpRequestStatus::CONNECTING;
+            }
+                break;
+            case HttpRequestStatus::CONNECTING:
+            {
+                socket = connect(url);
+                status = HttpRequestStatus::SEND_REQUEST_HEADER;
+            }
+                break;
+            case HttpRequestStatus::SEND_REQUEST_HEADER:
+            {
+                sendRequestHeaderWithContentLength(*socket, requestHeader, dataLen);
+                status = HttpRequestStatus::SEND_REQUEST_CONTENT;
+            }
+                break;
+            case HttpRequestStatus::SEND_REQUEST_CONTENT:
+            {
+                sendRequestContent(*socket, data, dataLen);
+                status = HttpRequestStatus::RECV_RESPONSE_HEADER;
+            }
+                break;
+            case HttpRequestStatus::RECV_RESPONSE_HEADER:
+            {
+                char ch;
+                int len = socket->recv(&ch, sizeof(char));
+                if (len < 0) {
+                    status = HttpRequestStatus::ERROR;
+                    break;
+                }
+                responseHeaderReader.read(&ch, sizeof(char));
+                if (responseHeaderReader.complete()) {
+                    HttpHeader & header = responseHeaderReader.getHeader();
+                    if (checkIf302(header)) {
+                        url.setPath(header["Location"]);
+                        status = HttpRequestStatus::SEND_REQUEST_HEADER;
+                    } else if (header.getContentLength() > 0) {
+                        readTotalLen = header.getContentLength();
+                        status = HttpRequestStatus::RECV_RESPONSE_CONTENT;
+                    } else {
+                        status = HttpRequestStatus::DONE;
+                    }
+                }
+            }
+                break;
+            case HttpRequestStatus::RECV_RESPONSE_CONTENT:
+            {
+                char buffer[1024] = {0,};
+                int len = socket->recv(buffer, sizeof(buffer));
+                if (len < 0) {
+                    status = HttpRequestStatus::ERROR;
+                    break;
+                }
+                
+                readLen += len;
+                
+                if (readLen >= readTotalLen) {
+                    status = HttpRequestStatus::DONE;
+                }
+            }
+                break;
+            case HttpRequestStatus::DONE:
+                break;
+            default:
+                break;
+        }
+        
+        if (selector.select(timeout) > 0) {
+            char buffer[1024] = {0,};
+            socket->recv(buffer, sizeof(buffer));
         }
     }
     
@@ -202,7 +327,19 @@ namespace HTTP {
         socket.send(headerStr.c_str(), headerStr.length());
         if (buffer && len > 0) {
             socket.send(buffer, len);
-            std::string s(buffer, len);
+        }
+    }
+    template<typename T>
+    void HttpClient<T>::sendRequestHeaderWithContentLength(OS::Socket & socket, HttpHeader & header, size_t contentLength) {
+        header.setContentLength((int)contentLength);
+        std::string headerStr = header.toString();
+        socket.send(headerStr.c_str(), headerStr.length());
+    }
+    
+    template<typename T>
+    void HttpClient<T>::sendRequestContent(OS::Socket & socket, const char * content, size_t contentLength) {
+        if (content && contentLength > 0) {
+            socket.send(content, contentLength);
         }
     }
     
@@ -215,7 +352,7 @@ namespace HTTP {
             headerReader.read(&buffer, 1);
         }
         if (!headerReader.complete()) {
-            throw -1;
+            throw OS::IOException("read header error", -1, 0);
         }
         return headerReader.getHeader();
     }
