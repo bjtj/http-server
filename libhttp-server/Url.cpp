@@ -54,6 +54,9 @@ namespace HTTP {
 		this->port = port;
 	}
 	void Url::setPath(string path) {
+        if (!Text::startsWith(path, "/")) {
+            path = "/" + path;
+        }
 		this->path = path;
 	}
 
