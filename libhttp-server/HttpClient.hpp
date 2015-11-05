@@ -88,6 +88,7 @@ namespace HTTP {
         Url url;
         char * data;
         size_t dataLen;
+		size_t writeLen;
         size_t readLen;
         size_t readTotalLen;
 		
@@ -130,7 +131,7 @@ namespace HTTP {
     template<typename T>
     HttpClient<T>::HttpClient() :
     sem(1), responseHandler(NULL), socket(NULL), followRedirect(false),
-    data(NULL), dataLen(0), readLen(0), readTotalLen(0) {
+    data(NULL), dataLen(0), writeLen(0), readLen(0), readTotalLen(0) {
         
         httpProtocol = "HTTP/1.1";
         defaultHeaderFields["User-Agent"] = "Cross-Platform/0.1 HTTP/1.1 HttpClient/0.1";

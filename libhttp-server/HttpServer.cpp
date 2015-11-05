@@ -10,14 +10,14 @@ namespace HTTP {
 	 * @brief http server thread
 	 */
 	HttpServerPollingThread::HttpServerPollingThread(HttpServer * server) :
-		server(server) {
+		server(server), timeout(1000) {
 	}
 	HttpServerPollingThread::~HttpServerPollingThread() {
 	}
 	
 	void HttpServerPollingThread::run() {
 		while (!interrupted()) {
-			server->poll(1000);
+			server->poll(timeout);
 		}
 	}
 

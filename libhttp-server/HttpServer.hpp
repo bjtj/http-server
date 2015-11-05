@@ -26,6 +26,7 @@ namespace HTTP {
 	class HttpServerPollingThread : public OS::Thread {
 	private:
 		HttpServer * server;
+		unsigned long timeout;
 		
 	public:
 		HttpServerPollingThread(HttpServer * server);
