@@ -16,10 +16,10 @@ namespace HTTP {
 	HttpRequest::~HttpRequest() {
 	}
 	
-	string HttpRequest::getMethod() {
+	string HttpRequest::getMethod() const {
 		return header.getMethod();
 	}
-	string HttpRequest::getPath() {
+	string HttpRequest::getPath() const {
 		return header.getPath();
 	}
 	string HttpRequest::getHeaderField(string & name) {

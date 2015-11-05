@@ -21,6 +21,7 @@ namespace HTTP {
 	}
 
 	void MultiConnMultiplexServer::start() {
+        
 		server = new ServerSocket(port);
 		server->setReuseAddr();
 		server->bind();
@@ -84,6 +85,7 @@ namespace HTTP {
 	}
 
 	bool MultiConnMultiplexServer::isClientDisconnected(ClientSession & client) {
+        
 		for (size_t i = 0; i < clients.size(); i++) {
 			if (clients[(int)i] == &client) {
 				return false;

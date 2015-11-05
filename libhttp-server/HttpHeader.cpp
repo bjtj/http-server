@@ -33,13 +33,13 @@ namespace HTTP {
 		setPart2(part2);
 		setPart3(part3);
 	}
-	string HttpHeader::getPart1() {
+	string HttpHeader::getPart1() const {
 		return part1;
 	}
-	string HttpHeader::getPart2() {
+	string HttpHeader::getPart2() const {
 		return part2;
 	}
-	string HttpHeader::getPart3() {
+	string HttpHeader::getPart3() const {
 		return part2;
 	}
 	void HttpHeader::setPart1(string part) {
@@ -77,7 +77,7 @@ namespace HTTP {
 	void HttpHeader::setHeaderFields(map<string, string> & fields) {
 		this->fields = fields;
 	}
-	void HttpHeader::appendHeaderFields(map<string, string> & fields) {
+	void HttpHeader::appendHeaderFields(const map<string, string> & fields) {
 		this->fields.insert(fields.begin(), fields.end());
 	}
 	map<string, string> & HttpHeader::getHeaderFields() {
@@ -193,13 +193,13 @@ namespace HTTP {
 		parsePath();
 	}
 	
-	string HttpRequestHeader::getMethod() {
+	string HttpRequestHeader::getMethod() const {
 		return getHeader().getPart1();
 	}
-	string HttpRequestHeader::getPath() {
+	string HttpRequestHeader::getPath() const {
 		return getHeader().getPart2();
 	}
-	string HttpRequestHeader::getProtocol() {
+	string HttpRequestHeader::getProtocol() const {
 		return getHeader().getPart3();
 	}
 

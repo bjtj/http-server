@@ -10,17 +10,6 @@ using namespace UTIL;
 namespace HTTP {
 
 	static Logger & logger = Logger::getLogger();
-
-
-	const int HttpRequestStatus::IDLE_STATUS = 0;
-    const int HttpRequestStatus::CONNECTING_STATUS = 1;
-    const int HttpRequestStatus::SEND_REQUEST_HEADER_STATUS = 2;
-    const int HttpRequestStatus::SEND_REQUEST_CONTENT_STATUS = 3;
-    const int HttpRequestStatus::RECV_RESPONSE_HEADER_STATUS = 4;
-    const int HttpRequestStatus::RECV_RESPONSE_CONTENT_STATUS = 5;
-    const int HttpRequestStatus::DONE_STATUS = 6;
-    const int HttpRequestStatus::ERROR_STATUS = 7;
-    
     
     HttpResponseDump::HttpResponseDump() {
         

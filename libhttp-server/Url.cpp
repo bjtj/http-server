@@ -23,22 +23,22 @@ namespace HTTP {
 	Url::~Url() {
 	}
 
-	string Url::getScheme() {
+	string Url::getScheme() const {
 		return scheme;
 	}
-	string Url::getProtocol() {
+	string Url::getProtocol() const {
 		return scheme;
 	}
-	string Url::getHost() {
+	string Url::getHost() const {
 		return host;
 	}
-	string Url::getPort() {
+	string Url::getPort() const {
 		return port;
 	}
-	int Url::getIntegerPort() {
+	int Url::getIntegerPort() const {
 		return UTIL::Text::toInt(port);
 	}
-	string Url::getPath() {
+	string Url::getPath() const {
 		return path;
 	}
 	void Url::setScheme(string scheme) {
@@ -111,7 +111,7 @@ namespace HTTP {
 		}
 	}
 
-	string Url::getAddress() {
+	string Url::getAddress() const {
 		return host + (port.empty() ? "" : ":" + port);
 	}
     

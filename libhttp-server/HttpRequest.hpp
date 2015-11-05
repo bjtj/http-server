@@ -23,8 +23,8 @@ namespace HTTP {
 		HttpRequest(HttpHeader & header, OS::Socket & socket);
 		virtual ~HttpRequest();
 
-		std::string getMethod();
-		std::string getPath();
+		std::string getMethod() const;
+		std::string getPath() const;
 		std::string getHeaderField(std::string & name);
 		std::map<std::string, std::string> & getHeaderFields();
 		std::string getParameter(const std::string & name);

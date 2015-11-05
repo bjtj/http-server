@@ -20,12 +20,12 @@ namespace HTTP {
 		Url(const std::string & urlStr);
 		virtual ~Url();
 
-		std::string getScheme();
-		std::string getProtocol();
-		std::string getHost();
-		std::string getPort();
-		int getIntegerPort();
-		std::string getPath();
+		std::string getScheme() const;
+		std::string getProtocol() const;
+		std::string getHost() const;
+		std::string getPort() const;
+		int getIntegerPort() const;
+		std::string getPath() const;
 		void setScheme(std::string scheme);
 		void setProtocol(std::string scheme);
 		void setHost(std::string host);
@@ -39,7 +39,7 @@ namespace HTTP {
 		std::vector<std::string> parseAddress(std::string address);
 		void setAddress(std::vector<std::string> & addr);
 
-		std::string getAddress();
+		std::string getAddress() const;
 
         std::string enoughPath(const std::string & path);
 		virtual std::string toString();

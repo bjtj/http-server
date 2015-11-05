@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		E82789341BDCEDB70009E46A /* libhttp-server-cocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E82789311BDCED9C0009E46A /* libhttp-server-cocoa.a */; };
 		E82789401BDCEE130009E46A /* liboslayer-cocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E827893D1BDCEE050009E46A /* liboslayer-cocoa.a */; };
-		E857BB031BE2A2E900D2022F /* HttpServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E857BAEE1BE246E600D2022F /* HttpServer.cpp */; };
+		E857BB651BEC122500D2022F /* HttpClientPoll.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E857BB511BEB9C2C00D2022F /* HttpClientPoll.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +75,10 @@
 		E82789281BDCED9C0009E46A /* http-server.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "http-server.xcodeproj"; path = "../http-server/http-server.xcodeproj"; sourceTree = "<group>"; };
 		E82789351BDCEE050009E46A /* oslayer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oslayer.xcodeproj; path = ../../../oslayer/xcode/oslayer/oslayer.xcodeproj; sourceTree = "<group>"; };
 		E857BAEE1BE246E600D2022F /* HttpServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpServer.cpp; path = ../../../examples/HttpServer.cpp; sourceTree = "<group>"; };
+		E857BB511BEB9C2C00D2022F /* HttpClientPoll.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpClientPoll.cpp; path = ../../../examples/HttpClientPoll.cpp; sourceTree = "<group>"; };
+		E857BB521BEB9C2C00D2022F /* HttpClientTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpClientTest.cpp; path = ../../../examples/HttpClientTest.cpp; sourceTree = "<group>"; };
+		E857BB531BEB9C2C00D2022F /* HttpServerPoll.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpServerPoll.cpp; path = ../../../examples/HttpServerPoll.cpp; sourceTree = "<group>"; };
+		E857BB631BEC0BB600D2022F /* RESTServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RESTServer.cpp; path = ../../../examples/RESTServer.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,8 +115,12 @@
 		E82789201BDCED880009E46A /* http-server-console */ = {
 			isa = PBXGroup;
 			children = (
+				E857BB511BEB9C2C00D2022F /* HttpClientPoll.cpp */,
+				E857BB521BEB9C2C00D2022F /* HttpClientTest.cpp */,
+				E857BB531BEB9C2C00D2022F /* HttpServerPoll.cpp */,
 				E82789211BDCED880009E46A /* main.cpp */,
 				E857BAEE1BE246E600D2022F /* HttpServer.cpp */,
+				E857BB631BEC0BB600D2022F /* RESTServer.cpp */,
 			);
 			path = "http-server-console";
 			sourceTree = "<group>";
@@ -234,7 +242,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E857BB031BE2A2E900D2022F /* HttpServer.cpp in Sources */,
+				E857BB651BEC122500D2022F /* HttpClientPoll.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

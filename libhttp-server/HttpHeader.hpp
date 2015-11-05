@@ -34,9 +34,9 @@ namespace HTTP {
 		virtual void setFirstLine(std::string & firstline);
 		virtual void setParts(std::vector<std::string> & parts);
 		virtual void setParts(std::string par1, std::string part2, std::string part3);
-		virtual std::string getPart1();
-		virtual std::string getPart2();
-		virtual std::string getPart3();
+		virtual std::string getPart1() const;
+		virtual std::string getPart2() const;
+		virtual std::string getPart3() const;
 		virtual void setPart1(std::string part);
 		virtual void setPart2(std::string part);
 		virtual void setPart3(std::string part);
@@ -49,7 +49,7 @@ namespace HTTP {
 		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name);
 		virtual void setHeaderField(std::string name, std::string value);
 		virtual void setHeaderFields(std::map<std::string, std::string> & fields);
-		virtual void appendHeaderFields(std::map<std::string, std::string> & fields);
+		virtual void appendHeaderFields(const std::map<std::string, std::string> & fields);
 		virtual std::map<std::string, std::string> & getHeaderFields();
 		virtual void removeHeaderField(std::string name);
 		virtual void removeHeaderFieldIgnoreCase(std::string name);
@@ -80,15 +80,16 @@ namespace HTTP {
 		HttpHeaderWrapper(HttpHeader & header) : header(header) {}
 		virtual ~HttpHeaderWrapper() {}
 
-		HttpHeader & getHeader() {return header;}
+        HttpHeader & getHeader() {return header;}
+		const HttpHeader & getHeader() const {return header;}
 
 		virtual bool isValid() {return getHeader().isValid();}
 		
 		virtual void setFirstLine(std::string & firstline) {getHeader().setFirstLine(firstline);}
 		virtual void setParts(std::vector<std::string> & parts) {getHeader().setParts(parts);}
-		virtual std::string getPart1() {return getHeader().getPart1();}
-		virtual std::string getPart2() {return getHeader().getPart2();}
-		virtual std::string getPart3() {return getHeader().getPart3();}
+		virtual std::string getPart1() const {return getHeader().getPart1();}
+		virtual std::string getPart2() const {return getHeader().getPart2();}
+		virtual std::string getPart3() const {return getHeader().getPart3();}
 		virtual void setPart1(std::string part) {getHeader().setPart1(part);}
 		virtual void setPart2(std::string part) {getHeader().setPart2(part);}
 		virtual void setPart3(std::string part) {getHeader().setPart3(part);}
@@ -127,9 +128,9 @@ namespace HTTP {
 
 		virtual void setPart2(std::string part);
 
-		std::string getMethod();
-		std::string getPath();
-		std::string getProtocol();
+		std::string getMethod() const;
+		std::string getPath() const;
+		std::string getProtocol() const;
 	};
 
 	/**

@@ -28,7 +28,9 @@ public:
 
 int main(int argc, char * args[]) {
 
+    bool done = false;
 	HttpServer server(8083);
+    server.setUseThreadedMultiConnType(true);
 
 	Hello hello;
 	server.vpath("/hello/*", &hello);
@@ -37,7 +39,7 @@ int main(int argc, char * args[]) {
 
 	cout << "start" << endl;
 
-	while (1) {
+	while (!done) {
 		server.poll(1000);
 	}
 
