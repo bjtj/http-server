@@ -24,39 +24,69 @@ namespace HTTP {
 	/**
 	 * @brief http server
 	 */
-	HttpServer::HttpServer(int port) : thread(NULL) {
-		conn = new MultiConnThreadedServer(port);
-		//conn = new MultiConnMultiplexServer(port);
-		conn->setProtocol(this);
+	HttpServer::HttpServer(int port) : port(port), conn(NULL), thread(NULL), useThreadedMultiConnType(true) {
 	}
 	HttpServer::~HttpServer() {
-		delete conn;
+		stop();
 	}
-	
-	void HttpServer::start() {
-		conn->start();
+
+	MultiConn * HttpServer::createMultiConn(bool useThreadedMultiConnType) {
+		MultiConn * conn = NULL;
+		if (useThreadedMultiConnType) {
+			conn = new MultiConnThreadedServer(port);
+		} else {
+			conn = new MultiConnMultiplexServer(port);
+		}
+		conn->setProtocol(this);
+		return conn;
 	}
-	void HttpServer::startAsync() {
-		
-		start();
+
+	void HttpServer::startPollingThread() {
 		if (!thread) {
 			thread = new HttpServerPollingThread(this);
 			thread->start();
 		}
 	}
-	void HttpServer::poll(unsigned long timeout_milli) {
-		conn->poll(timeout_milli);
-	}
-	void HttpServer::stop() {
+	void HttpServer::stopPollingThread() {
 		if (thread) {
 			thread->interrupt();
 			thread->join();
 			delete thread;
 			thread = NULL;
 		}
-		conn->stop();
+	}
+
+	void HttpServer::setUseThreadedMultiConnType(bool use) {
+		this->useThreadedMultiConnType = use;
+	}
+	
+	void HttpServer::start() {
+		if (!conn) {
+			conn = createMultiConn(useThreadedMultiConnType);
+			conn->start();
+		}
+		
+	}
+	void HttpServer::startAsync() {
+		start();
+		startPollingThread();
+	}
+	void HttpServer::poll(unsigned long timeout_milli) {
+		if (conn) {
+			conn->poll(timeout_milli);
+		}
+	}
+	void HttpServer::stop() {
+
+		stopPollingThread();
+
+		if (conn) {
+			conn->stop();
+			delete conn;
+			conn = NULL;
+		}
 	}
 	bool HttpServer::isRunning() {
-		return conn->isRunning();
+		return (conn ? conn->isRunning() : false);
 	}
 }

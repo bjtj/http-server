@@ -38,11 +38,20 @@ namespace HTTP {
 	 */
 	class HttpServer : public HttpProtocol {
 	private:
+		int port;
 		MultiConn * conn;
 		HttpServerPollingThread * thread;
+		bool useThreadedMultiConnType;
+	private:
+		HttpServer(const HttpServer & other); // not allowed copy
+		MultiConn * createMultiConn(bool useThreadedMultiConnType);
+		void startPollingThread();
+		void stopPollingThread();
 	public:
 		HttpServer(int port);
 		virtual ~HttpServer();
+
+		void setUseThreadedMultiConnType(bool use);
 
 		virtual void start();
 		virtual void startAsync();
