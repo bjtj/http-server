@@ -68,15 +68,6 @@ namespace HTTP {
         }
     };
 
-	const int HttpRequestStatus::IDLE_STATUS = 0;
-    const int HttpRequestStatus::CONNECTING_STATUS = 1;
-    const int HttpRequestStatus::SEND_REQUEST_HEADER_STATUS = 2;
-    const int HttpRequestStatus::SEND_REQUEST_CONTENT_STATUS = 3;
-    const int HttpRequestStatus::RECV_RESPONSE_HEADER_STATUS = 4;
-    const int HttpRequestStatus::RECV_RESPONSE_CONTENT_STATUS = 5;
-    const int HttpRequestStatus::DONE_STATUS = 6;
-    const int HttpRequestStatus::ERROR_STATUS = 7;
-
 	/**
 	 * @brief http client
 	 */
@@ -184,7 +175,7 @@ namespace HTTP {
     
     template<typename T>
     void HttpClient<T>::request(Url & url, T userData) {
-        std::map<std::string, std::string> empty;
+        StringMap empty;
         request(url, "GET", empty, NULL, 0, userData);
     }
     
