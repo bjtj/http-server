@@ -50,16 +50,16 @@ namespace HTTP {
     private:
         int status;
     public:
-        static const int IDLE = 0;
-        static const int CONNECTING = 1;
-        static const int SEND_REQUEST_HEADER = 2;
-        static const int SEND_REQUEST_CONTENT = 3;
-        static const int RECV_RESPONSE_HEADER = 4;
-        static const int RECV_RESPONSE_CONTENT = 5;
-        static const int DONE = 6;
-        static const int ERROR = 7;
+        static const int IDLE_STATUS;
+        static const int CONNECTING_STATUS;
+        static const int SEND_REQUEST_HEADER_STATUS;
+        static const int SEND_REQUEST_CONTENT_STATUS;
+        static const int RECV_RESPONSE_HEADER_STATUS;
+        static const int RECV_RESPONSE_CONTENT_STATUS;
+        static const int DONE_STATUS;
+        static const int ERROR_STATUS;
     public:
-        HttpRequestStatus() : status(IDLE) {}
+        HttpRequestStatus() : status(IDLE_STATUS) {}
         virtual ~HttpRequestStatus() {}
         void setStatus(int status) {this->status = status;}
         int getStatus() {return status;}
@@ -67,6 +67,15 @@ namespace HTTP {
             return this->status == status;
         }
     };
+
+	const int HttpRequestStatus::IDLE_STATUS = 0;
+    const int HttpRequestStatus::CONNECTING_STATUS = 1;
+    const int HttpRequestStatus::SEND_REQUEST_HEADER_STATUS = 2;
+    const int HttpRequestStatus::SEND_REQUEST_CONTENT_STATUS = 3;
+    const int HttpRequestStatus::RECV_RESPONSE_HEADER_STATUS = 4;
+    const int HttpRequestStatus::RECV_RESPONSE_CONTENT_STATUS = 5;
+    const int HttpRequestStatus::DONE_STATUS = 6;
+    const int HttpRequestStatus::ERROR_STATUS = 7;
 
 	/**
 	 * @brief http client
@@ -233,35 +242,35 @@ namespace HTTP {
     void HttpClient<T>::poll(unsigned long timeout) {
         
         switch (status) {
-            case HttpRequestStatus::IDLE:
+            case HttpRequestStatus::IDLE_STATUS:
             {
-                status = HttpRequestStatus::CONNECTING;
+                status = HttpRequestStatus::CONNECTING_STATUS;
             }
                 break;
-            case HttpRequestStatus::CONNECTING:
+            case HttpRequestStatus::CONNECTING_STATUS:
             {
                 socket = connect(url);
-                status = HttpRequestStatus::SEND_REQUEST_HEADER;
+                status = HttpRequestStatus::SEND_REQUEST_HEADER_STATUS;
             }
                 break;
-            case HttpRequestStatus::SEND_REQUEST_HEADER:
+            case HttpRequestStatus::SEND_REQUEST_HEADER_STATUS:
             {
                 sendRequestHeaderWithContentLength(*socket, requestHeader, dataLen);
-                status = HttpRequestStatus::SEND_REQUEST_CONTENT;
+                status = HttpRequestStatus::SEND_REQUEST_CONTENT_STATUS;
             }
                 break;
-            case HttpRequestStatus::SEND_REQUEST_CONTENT:
+            case HttpRequestStatus::SEND_REQUEST_CONTENT_STATUS:
             {
                 sendRequestContent(*socket, data, dataLen);
-                status = HttpRequestStatus::RECV_RESPONSE_HEADER;
+                status = HttpRequestStatus::RECV_RESPONSE_HEADER_STATUS;
             }
                 break;
-            case HttpRequestStatus::RECV_RESPONSE_HEADER:
+            case HttpRequestStatus::RECV_RESPONSE_HEADER_STATUS:
             {
                 char ch;
                 int len = socket->recv(&ch, sizeof(char));
                 if (len < 0) {
-                    status = HttpRequestStatus::ERROR;
+                    status = HttpRequestStatus::ERROR_STATUS;
                     break;
                 }
                 responseHeaderReader.read(&ch, sizeof(char));
@@ -269,33 +278,33 @@ namespace HTTP {
                     HttpHeader & header = responseHeaderReader.getHeader();
                     if (checkIf302(header)) {
                         url.setPath(header["Location"]);
-                        status = HttpRequestStatus::SEND_REQUEST_HEADER;
+                        status = HttpRequestStatus::SEND_REQUEST_HEADER_STATUS;
                     } else if (header.getContentLength() > 0) {
                         readTotalLen = header.getContentLength();
-                        status = HttpRequestStatus::RECV_RESPONSE_CONTENT;
+                        status = HttpRequestStatus::RECV_RESPONSE_CONTENT_STATUS;
                     } else {
-                        status = HttpRequestStatus::DONE;
+                        status = HttpRequestStatus::DONE_STATUS;
                     }
                 }
             }
                 break;
-            case HttpRequestStatus::RECV_RESPONSE_CONTENT:
+            case HttpRequestStatus::RECV_RESPONSE_CONTENT_STATUS:
             {
                 char buffer[1024] = {0,};
                 int len = socket->recv(buffer, sizeof(buffer));
                 if (len < 0) {
-                    status = HttpRequestStatus::ERROR;
+                    status = HttpRequestStatus::ERROR_STATUS;
                     break;
                 }
                 
                 readLen += len;
                 
                 if (readLen >= readTotalLen) {
-                    status = HttpRequestStatus::DONE;
+                    status = HttpRequestStatus::DONE_STATUS;
                 }
             }
                 break;
-            case HttpRequestStatus::DONE:
+            case HttpRequestStatus::DONE_STATUS:
                 break;
             default:
                 break;

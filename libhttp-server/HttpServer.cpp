@@ -1,4 +1,6 @@
 #include "HttpServer.hpp"
+#include "MultiConnMultiplexServer.hpp"
+#include "MultiConnThreadedServer.hpp"
 
 namespace HTTP {
 
@@ -24,6 +26,7 @@ namespace HTTP {
 	 */
 	HttpServer::HttpServer(int port) : thread(NULL) {
 		conn = new MultiConnThreadedServer(port);
+		//conn = new MultiConnMultiplexServer(port);
 		conn->setProtocol(this);
 	}
 	HttpServer::~HttpServer() {

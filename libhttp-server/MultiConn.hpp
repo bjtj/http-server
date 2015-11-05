@@ -37,6 +37,7 @@ namespace HTTP {
 	 */
 	class ClientSession {
 	private:
+		int id;
 		OS::Socket * socket;
 		int bufferSize;
 		int maxBufferSize;
@@ -50,6 +51,9 @@ namespace HTTP {
 		void setBufferSize(int bufferSize);
 		int getBufferSize();
 		int getMaxBufferSize();
+
+		bool isClosed();
+		void close();
 
 		bool operator==(const ClientSession &other) const;
 	};
@@ -122,7 +126,6 @@ namespace HTTP {
 		virtual bool isRunning() = 0;
 
 		virtual bool isClientDisconnected(ClientSession & client) = 0;
-		virtual void disconnect(ClientSession & client) = 0;
 
 		virtual void onClientConnect(ClientSession & client);
 		virtual void onClientReceive(ClientSession & client, Packet & packet);
@@ -133,80 +136,6 @@ namespace HTTP {
 		void setOnDisconnectListener(OnDisconnectListener * onDisconnectListener);
 
 		void setProtocol(MultiConnProtocol * protocol);
-	};
-
-
-	/**
-	 * @brief multi connection server
-	 */
-	class MultiConnMultiplexServer : public MultiConn {
-	private:
-		int port;
-
-		OS::Selector selector;
-		std::map<int, ClientSession*> clients;
-		OS::ServerSocket * server;
-
-	public:
-		MultiConnMultiplexServer(int port);
-		virtual ~MultiConnMultiplexServer();
-
-		virtual void start();
-		virtual void poll(unsigned long timeout_milli);
-		virtual void stop();
-		virtual bool isRunning();
-
-		virtual bool isClientDisconnected(ClientSession & client);
-		virtual void disconnect(ClientSession & client);
-
-		virtual void onClientConnect(ClientSession & client);
-		virtual void onClientReceive(ClientSession & client, Packet & packet);
-		virtual void onClientDisconnect(ClientSession & client);
-	};
-
-	/**
-	 * @brief client thread
-	 */
-	class ClientHandlerThread : public OS::Thread {
-	private:
-		MultiConnThreadedServer & server;
-		ClientSession & client;
-		
-	public:
-		ClientHandlerThread(MultiConnThreadedServer & server, ClientSession & client);
-		virtual ~ClientHandlerThread();
-		virtual void run();
-		ClientSession & getClient();
-		void quit();
-	};
-	
-	/**
-	 * @brief multi conn threaded server
-	 */
-	class MultiConnThreadedServer : public MultiConn {
-	private:
-		int port;
-		OS::Selector selector;
-        std::map<int, ClientHandlerThread *> clients;
-		OS::ServerSocket * server;
-		
-	public:
-		MultiConnThreadedServer(int port);
-		virtual ~MultiConnThreadedServer();
-
-		virtual void start();
-		virtual void poll(unsigned long timeout_milli);
-		virtual void stop();
-		virtual bool isRunning();
-
-		void releaseInvalidThreads();
-
-		virtual bool isClientDisconnected(ClientSession & client);
-		virtual void disconnect(ClientSession & client);
-
-		virtual void onClientConnect(ClientSession & client);
-		virtual void onClientReceive(ClientSession & client, Packet & packet);
-		virtual void onClientDisconnect(ClientSession & client);
 	};
 
 }

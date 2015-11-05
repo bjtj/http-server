@@ -40,7 +40,7 @@ namespace HTTP {
 			onRequest(*request, *response);
 
 			if (response->hasComplete()) {
-                client.getSocket()->close();
+				client.close();
             }
 		}
 	}
