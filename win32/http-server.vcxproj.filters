@@ -60,9 +60,6 @@
     <ClInclude Include="..\libhttp-server\Url.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\libhttp-server\Logger.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\libhttp-server\ChunkedReader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -114,9 +111,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\libhttp-server\Url.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\libhttp-server\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\libhttp-server\ChunkedReader.cpp">

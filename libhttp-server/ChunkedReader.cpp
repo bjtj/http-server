@@ -3,14 +3,14 @@
 #include <liboslayer/Text.hpp>
 #include <string>
 
-#include "Logger.hpp"
+#include <liboslayer/Logger.hpp>
 
 namespace HTTP {
 
 	using namespace std;
 	using namespace UTIL;
 
-	static Logger & logger = Logger::getLogger();
+	static const Logger & logger = LoggerFactory::getDefaultLogger();
 
 	/**
 	 * @brief Chunked Read Buffer

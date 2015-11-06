@@ -1,7 +1,7 @@
 #include <liboslayer/Text.hpp>
 #include "HttpClient.hpp"
 #include "ChunkedReader.hpp"
-#include "Logger.hpp"
+#include <liboslayer/Logger.hpp>
 
 using namespace std;;
 using namespace OS;
@@ -9,7 +9,7 @@ using namespace UTIL;
 
 namespace HTTP {
 
-	static Logger & logger = Logger::getLogger();
+	static const Logger & logger = LoggerFactory::getDefaultLogger();
     
     HttpResponseDump::HttpResponseDump() {
         

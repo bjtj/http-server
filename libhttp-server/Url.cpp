@@ -1,5 +1,5 @@
 #include <liboslayer/Text.hpp>
-#include "Logger.hpp"
+#include <liboslayer/Logger.hpp>
 
 #include "Url.hpp"
 
@@ -8,7 +8,7 @@ namespace HTTP {
 	using namespace std;
     using namespace UTIL;
 
-	static Logger & logger = Logger::getLogger();
+	static const Logger & logger = LoggerFactory::getDefaultLogger();
 
     Url::Url() {
     }
@@ -143,10 +143,10 @@ namespace HTTP {
 	}
 
 	void Url::clear() {
-		scheme = "";
-		host = "";
-		port = "";
-		path = "";
+		scheme.clear();
+		host.clear();
+		port.clear();
+		path.clear();
 		params.clear();
 	}
 

@@ -25,7 +25,6 @@
     <ClInclude Include="..\libhttp-server\HttpServer.hpp" />
     <ClInclude Include="..\libhttp-server\HttpStatusCodes.hpp" />
     <ClInclude Include="..\libhttp-server\InetAddress.hpp" />
-    <ClInclude Include="..\libhttp-server\Logger.hpp" />
     <ClInclude Include="..\libhttp-server\MultiConn.hpp" />
     <ClInclude Include="..\libhttp-server\MultiConnMultiplexServer.hpp" />
     <ClInclude Include="..\libhttp-server\MultiConnThreadedServer.hpp" />
@@ -45,7 +44,6 @@
     <ClCompile Include="..\libhttp-server\HttpResponse.cpp" />
     <ClCompile Include="..\libhttp-server\HttpServer.cpp" />
     <ClCompile Include="..\libhttp-server\HttpStatusCodes.cpp" />
-    <ClCompile Include="..\libhttp-server\Logger.cpp" />
     <ClCompile Include="..\libhttp-server\MultiConn.cpp" />
     <ClCompile Include="..\libhttp-server\MultiConnMultiplexServer.cpp" />
     <ClCompile Include="..\libhttp-server\MultiConnThreadedServer.cpp" />
