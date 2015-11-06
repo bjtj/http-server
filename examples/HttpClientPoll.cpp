@@ -29,11 +29,17 @@ public:
     MyHttpClientPollListener() {}
     virtual ~MyHttpClientPollListener() {}
     virtual void onResponseHeader(const HttpHeader & responseHeader, int userData) {
-        
+		cout << responseHeader.toString() << endl;
     }
     virtual void onResponseDataChunk(const char * data, size_t len, int userData) {
         cout << string(data,len) << endl;
     }
+	virtual void onComplete() {
+		cout << "done" << endl;
+	}
+	virtual void onError() {
+		cout << "error" << endl;
+	}
 };
 
 int main(int argc, char * args[]) {
@@ -47,7 +53,11 @@ int main(int argc, char * args[]) {
     MyHttpClientPollListener pollListener;
     client.setHttpClientPollListener(&pollListener);
 
-	client.requestStart(Url("http://www.example.com"), "GET", StringMap(), NULL, 0, 0);
+	// client.requestStart(Url("http://www.example.com"), "GET", StringMap(), NULL, 0, 0);
+	//client.requestStart(Url("http://192.168.0.2:54030/"), "GET", StringMap(), NULL, 0, 0);
+	//client.requestStart(Url("http://192.168.0.2:51001/"), "GET", StringMap(), NULL, 0, 0);
+	client.requestStart(Url("http://www.google.com/"), "GET", StringMap(), NULL, 0, 0);
+	
     while (!done) {
         client.poll(1000);
     }

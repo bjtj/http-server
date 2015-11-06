@@ -11,66 +11,136 @@ namespace HTTP {
 	using namespace UTIL;
 
 	static Logger & logger = Logger::getLogger();
-	
+
+	/**
+	 * @brief Chunked Read Buffer
+	 */
+	ChunkedReaderBuffer::ChunkedReaderBuffer() : chunkDataBuffer(NULL) {
+		clear();
+	}
+	ChunkedReaderBuffer::~ChunkedReaderBuffer() {
+		clear();
+	}
+
+	void ChunkedReaderBuffer::clear() {
+		chunkSizeBuffer.clear();
+		if (chunkDataBuffer) {
+			delete [] chunkDataBuffer;
+		}
+		chunkDataBuffer = NULL;
+		chunkSize = 0;
+		chunkSizeRecognized = false;
+		chunkDataReadPosition = 0;
+	}
+	void ChunkedReaderBuffer::readChunkSize(char ch) {
+		chunkSizeBuffer.append(1, ch);
+		if (Text::endsWith(chunkSizeBuffer, "\r\n")) {
+			chunkSize = Text::toInt(chunkSizeBuffer, 16);
+			chunkDataBuffer = new char[chunkSize];
+			chunkSizeRecognized = true;
+		}
+	}
+	void ChunkedReaderBuffer::readChunkData(const char * data, size_t len) {
+		size_t remain = remainingDataBuffer();
+		size_t writeSize = (len < remain ? len : remain);
+		memcpy(chunkDataBuffer + chunkDataReadPosition, data, writeSize);
+		chunkDataReadPosition += writeSize;
+	}
+	size_t ChunkedReaderBuffer::remainingDataBuffer() const {
+		return (chunkDataReadPosition <= chunkSize ? chunkSize - chunkDataReadPosition : 0);
+	}
+	bool ChunkedReaderBuffer::hasSizeRecognized() const {
+		return chunkSizeRecognized;
+	}
+	bool ChunkedReaderBuffer::completeData() const {
+		return (remainingDataBuffer() == 0);
+	}
+	int ChunkedReaderBuffer::getChunkSize() const {
+		return chunkSize;
+	}
+	const char * ChunkedReaderBuffer::getChunkData() const {
+		return chunkDataBuffer;
+	}
+
+	size_t ChunkedReaderBuffer::getReadSize(size_t bufferSize) const {
+		size_t remain = remainingDataBuffer();
+		return bufferSize > remain ? remain : bufferSize;
+	}
+
+	/**
+	 * @brief consume
+	 */
+	ConsumeBuffer::ConsumeBuffer(size_t maxSize) : pos(0), maxSize(maxSize) {
+	}
+	ConsumeBuffer::~ConsumeBuffer() {
+	}
+
+	void ConsumeBuffer::clear() {
+		pos = 0;
+	}
+	void ConsumeBuffer::read(size_t len) {
+		size_t writeSize = len < remaining() ? len : remaining();
+		pos += writeSize;
+	}
+	size_t ConsumeBuffer::remaining() {
+		return (pos < maxSize ? maxSize - pos : 0);
+	}
+	bool ConsumeBuffer::complete() {
+		return remaining() == 0;
+	}
+
+	void ConsumeBuffer::setMaxSize(size_t maxSize) {
+		this->maxSize = maxSize;
+	}
+
+
+	/**
+	 * @brief Chunked Reader
+	 */
 	ChunkedReader::ChunkedReader(OS::Socket & socket) : socket(socket) {
 	}
 	
 	ChunkedReader::~ChunkedReader() {
 	}
-	
+	size_t ChunkedReader::minSize(size_t a, size_t b) {
+		return (a < b ? a : b);
+	}
 	int ChunkedReader::readChunkSize() {
 		char ch;
-		string buf;
 		int len;
+		chunkedBuffer.clear();
 		while ((len = socket.recv(&ch, 1)) > 0) {
-			size_t f;
-			buf.append(&ch, 1);
-			f = buf.find("\r\n");
-			if (f != string::npos) {
-				return Text::toInt(buf, 16);
+			chunkedBuffer.readChunkSize(ch);
+			if (chunkedBuffer.hasSizeRecognized()) {
+				return chunkedBuffer.getChunkSize();
 			}
 		}
 		return 0;
 	}
-	int ChunkedReader::readChunkData(int chunkSize, char * out, int max) {
-		
+	size_t ChunkedReader::readChunkData(char * out, size_t maxSize) {
+
 		int len = 0;
-		char readBuf[1024] = {0,};
-		int readSize;
-		int readPos = 0;
-		int writePos = 0;
-		
-		while (readSize = calcBufferedSize(chunkSize + 2, readPos, sizeof(readBuf)),
-			   (readSize > 0) && ((len = socket.recv(readBuf, readSize)) > 0)) {
-
-			readPos += len;
-
-			int writeSize = calcBufferedSize(max, writePos, len);
-			if (writeSize > 0) {
-				memcpy(out + writePos, readBuf, writeSize);
-				writePos += len;
-			} else {
-				writePos = max;
+		if (chunkedBuffer.getChunkSize() > 0) {
+			char readBuffer[1024] = {0,};
+			while (!chunkedBuffer.completeData() && (len = socket.recv(readBuffer, chunkedBuffer.getReadSize(sizeof(readBuffer)))) > 0) {
+				chunkedBuffer.readChunkData(readBuffer, len);
 			}
 		}
 
-		if (readPos >= 2 && writePos > readPos - 2) {
-			writePos = readPos - 2;
+		// read trailing \r\n
+		ConsumeBuffer consume(2);
+		char ch;
+		while (!consume.complete() && (len = socket.recv(&ch, 1)) > 0) {
+			consume.read(len);
 		}
 
-		return writePos;
-	}
-	int ChunkedReader::read(char * buffer, int max) {
-		int size = readChunkSize();
-		return readChunkData(size, buffer, max);
-	}
+		size_t writeSize = minSize(maxSize, chunkedBuffer.getChunkSize());
+		memcpy(out, chunkedBuffer.getChunkData(), writeSize);
 
-	int ChunkedReader::calcBufferedSize(int max, int pos, int bufferSize) {
-		if (pos + bufferSize > max) {
-			int ret = bufferSize - (pos + bufferSize - max);
-			return ret;
-		}
-
-		return bufferSize;
+		return writeSize;
+	}
+	size_t ChunkedReader::read(char * buffer, size_t max) {
+		readChunkSize();
+		return readChunkData(buffer, max);
 	}
 }

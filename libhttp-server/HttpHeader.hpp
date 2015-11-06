@@ -21,7 +21,7 @@ namespace HTTP {
 		std::string part1;
 		std::string part2;
 		std::string part3;
-		mutable std::map<std::string, std::string> fields;
+		std::map<std::string, std::string> fields;
 		std::map<std::string, HttpParameter> params;
 		
 	public:
@@ -30,6 +30,8 @@ namespace HTTP {
 		virtual ~HttpHeader();
 
 		virtual bool isValid();
+
+		void clear();
 		
 		virtual void setFirstLine(std::string & firstline);
 		virtual void setParts(std::vector<std::string> & parts);
@@ -41,10 +43,10 @@ namespace HTTP {
 		virtual void setPart2(std::string part);
 		virtual void setPart3(std::string part);
 
-		std::string makeFirstLine();
+		std::string makeFirstLine() const;
 		
-		virtual std::string & getHeaderField(const std::string & name) const;
-		virtual std::string & getHeaderFieldIgnoreCase(const std::string & name) const;
+		virtual std::string & getHeaderField(const std::string & name);
+		virtual std::string & getHeaderFieldIgnoreCase(const std::string & name);
 		virtual int getHeaderFieldAsInteger(std::string name);
 		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name);
 		virtual void setHeaderField(std::string name, std::string value);
@@ -65,9 +67,9 @@ namespace HTTP {
 		virtual std::vector<std::string> getParameters(std::string name);
 		virtual void setParameter(std::string name, std::string value);
 
-		virtual std::string toString();
+		virtual std::string toString() const;
 
-		std::string operator[] (const std::string & headerFieldName) const;
+		std::string operator[] (const std::string & headerFieldName);
 	};
 
 	/**

@@ -1,5 +1,4 @@
 #include <iostream>
-#include <libhttp-server/Http.hpp>
 #include <libhttp-server/HttpClient.hpp>
 #include <libhttp-server/ChunkedReader.hpp>
 
@@ -14,47 +13,11 @@ public:
     virtual ~MyResponseHandler() {
 	}
 
-	virtual void onResponse(HttpClient<int> & httpClient, HttpHeader & responseHeader, OS::Socket & socket,
-							int userData) {
+	virtual void onResponse(HttpClient<int> & httpClient, HttpHeader & responseHeader, OS::Socket & socket, int userData) {
 
-		if (responseHeader.isChunkedTransfer()) {
+		string dump = HttpResponseDump::dump(responseHeader, socket);
 
-			ChunkedReader reader(socket);
-
-			while (1) {
-				int size = reader.readChunkSize();
-				char * buffer = (char*)malloc(size);
-				int len = reader.readChunkData(size, buffer, size);
-				string msg(buffer, len);
-				cout << msg;
-				free(buffer);
-
-				if (len == 0) {
-					break;
-				}
-			}
-			
-		} else {
-			
-			int total = 0;
-			char buffer[1024] = {0,};
-			int len;
-			int contentLength = responseHeader.getHeaderFieldIgnoreCaseAsInteger("Content-Length");
-
-			cout << responseHeader.toString();
-		
-			while ((len = socket.recv(buffer, sizeof(buffer))) > 0) {
-				total += len;
-				if (total > contentLength) {
-					len -= (total - contentLength);
-				}
-				string msg(buffer, len);
-				cout << msg;
-				if (total >= contentLength) {
-					break;
-				}
-			}
-		}
+		cout << dump << endl;
 	}
 };
 
@@ -104,4 +67,6 @@ void test_request(Url & url) {
 	client.setHttpResponseHandler(&handler);
 	client.setFollowRedirect(true);
 	client.request(url, 0);
+
+	getchar();
 }

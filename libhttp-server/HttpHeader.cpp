@@ -20,6 +20,15 @@ namespace HTTP {
 	bool HttpHeader::isValid() {
 		return valid;
 	}
+	void HttpHeader::clear() {
+		valid = false;
+		firstline.clear();
+		part1.clear();
+		part2.clear();
+		part3.clear();
+		fields.clear();
+		params.clear();
+	}
 	void HttpHeader::setFirstLine(string & firstline) {
 		this->firstline = firstline;
 	}
@@ -51,13 +60,13 @@ namespace HTTP {
 	void HttpHeader::setPart3(string part) {
 		part3 = part;
 	}
-	string HttpHeader::makeFirstLine() {
+	string HttpHeader::makeFirstLine() const {
 		return (part1 + " " + part2 + " " + part3);
 	}
-	string & HttpHeader::getHeaderField(const string & name) const {
+	string & HttpHeader::getHeaderField(const string & name) {
 		return fields[name];
 	}
-	string & HttpHeader::getHeaderFieldIgnoreCase(const string & name) const {
+	string & HttpHeader::getHeaderFieldIgnoreCase(const string & name) {
 		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
 			if (Text::equalsIgnoreCase(iter->first, name)) {
 				return iter->second;
@@ -133,16 +142,16 @@ namespace HTTP {
 		}
 		params[name].appendValue(value);
 	}
-	string HttpHeader::toString() {
+	string HttpHeader::toString() const {
 		string ret = makeFirstLine() + "\r\n";
-		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
+		for (map<string, string>::const_iterator iter = fields.begin(); iter != fields.end(); iter++) {
 			ret += (iter->first + ": " + iter->second + "\r\n");
 		}
 		ret += "\r\n";
 		return ret;
 	}
 
-	string HttpHeader::operator[] (const string & headerFieldName) const {
+	string HttpHeader::operator[] (const string & headerFieldName) {
 		return getHeaderFieldIgnoreCase(headerFieldName);
 	}
 

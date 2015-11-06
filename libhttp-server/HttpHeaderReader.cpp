@@ -14,6 +14,9 @@ namespace HTTP {
 	}
 	HttpHeaderReader::~HttpHeaderReader() {
 	}
+	void HttpHeaderReader::clear() {
+		buffer.clear();
+	}
 	bool HttpHeaderReader::complete() {
 		return buffer.find("\r\n\r\n") != string::npos;
 	}

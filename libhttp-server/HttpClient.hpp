@@ -9,6 +9,7 @@
 #include "Url.hpp"
 #include "HttpHeader.hpp"
 #include "HttpHeaderReader.hpp"
+#include "ChunkedReader.hpp"
 
 namespace HTTP {
 
@@ -56,8 +57,11 @@ namespace HTTP {
         static const int SEND_REQUEST_CONTENT_STATUS = 3;
         static const int RECV_RESPONSE_HEADER_STATUS = 4;
         static const int RECV_RESPONSE_CONTENT_STATUS = 5;
-        static const int DONE_STATUS = 6;
-        static const int ERROR_STATUS = 7;
+		static const int RECV_RESPONSE_READ_CHUNK_SIZE_STATUS = 6;
+		static const int RECV_RESPONSE_READ_CHUNK_DATA_STATUS = 7;
+		static const int RECV_RESPONSE_READ_CHUNK_DATA_TRAILING_STATUS = 8;
+        static const int DONE_STATUS = 9;
+        static const int ERROR_STATUS = 10;
     public:
         HttpRequestStatus() : status(IDLE_STATUS) {}
         virtual ~HttpRequestStatus() {}
@@ -83,6 +87,12 @@ namespace HTTP {
                     return "RECV_RESPONSE_HEADER_STATUS";
                 case RECV_RESPONSE_CONTENT_STATUS:
                     return "RECV_RESPONSE_CONTENT_STATUS";
+				case RECV_RESPONSE_READ_CHUNK_SIZE_STATUS:
+					return "RECV_RESPONSE_READ_CHUNK_SIZE_STATUS";
+				case RECV_RESPONSE_READ_CHUNK_DATA_STATUS:
+					return "RECV_RESPONSE_READ_CHUNK_DATA_STATUS";
+				case RECV_RESPONSE_READ_CHUNK_DATA_TRAILING_STATUS:
+					return "RECV_RESPONSE_READ_CHUNK_DATA_TRAILING_STATUS";
                 case DONE_STATUS:
                     return "DONE_STATUS";
                 case ERROR_STATUS:
@@ -106,6 +116,8 @@ namespace HTTP {
         virtual ~HttpClientPollListener() {}
         virtual void onResponseHeader(const HttpHeader & responseHeader, T userData) = 0;
         virtual void onResponseDataChunk(const char * data, size_t len, T userData) = 0;
+		virtual void onComplete() = 0;
+		virtual void onError() = 0;
     };
 
 	/**
@@ -134,6 +146,8 @@ namespace HTTP {
         size_t readLen;
         size_t readTotalLen;
         T userData;
+		ChunkedReaderBuffer chunkedBuffer;
+		ConsumeBuffer consumeBuffer;
 		
 	public:
 		HttpClient();
@@ -179,7 +193,7 @@ namespace HTTP {
     template<typename T>
     HttpClient<T>::HttpClient() :
     sem(1), responseHandler(NULL), socket(NULL), followRedirect(false), pollListener(NULL),
-    data(NULL), dataLen(0), writeLen(0), readLen(0), readTotalLen(0) {
+    data(NULL), dataLen(0), writeLen(0), readLen(0), readTotalLen(0), consumeBuffer(2) {
         
         httpProtocol = "HTTP/1.1";
         defaultHeaderFields["User-Agent"] = "Cross-Platform/0.1 HTTP/1.1 HttpClient/0.1";
@@ -191,8 +205,15 @@ namespace HTTP {
 
 	template<typename T>
     OS::Socket * HttpClient<T>::connect(Url & url) {
-        OS::Socket * socket = new OS::Socket(url.getHost().c_str(), url.getIntegerPort());
-        socket->connect();
+		
+		OS::Socket * socket = new OS::Socket(url.getHost().c_str(), url.getIntegerPort());
+
+		try {
+			socket->connect();
+		} catch (OS::IOException e) {
+			delete socket;
+			socket = NULL;
+		}
         return socket;
     }
 
@@ -311,8 +332,8 @@ namespace HTTP {
     
     template<typename T>
     void HttpClient<T>::poll(unsigned long timeout) {
-        
-//        printf("status: %s\n", HttpRequestStatus::toString(status.getStatus()).c_str());
+
+		//printf("status: %s\n", HttpRequestStatus::toString(status.getStatus()).c_str());
         switch (status.getStatus()) {
             case HttpRequestStatus::IDLE_STATUS:
             {
@@ -356,19 +377,22 @@ namespace HTTP {
                 responseHeaderReader.read(&ch, sizeof(char));
                 if (responseHeaderReader.complete()) {
                     responseHeader = responseHeaderReader.getHeader();
+					responseHeaderReader.clear();
+					if (pollListener) {
+                        pollListener->onResponseHeader(responseHeader, userData);
+                    }
+
                     if (checkIf302(responseHeader)) {
                         url.setPath(responseHeader["Location"]);
+						requestHeader.setPart2(url.getPath());
                         status = HttpRequestStatus::SEND_REQUEST_HEADER_STATUS;
-                    } else if (responseHeader.getContentLength() > 0) {
+                    } else if (responseHeader.isChunkedTransfer()) {
+						chunkedBuffer.clear();
+						status = HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_SIZE_STATUS;
+					} else if (responseHeader.getContentLength() > 0) {
                         readTotalLen = responseHeader.getContentLength();
-                        if (pollListener) {
-                            pollListener->onResponseHeader(responseHeader, userData);
-                        }
                         status = HttpRequestStatus::RECV_RESPONSE_CONTENT_STATUS;
                     } else {
-                        if (pollListener) {
-                            pollListener->onResponseHeader(responseHeader, userData);
-                        }
                         status = HttpRequestStatus::DONE_STATUS;
                     }
                 }
@@ -396,13 +420,92 @@ namespace HTTP {
                 }
             }
                 break;
+			case HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_SIZE_STATUS:
+			{
+				char ch;
+				if (selector.select(timeout) <= 0) {
+                    break;
+                }
+                int len = socket->recv(&ch, sizeof(char));
+                if (len < 0) {
+                    status = HttpRequestStatus::ERROR_STATUS;
+                    break;
+                }
+				chunkedBuffer.readChunkSize(ch);
+				if (chunkedBuffer.hasSizeRecognized()) {
+					status = HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_DATA_STATUS;
+				}
+			}
+				break;
+			case HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_DATA_STATUS:
+			{
+				if (chunkedBuffer.getChunkSize() == 0) {
+					consumeBuffer.clear();
+					consumeBuffer.setMaxSize(2);
+					status = HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_DATA_TRAILING_STATUS;
+					break;
+				}
+				char buffer[4096] = {0,};
+				if (selector.select(timeout) <= 0) {
+                    break;
+                }
+				int len = socket->recv(buffer, chunkedBuffer.getReadSize(sizeof(buffer)));
+                if (len < 0) {
+                    status = HttpRequestStatus::ERROR_STATUS;
+                    break;
+                }
+				chunkedBuffer.readChunkData(buffer, len);
+				if (chunkedBuffer.completeData()) {
+
+					if (pollListener) {
+						pollListener->onResponseDataChunk(chunkedBuffer.getChunkData(), chunkedBuffer.getChunkSize(), userData);
+					}
+
+					consumeBuffer.clear();
+					consumeBuffer.setMaxSize(2);
+					status = HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_DATA_TRAILING_STATUS;
+				}
+			}
+				break;
+			case HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_DATA_TRAILING_STATUS:
+			{
+				char ch;
+				if (selector.select(timeout) <= 0) {
+                    break;
+                }
+                int len = socket->recv(&ch, sizeof(char));
+                if (len < 0) {
+                    status = HttpRequestStatus::ERROR_STATUS;
+                    break;
+                }
+				consumeBuffer.read(len);
+				if (consumeBuffer.complete()) {
+					if (chunkedBuffer.getChunkSize() == 0) {
+						status = HttpRequestStatus::DONE_STATUS;
+					} else {
+						chunkedBuffer.clear();
+						status = HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_SIZE_STATUS;
+					}
+				}
+			}
+				break;
             case HttpRequestStatus::DONE_STATUS:
+			{
+				if (pollListener) {
+                    pollListener->onComplete();
+                }
                 disconnect();
                 status = HttpRequestStatus::IDLE_STATUS;
+			}
                 break;
             case HttpRequestStatus::ERROR_STATUS:
+			{
+				if (pollListener) {
+                    pollListener->onError();
+                }
                 disconnect();
                 status = HttpRequestStatus::IDLE_STATUS;
+			}
                 break;
             default:
                 break;

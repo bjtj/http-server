@@ -28,7 +28,7 @@ namespace HTTP {
             int size = 0;
             while ((size = reader.readChunkSize()) > 0) {
                 char * buffer = new char[size];
-                int len = reader.readChunkData(size, buffer, size);
+                int len = reader.readChunkData(buffer, size);
                 string chunk(buffer, len);
                 delete buffer;
                 

@@ -23,6 +23,7 @@ namespace HTTP {
 		HttpHeaderReader();
 		virtual ~HttpHeaderReader();
 
+		void clear();
 		bool complete();
 		int cutEndPos();
 		void append(char * data, int size);
