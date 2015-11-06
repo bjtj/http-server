@@ -47,6 +47,7 @@ namespace HTTP {
 		
 		virtual std::string & getHeaderField(const std::string & name);
 		virtual std::string & getHeaderFieldIgnoreCase(const std::string & name);
+		virtual const std::string & getHeaderFieldIgnoreCase(const std::string & name) const;
 		virtual int getHeaderFieldAsInteger(std::string name);
 		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name);
 		virtual void setHeaderField(std::string name, std::string value);
@@ -70,6 +71,7 @@ namespace HTTP {
 		virtual std::string toString() const;
 
 		std::string operator[] (const std::string & headerFieldName);
+		std::string operator[] (const std::string & headerFieldName) const;
 	};
 
 	/**

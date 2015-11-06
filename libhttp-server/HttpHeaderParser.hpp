@@ -20,11 +20,13 @@ namespace HTTP {
 		int errorCode;
 		std::string errorMessage;
         HttpHeader header;
+
 	public:
 		HttpHeaderParseResult();
 		HttpHeaderParseResult(bool success, int errorCode, std::string errorMessage);
 		virtual ~HttpHeaderParseResult();
 
+		void clear();
 		int setResult(bool success, int errorCode, std::string errorMessage);
 		HttpHeader & getHeader();
 		bool succeeded();

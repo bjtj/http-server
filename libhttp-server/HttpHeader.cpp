@@ -7,6 +7,8 @@ namespace HTTP {
 	using namespace std;
 	using namespace UTIL;
 
+	static string EMPTY_STRING;
+
 	/**
 	 * @brief http header constructor
 	 */
@@ -73,6 +75,14 @@ namespace HTTP {
 			}
 		}
 		return fields[name];
+	}
+	const string & HttpHeader::getHeaderFieldIgnoreCase(const string & name) const {
+		for (map<string, string>::const_iterator iter = fields.begin(); iter != fields.end(); iter++) {
+			if (Text::equalsIgnoreCase(iter->first, name)) {
+				return iter->second;
+			}
+		}
+		return EMPTY_STRING;
 	}
 	int HttpHeader::getHeaderFieldAsInteger(string name) {
 		return Text::toInt(getHeaderField(name));
@@ -154,7 +164,10 @@ namespace HTTP {
 	string HttpHeader::operator[] (const string & headerFieldName) {
 		return getHeaderFieldIgnoreCase(headerFieldName);
 	}
-
+	
+	string HttpHeader::operator[] (const string & headerFieldName) const {
+		return getHeaderFieldIgnoreCase(headerFieldName);
+	}
 
 	/**
 	 * @brief http request header

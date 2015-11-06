@@ -38,10 +38,10 @@ namespace HTTP {
 		HttpResponseHandler() {}
 		virtual ~HttpResponseHandler() {}
 
-		virtual void onResponse(HttpClient<T> & httpClient,
-                                HttpHeader & responseHeader,
-                                OS::Socket & socket,
-                                T userData) = 0;
+		virtual void onHttpResponse(HttpClient<T> & httpClient,
+			HttpHeader & responseHeader,
+			OS::Socket & socket,
+			T userData) = 0;
 	};
     
     /**
@@ -292,7 +292,7 @@ namespace HTTP {
             }
             
             if (responseHandler) {
-                responseHandler->onResponse(*this, responseHeader, *socket, userData);
+                responseHandler->onHttpResponse(*this, responseHeader, *socket, userData);
             }
             
             // auto disconnect will remove socket

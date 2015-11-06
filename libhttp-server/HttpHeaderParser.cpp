@@ -17,6 +17,14 @@ namespace HTTP {
 	}
 	HttpHeaderParseResult::~HttpHeaderParseResult() {
 	}
+
+	void HttpHeaderParseResult::clear() {
+		success = false;
+		errorCode = 0;
+		errorMessage.clear();
+        header.clear();
+	}
+
 	int HttpHeaderParseResult::setResult(bool success, int errorCode, string errorMessage) {
 		this->success = success;
 		this->errorCode = errorCode;
@@ -45,6 +53,7 @@ namespace HTTP {
 	}
 	int HttpHeaderParser::parse(const string & rawHeader) {
 
+		result.clear();
 		HttpHeader & httpHeader = result.getHeader();
 		
 		size_t f = 0;
