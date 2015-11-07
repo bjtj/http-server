@@ -25,10 +25,10 @@ namespace HTTP {
         
         if (responseHeader.isChunkedTransfer()) {
             ChunkedReader reader(socket);
-            int size = 0;
+            size_t size = 0;
             while ((size = reader.readChunkSize()) > 0) {
                 char * buffer = new char[size];
-                int len = reader.readChunkData(buffer, size);
+                size_t len = reader.readChunkData(buffer, size);
                 string chunk(buffer, len);
                 delete buffer;
                 

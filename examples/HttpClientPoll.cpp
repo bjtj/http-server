@@ -10,34 +10,24 @@ using namespace HTTP;
 using namespace OS;
 using namespace UTIL;
 
-class MyHttpResponseHandler : public HttpResponseHandler<int> {
-private:
-public:
-	MyHttpResponseHandler() {
-	}
-	virtual ~MyHttpResponseHandler() {
-	}
-	virtual void onResponse(HttpClient<int> & httpClient, HttpHeader & responseHeader, OS::Socket & socket, int userData) {
-		string dump = HttpResponseDump::dump(responseHeader, socket);
-		cout << dump << endl;
-	}
-};
-
 class MyHttpClientPollListener : public HttpClientPollListener<int> {
 private:
 public:
     MyHttpClientPollListener() {}
     virtual ~MyHttpClientPollListener() {}
-    virtual void onResponseHeader(const HttpHeader & responseHeader, int userData) {
+    virtual void onRequestHeader(HttpClient<int> & httpClient, const HttpHeader & requestHeader, int userData) {
+        cout << requestHeader.toString() << endl;
+    }
+    virtual void onResponseHeader(HttpClient<int> & httpClient, const HttpHeader & responseHeader, int userData) {
 		cout << responseHeader.toString() << endl;
     }
-    virtual void onResponseDataChunk(const char * data, size_t len, int userData) {
+    virtual void onResponseDataChunk(HttpClient<int> & httpClient, const HttpHeader & responseHeader, const char * data, size_t len, int userData) {
         cout << string(data,len) << endl;
     }
-	virtual void onComplete() {
+	virtual void onComplete(HttpClient<int> & httpClient) {
 		cout << "done" << endl;
 	}
-	virtual void onError() {
+	virtual void onError(HttpClient<int> & httpClient) {
 		cout << "error" << endl;
 	}
 };
@@ -47,8 +37,7 @@ int main(int argc, char * args[]) {
     bool done = false;
 	HttpClient<int> client;
     
-//	MyHttpResponseHandler handler;
-//	client.setHttpResponseHandler(&handler);
+    client.setFollowRedirect(true);
     
     MyHttpClientPollListener pollListener;
     client.setHttpClientPollListener(&pollListener);
@@ -59,6 +48,13 @@ int main(int argc, char * args[]) {
 	client.requestStart(Url("http://www.google.com/"), "GET", StringMap(), NULL, 0, 0);
 	
     while (!done) {
+        
+        if (client.getStatus() == HttpRequestStatus::IDLE_STATUS) {
+            char buffer[4096] = {0,};
+            fgets(buffer, sizeof(buffer), stdin);
+            buffer[strlen(buffer) - 1] = 0;
+            client.requestStart(Url(buffer), "GET", StringMap(), NULL, 0, 0);
+        }
         client.poll(1000);
     }
 

@@ -5,17 +5,38 @@
 #include <string>
 
 namespace HTTP {
+    
+    /**
+     * @brief Chunked Buffer
+     */
+    class ChunkedBuffer {
+    private:
+        char * chunkDataBuffer;
+        size_t chunkSize;
+        size_t chunkDataReadPosition;
+        
+    public:
+        ChunkedBuffer();
+        virtual ~ChunkedBuffer();
+        
+        void clear();
+        void readChunkData(const char * data, size_t len);
+        size_t remainingDataBuffer() const;
+        bool completeData() const;
+        void setChunkSize(size_t size);
+        size_t getChunkSize() const;
+        const char * getChunkData() const;
+        size_t getReadSize(size_t bufferSize) const;
+        size_t getCurrentReadPosition() const;
+    };
 	
 	/**
 	 * @brief Chunked Read Buffer
 	 */
-	class ChunkedReaderBuffer {
+    class ChunkedReaderBuffer : public ChunkedBuffer {
 	private:
 		std::string chunkSizeBuffer;
-		char * chunkDataBuffer;
-		size_t chunkSize;
 		bool chunkSizeRecognized;
-		size_t chunkDataReadPosition;
 
 	public:
 		ChunkedReaderBuffer();
@@ -23,13 +44,7 @@ namespace HTTP {
 
 		void clear();
 		void readChunkSize(char ch);
-		void readChunkData(const char * data, size_t len);
-		size_t remainingDataBuffer() const;
 		bool hasSizeRecognized() const;
-		bool completeData() const;
-		int getChunkSize() const;
-		const char * getChunkData() const;
-		size_t getReadSize(size_t bufferSize) const;
 	};
 
 	/**
@@ -45,10 +60,11 @@ namespace HTTP {
 
 		void clear();
 		void read(size_t len);
-		size_t remaining();
-		bool complete();
+		size_t remaining() const;
+		bool complete() const;
 
 		void setMaxSize(size_t maxSize);
+        size_t getReadSize(size_t bufferSize) const;
 	};
 
 	/**
@@ -64,7 +80,7 @@ namespace HTTP {
 		virtual ~ChunkedReader();
 
 		size_t minSize(size_t a, size_t b);
-		int readChunkSize();
+		size_t readChunkSize();
 		size_t readChunkData(char * out, size_t max);
 		size_t read(char * buffer, size_t max);
 		

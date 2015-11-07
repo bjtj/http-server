@@ -5,20 +5,26 @@
 using namespace std;
 using namespace HTTP;
 
-class MyResponseHandler : public HttpResponseHandler<int> {
+class MyHttpClientPollListener : public HttpClientPollListener<int> {
 private:
 public:
-    MyResponseHandler() {
-	}
-    virtual ~MyResponseHandler() {
-	}
-
-	virtual void onResponse(HttpClient<int> & httpClient, HttpHeader & responseHeader, OS::Socket & socket, int userData) {
-
-		string dump = HttpResponseDump::dump(responseHeader, socket);
-
-		cout << dump << endl;
-	}
+    MyHttpClientPollListener() {}
+    virtual ~MyHttpClientPollListener() {}
+    virtual void onRequestHeader(HttpClient<int> & httpClient, const HttpHeader & requestHeader, int userData) {
+        cout << requestHeader.toString() << endl;
+    }
+    virtual void onResponseHeader(HttpClient<int> & httpClient, const HttpHeader & responseHeader, int userData) {
+        cout << responseHeader.toString() << endl;
+    }
+    virtual void onResponseDataChunk(HttpClient<int> & httpClient, const HttpHeader & responseHeader, const char * data, size_t len, int userData) {
+        cout << string(data,len) << endl;
+    }
+    virtual void onComplete(HttpClient<int> & httpClient) {
+        cout << "done" << endl;
+    }
+    virtual void onError(HttpClient<int> & httpClient) {
+        cout << "error" << endl;
+    }
 };
 
 
@@ -63,8 +69,8 @@ void print_url(Url & url) {
 
 void test_request(Url & url) {
 	HttpClient<int> client;
-	MyResponseHandler handler;
-	client.setHttpResponseHandler(&handler);
+    MyHttpClientPollListener pollListener;
+    client.setHttpClientPollListener(&pollListener);
 	client.setFollowRedirect(true);
 	client.request(url, 0);
 

@@ -67,6 +67,10 @@ namespace HTTP {
 	vector<pair<string, string> > & Url::getParams() {
 		return params;
 	}
+    
+    void Url::setUrl(const string & urlStr) {
+        parseUrlString(urlStr);
+    }
 
 	void Url::parseUrlString(string urlStr) {
 

@@ -68,6 +68,14 @@ namespace HTTP {
 	string & HttpHeader::getHeaderField(const string & name) {
 		return fields[name];
 	}
+    const string & HttpHeader::getHeaderField(const std::string & name) const {
+        for (map<string, string>::const_iterator iter = fields.begin(); iter != fields.end(); iter++) {
+            if (!iter->first.compare(name)) {
+                return iter->second;
+            }
+        }
+        return EMPTY_STRING;
+    }
 	string & HttpHeader::getHeaderFieldIgnoreCase(const string & name) {
 		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
 			if (Text::equalsIgnoreCase(iter->first, name)) {
@@ -84,10 +92,10 @@ namespace HTTP {
 		}
 		return EMPTY_STRING;
 	}
-	int HttpHeader::getHeaderFieldAsInteger(string name) {
+	int HttpHeader::getHeaderFieldAsInteger(string name) const {
 		return Text::toInt(getHeaderField(name));
 	}
-	int HttpHeader::getHeaderFieldIgnoreCaseAsInteger(string name) {
+	int HttpHeader::getHeaderFieldIgnoreCaseAsInteger(string name) const {
 		return Text::toInt(getHeaderFieldIgnoreCase(name));
 	}
 	void HttpHeader::setHeaderField(string name, string value) {
@@ -114,13 +122,13 @@ namespace HTTP {
 		}
 	}
 
-	string HttpHeader::getContentType() {
+	string HttpHeader::getContentType() const {
 		return getHeaderFieldIgnoreCase("Content-Type");
 	}
 	void HttpHeader::setContentType(string contentType) {
 		setHeaderField("Content-Type", contentType);
 	}
-	int HttpHeader::getContentLength() {
+	int HttpHeader::getContentLength() const {
 		return getHeaderFieldIgnoreCaseAsInteger("Content-Length");
 	}
 	void HttpHeader::setContentLength(int contentLength) {
@@ -161,11 +169,11 @@ namespace HTTP {
 		return ret;
 	}
 
-	string HttpHeader::operator[] (const string & headerFieldName) {
+	string & HttpHeader::operator[] (const string & headerFieldName) {
 		return getHeaderFieldIgnoreCase(headerFieldName);
 	}
 	
-	string HttpHeader::operator[] (const string & headerFieldName) const {
+	const string & HttpHeader::operator[] (const string & headerFieldName) const {
 		return getHeaderFieldIgnoreCase(headerFieldName);
 	}
 

@@ -15,9 +15,12 @@ namespace HTTP {
     /**
      * @brief http client request
      */
+    
     template <typename T>
     class HttpClientRequest {
+        
     private:
+        
         Url url;
         std::string method;
         HttpHeader header;
@@ -27,6 +30,7 @@ namespace HTTP {
         T userData;
         
     public:
+        
         HttpClientRequest();
         HttpClientRequest(const Url & url, const std::string & method, const UTIL::StringMap & addtionalHeaderFields, const char * data, size_t len, T userData);
 		HttpClientRequest(const HttpClientRequest<T> & other);
@@ -44,101 +48,63 @@ namespace HTTP {
         T getUserData();
     };
     
-    /**
-     * @brief http client thread
-     */
-    template <typename T>
-    class HttpClientThread : public OS::Thread {
-    private:
-        HttpClient<T> client;
-        std::queue<HttpClientRequest<T> > * requestQueue;
-        OS::Semaphore * sem;
-        
-    public:
-        HttpClientThread(std::queue<HttpClientRequest<T> > * requestQueue, OS::Semaphore * sem);
-        virtual ~HttpClientThread();
-        virtual void run();
-        HttpClient<T> & getHttpClient();
-        void disconnect();
-    };
-
-    /**
-     * @brief http client thread pool
-     */
-    template <typename T>
-	class HttpClientThreadPool {
-	private:
-		int maxThread;
-        OS::Semaphore sem;
-        std::queue<HttpClientRequest<T> > requestQueue;
-        HttpResponseHandler<T> * handler;
-        std::vector<HttpClientThread<T> > pool;
-        
-	public:
-		HttpClientThreadPool(int maxThread);
-		virtual ~HttpClientThreadPool();
-        void setHttpResponseHandler(HttpResponseHandler<T> * handler);
-        void setFollowRedirect(bool followRedirect);
-        void request(const Url & url, const std::string & method, const UTIL::StringMap & additionalHeaderFields, const char * data, size_t len, T userData);
-        void start();
-        void stop();
-	};
-    
-
-	/**
-	 * @brief Http Client Request
-	 */
-    
     template <typename T>
     HttpClientRequest<T>::HttpClientRequest() : data(NULL), len(0) {
     }
+    
     template <typename T>
     HttpClientRequest<T>::HttpClientRequest(const Url & url, const std::string & method, const UTIL::StringMap & additionalHeaderFields, const char * data, size_t len, T userData)
     : url(url), method(method), additionalHeaderFields(additionalHeaderFields), len(len), userData(userData) {
-		this->data = copyDataChunk(data, len);
+        this->data = copyDataChunk(data, len);
     }
-	template <typename T>
+    
+    template <typename T>
     HttpClientRequest<T>::HttpClientRequest(const HttpClientRequest<T> & other) {
-		url = other.url;
+        url = other.url;
         method = other.method;
         header = other.header;
         additionalHeaderFields = other.additionalHeaderFields;
-		data = copyDataChunk(other.data, other.len);
-		len = other.len;
+        data = copyDataChunk(other.data, other.len);
+        len = other.len;
         userData = other.userData;
-	}
+    }
     template <typename T>
     HttpClientRequest<T>::~HttpClientRequest() {
-		if (!data) {
-			free(data);
-		}
+        if (!data) {
+            free(data);
+        }
     }
-	template <typename T>
-	char * HttpClientRequest<T>::copyDataChunk(const char * data, size_t len) {
-		if (len > 0) {
-			char * chunk = (char*)malloc(len);
-			memcpy(chunk, data, len);
-			return chunk;
-		}
-		return NULL;
-	}
-
+    
+    template <typename T>
+    char * HttpClientRequest<T>::copyDataChunk(const char * data, size_t len) {
+        if (len > 0) {
+            char * chunk = (char*)malloc(len);
+            memcpy(chunk, data, len);
+            return chunk;
+        }
+        return NULL;
+    }
+    
     template <typename T>
     Url & HttpClientRequest<T>::getUrl() {
         return url;
     }
+    
     template <typename T>
     HttpHeader & HttpClientRequest<T>::getHeader() {
         return header;
     }
+    
     template <typename T>
     UTIL::StringMap & HttpClientRequest<T>::getAdditionalHeaderFields() {
         return additionalHeaderFields;
     }
+    
     template <typename T>
     std::string & HttpClientRequest<T>::getMethod() {
         return method;
     }
+    
     template <typename T>
     const char * HttpClientRequest<T>::getData() {
         return data;
@@ -147,19 +113,42 @@ namespace HTTP {
     size_t HttpClientRequest<T>::getDataLength() {
         return len;
     }
+    
     template <typename T>
     void HttpClientRequest<T>::setData(char * data, int len) {
         this->data = data;
         this->len = len;
     }
+    
     template <typename T>
     T HttpClientRequest<T>::getUserData() {
         return userData;
     }
     
-	/**
-	 * @brief Http Client Thread
-	 */
+    
+    /**
+     * @brief http client thread
+     */
+    
+    template <typename T>
+    class HttpClientThread : public OS::Thread {
+        
+    private:
+        
+        HttpClient<T> client;
+        std::queue<HttpClientRequest<T> > * requestQueue;
+        OS::Semaphore * sem;
+        
+    public:
+        
+        HttpClientThread(std::queue<HttpClientRequest<T> > * requestQueue, OS::Semaphore * sem);
+        virtual ~HttpClientThread();
+        
+        virtual void run();
+        HttpClient<T> & getHttpClient();
+        void disconnect();
+    };
+    
     
     template <typename T>
     HttpClientThread<T>::HttpClientThread(std::queue<HttpClientRequest<T> > * requestQueue, OS::Semaphore * sem)
@@ -209,54 +198,81 @@ namespace HTTP {
     void HttpClientThread<T>::disconnect() {
         client.disconnect();
     }
+    
 
-	/**
-	 * @brief Http Client Thread Pool
-	 */
+    /**
+     * @brief http client thread pool
+     */
     
     template <typename T>
-    HttpClientThreadPool<T>::HttpClientThreadPool(int maxThread) : maxThread(maxThread), sem(1), handler(NULL) {
+	class HttpClientThreadPool {
+        
+	private:
+        
+		int maxThread;
+        OS::Semaphore sem;
+        std::queue<HttpClientRequest<T> > requestQueue;
+        std::vector<HttpClientThread<T> > pool;
+        HttpClientPollListener<T> * pollListener;
+        
+	public:
+        
+		HttpClientThreadPool(int maxThread);
+		virtual ~HttpClientThreadPool();
+        void clearRequestQueue();
+        void setFollowRedirect(bool followRedirect);
+        void request(const Url & url, const std::string & method, const UTIL::StringMap & additionalHeaderFields, const char * data, size_t len, T userData);
+        void start();
+        void stop();
+        void setHttpClientPollListener(HttpClientPollListener<T> * pollListener);
+	};
+    
+    
+    template <typename T>
+    HttpClientThreadPool<T>::HttpClientThreadPool(int maxThread) : maxThread(maxThread), sem(1) {
         for (int i = 0; i < maxThread; i++) {
             pool.push_back(HttpClientThread<T>(&requestQueue, &sem));
         }
     }
+    
     template <typename T>
     HttpClientThreadPool<T>::~HttpClientThreadPool() {
         
     }
+    
     template <typename T>
-    void HttpClientThreadPool<T>::setHttpResponseHandler(HttpResponseHandler<T> * handler) {
-        this->handler = handler;
-        
-        for (size_t i = 0; i < pool.size(); i++) {
-            pool[i].getHttpClient().setHttpResponseHandler(handler);
-        }
+    void HttpClientThreadPool<T>::clearRequestQueue() {
+        sem.wait();
+        std::queue<HttpClientRequest<T> > empty;
+        std::swap(requestQueue, empty);
+        sem.post();
     }
+    
     template <typename T>
     void HttpClientThreadPool<T>::setFollowRedirect(bool followRedirect) {
         for (size_t i = 0; i < pool.size(); i++) {
             pool[i].getHttpClient().setFollowRedirect(followRedirect);
         }
     }
+    
     template <typename T>
     void HttpClientThreadPool<T>::request(const Url & url, const std::string & method, const UTIL::StringMap & additionalHeaderFields, const char * data, size_t len, T userData) {
         sem.wait();
         requestQueue.push(HttpClientRequest<T>(url, method, additionalHeaderFields, data, len, userData));
         sem.post();
     }
+    
     template <typename T>
     void HttpClientThreadPool<T>::start() {
         for (size_t i = 0; i < pool.size(); i++) {
             pool[i].start();
         }
     }
+    
     template <typename T>
     void HttpClientThreadPool<T>::stop() {
         
-        sem.wait();
-        std::queue<HttpClientRequest<T> > empty;
-        std::swap(requestQueue, empty);
-        sem.post();
+        clearRequestQueue();
         
         for (size_t i = 0; i < pool.size(); i++) {
             pool[i].disconnect();
@@ -265,6 +281,15 @@ namespace HTTP {
         
         for (size_t i = 0; i < pool.size(); i++) {
             pool[i].join();
+        }
+    }
+    
+    template <typename T>
+    void HttpClientThreadPool<T>::setHttpClientPollListener(HttpClientPollListener<T> * pollListener) {
+        this->pollListener = pollListener;
+        
+        for (size_t i = 0; i < pool.size(); i++) {
+            pool[i].getHttpClient().setHttpClientPollListener(pollListener);
         }
     }
 }

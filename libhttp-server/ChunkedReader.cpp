@@ -11,11 +11,67 @@ namespace HTTP {
 	using namespace UTIL;
 
 	static const Logger & logger = LoggerFactory::getDefaultLogger();
+    
+    ChunkedBuffer::ChunkedBuffer() : chunkDataBuffer(NULL) {
+        clear();
+    }
+    
+    ChunkedBuffer::~ChunkedBuffer() {
+        clear();
+    }
+    
+    void ChunkedBuffer::clear() {
+        if (chunkDataBuffer) {
+            delete [] chunkDataBuffer;
+        }
+        chunkDataBuffer = NULL;
+        chunkSize = 0;
+        chunkDataReadPosition = 0;
+    }
+    
+    void ChunkedBuffer::readChunkData(const char * data, size_t len) {
+        size_t remain = remainingDataBuffer();
+        size_t writeSize = (len < remain ? len : remain);
+        memcpy(chunkDataBuffer + chunkDataReadPosition, data, writeSize);
+        chunkDataReadPosition += writeSize;
+    }
+    
+    size_t ChunkedBuffer::remainingDataBuffer() const {
+        return (chunkDataReadPosition <= chunkSize ? chunkSize - chunkDataReadPosition : 0);
+    }
+    
+    bool ChunkedBuffer::completeData() const {
+        return (remainingDataBuffer() == 0);
+    }
+    
+    void ChunkedBuffer::setChunkSize(size_t chunkSize) {
+        clear();
+        this->chunkSize = chunkSize;
+        chunkDataBuffer = new char[chunkSize];
+    }
+    
+    size_t ChunkedBuffer::getChunkSize() const {
+        return chunkSize;
+    }
+    
+    const char * ChunkedBuffer::getChunkData() const {
+        return chunkDataBuffer;
+    }
+    
+    size_t ChunkedBuffer::getReadSize(size_t bufferSize) const {
+        size_t remain = remainingDataBuffer();
+        return bufferSize > remain ? remain : bufferSize;
+    }
+    
+    size_t ChunkedBuffer::getCurrentReadPosition() const {
+        return chunkDataReadPosition;
+    }
+    
 
 	/**
 	 * @brief Chunked Read Buffer
 	 */
-	ChunkedReaderBuffer::ChunkedReaderBuffer() : chunkDataBuffer(NULL) {
+	ChunkedReaderBuffer::ChunkedReaderBuffer() {
 		clear();
 	}
 	ChunkedReaderBuffer::~ChunkedReaderBuffer() {
@@ -23,48 +79,19 @@ namespace HTTP {
 	}
 
 	void ChunkedReaderBuffer::clear() {
-		chunkSizeBuffer.clear();
-		if (chunkDataBuffer) {
-			delete [] chunkDataBuffer;
-		}
-		chunkDataBuffer = NULL;
-		chunkSize = 0;
-		chunkSizeRecognized = false;
-		chunkDataReadPosition = 0;
+        chunkSizeBuffer.clear();
+        chunkSizeRecognized = false;
+        ChunkedBuffer::clear();
 	}
 	void ChunkedReaderBuffer::readChunkSize(char ch) {
 		chunkSizeBuffer.append(1, ch);
 		if (Text::endsWith(chunkSizeBuffer, "\r\n")) {
-			chunkSize = Text::toInt(chunkSizeBuffer, 16);
-			chunkDataBuffer = new char[chunkSize];
+            setChunkSize(Text::toInt(chunkSizeBuffer, 16));
 			chunkSizeRecognized = true;
 		}
 	}
-	void ChunkedReaderBuffer::readChunkData(const char * data, size_t len) {
-		size_t remain = remainingDataBuffer();
-		size_t writeSize = (len < remain ? len : remain);
-		memcpy(chunkDataBuffer + chunkDataReadPosition, data, writeSize);
-		chunkDataReadPosition += writeSize;
-	}
-	size_t ChunkedReaderBuffer::remainingDataBuffer() const {
-		return (chunkDataReadPosition <= chunkSize ? chunkSize - chunkDataReadPosition : 0);
-	}
-	bool ChunkedReaderBuffer::hasSizeRecognized() const {
+    bool ChunkedReaderBuffer::hasSizeRecognized() const {
 		return chunkSizeRecognized;
-	}
-	bool ChunkedReaderBuffer::completeData() const {
-		return (remainingDataBuffer() == 0);
-	}
-	int ChunkedReaderBuffer::getChunkSize() const {
-		return chunkSize;
-	}
-	const char * ChunkedReaderBuffer::getChunkData() const {
-		return chunkDataBuffer;
-	}
-
-	size_t ChunkedReaderBuffer::getReadSize(size_t bufferSize) const {
-		size_t remain = remainingDataBuffer();
-		return bufferSize > remain ? remain : bufferSize;
 	}
 
 	/**
@@ -82,16 +109,21 @@ namespace HTTP {
 		size_t writeSize = len < remaining() ? len : remaining();
 		pos += writeSize;
 	}
-	size_t ConsumeBuffer::remaining() {
+	size_t ConsumeBuffer::remaining() const {
 		return (pos < maxSize ? maxSize - pos : 0);
 	}
-	bool ConsumeBuffer::complete() {
+	bool ConsumeBuffer::complete() const {
 		return remaining() == 0;
 	}
 
 	void ConsumeBuffer::setMaxSize(size_t maxSize) {
 		this->maxSize = maxSize;
 	}
+    
+    size_t ConsumeBuffer::getReadSize(size_t bufferSize) const {
+        size_t remain = remaining();
+        return bufferSize > remain ? remain : bufferSize;
+    }
 
 
 	/**
@@ -105,7 +137,7 @@ namespace HTTP {
 	size_t ChunkedReader::minSize(size_t a, size_t b) {
 		return (a < b ? a : b);
 	}
-	int ChunkedReader::readChunkSize() {
+	size_t ChunkedReader::readChunkSize() {
 		char ch;
 		int len;
 		chunkedBuffer.clear();

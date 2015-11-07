@@ -35,6 +35,7 @@ namespace HTTP {
 		void appendParam(std::string name, std::string value);
 		std::vector<std::pair<std::string, std::string> > & getParams();
 
+        void setUrl(const std::string & urlStr);
 		void parseUrlString(std::string urlStr);
 		std::vector<std::string> parseAddress(std::string address);
 		void setAddress(std::vector<std::string> & addr);

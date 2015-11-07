@@ -21,7 +21,6 @@
 		E82789571BDD19920009E46A /* HttpServer.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB25B1BD7D2CE00E89DC5 /* HttpServer.hpp */; };
 		E82789581BDD19920009E46A /* HttpStatusCodes.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB25D1BD7D2CE00E89DC5 /* HttpStatusCodes.hpp */; };
 		E82789591BDD19920009E46A /* InetAddress.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB25E1BD7D2CE00E89DC5 /* InetAddress.hpp */; };
-		E827895A1BDD19920009E46A /* Logger.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB2601BD7D2CE00E89DC5 /* Logger.hpp */; };
 		E827895B1BDD19920009E46A /* MultiConn.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB2621BD7D2CE00E89DC5 /* MultiConn.hpp */; };
 		E827895C1BDD19920009E46A /* OnHttpRequestHandler.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB2631BD7D2CE00E89DC5 /* OnHttpRequestHandler.hpp */; };
 		E827895D1BDD19920009E46A /* Url.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB2651BD7D2CE00E89DC5 /* Url.hpp */; };
@@ -30,7 +29,6 @@
 		E857BB611BEB9DC100D2022F /* MultiConnMultiplexServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E857BB5A1BEB9D7700D2022F /* MultiConnMultiplexServer.cpp */; };
 		E857BB621BEB9DC100D2022F /* MultiConnThreadedServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E857BB5C1BEB9D7700D2022F /* MultiConnThreadedServer.cpp */; };
 		E8E0FEA91BD848EB00292C54 /* http_server.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB23D1BD7D29800E89DC5 /* http_server.mm */; };
-		E8E0FEAA1BD848EB00292C54 /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB25F1BD7D2CE00E89DC5 /* Logger.cpp */; };
 		E8E0FEAB1BD848EB00292C54 /* HttpHeaderReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2501BD7D2CE00E89DC5 /* HttpHeaderReader.cpp */; };
 		E8E0FEAC1BD848EB00292C54 /* HttpServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB25A1BD7D2CE00E89DC5 /* HttpServer.cpp */; };
 		E8E0FEAD1BD848EB00292C54 /* ChunkedReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2451BD7D2CE00E89DC5 /* ChunkedReader.cpp */; };
@@ -61,7 +59,6 @@
 		E8FAB26F1BD7D2CE00E89DC5 /* HttpResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2581BD7D2CE00E89DC5 /* HttpResponse.cpp */; };
 		E8FAB2701BD7D2CE00E89DC5 /* HttpServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB25A1BD7D2CE00E89DC5 /* HttpServer.cpp */; };
 		E8FAB2711BD7D2CE00E89DC5 /* HttpStatusCodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB25C1BD7D2CE00E89DC5 /* HttpStatusCodes.cpp */; };
-		E8FAB2721BD7D2CE00E89DC5 /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB25F1BD7D2CE00E89DC5 /* Logger.cpp */; };
 		E8FAB2731BD7D2CE00E89DC5 /* MultiConn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2611BD7D2CE00E89DC5 /* MultiConn.cpp */; };
 		E8FAB2741BD7D2CE00E89DC5 /* Url.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2641BD7D2CE00E89DC5 /* Url.cpp */; };
 		E8FAB29B1BD7D3B700E89DC5 /* liboslayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E8FAB2961BD7D39000E89DC5 /* liboslayer.a */; };
@@ -129,7 +126,6 @@
 				E82789571BDD19920009E46A /* HttpServer.hpp in CopyFiles */,
 				E82789581BDD19920009E46A /* HttpStatusCodes.hpp in CopyFiles */,
 				E82789591BDD19920009E46A /* InetAddress.hpp in CopyFiles */,
-				E827895A1BDD19920009E46A /* Logger.hpp in CopyFiles */,
 				E827895B1BDD19920009E46A /* MultiConn.hpp in CopyFiles */,
 				E827895C1BDD19920009E46A /* OnHttpRequestHandler.hpp in CopyFiles */,
 				E827895D1BDD19920009E46A /* Url.hpp in CopyFiles */,
@@ -174,8 +170,6 @@
 		E8FAB25C1BD7D2CE00E89DC5 /* HttpStatusCodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpStatusCodes.cpp; path = "../../libhttp-server/HttpStatusCodes.cpp"; sourceTree = "<group>"; };
 		E8FAB25D1BD7D2CE00E89DC5 /* HttpStatusCodes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpStatusCodes.hpp; path = "../../libhttp-server/HttpStatusCodes.hpp"; sourceTree = "<group>"; };
 		E8FAB25E1BD7D2CE00E89DC5 /* InetAddress.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = InetAddress.hpp; path = "../../libhttp-server/InetAddress.hpp"; sourceTree = "<group>"; };
-		E8FAB25F1BD7D2CE00E89DC5 /* Logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Logger.cpp; path = "../../libhttp-server/Logger.cpp"; sourceTree = "<group>"; };
-		E8FAB2601BD7D2CE00E89DC5 /* Logger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Logger.hpp; path = "../../libhttp-server/Logger.hpp"; sourceTree = "<group>"; };
 		E8FAB2611BD7D2CE00E89DC5 /* MultiConn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MultiConn.cpp; path = "../../libhttp-server/MultiConn.cpp"; sourceTree = "<group>"; };
 		E8FAB2621BD7D2CE00E89DC5 /* MultiConn.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MultiConn.hpp; path = "../../libhttp-server/MultiConn.hpp"; sourceTree = "<group>"; };
 		E8FAB2631BD7D2CE00E89DC5 /* OnHttpRequestHandler.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = OnHttpRequestHandler.hpp; path = "../../libhttp-server/OnHttpRequestHandler.hpp"; sourceTree = "<group>"; };
@@ -265,8 +259,6 @@
 				E8FAB25C1BD7D2CE00E89DC5 /* HttpStatusCodes.cpp */,
 				E8FAB25D1BD7D2CE00E89DC5 /* HttpStatusCodes.hpp */,
 				E8FAB25E1BD7D2CE00E89DC5 /* InetAddress.hpp */,
-				E8FAB25F1BD7D2CE00E89DC5 /* Logger.cpp */,
-				E8FAB2601BD7D2CE00E89DC5 /* Logger.hpp */,
 				E8FAB2611BD7D2CE00E89DC5 /* MultiConn.cpp */,
 				E8FAB2621BD7D2CE00E89DC5 /* MultiConn.hpp */,
 				E8FAB2631BD7D2CE00E89DC5 /* OnHttpRequestHandler.hpp */,
@@ -387,7 +379,6 @@
 				E857BB611BEB9DC100D2022F /* MultiConnMultiplexServer.cpp in Sources */,
 				E857BB621BEB9DC100D2022F /* MultiConnThreadedServer.cpp in Sources */,
 				E8E0FEA91BD848EB00292C54 /* http_server.mm in Sources */,
-				E8E0FEAA1BD848EB00292C54 /* Logger.cpp in Sources */,
 				E8E0FEAB1BD848EB00292C54 /* HttpHeaderReader.cpp in Sources */,
 				E8E0FEAC1BD848EB00292C54 /* HttpServer.cpp in Sources */,
 				E8E0FEAD1BD848EB00292C54 /* ChunkedReader.cpp in Sources */,
@@ -410,7 +401,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8FAB23E1BD7D29800E89DC5 /* http_server.mm in Sources */,
-				E8FAB2721BD7D2CE00E89DC5 /* Logger.cpp in Sources */,
 				E8FAB26B1BD7D2CE00E89DC5 /* HttpHeaderReader.cpp in Sources */,
 				E857BB5F1BEB9D7700D2022F /* MultiConnMultiplexServer.cpp in Sources */,
 				E8FAB2701BD7D2CE00E89DC5 /* HttpServer.cpp in Sources */,

@@ -46,10 +46,11 @@ namespace HTTP {
 		std::string makeFirstLine() const;
 		
 		virtual std::string & getHeaderField(const std::string & name);
+        virtual const std::string & getHeaderField(const std::string & name) const;
 		virtual std::string & getHeaderFieldIgnoreCase(const std::string & name);
 		virtual const std::string & getHeaderFieldIgnoreCase(const std::string & name) const;
-		virtual int getHeaderFieldAsInteger(std::string name);
-		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name);
+		virtual int getHeaderFieldAsInteger(std::string name) const;
+		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name) const;
 		virtual void setHeaderField(std::string name, std::string value);
 		virtual void setHeaderFields(std::map<std::string, std::string> & fields);
 		virtual void appendHeaderFields(const std::map<std::string, std::string> & fields);
@@ -57,9 +58,9 @@ namespace HTTP {
 		virtual void removeHeaderField(std::string name);
 		virtual void removeHeaderFieldIgnoreCase(std::string name);
 
-		std::string getContentType();
+		std::string getContentType() const;
 		void setContentType(std::string contentType);
-		int getContentLength();
+		int getContentLength() const;
 		void setContentLength(int contentLength);
 		bool isChunkedTransfer();
 		void setChunkedTransfer(bool chunked);
@@ -70,8 +71,8 @@ namespace HTTP {
 
 		virtual std::string toString() const;
 
-		std::string operator[] (const std::string & headerFieldName);
-		std::string operator[] (const std::string & headerFieldName) const;
+		std::string & operator[] (const std::string & headerFieldName);
+		const std::string & operator[] (const std::string & headerFieldName) const;
 	};
 
 	/**
