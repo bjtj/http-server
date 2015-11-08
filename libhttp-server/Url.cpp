@@ -41,24 +41,39 @@ namespace HTTP {
 	string Url::getPath() const {
 		return path;
 	}
-	void Url::setScheme(string scheme) {
+	void Url::setScheme(const string & scheme) {
 		this->scheme = scheme;
 	}
-	void Url::setProtocol(string scheme) {
+	void Url::setProtocol(const string & scheme) {
 		this->scheme = scheme;
 	}
-	void Url::setHost(string host) {
+	void Url::setHost(const string & host) {
 		this->host = host;
 	}
-	void Url::setPort(string port) {
+	void Url::setPort(const string & port) {
 		this->port = port;
 	}
-	void Url::setPath(string path) {
-        if (!Text::startsWith(path, "/")) {
-            path = "/" + path;
+	void Url::setPath(const string & path) {
+        string p = path;
+        if (!Text::startsWith(p, "/")) {
+            p = "/" + p;
         }
-		this->path = path;
+		this->path = p;
 	}
+    void Url::setRelativePath(const string & relativePath) {
+        
+        if (Text::startsWith(relativePath, "/")) {
+            setPath(relativePath);
+        } else {
+            size_t l = path.find_last_of("/");
+            if (l == string::npos) {
+                setPath(relativePath);
+            } else {
+                string prefix = path.substr(0, l+1);
+                path = prefix + relativePath;
+            }
+        }
+    }
 
 	void Url::appendParam(string name, string value) {
 		params.push_back(make_pair(name, value));

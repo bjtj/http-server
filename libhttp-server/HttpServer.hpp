@@ -39,16 +39,21 @@ namespace HTTP {
 	 */
 	class HttpServer : public HttpProtocol {
 	private:
+        
 		int port;
 		MultiConn * conn;
 		HttpServerPollingThread * thread;
 		bool useThreadedMultiConnType;
+        
 	private:
+        
 		HttpServer(const HttpServer & other); // not allowed copy
 		MultiConn * createMultiConn(bool useThreadedMultiConnType);
 		void startPollingThread();
 		void stopPollingThread();
+        
 	public:
+        
 		HttpServer(int port);
 		virtual ~HttpServer();
 
@@ -59,6 +64,9 @@ namespace HTTP {
 		virtual void poll(unsigned long timeout_milli);
 		virtual void stop();
 		virtual bool isRunning();
+        
+        int getPort();
+        
 	};
 
 }

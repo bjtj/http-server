@@ -49,7 +49,7 @@ namespace HTTP {
 		void vpath(std::string path, OnHttpRequestHandler * handler);
 		OnHttpRequestHandler * getHandler(std::string path);
 
-		virtual void onRequest(HttpRequest & request, HttpResponse & response);
+		virtual void onHttpRequest(HttpRequest & request, HttpResponse & response);
 
 		void setPage404(const std::string & html);
 		void setPage500(const std::string & html);

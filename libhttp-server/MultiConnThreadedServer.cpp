@@ -158,5 +158,4 @@ namespace HTTP {
 
 		delete &client;
 	}
-
 }

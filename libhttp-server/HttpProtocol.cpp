@@ -85,10 +85,10 @@ namespace HTTP {
 		return NULL;
 	}
 
-	void HttpProtocol::onRequest(HttpRequest & request, HttpResponse & response) {
+	void HttpProtocol::onHttpRequest(HttpRequest & request, HttpResponse & response) {
 		OnHttpRequestHandler * handler = getHandler(request.getPath());
 		if (handler) {
-			handler->onRequest(request, response);
+			handler->onHttpRequest(request, response);
 		} else {
 			response.setStatusCode(404, HttpStatusCodes::getMessage(404));
 			response.write(page404);

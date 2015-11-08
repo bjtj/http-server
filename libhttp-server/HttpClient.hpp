@@ -106,8 +106,8 @@ namespace HTTP {
         virtual void onRequestHeader(HttpClient<T> & httpClient, const HttpHeader & requestHeader, T userData) = 0;
         virtual void onResponseHeader(HttpClient<T> & httpClient, const HttpHeader & responseHeader, T userData) = 0;
         virtual void onResponseDataChunk(HttpClient<T> & httpClient, const HttpHeader & responseHeader, const char * data, size_t len, T userData) = 0;
-		virtual void onComplete(HttpClient<T> & httpClient) = 0;
-		virtual void onError(HttpClient<T> & httpClient) = 0;
+		virtual void onComplete(HttpClient<T> & httpClient, T userData) = 0;
+		virtual void onError(HttpClient<T> & httpClient, T userData) = 0;
     };
 
 	/**
@@ -166,6 +166,7 @@ namespace HTTP {
         int read(char * buffer, size_t size);
         
         HttpRequestStatus getStatus();
+        Url & getUrl();
         HttpHeader & getResponseHeader();
         void clearBuffer();
         std::string & getStringBuffer();
@@ -306,6 +307,8 @@ namespace HTTP {
             this->writeLen = 0;
             this->contentBuffer.clear();
             this->userData = userData;
+            
+            clearBuffer();
             
             this->status = HttpRequestStatus::CONNECTING_STATUS;
         }
@@ -473,7 +476,7 @@ namespace HTTP {
             case HttpRequestStatus::DONE_STATUS:
 			{
 				if (pollListener) {
-                    pollListener->onComplete(*this);
+                    pollListener->onComplete(*this, userData);
                 }
                 disconnect();
                 clearBuffer();
@@ -483,7 +486,7 @@ namespace HTTP {
             case HttpRequestStatus::ERROR_STATUS:
 			{
 				if (pollListener) {
-                    pollListener->onError(*this);
+                    pollListener->onError(*this, userData);
                 }
                 disconnect();
                 clearBuffer();
@@ -526,6 +529,11 @@ namespace HTTP {
     template<typename T>
     HttpRequestStatus HttpClient<T>::getStatus() {
         return status;
+    }
+    
+    template<typename T>
+    Url & HttpClient<T>::getUrl() {
+        return url;
     }
     
     template<typename T>
@@ -599,7 +607,6 @@ namespace HTTP {
     }
     
     
-    
     /**
      * @brief http response handler
      */
@@ -609,21 +616,21 @@ namespace HTTP {
     public:
         HttpResponseHandler() {}
         virtual ~HttpResponseHandler() {}
-        virtual void onRequestHeader(HttpClient<T> & httpClient, const HttpHeader & requestHeader, int userData) {
+        virtual void onRequestHeader(HttpClient<T> & httpClient, const HttpHeader & requestHeader, T userData) {
         }
-        virtual void onResponseHeader(HttpClient<T> & httpClient, const HttpHeader & responseHeader, int userData) {
+        virtual void onResponseHeader(HttpClient<T> & httpClient, const HttpHeader & responseHeader, T userData) {
         }
-        virtual void onResponseDataChunk(HttpClient<T> & httpClient, const HttpHeader & responseHeader, const char * data, size_t len, int userData) {
+        virtual void onResponseDataChunk(HttpClient<T> & httpClient, const HttpHeader & responseHeader, const char * data, size_t len, T userData) {
             int statusCode = httpClient.getStatusCode();
             if (!httpClient.isFollowRedirect() || (statusCode != 301 && statusCode != 302)) {
                 httpClient.getStringBuffer().append(data, len);
             }
         }
-        virtual void onComplete(HttpClient<T> & httpClient) {
-            onHttpResponse(httpClient, httpClient.getResponseHeader(), httpClient.getStringBuffer());
+        virtual void onComplete(HttpClient<T> & httpClient, T userData) {
+            onHttpResponse(httpClient, httpClient.getResponseHeader(), httpClient.getStringBuffer(), userData);
         }
         
-        virtual void onHttpResponse(HttpClient<T> & httpClient, const HttpHeader & responseHeader, const std::string & content) = 0;
+        virtual void onHttpResponse(HttpClient<T> & httpClient, const HttpHeader & responseHeader, const std::string & content, T userData) = 0;
     };
 }
 

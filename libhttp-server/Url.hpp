@@ -26,11 +26,12 @@ namespace HTTP {
 		std::string getPort() const;
 		int getIntegerPort() const;
 		std::string getPath() const;
-		void setScheme(std::string scheme);
-		void setProtocol(std::string scheme);
-		void setHost(std::string host);
-		void setPort(std::string port);
-		void setPath(std::string path);
+		void setScheme(const std::string & scheme);
+		void setProtocol(const std::string & scheme);
+		void setHost(const std::string & host);
+		void setPort(const std::string & port);
+		void setPath(const std::string & path);
+        void setRelativePath(const std::string & relativePath);
 
 		void appendParam(std::string name, std::string value);
 		std::vector<std::pair<std::string, std::string> > & getParams();

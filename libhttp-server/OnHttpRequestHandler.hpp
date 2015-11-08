@@ -14,7 +14,7 @@ namespace HTTP {
 		OnHttpRequestHandler() {}
 		virtual ~OnHttpRequestHandler() {}
 
-		virtual void onRequest(HttpRequest & request, HttpResponse & response) = 0;
+		virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) = 0;
 	};
 
 	/**
@@ -27,7 +27,7 @@ namespace HTTP {
 		OnHttpRequestHandlerDecorator(OnHttpRequestHandler * handler) : handler(handler) {}
 		virtual ~OnHttpRequestHandlerDecorator() {}
 
-		virtual void onRequest(HttpRequest & request, HttpResponse & response) = 0;
+		virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) = 0;
 
 		OnHttpRequestHandler * getHandler() {return handler;}
 	};

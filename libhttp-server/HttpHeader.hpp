@@ -39,9 +39,9 @@ namespace HTTP {
 		virtual std::string getPart1() const;
 		virtual std::string getPart2() const;
 		virtual std::string getPart3() const;
-		virtual void setPart1(std::string part);
-		virtual void setPart2(std::string part);
-		virtual void setPart3(std::string part);
+		virtual void setPart1(const std::string & part);
+		virtual void setPart2(const std::string & part);
+		virtual void setPart3(const std::string & part);
 
 		std::string makeFirstLine() const;
 		
@@ -95,9 +95,9 @@ namespace HTTP {
 		virtual std::string getPart1() const {return getHeader().getPart1();}
 		virtual std::string getPart2() const {return getHeader().getPart2();}
 		virtual std::string getPart3() const {return getHeader().getPart3();}
-		virtual void setPart1(std::string part) {getHeader().setPart1(part);}
-		virtual void setPart2(std::string part) {getHeader().setPart2(part);}
-		virtual void setPart3(std::string part) {getHeader().setPart3(part);}
+		virtual void setPart1(const std::string & part) {getHeader().setPart1(part);}
+		virtual void setPart2(const std::string & part) {getHeader().setPart2(part);}
+		virtual void setPart3(const std::string & part) {getHeader().setPart3(part);}
 		
 		virtual std::string getHeaderField(std::string name) {return getHeader().getHeaderField(name);}
 		virtual std::string getHeaderFieldIgnoreCase(std::string name) {

@@ -14,7 +14,7 @@ namespace HTTP {
 	 */
 	HttpHeader::HttpHeader() : valid(false) {
 	}
-	HttpHeader::HttpHeader(std::string par1, std::string part2, std::string part3) : valid(false) {
+	HttpHeader::HttpHeader(std::string part1, std::string part2, std::string part3) : valid(false) {
 		setParts(part1, part2, part3);
 	}
 	HttpHeader::~HttpHeader() {
@@ -39,7 +39,7 @@ namespace HTTP {
 		setPart2(parts[1]);
 		setPart3(parts[2]);
 	}
-	void HttpHeader::setParts(std::string par1, std::string part2, std::string part3) {
+	void HttpHeader::setParts(std::string part1, std::string part2, std::string part3) {
 		setPart1(part1);
 		setPart2(part2);
 		setPart3(part3);
@@ -53,13 +53,13 @@ namespace HTTP {
 	string HttpHeader::getPart3() const {
 		return part2;
 	}
-	void HttpHeader::setPart1(string part) {
+	void HttpHeader::setPart1(const string & part) {
 		part1 = part;
 	}
-	void HttpHeader::setPart2(string part) {
+	void HttpHeader::setPart2(const string & part) {
 		part2 = part;
 	}
-	void HttpHeader::setPart3(string part) {
+	void HttpHeader::setPart3(const string & part) {
 		part3 = part;
 	}
 	string HttpHeader::makeFirstLine() const {

@@ -89,4 +89,8 @@ namespace HTTP {
 	bool HttpServer::isRunning() {
 		return (conn ? conn->isRunning() : false);
 	}
+    
+    int HttpServer::getPort() {
+        return port;
+    }
 }

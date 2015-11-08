@@ -37,7 +37,7 @@ namespace HTTP {
 			client.setBufferSize(client.getMaxBufferSize());
 			prepareRequestAndResponse(client);
 			
-			onRequest(*request, *response);
+			onHttpRequest(*request, *response);
 
 			if (response->hasComplete()) {
 				client.close();
@@ -62,9 +62,9 @@ namespace HTTP {
 		// content buffer manipulation
 	}
 	
-	void HttpConnection::onRequest(HttpRequest & request, HttpResponse & response) {
+	void HttpConnection::onHttpRequest(HttpRequest & request, HttpResponse & response) {
 		if (getHandler()) {
-			getHandler()->onRequest(request, response);
+			getHandler()->onHttpRequest(request, response);
 		}
 	}
 	
