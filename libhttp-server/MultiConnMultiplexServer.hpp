@@ -21,6 +21,7 @@ namespace HTTP {
 
 		virtual void start();
 		virtual void poll(unsigned long timeout_milli);
+        virtual void listen();
 		virtual void stop();
 		virtual bool isRunning();
 

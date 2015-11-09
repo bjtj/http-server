@@ -35,38 +35,41 @@ namespace HTTP {
 	void MultiConnMultiplexServer::poll(unsigned long timeout_milli) {
 		
 		if (selector.select(timeout_milli) > 0) {
-
-			vector<int> selected = selector.getSelected();
-			for (size_t i = 0; i < selected.size(); i++) {
-					
-				int fd = selected[i];
-
-				if (server->compareFd(fd)) {
-					Socket * client = server->accept();
-					
-					if (client) {
-						ClientSession * session = new ClientSession(client, 1024);
-						onClientConnect(*session);
-					}
-				} else {
-					ClientSession * client = clients[fd];
-					if (client) {
-						char buffer[1024] = {0,};
-						int len = client->getSocket()->recv(buffer, client->getBufferSize());
-						if (len <= 0) {
-							onClientDisconnect(*client);
-						} else {
-							Packet packet(buffer, len);
-							onClientReceive(*client, packet);
-							if (client->isClosed()) {
-								onClientDisconnect(*client);
-							}
-						}
-					}
-				}
-			}
+            listen();
 		}
 	}
+    
+    void MultiConnMultiplexServer::listen() {
+        vector<int> selected = selector.getSelected();
+        for (size_t i = 0; i < selected.size(); i++) {
+            
+            int fd = selected[i];
+            
+            if (server->compareFd(fd)) {
+                Socket * client = server->accept();
+                
+                if (client) {
+                    ClientSession * session = new ClientSession(client, 1024);
+                    onClientConnect(*session);
+                }
+            } else {
+                ClientSession * client = clients[fd];
+                if (client) {
+                    char buffer[1024] = {0,};
+                    int len = client->getSocket()->recv(buffer, client->getBufferSize());
+                    if (len <= 0) {
+                        onClientDisconnect(*client);
+                    } else {
+                        Packet packet(buffer, len);
+                        onClientReceive(*client, packet);
+                        if (client->isClosed()) {
+                            onClientDisconnect(*client);
+                        }
+                    }
+                }
+            }
+        }
+    }
     
 	void MultiConnMultiplexServer::stop() {
 

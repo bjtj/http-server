@@ -39,11 +39,11 @@ public:
 class MyHttpResponseHandler : public HttpResponseHandler<int> {
 private:
 public:
-    virtual void onHttpResponse(HttpClient<int> & httpClient, const HttpHeader & responseHeader, const string & content) {
+    virtual void onHttpResponse(HttpClient<int> & httpClient, const HttpHeader & responseHeader, const string & content, int userData) {
         cout << content << endl;
     }
     
-    virtual void onError(HttpClient<int> & httpClient) {
+    virtual void onError(HttpClient<int> & httpClient, int userData) {
         cout << "error" << endl;
     }
 };

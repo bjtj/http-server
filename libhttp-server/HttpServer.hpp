@@ -37,7 +37,7 @@ namespace HTTP {
 	/**
 	 * @brief http server
 	 */
-	class HttpServer : public HttpProtocol {
+    class HttpServer : public HttpProtocol {
 	private:
         
 		int port;

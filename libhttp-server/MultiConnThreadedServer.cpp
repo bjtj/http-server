@@ -66,19 +66,24 @@ namespace HTTP {
     
 	void MultiConnThreadedServer::poll(unsigned long timeout_milli) {
 		if (selector.select(timeout_milli) > 0) {
-            
-            if (selector.isSelected(server->getFd())) {
-                Socket * client = server->accept();
-                
-                if (client) {
-                    ClientSession * session = new ClientSession(client, 1024);
-                    onClientConnect(*session);
-                }
-            }
+            listen();
 		}
 
 		releaseInvalidThreads();
 	}
+    
+    void MultiConnThreadedServer::listen() {
+        
+        if (selector.isSelected(server->getFd())) {
+            Socket * client = server->accept();
+            
+            if (client) {
+                ClientSession * session = new ClientSession(client, 1024);
+                onClientConnect(*session);
+            }
+        }
+        
+    }
     
 	void MultiConnThreadedServer::stop() {
         
@@ -110,9 +115,6 @@ namespace HTTP {
 		}
 		return true;
 	}
-	/*void MultiConnThreadedServer::disconnect(ClientSession & client) {
-		onClientDisconnect(client);
-	}*/
 
 	void MultiConnThreadedServer::releaseInvalidThreads() {
 		clientsLock.wait();
