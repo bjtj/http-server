@@ -29,7 +29,6 @@ namespace HTTP {
 		part2.clear();
 		part3.clear();
 		fields.clear();
-		// params.clear();
 	}
 
 	void HttpHeader::set(const HttpHeader & other) {
@@ -39,7 +38,6 @@ namespace HTTP {
 		part2 = other.part2;
 		part3 = other.part3;
 		fields = other.fields;
-		// params = other.params;
 	}
 
 	void HttpHeader::setFirstLine(string & firstline) {
@@ -234,6 +232,13 @@ namespace HTTP {
 			}
 		}
 	}
+    vector<string> HttpRequestHeader::getParameterNames() {
+        vector<string> names;
+        for (map<string, HttpParameter>::const_iterator iter = params.begin(); iter != params.end(); iter++) {
+            names.push_back(iter->first);
+        }
+        return names;
+    }
 	string HttpRequestHeader::getParameter(string name) {
 		return params[name].getFirstValue();
 	}

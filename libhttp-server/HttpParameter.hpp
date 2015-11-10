@@ -18,8 +18,8 @@ namespace HTTP {
 		std::vector<std::string> values;
 	public:
 		HttpParameter();
-		HttpParameter(std::string name);
-		HttpParameter(std::string name, std::string value);
+		HttpParameter(const std::string & name);
+		HttpParameter(const std::string & name, const std::string & value);
 		virtual ~HttpParameter();
 		
 		bool empty();

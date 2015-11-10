@@ -11,7 +11,7 @@ namespace HTTP {
 	 * @brief http request
 	 */
 	HttpRequest::HttpRequest(HttpHeader & header, OS::Socket & socket)
-		: header(header), contentSize(0), socket(socket) {
+		: header(header), socket(socket) {
 	}
 	HttpRequest::~HttpRequest() {
 	}
@@ -49,22 +49,19 @@ namespace HTTP {
 	HttpRequestHeader & HttpRequest::getHeader() {
 		return header;
 	}
-	void HttpRequest::appendContent(char * buffer, size_t size) {
-		content += string(buffer, size);
-	}
-	void HttpRequest::compactContent() {
-		content = "";
-	}
-	string & HttpRequest::getContent() {
-		return content;
-	}
+    ChunkedBuffer & HttpRequest::getChunkedBuffer() {
+        return chunkedBuffer;
+    }
+    string & HttpRequest::getStringBuffer() {
+        return stringBuffer;
+    }
+    OS::Socket & HttpRequest::getSocket() {
+        return socket;
+    }
 	int HttpRequest::getContentLength() {
 		return header.getContentLength();
 	}
 	string HttpRequest::getContentType() {
 		return header.getContentType();
-	}
-	bool HttpRequest::remaining() {
-		return getContentLength() > contentSize;
 	}
 }

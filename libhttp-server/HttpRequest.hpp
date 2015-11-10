@@ -7,6 +7,7 @@
 
 #include <liboslayer/os.hpp>
 #include "HttpHeader.hpp"
+#include "ChunkedReader.hpp"
 
 namespace HTTP {
 
@@ -17,8 +18,10 @@ namespace HTTP {
 	private:
         HttpRequestHeader header;
 		std::string content;
-		int contentSize;
 		OS::Socket & socket;
+        
+        ChunkedBuffer chunkedBuffer;
+        std::string stringBuffer;
 
 	public:
 		HttpRequest(HttpHeader & header, OS::Socket & socket);
@@ -36,13 +39,13 @@ namespace HTTP {
 		std::vector<std::string> getParameters(std::string & name);
 
 		HttpRequestHeader & getHeader();
-		void appendContent(char * buffer, size_t size);
-		void compactContent();
-		std::string & getContent();
+        ChunkedBuffer & getChunkedBuffer();
+        std::string & getStringBuffer();
+        
+        OS::Socket & getSocket();
 
 		int getContentLength();
 		std::string getContentType();
-		bool remaining();
 	};
 
 }

@@ -20,9 +20,16 @@ int main(int argc, char * args[]) {
 
 	cout << method << endl;
 
+    cout << requestHeader.getPath() << endl;
 	cout << requestHeader.getParameter("param1") << endl;
 	cout << requestHeader.getParameter("param2") << endl;
 	cout << requestHeader.getParameter("param3") << endl;
+    
+    vector<string> names = requestHeader.getParameterNames();
+    for (size_t i = 0; i < names.size(); i++) {
+        string name = names[i];
+        cout << name << " : " << requestHeader.getParameter(name) << endl;
+    }
 
 	getchar();
 

@@ -95,6 +95,7 @@ namespace HTTP {
 		void parsePath(const std::string & path);
 		void parseQuery(const std::string & query);
 
+        std::vector<std::string> getParameterNames();
 		std::string getParameter(std::string name);
 		std::vector<std::string> getParameters(std::string name);
 		void setParameter(std::string name, std::string value);

@@ -99,8 +99,14 @@ namespace HTTP {
      */
     template <typename T>
     class HttpClientPollListener {
+        
+        
     private:
+        
+        
     public:
+        
+        
         HttpClientPollListener() {}
         virtual ~HttpClientPollListener() {}
         virtual void onRequestHeader(HttpClient<T> & httpClient, const HttpHeader & requestHeader, T userData) = 0;
@@ -108,14 +114,22 @@ namespace HTTP {
         virtual void onResponseDataChunk(HttpClient<T> & httpClient, const HttpHeader & responseHeader, const char * data, size_t len, T userData) = 0;
 		virtual void onComplete(HttpClient<T> & httpClient, T userData) = 0;
 		virtual void onError(HttpClient<T> & httpClient, T userData) = 0;
+        
+        
     };
 
 	/**
 	 * @brief http client
 	 */
+    
     template <typename T>
 	class HttpClient {
+        
+        
+        
 	private:
+        
+        
         OS::Semaphore sem;
 		std::string httpProtocol;
 		OS::Socket * socket;
@@ -139,7 +153,11 @@ namespace HTTP {
         std::string stringBuffer;
         ChunkedBuffer dataBuffer;
 		
+        
+        
 	public:
+        
+        
 		HttpClient();
 		virtual ~HttpClient();
 
@@ -147,12 +165,14 @@ namespace HTTP {
 		void disconnect();
         bool isFollowRedirect() const;
 		void setFollowRedirect(bool followRedirect);
-		void request(Url & url, T userData);
-		void request(Url & url, std::string method, const char * data, size_t len, T userData);
-		void request(Url & url, std::string method,
+        
+        //void request(const std::string & urlString, T userData);
+		void request(const Url & url, T userData);
+		void request(const Url & url, std::string method, const char * data, size_t len, T userData);
+		void request(const Url & url, std::string method,
 					 UTIL::StringMap & additionalHeaderFields,
 					 const char * data, size_t len, T userData);
-        
+
         void requestStart(const Url & url, const std::string & method,
                           const UTIL::StringMap & additionalHeaderFields,
                           const char * data, size_t len, T userData);
@@ -172,7 +192,11 @@ namespace HTTP {
         std::string & getStringBuffer();
         ChunkedBuffer & getDataBuffer();
 
+        
+        
 	private:
+        
+        
 		void disconnect(OS::Socket * socket);
 		HttpHeader makeRequestHeader(const std::string & method,
 									 const std::string & path,
@@ -183,6 +207,8 @@ namespace HTTP {
         void sendRequestContent(OS::Socket & socket, const char * content, size_t contentLength);
 		bool checkIfRedirect(HttpHeader & responseHeader);
         void processRedirect();
+        
+        
 	};
     
     
@@ -240,14 +266,16 @@ namespace HTTP {
         this->followRedirect = followRedirect;
     }
     
+    
+    
     template<typename T>
-    void HttpClient<T>::request(Url & url, T userData) {
+    void HttpClient<T>::request(const Url & url, T userData) {
         UTIL::StringMap empty;
         request(url, "GET", empty, NULL, 0, userData);
     }
     
     template<typename T>
-    void HttpClient<T>::request(Url & url, std::string method, const char * data, size_t len, T userData) {
+    void HttpClient<T>::request(const Url & url, std::string method, const char * data, size_t len, T userData) {
         UTIL::StringMap empty;
         request(url, method, empty, data, len, userData);
     }
@@ -263,9 +291,9 @@ namespace HTTP {
             client->disconnect();
         }
     };
-    
+        
     template<typename T>
-    void HttpClient<T>::request(Url & url,
+    void HttpClient<T>::request(const Url & url,
                                 std::string method,
                                 UTIL::StringMap & additionalHeaderFields,
                                 const char * data,
@@ -317,7 +345,6 @@ namespace HTTP {
     template<typename T>
     void HttpClient<T>::poll(unsigned long timeout) {
 
-		//printf("status: %s\n", HttpRequestStatus::toString(status.getStatus()).c_str());
         switch (status.getStatus()) {
             case HttpRequestStatus::IDLE_STATUS:
             {

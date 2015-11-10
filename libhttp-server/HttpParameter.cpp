@@ -12,9 +12,9 @@ namespace HTTP {
 	 */
 	HttpParameter::HttpParameter() {
 	}
-	HttpParameter::HttpParameter(string name) : name(name){
+	HttpParameter::HttpParameter(const string & name) : name(name){
 	}
-	HttpParameter::HttpParameter(string name, string value) : name(name){
+	HttpParameter::HttpParameter(const string & name, const string & value) : name(name){
 		values.push_back(value);
 	}
 	HttpParameter::~HttpParameter() {
