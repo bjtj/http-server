@@ -19,13 +19,17 @@ namespace HTTP {
 		std::string content;
 		int contentSize;
 		OS::Socket & socket;
+
 	public:
 		HttpRequest(HttpHeader & header, OS::Socket & socket);
 		virtual ~HttpRequest();
 
 		std::string getMethod() const;
 		std::string getPath() const;
-		std::string getHeaderField(std::string & name);
+		std::string & getHeaderField(const std::string & name);
+		std::string getHeaderField(const std::string & name) const;
+		std::string & getHeaderFieldIgnoreCase(const std::string & name);
+		std::string getHeaderFieldIgnoreCase(const std::string & name) const;
 		std::map<std::string, std::string> & getHeaderFields();
 		std::string getParameter(const std::string & name);
 		std::string getParameter(const char * name);

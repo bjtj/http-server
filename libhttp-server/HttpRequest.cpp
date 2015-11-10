@@ -22,8 +22,17 @@ namespace HTTP {
 	string HttpRequest::getPath() const {
 		return header.getPath();
 	}
-	string HttpRequest::getHeaderField(string & name) {
+	string & HttpRequest::getHeaderField(const string & name) {
 		return header.getHeaderField(name);
+	}
+	string HttpRequest::getHeaderField(const string & name) const {
+		return header.getHeaderField(name);
+	}
+	string & HttpRequest::getHeaderFieldIgnoreCase(const string & name) {
+		return header.getHeaderFieldIgnoreCase(name);
+	}
+	string HttpRequest::getHeaderFieldIgnoreCase(const string & name) const {
+		return header.getHeaderFieldIgnoreCase(name);
 	}
 	map<string, string> & HttpRequest::getHeaderFields() {
 		return header.getHeaderFields();
@@ -50,10 +59,10 @@ namespace HTTP {
 		return content;
 	}
 	int HttpRequest::getContentLength() {
-		return Text::toInt(header.getParameter("Content-Length"));
+		return header.getContentLength();
 	}
 	string HttpRequest::getContentType() {
-		return header.getParameter("Content-Type");
+		return header.getContentType();
 	}
 	bool HttpRequest::remaining() {
 		return getContentLength() > contentSize;

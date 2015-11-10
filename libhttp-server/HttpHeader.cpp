@@ -7,10 +7,9 @@ namespace HTTP {
 	using namespace std;
 	using namespace UTIL;
 
-	static string EMPTY_STRING;
 
 	/**
-	 * @brief http header constructor
+	 * @brief HttpHeader
 	 */
 	HttpHeader::HttpHeader() : valid(false) {
 	}
@@ -19,6 +18,7 @@ namespace HTTP {
 	}
 	HttpHeader::~HttpHeader() {
 	}
+
 	bool HttpHeader::isValid() {
 		return valid;
 	}
@@ -29,8 +29,19 @@ namespace HTTP {
 		part2.clear();
 		part3.clear();
 		fields.clear();
-		params.clear();
+		// params.clear();
 	}
+
+	void HttpHeader::set(const HttpHeader & other) {
+		valid = other.valid;
+		firstline = other.firstline;
+		part1 = other.part1;
+		part2 = other.part2;
+		part3 = other.part3;
+		fields = other.fields;
+		// params = other.params;
+	}
+
 	void HttpHeader::setFirstLine(string & firstline) {
 		this->firstline = firstline;
 	}
@@ -68,13 +79,13 @@ namespace HTTP {
 	string & HttpHeader::getHeaderField(const string & name) {
 		return fields[name];
 	}
-    const string & HttpHeader::getHeaderField(const std::string & name) const {
+    string HttpHeader::getHeaderField(const std::string & name) const {
         for (map<string, string>::const_iterator iter = fields.begin(); iter != fields.end(); iter++) {
             if (!iter->first.compare(name)) {
                 return iter->second;
             }
         }
-        return EMPTY_STRING;
+        return "";
     }
 	string & HttpHeader::getHeaderFieldIgnoreCase(const string & name) {
 		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
@@ -84,13 +95,13 @@ namespace HTTP {
 		}
 		return fields[name];
 	}
-	const string & HttpHeader::getHeaderFieldIgnoreCase(const string & name) const {
+	string HttpHeader::getHeaderFieldIgnoreCase(const string & name) const {
 		for (map<string, string>::const_iterator iter = fields.begin(); iter != fields.end(); iter++) {
 			if (Text::equalsIgnoreCase(iter->first, name)) {
 				return iter->second;
 			}
 		}
-		return EMPTY_STRING;
+		return "";
 	}
 	int HttpHeader::getHeaderFieldAsInteger(string name) const {
 		return Text::toInt(getHeaderField(name));
@@ -121,7 +132,6 @@ namespace HTTP {
 			}
 		}
 	}
-
 	string HttpHeader::getContentType() const {
 		return getHeaderFieldIgnoreCase("Content-Type");
 	}
@@ -145,21 +155,7 @@ namespace HTTP {
 			removeHeaderFieldIgnoreCase("Transfer-Encoding");
 		}
 	}
-
-	string HttpHeader::getParameter(string name) {
-		return params[name].getFirstValue();
-	}
-	vector<string> HttpHeader::getParameters(string name) {
-		return params[name].getValues();
-	}
-	void HttpHeader::setParameter(string name, string value) {
-		if (params.find(name) == params.end()) {
-			HttpParameter param(name);
-			param.setValue(value);
-			params[name] = param;
-		}
-		params[name].appendValue(value);
-	}
+	
 	string HttpHeader::toString() const {
 		string ret = makeFirstLine() + "\r\n";
 		for (map<string, string>::const_iterator iter = fields.begin(); iter != fields.end(); iter++) {
@@ -168,98 +164,127 @@ namespace HTTP {
 		ret += "\r\n";
 		return ret;
 	}
-
 	string & HttpHeader::operator[] (const string & headerFieldName) {
 		return getHeaderFieldIgnoreCase(headerFieldName);
 	}
 	
-	const string & HttpHeader::operator[] (const string & headerFieldName) const {
-		return getHeaderFieldIgnoreCase(headerFieldName);
-	}
 
 	/**
-	 * @brief http request header
+	 * @brief HttpRequestHeader
 	 */
-	HttpRequestHeader::HttpRequestHeader(HttpHeader & header) : HttpHeaderWrapper(header) {
-		parsePath();
+
+
+	HttpRequestHeader::HttpRequestHeader() {
+	}
+
+	HttpRequestHeader::HttpRequestHeader(const HttpHeader & other) {
+		set(other);
+		parsePath(getPath());
 	}
 
 	HttpRequestHeader::~HttpRequestHeader() {
 	}
 
-	void HttpRequestHeader::parsePath() {
-		HttpHeader & header = getHeader();
-		string path = header.getPart2();
-		size_t p = path.find("?");
-		if (p != string::npos) {
-			parseParams(path, ++p);
-			header.setPart2(path.substr(0, p));
-		}
-	}
-	void HttpRequestHeader::parseParams(const string & params, size_t offset) {
-		HttpHeader & header = getHeader();
-		parseParams(header, params, offset);
-	}
-	void HttpRequestHeader::parseParams(HttpHeader & header, string params, size_t offset) {
-		size_t f = offset;
-		while (parseParam(header, params, f) != string::npos) {}
-	}
-	size_t HttpRequestHeader::parseParam(HttpHeader & header, const string & param, size_t & f) {
-		size_t sep = param.find("=", f);
-		size_t next = param.find("&", f);
-		if (sep != string::npos) {
-			size_t s = sep + 1;
-			size_t e = (next == string::npos ? param.length() : next);
-			string name = param.substr(f, sep - f);
-			string value = param.substr(s, e - s);
-			header.setParameter(name, value);
-			f = next + 1;
-		}
-		return next;
-	}
-	
-	void HttpRequestHeader::setPart2(string part) {
-		HttpHeaderWrapper::setPart2(part);
-		parsePath();
-	}
-	
-	string HttpRequestHeader::getMethod() const {
-		return getHeader().getPart1();
-	}
-	string HttpRequestHeader::getPath() const {
-		return getHeader().getPart2();
-	}
-	string HttpRequestHeader::getProtocol() const {
-		return getHeader().getPart3();
+	void HttpRequestHeader::clear() {
+		HttpHeader::clear();
+		params.clear();
 	}
 
-	/**
-	 * @brief http response header (wrapper) constructor
-	 */
-	HttpResponseHeader::HttpResponseHeader() : HttpHeaderWrapper(header) {
-		header.setPart1("HTTP/1.1");
-		header.setPart2("200");
-		header.setPart3("OK");
+	string HttpRequestHeader::getMethod() const {
+		return getPart1();
 	}
-	HttpResponseHeader::HttpResponseHeader(HttpHeader & header) : HttpHeaderWrapper(header) {
+	void HttpRequestHeader::setMethod(const string & method) {
+		setPart1(method);
+	}
+	string HttpRequestHeader::getPath() const {
+		return getPart2();
+	}
+	void HttpRequestHeader::setPath(const string & path) {
+		parsePath(path);
+	}
+	string HttpRequestHeader::getProtocol() const {
+		return getPart3();
+	}
+	void HttpRequestHeader::setProtocol(const string & protocol) {
+		setPart3(protocol);
+	}
+	void HttpRequestHeader::parsePath(const string & path) {
+
+		size_t sep = path.find("?");
+		if (sep != string::npos) {
+			setPart2(path.substr(0, sep));
+			parseQuery(path.substr(sep + 1));
+		} else {
+			setPart2(path);
+		}
+	}
+	void HttpRequestHeader::parseQuery(const string & query) {
+		params.clear();
+		if (query.empty()) {
+			return;
+		}
+		vector<string> queries = Text::split(query, "&");
+		for (size_t i = 0; i < queries.size(); i++) {
+			string q = queries[i];
+			size_t sep = q.find("=");
+			if (sep != string::npos) {
+				setParameter(q.substr(0, sep), q.substr(sep + 1));
+			} else {
+				setParameter(q, "");
+			}
+		}
+	}
+	string HttpRequestHeader::getParameter(string name) {
+		return params[name].getFirstValue();
+	}
+	vector<string> HttpRequestHeader::getParameters(string name) {
+		return params[name].getValues();
+	}
+	void HttpRequestHeader::setParameter(string name, string value) {
+		if (params.find(name) == params.end()) {
+			HttpParameter param(name);
+			param.setValue(value);
+			params[name] = param;
+		}
+		params[name].appendValue(value);
+	}
+
+
+
+
+	/**
+	 * @brief HttpResponseHeader
+	 */
+
+
+	HttpResponseHeader::HttpResponseHeader() {
+		setProtocol("HTTP/1.1");
+		setStatusCode(200);
+		setMessage("OK");
+	}
+	HttpResponseHeader::HttpResponseHeader(const HttpHeader & other) {
+		set(other);
 	}
 	HttpResponseHeader::~HttpResponseHeader() {
 	}
-	
-	string HttpResponseHeader::getProtocol() {
-		return getHeader().getPart1();
+
+	string HttpResponseHeader::getProtocol() const {
+		return getPart1();
 	}
-	int HttpResponseHeader::getStatusCode() {
-		return atoi(getHeader().getPart2().c_str());
+	void HttpResponseHeader::setProtocol(const string & protocol) {
+		setPart1(protocol);
 	}
-	void HttpResponseHeader::setStatusCode(int status) {
-		getHeader().setPart2(UTIL::Text::toString(status));
+	int HttpResponseHeader::getStatusCode() const {
+		return Text::toInt(getPart2());
 	}
-	string HttpResponseHeader::getMessage() {
-		return getHeader().getPart3();
+	void HttpResponseHeader::setStatusCode(int statusCode) {
+		setPart2(Text::toString(statusCode));
 	}
-	void HttpResponseHeader::setMessage(string message) {
-		getHeader().setPart3(message);
+	std::string HttpResponseHeader::getMessage() const {
+		return getPart3();
 	}
-	
+	void HttpResponseHeader::setMessage(const std::string & message)  {
+		setPart3(message);
+	}
+
 }

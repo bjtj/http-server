@@ -16,7 +16,7 @@ public:
     virtual ~Hello() {
 	}
 
-	virtual void onRequest(HttpRequest & request, HttpResponse & response) {
+	virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) {
 
 		if (!request.remaining()) {
 			string path = request.getPath();
