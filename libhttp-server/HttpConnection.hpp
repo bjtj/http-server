@@ -34,7 +34,6 @@ namespace HTTP {
 
 		void prepareRequestAndResponse(ClientSession & client);
 
-		virtual void readContent(char * buffer, size_t size);
 		virtual void onHttpRequest(HttpRequest & request, HttpResponse & response);
 
 	private:

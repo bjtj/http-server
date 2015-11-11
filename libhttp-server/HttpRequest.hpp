@@ -39,6 +39,7 @@ namespace HTTP {
 		std::vector<std::string> getParameters(std::string & name);
 
 		HttpRequestHeader & getHeader();
+		const HttpRequestHeader & getHeader() const;
         ChunkedBuffer & getChunkedBuffer();
         std::string & getStringBuffer();
         
@@ -46,6 +47,8 @@ namespace HTTP {
 
 		int getContentLength();
 		std::string getContentType();
+
+		void readChunkedBuffer(ChunkedBuffer & buffer);
 	};
 
 }

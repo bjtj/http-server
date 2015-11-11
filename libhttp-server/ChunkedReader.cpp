@@ -15,7 +15,18 @@ namespace HTTP {
     ChunkedBuffer::ChunkedBuffer() : chunkDataBuffer(NULL) {
         clear();
     }
-    
+
+    ChunkedBuffer::ChunkedBuffer(const ChunkedBuffer & other) {
+		chunkDataBuffer = NULL;
+        chunkSize = other.chunkSize;
+        chunkDataReadPosition = other.chunkDataReadPosition;
+
+		if (chunkSize > 0) {
+			chunkDataBuffer = new char[chunkSize];
+			memcpy(chunkDataBuffer, other.chunkDataBuffer, chunkSize);
+		}
+	}
+
     ChunkedBuffer::~ChunkedBuffer() {
         clear();
     }
@@ -39,7 +50,11 @@ namespace HTTP {
     size_t ChunkedBuffer::remainingDataBuffer() const {
         return (chunkDataReadPosition <= chunkSize ? chunkSize - chunkDataReadPosition : 0);
     }
-    
+
+    bool ChunkedBuffer::remain() const {
+		return (remainingDataBuffer() > 0);
+	}
+
     bool ChunkedBuffer::completeData() const {
         return (remainingDataBuffer() == 0);
     }

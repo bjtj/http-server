@@ -14,14 +14,16 @@ namespace HTTP {
         char * chunkDataBuffer;
         size_t chunkSize;
         size_t chunkDataReadPosition;
-        
+
     public:
         ChunkedBuffer();
+		ChunkedBuffer(const ChunkedBuffer & other);
         virtual ~ChunkedBuffer();
         
         void clear();
         void readChunkData(const char * data, size_t len);
         size_t remainingDataBuffer() const;
+		bool remain() const;
         bool completeData() const;
         void setChunkSize(size_t size);
         size_t getChunkSize() const;

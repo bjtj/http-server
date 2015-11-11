@@ -18,17 +18,10 @@ public:
     
     virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) {
         
-        int len = request.getContentLength();
         ChunkedBuffer & buffer = request.getChunkedBuffer();
-        if (len != buffer.getChunkSize()) {
-            buffer.setChunkSize(len);
-        }
+		request.readChunkedBuffer(buffer);
         
-        char readBuffer[1024] = {0,};
-        int readLen = request.getSocket().recv(readBuffer, buffer.getReadSize(sizeof(readBuffer)));
-        buffer.readChunkData(readBuffer, readLen);
-        
-        if (!buffer.remainingDataBuffer()) {
+		if (!buffer.remain()) {
             
             cout << request.getHeader().toString() << endl;
             cout << string(buffer.getChunkData(), buffer.getChunkSize()) << endl;

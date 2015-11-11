@@ -49,6 +49,9 @@ namespace HTTP {
 	HttpRequestHeader & HttpRequest::getHeader() {
 		return header;
 	}
+	const HttpRequestHeader & HttpRequest::getHeader() const {
+		return header;
+	}
     ChunkedBuffer & HttpRequest::getChunkedBuffer() {
         return chunkedBuffer;
     }
@@ -63,5 +66,20 @@ namespace HTTP {
 	}
 	string HttpRequest::getContentType() {
 		return header.getContentType();
+	}
+
+	void HttpRequest::readChunkedBuffer(ChunkedBuffer & buffer) {
+
+		int len = getContentLength();
+
+		if (len > 0) {
+			if (len != buffer.getChunkSize()) {
+				buffer.setChunkSize(len);
+			}
+        
+			char readBuffer[1024] = {0,};
+			int readLen = socket.recv(readBuffer, buffer.getReadSize(sizeof(readBuffer)));
+			buffer.readChunkData(readBuffer, readLen);
+		}
 	}
 }

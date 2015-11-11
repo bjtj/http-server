@@ -58,10 +58,6 @@ namespace HTTP {
 		}
 	}
 	
-	void HttpConnection::readContent(char * buffer, size_t size) {
-		// content buffer manipulation
-	}
-	
 	void HttpConnection::onHttpRequest(HttpRequest & request, HttpResponse & response) {
 		if (getHandler()) {
 			getHandler()->onHttpRequest(request, response);
