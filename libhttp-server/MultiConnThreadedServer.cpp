@@ -87,15 +87,21 @@ namespace HTTP {
     
 	void MultiConnThreadedServer::stop() {
         
+        vector<ClientHandlerThread*> threads;
+        
+        clientsLock.wait();
 		for (map<int, ClientHandlerThread*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
-            ClientHandlerThread * thread = iter->second;
-            thread->quit();
+            threads.push_back(iter->second);
 		}
-
-		for (map<int, ClientHandlerThread*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
-            ClientHandlerThread * thread = iter->second;
-            thread->join();
-		}
+        clientsLock.post();
+        
+        for (size_t i = 0; i < threads.size(); i++) {
+            threads[i]->quit();
+        }
+        
+        for (size_t i = 0; i < threads.size(); i++) {
+            threads[i]->join();
+        }
 		
 		clients.clear();
 
