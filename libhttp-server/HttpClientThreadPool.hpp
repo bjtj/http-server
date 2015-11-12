@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 #include <liboslayer/os.hpp>
+#include <liboslayer/Logger.hpp>
 #include <liboslayer/StringElement.hpp>
 #include "HttpHeader.hpp"
 #include "HttpClient.hpp"
@@ -135,6 +136,7 @@ namespace HTTP {
         
     private:
         
+		const UTIL::Logger & logger;
         HttpClient<T> client;
         std::queue<HttpClientRequest<T> > * requestQueue;
         OS::Semaphore * sem;
@@ -152,7 +154,7 @@ namespace HTTP {
     
     template <typename T>
     HttpClientThread<T>::HttpClientThread(std::queue<HttpClientRequest<T> > * requestQueue, OS::Semaphore * sem)
-    : requestQueue(requestQueue), sem(sem) {
+		: logger(UTIL::LoggerFactory::getDefaultLogger()), requestQueue(requestQueue), sem(sem) {
     }
     
     template <typename T>
@@ -181,6 +183,7 @@ namespace HTTP {
                                    req.getData(), req.getDataLength(),
                                    req.getUserData());
                 } catch (OS::IOException e) {
+					logger.loge("HttpClientThreadPool::request error/err_msg: " + e.getMessage());
                 }
                 
             } else {

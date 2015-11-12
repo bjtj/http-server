@@ -616,7 +616,10 @@ namespace HTTP {
     template<typename T>
     void HttpClient<T>::sendRequestContent(OS::Socket & socket, const char * content, size_t contentLength) {
         if (content && contentLength > 0) {
-            socket.send(content, contentLength);
+            int len = socket.send(content, contentLength);
+			if (len != contentLength) {
+				// TODO: make it sure whole contents sent
+			}
         }
     }
     

@@ -12,11 +12,9 @@ namespace HTTP {
 	static const Logger & logger = LoggerFactory::getDefaultLogger();
     
     HttpResponseDump::HttpResponseDump() {
-        
     }
     
     HttpResponseDump::~HttpResponseDump() {
-        
     }
     
     string HttpResponseDump::dump(HttpHeader & responseHeader, Socket & socket) {
