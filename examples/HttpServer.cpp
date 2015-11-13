@@ -17,9 +17,12 @@ public:
     virtual ~Hello() {
 	}
 
-	virtual void onRequest(HttpRequest & request, HttpResponse & response) {
+	virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) {
 
-		if (!request.remaining()) {
+		ChunkedBuffer & buffer = request.getChunkedBuffer();
+		request.readChunkedBuffer(buffer);
+
+		if (!buffer.remain()) {
 			string path = request.getPath();
 			response.write("hello world - " + path);
 			response.setComplete();
@@ -35,9 +38,12 @@ public:
     virtual ~Late() {
 	}
 
-	virtual void onRequest(HttpRequest & request, HttpResponse & response) {
+	virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) {
 
-		if (!request.remaining()) {
+		ChunkedBuffer & buffer = request.getChunkedBuffer();
+		request.readChunkedBuffer(buffer);
+
+		if (!buffer.remain()) {
 
 			string timeout = request.getParameter("timeout");
 			long t = Text::toInt(timeout);
@@ -83,7 +89,8 @@ size_t readline(char * buffer, size_t max) {
 
 int main(int argc, char *args[]) {
 
-	HttpServer server(8082);
+	int port = 8082;
+	HttpServer server(port);
 	RequestThread rt;
 
 	Hello hello;
@@ -93,6 +100,8 @@ int main(int argc, char *args[]) {
 	server.vpath("/late", &late);
 
 	server.startAsync();
+
+	cout << "start port: " << port << endl;
 
 	while (1) {
 		char buffer[1024] = {0,};
