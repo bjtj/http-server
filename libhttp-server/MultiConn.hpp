@@ -21,15 +21,20 @@ namespace HTTP {
 		int _length;
 
 	public:
+		Packet();
 		Packet(int size);
 		Packet(char * buffer, int size);
+		Packet(const Packet & other);
 		virtual ~Packet();
 
+		void clear();
 		char * getBuffer();
 		int put(char * data, int len);
 		int size();
 		void resize(int size);
 		int length();
+
+		Packet & operator= (const Packet & other);
 	};
 
 	/**
@@ -125,7 +130,7 @@ namespace HTTP {
 		virtual void stop() = 0;
 		virtual bool isRunning() = 0;
 
-		virtual bool isClientDisconnected(ClientSession & client) = 0;
+		/*virtual bool isClientDisconnected(ClientSession & client) = 0;*/
 
 		virtual void onClientConnect(ClientSession & client);
 		virtual void onClientReceive(ClientSession & client, Packet & packet);

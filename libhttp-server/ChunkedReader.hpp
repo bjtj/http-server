@@ -50,23 +50,26 @@ namespace HTTP {
 	};
 
 	/**
-	 * @brief consume
+	 * @brief ReadCounter
 	 */
-	class ConsumeBuffer {
+	class ReadCounter {
 	private:
 		size_t pos;
-		size_t maxSize;
+		size_t contentSize;
 	public:
-		ConsumeBuffer(size_t maxSize);
-		virtual ~ConsumeBuffer();
+		ReadCounter();
+		ReadCounter(size_t contentSize);
+		virtual ~ReadCounter();
 
 		void clear();
 		void read(size_t len);
 		size_t remaining() const;
 		bool complete() const;
 
-		void setMaxSize(size_t maxSize);
+		void setContentSize(size_t contentSize);
+		size_t getContentSize();
         size_t getReadSize(size_t bufferSize) const;
+		size_t getReadPosition();
 	};
 
 	/**

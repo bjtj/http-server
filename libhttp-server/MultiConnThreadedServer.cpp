@@ -3,11 +3,15 @@
 #include <vector>
 #include <map>
 #include <liboslayer/os.hpp>
+#include <liboslayer/Logger.hpp>
 
 namespace HTTP {
 
 	using namespace std;
 	using namespace OS;
+	using namespace UTIL;
+
+	static const Logger & logger = LoggerFactory::getDefaultLogger();
 
 	/**
 	 * @brief client thread
@@ -21,12 +25,22 @@ namespace HTTP {
     
 	void ClientHandlerThread::run() {
 		Socket * socket = client.getSocket();
+		Selector selector;
+		socket->registerSelector(selector);
 		char buffer[1024] = {0,};
-		int len = 0;
         try {
-            while (!interrupted() && (len = socket->recv(buffer, client.getBufferSize())) > 0) {
-                Packet packet(buffer, len);
-                server.onClientReceive(client, packet);
+            while (!interrupted()) {
+				if (selector.select(1000) > 0) {
+					int len = socket->recv(buffer, client.getBufferSize());
+					if (len <= 0) {
+						break;
+					}
+					Packet packet(buffer, len);
+					server.onClientReceive(client, packet);
+				}
+				if (client.isClosed()) {
+					break;
+				}
             }
         } catch (IOException e) {
         }
@@ -39,20 +53,25 @@ namespace HTTP {
     
 	void ClientHandlerThread::quit() {
         this->interrupt();
-		client.getSocket()->close();
+		client.close();
 	}
 	
 
 	/**
 	 * @brief multi conn threaded server
 	 */
-	MultiConnThreadedServer::MultiConnThreadedServer(int port) : port(port), clientsLock(1) {
+	MultiConnThreadedServer::MultiConnThreadedServer(int port) : port(port), clientThreadsLock(1), server(NULL) {
 	}
     
 	MultiConnThreadedServer::~MultiConnThreadedServer() {
+		stop();
 	}
 	
 	void MultiConnThreadedServer::start() {
+
+		if (server) {
+			return;
+		}
 
 		server = new ServerSocket(port);
 		server->setReuseAddr();
@@ -61,7 +80,7 @@ namespace HTTP {
 
 		server->registerSelector(selector);
 
-		clients.clear();
+		clientThreads.clear();
 	}
     
 	void MultiConnThreadedServer::poll(unsigned long timeout_milli) {
@@ -70,6 +89,23 @@ namespace HTTP {
 		}
 
 		releaseInvalidThreads();
+	}
+
+	void MultiConnThreadedServer::releaseInvalidThreads() {
+		clientThreadsLock.wait();
+		map<int, ClientHandlerThread*>::iterator iter = clientThreads.begin();
+		while (iter != clientThreads.end()) {
+			ClientHandlerThread * thread = iter->second;
+			if (!thread) {
+				clientThreads.erase(iter++);
+			} else if (!thread->isRunning()) {
+				delete thread;
+				clientThreads.erase(iter++);
+			} else {
+				++iter;
+			}
+		}
+		clientThreadsLock.post();
 	}
     
     void MultiConnThreadedServer::listen() {
@@ -82,70 +118,14 @@ namespace HTTP {
                 onClientConnect(*session);
             }
         }
-        
     }
-    
-	void MultiConnThreadedServer::stop() {
-        
-        vector<ClientHandlerThread*> threads;
-        
-        clientsLock.wait();
-		for (map<int, ClientHandlerThread*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
-            threads.push_back(iter->second);
-		}
-        clientsLock.post();
-        
-        for (size_t i = 0; i < threads.size(); i++) {
-            threads[i]->quit();
-        }
-        
-        for (size_t i = 0; i < threads.size(); i++) {
-            threads[i]->join();
-        }
-		
-		clients.clear();
-
-		server->close();
-		server = NULL;
-	}
-    
-	bool MultiConnThreadedServer::isRunning() {
-		return server != NULL;
-	}
-	
-	bool MultiConnThreadedServer::isClientDisconnected(ClientSession & client) {
-		for (map<int, ClientHandlerThread*>::iterator iter = clients.begin(); iter != clients.end(); iter++) {
-			if (&(iter->second->getClient()) == &client) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	void MultiConnThreadedServer::releaseInvalidThreads() {
-		clientsLock.wait();
-		map<int, ClientHandlerThread*>::iterator iter = clients.begin();
-		while (iter != clients.end()) {
-			ClientHandlerThread * thread = iter->second;
-			if (!thread) {
-				clients.erase(iter++);
-			} else if (!thread->isRunning()) {
-				onClientDisconnect(thread->getClient());
-				delete thread;
-				clients.erase(iter++);
-			} else {
-				++iter;
-			}
-		}
-		clientsLock.post();
-	}
 	
 	void MultiConnThreadedServer::onClientConnect(ClientSession & client) {
 		ClientHandlerThread * thread = new ClientHandlerThread(*this, client);
 
-		clientsLock.wait();
-		clients[client.getId()] = thread;
-		clientsLock.post();
+		clientThreadsLock.wait();
+		clientThreads[client.getId()] = thread;
+		clientThreadsLock.post();
 
 		thread->start();
 		MultiConn::onClientConnect(client);
@@ -160,10 +140,42 @@ namespace HTTP {
 		
 		MultiConn::onClientDisconnect(client);
 
-		clientsLock.wait();
-		clients.erase(id);
-		clientsLock.post();
+		clientThreadsLock.wait();
+		clientThreads.erase(id);
+		clientThreadsLock.post();
 
 		delete &client;
+	}
+
+	void MultiConnThreadedServer::stop() {
+
+		if (!server) {
+			return;
+		}
+        
+        vector<ClientHandlerThread*> threads;
+        
+        clientThreadsLock.wait();
+		for (map<int, ClientHandlerThread*>::iterator iter = clientThreads.begin(); iter != clientThreads.end(); iter++) {
+            threads.push_back(iter->second);
+		}
+        clientThreadsLock.post();
+        
+        for (size_t i = 0; i < threads.size(); i++) {
+            threads[i]->quit();
+        }
+        
+        for (size_t i = 0; i < threads.size(); i++) {
+            threads[i]->join();
+        }
+		
+		clientThreads.clear();
+
+		server->close();
+		server = NULL;
+	}
+    
+	bool MultiConnThreadedServer::isRunning() {
+		return server != NULL;
 	}
 }

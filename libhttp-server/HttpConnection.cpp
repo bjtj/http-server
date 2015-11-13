@@ -1,5 +1,5 @@
-#include <iostream>
 #include <liboslayer/Text.hpp>
+#include <liboslayer/Logger.hpp>
 
 #include "HttpConnection.hpp"
 #include "HttpStatusCodes.hpp"
@@ -10,6 +10,7 @@ namespace HTTP {
     using namespace OS;
 	using namespace UTIL;
 
+	const static Logger & logger = LoggerFactory::getDefaultLogger();
 	
 	/**
 	 * @brief http connection constructor
@@ -24,28 +25,37 @@ namespace HTTP {
 
 	void HttpConnection::onClientConnect(MultiConn & server, ClientSession & client) {
 		client.setBufferSize(1);
+		logger.logv("connected/client");
 	}
 
 	void HttpConnection::onClientReceive(MultiConn & server, ClientSession & client, Packet & packet) {
 
 		if (!headerReader.complete()) {
-			headerReader.read(packet.getBuffer(), (int)packet.size());
+			headerReader.read(packet.getBuffer(), packet.length());
+			packet.clear();
 		}
 
 		if (headerReader.complete()) {
 
+			logger.logv("ready");
+
 			client.setBufferSize(client.getMaxBufferSize());
 			prepareRequestAndResponse(client);
 			
+			request->setContentPacket(packet);
 			onHttpRequest(*request, *response);
 
 			if (response->hasComplete()) {
+				logger.logv("complete");
 				client.close();
-            }
+            } else {
+				logger.logv("what?");
+			}
 		}
 	}
 
 	void HttpConnection::onClientDisconnect(MultiConn & server, ClientSession & client) {
+		logger.logv("disconnected/client");
 	}
 
 	void HttpConnection::prepareRequestAndResponse(ClientSession & client) {

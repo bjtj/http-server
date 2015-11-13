@@ -29,8 +29,8 @@ namespace HTTP {
 	private:
 		int port;
 		OS::Selector selector;
-		OS::Semaphore clientsLock;
-        std::map<int, ClientHandlerThread *> clients;
+		OS::Semaphore clientThreadsLock;
+        std::map<int, ClientHandlerThread *> clientThreads;
 		OS::ServerSocket * server;
 		
 	public:
@@ -39,17 +39,15 @@ namespace HTTP {
 
 		virtual void start();
 		virtual void poll(unsigned long timeout_milli);
-        virtual void listen();
-		virtual void stop();
-		virtual bool isRunning();
-
 		void releaseInvalidThreads();
 
-		virtual bool isClientDisconnected(ClientSession & client);
-
+        virtual void listen();
 		virtual void onClientConnect(ClientSession & client);
 		virtual void onClientReceive(ClientSession & client, Packet & packet);
 		virtual void onClientDisconnect(ClientSession & client);
+
+		virtual void stop();
+		virtual bool isRunning();
 	};
 
 }

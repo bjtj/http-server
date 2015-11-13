@@ -1,4 +1,5 @@
 #include <liboslayer/Text.hpp>
+#include <liboslayer/Logger.hpp>
 
 #include "HttpResponse.hpp"
 #include "HttpStatusCodes.hpp"
@@ -7,6 +8,8 @@ namespace HTTP {
 
 	using namespace std;
 	using namespace UTIL;
+
+	const static Logger & logger = LoggerFactory::getDefaultLogger();
 
 	/**
 	 * @brief http response constructor
@@ -60,7 +63,10 @@ namespace HTTP {
 		}
 	}
 	void HttpResponse::sendContent() {
-		socket.send((char*)content.c_str(), content.length());
+		int len = socket.send((char*)content.c_str(), content.length());
+		if (len != content.length()) {
+			logger.loge("send() error / expected: " + Text::toString(content.length()) + ", but: " + Text::toString(len));
+		}
 		clearBuffer();
 	}
 	void HttpResponse::setComplete() {

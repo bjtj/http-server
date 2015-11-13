@@ -110,36 +110,43 @@ namespace HTTP {
 	}
 
 	/**
-	 * @brief consume
+	 * @brief ReadCounter
 	 */
-	ConsumeBuffer::ConsumeBuffer(size_t maxSize) : pos(0), maxSize(maxSize) {
+	ReadCounter::ReadCounter() : pos(0), contentSize(0) {
 	}
-	ConsumeBuffer::~ConsumeBuffer() {
+	ReadCounter::ReadCounter(size_t contentSize) : pos(0), contentSize(contentSize) {
+	}
+	ReadCounter::~ReadCounter() {
 	}
 
-	void ConsumeBuffer::clear() {
+	void ReadCounter::clear() {
 		pos = 0;
 	}
-	void ConsumeBuffer::read(size_t len) {
+	void ReadCounter::read(size_t len) {
 		size_t writeSize = len < remaining() ? len : remaining();
 		pos += writeSize;
 	}
-	size_t ConsumeBuffer::remaining() const {
-		return (pos < maxSize ? maxSize - pos : 0);
+	size_t ReadCounter::remaining() const {
+		return (pos < contentSize ? contentSize - pos : 0);
 	}
-	bool ConsumeBuffer::complete() const {
+	bool ReadCounter::complete() const {
 		return remaining() == 0;
 	}
 
-	void ConsumeBuffer::setMaxSize(size_t maxSize) {
-		this->maxSize = maxSize;
+	void ReadCounter::setContentSize(size_t contentSize) {
+		this->contentSize = contentSize;
 	}
-    
-    size_t ConsumeBuffer::getReadSize(size_t bufferSize) const {
-        size_t remain = remaining();
+	size_t ReadCounter::getContentSize() {
+		return contentSize;
+	}
+    size_t ReadCounter::getReadSize(size_t bufferSize) const {
+		size_t remain = remaining();
         return bufferSize > remain ? remain : bufferSize;
-    }
+	}
 
+	size_t ReadCounter::getReadPosition() {
+		return pos;
+	}
 
 	/**
 	 * @brief Chunked Reader
@@ -175,7 +182,7 @@ namespace HTTP {
 		}
 
 		// read trailing \r\n
-		ConsumeBuffer consume(2);
+		ReadCounter consume(2);
 		char ch;
 		while (!consume.complete() && (len = socket.recv(&ch, 1)) > 0) {
 			consume.read(len);

@@ -86,17 +86,7 @@ namespace HTTP {
 	bool MultiConnMultiplexServer::isRunning() {
 		return server != NULL;
 	}
-
-	bool MultiConnMultiplexServer::isClientDisconnected(ClientSession & client) {
-        
-		for (size_t i = 0; i < clients.size(); i++) {
-			if (clients[(int)i] == &client) {
-				return false;
-			}
-		}
-		return true;
-	}
-
+	
 	void MultiConnMultiplexServer::onClientConnect(ClientSession & client) {
 		Socket * socket = client.getSocket();
 		clients[client.getId()] = &client;

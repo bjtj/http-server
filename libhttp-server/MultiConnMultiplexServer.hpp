@@ -25,8 +25,6 @@ namespace HTTP {
 		virtual void stop();
 		virtual bool isRunning();
 
-		virtual bool isClientDisconnected(ClientSession & client);
-
 		virtual void onClientConnect(ClientSession & client);
 		virtual void onClientReceive(ClientSession & client, Packet & packet);
 		virtual void onClientDisconnect(ClientSession & client);

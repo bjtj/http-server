@@ -8,6 +8,7 @@
 #include <liboslayer/os.hpp>
 #include "HttpHeader.hpp"
 #include "ChunkedReader.hpp"
+#include "MultiConn.hpp"
 
 namespace HTTP {
 
@@ -22,6 +23,9 @@ namespace HTTP {
         
         ChunkedBuffer chunkedBuffer;
         std::string stringBuffer;
+
+		Packet contentPacket;
+		ReadCounter contentReadCounter;
 
 	public:
 		HttpRequest(HttpHeader & header, OS::Socket & socket);
@@ -48,7 +52,9 @@ namespace HTTP {
 		int getContentLength();
 		std::string getContentType();
 
+		void setContentPacket(Packet & packet);
 		void readChunkedBuffer(ChunkedBuffer & buffer);
+		bool completeContentRead();
 	};
 
 }

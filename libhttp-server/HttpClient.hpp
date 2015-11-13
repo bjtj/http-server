@@ -148,13 +148,11 @@ namespace HTTP {
 		size_t writeLen;
         T userData;
 		ChunkedReaderBuffer chunkedBuffer;
-        ConsumeBuffer contentBuffer;
-		ConsumeBuffer consumeBuffer;
+        ReadCounter contentBuffer;
+		ReadCounter consumeBuffer;
         std::string stringBuffer;
         ChunkedBuffer dataBuffer;
 		
-        
-        
 	public:
         
         
@@ -404,7 +402,7 @@ namespace HTTP {
 						chunkedBuffer.clear();
 						status = HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_SIZE_STATUS;
 					} else if (responseHeader.getContentLength() > 0) {
-                        contentBuffer.setMaxSize(responseHeader.getContentLength());
+                        contentBuffer.setContentSize(responseHeader.getContentLength());
                         status = HttpRequestStatus::RECV_RESPONSE_CONTENT_STATUS;
                     } else {
                         status = HttpRequestStatus::DONE_STATUS;
@@ -454,7 +452,7 @@ namespace HTTP {
 			{
 				if (chunkedBuffer.getChunkSize() == 0) {
 					consumeBuffer.clear();
-					consumeBuffer.setMaxSize(2);
+					consumeBuffer.setContentSize(2);
 					status = HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_DATA_TRAILING_STATUS;
 					break;
 				}
@@ -471,7 +469,7 @@ namespace HTTP {
 					}
 
 					consumeBuffer.clear();
-					consumeBuffer.setMaxSize(2);
+					consumeBuffer.setContentSize(2);
 					status = HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_DATA_TRAILING_STATUS;
 				}
 			}

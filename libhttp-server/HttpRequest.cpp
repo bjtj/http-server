@@ -67,19 +67,31 @@ namespace HTTP {
 	string HttpRequest::getContentType() {
 		return header.getContentType();
 	}
-
+	void HttpRequest::setContentPacket(Packet & packet) {
+		this->contentPacket = packet;
+	}
 	void HttpRequest::readChunkedBuffer(ChunkedBuffer & buffer) {
 
 		int len = getContentLength();
 
 		if (len > 0) {
+
+			if (len != contentReadCounter.getContentSize()) {
+				contentReadCounter.setContentSize(len);
+			}
+
 			if (len != buffer.getChunkSize()) {
 				buffer.setChunkSize(len);
 			}
-        
-			char readBuffer[1024] = {0,};
-			int readLen = socket.recv(readBuffer, buffer.getReadSize(sizeof(readBuffer)));
-			buffer.readChunkData(readBuffer, readLen);
+
+			if (contentPacket.length() > 0) {
+				buffer.readChunkData(contentPacket.getBuffer(), contentPacket.length());
+				contentReadCounter.read(contentPacket.length());
+			}
 		}
+	}
+
+	bool HttpRequest::completeContentRead() {
+		return contentReadCounter.complete();
 	}
 }
