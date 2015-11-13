@@ -24,7 +24,7 @@ namespace HTTP {
     public:
         HttpResponseDump();
         virtual ~HttpResponseDump();
-        static std::string dump(HttpHeader & responseHeader, OS::Socket & socket);
+        static std::string dump(const HttpHeader & responseHeader, OS::Socket & socket);
     };
     
     /**

@@ -8,18 +8,22 @@
 
 #include <iostream>
 #include <string>
+#include <liboslayer/StringElement.hpp>
 #include <libhttp-server/HttpClient.hpp>
 #include <libhttp-server/HttpClientThreadPool.hpp>
 
 using namespace HTTP;
 using namespace std;
+using namespace UTIL;
 
 class MyHttpResponseHandler : public HttpResponseHandler<int> {
 public:
-    virtual void onResponse(HttpClient<int> & httpClient, HttpHeader & responseHeader, OS::Socket & socket, int userData) {
-        HttpResponseDump dump;
-        string ret = dump.dump(responseHeader, socket);
-        cout << userData << ret << endl;
+    virtual void onHttpResponse(HttpClient<int> & httpClient, const HttpHeader & responseHeader, const string & content, int userData) {
+
+        cout << userData << content << endl;
+    }
+    virtual void onError(HttpClient<int> & httpClient, int userData) {
+        
     }
 };
 
@@ -35,15 +39,16 @@ int main(int argc, const char * argv[]) {
     
     HttpClientThreadPool<int> pool(5);
     pool.setFollowRedirect(true);
-    pool.setHttpResponseHandler(&handler);
+    pool.setHttpClientPollListener(&handler);
+//    pool.setHttpResponseHandler(&handler);
     pool.start();
     string method = "GET";
-    int tag;
-    pool.request(url, method, NULL, 0, tag);
-    pool.request(url, method, NULL, 0, tag);
-    pool.request(url, method, NULL, 0, tag);
-    pool.request(url, method, NULL, 0, tag);
-    pool.request(url, method, NULL, 0, tag);
+    int tag = 0;
+    pool.request(url, method, StringMap(), NULL, 0, tag);
+    pool.request(url, method, StringMap(), NULL, 0, tag);
+    pool.request(url, method, StringMap(), NULL, 0, tag);
+    pool.request(url, method, StringMap(), NULL, 0, tag);
+    pool.request(url, method, StringMap(), NULL, 0, tag);
     
     getchar();
     

@@ -10,6 +10,7 @@ private:
 public:
     MyHttpClientPollListener() {}
     virtual ~MyHttpClientPollListener() {}
+    
     virtual void onRequestHeader(HttpClient<int> & httpClient, const HttpHeader & requestHeader, int userData) {
         cout << requestHeader.toString() << endl;
     }
@@ -19,10 +20,10 @@ public:
     virtual void onResponseDataChunk(HttpClient<int> & httpClient, const HttpHeader & responseHeader, const char * data, size_t len, int userData) {
         cout << string(data,len) << endl;
     }
-    virtual void onComplete(HttpClient<int> & httpClient) {
+    virtual void onComplete(HttpClient<int> & httpClient, int userData) {
         cout << "done" << endl;
     }
-    virtual void onError(HttpClient<int> & httpClient) {
+    virtual void onError(HttpClient<int> & httpClient, int userData) {
         cout << "error" << endl;
     }
 };

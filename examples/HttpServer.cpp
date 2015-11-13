@@ -22,7 +22,7 @@ public:
 		ChunkedBuffer & buffer = request.getChunkedBuffer();
 		request.readChunkedBuffer(buffer);
 
-		if (!buffer.remain()) {
+		if (request.completeContentRead()) {
 			string path = request.getPath();
 			response.write("hello world - " + path);
 			response.setComplete();
@@ -43,7 +43,7 @@ public:
 		ChunkedBuffer & buffer = request.getChunkedBuffer();
 		request.readChunkedBuffer(buffer);
 
-		if (!buffer.remain()) {
+		if (request.completeContentRead()) {
 
 			string timeout = request.getParameter("timeout");
 			long t = Text::toInt(timeout);

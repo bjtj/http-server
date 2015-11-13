@@ -18,7 +18,10 @@ public:
 
 	virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) {
 
-		if (!request.remaining()) {
+        ChunkedBuffer & buffer = request.getChunkedBuffer();
+        request.readChunkedBuffer(buffer);
+        
+		if (request.completeContentRead()) {
 			string path = request.getPath();
 			response.write("hello world - " + path);
 			response.setComplete();

@@ -17,7 +17,7 @@ namespace HTTP {
     HttpResponseDump::~HttpResponseDump() {
     }
     
-    string HttpResponseDump::dump(HttpHeader & responseHeader, Socket & socket) {
+    string HttpResponseDump::dump(const HttpHeader & responseHeader, Socket & socket) {
         
         string ret;
         

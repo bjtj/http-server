@@ -16,9 +16,12 @@ public:
     virtual ~REST() {
     }
     
-    virtual void onRequest(HttpRequest & request, HttpResponse & response) {
+    virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) {
         
-        if (!request.remaining()) {
+        ChunkedBuffer & buffer = request.getChunkedBuffer();
+        request.readChunkedBuffer(buffer);
+        
+        if (request.completeContentRead()) {
             string method = request.getMethod();
             if (Text::equalsIgnoreCase(method, "GET")) {
                 response.write("GET");
