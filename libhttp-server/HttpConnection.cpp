@@ -25,7 +25,6 @@ namespace HTTP {
 
 	void HttpConnection::onClientConnect(MultiConn & server, ClientSession & client) {
 		client.setBufferSize(1);
-		logger.logv("connected/client");
 	}
 
 	void HttpConnection::onClientReceive(MultiConn & server, ClientSession & client, Packet & packet) {
@@ -37,8 +36,6 @@ namespace HTTP {
 
 		if (headerReader.complete()) {
 
-			logger.logv("ready");
-
 			client.setBufferSize(client.getMaxBufferSize());
 			prepareRequestAndResponse(client);
 			
@@ -46,16 +43,12 @@ namespace HTTP {
 			onHttpRequest(*request, *response);
 
 			if (response->hasComplete()) {
-				logger.logv("complete");
 				client.close();
-            } else {
-				logger.logv("what?");
-			}
+            }
 		}
 	}
 
 	void HttpConnection::onClientDisconnect(MultiConn & server, ClientSession & client) {
-		logger.logv("disconnected/client");
 	}
 
 	void HttpConnection::prepareRequestAndResponse(ClientSession & client) {
