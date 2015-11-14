@@ -18,14 +18,15 @@ namespace HTTP {
 	/**
 	 * @brief http connection
 	 */
-	class HttpConnection : public MultiConnProtocol, public OnHttpRequestHandlerDecorator {
+	class HttpConnection : public MultiConnProtocol, public OnHttpRequestHandler {
 	private:
 		HttpRequest * request;
 		HttpResponse * response;
 		HttpHeaderReader headerReader;
+        OnHttpRequestHandler * requestHandler;
 		
 	public:
-        HttpConnection(OnHttpRequestHandler * handler);
+        HttpConnection(OnHttpRequestHandler * requestHandler);
 		virtual ~HttpConnection();
 
 		virtual void onClientConnect(MultiConn & server, ClientSession & client);

@@ -16,21 +16,6 @@ namespace HTTP {
 
 		virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) = 0;
 	};
-
-	/**
-	 * @brief http request handler
-	 */
-	class OnHttpRequestHandlerDecorator : public OnHttpRequestHandler {
-	private:
-        OnHttpRequestHandler * handler;
-	public:
-		OnHttpRequestHandlerDecorator(OnHttpRequestHandler * handler) : handler(handler) {}
-		virtual ~OnHttpRequestHandlerDecorator() {}
-
-		virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) = 0;
-
-		OnHttpRequestHandler * getHandler() {return handler;}
-	};
 }
 
 #endif

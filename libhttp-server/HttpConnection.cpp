@@ -15,8 +15,8 @@ namespace HTTP {
 	/**
 	 * @brief http connection constructor
 	 */
-    HttpConnection::HttpConnection(OnHttpRequestHandler * handler)
-		: OnHttpRequestHandlerDecorator(handler), request(NULL), response(NULL) {
+    HttpConnection::HttpConnection(OnHttpRequestHandler * requestHandler)
+		: requestHandler(requestHandler), request(NULL), response(NULL) {
 	}
 	HttpConnection::~HttpConnection() {
 		releaseRequest();
@@ -62,8 +62,8 @@ namespace HTTP {
 	}
 	
 	void HttpConnection::onHttpRequest(HttpRequest & request, HttpResponse & response) {
-		if (getHandler()) {
-			getHandler()->onHttpRequest(request, response);
+		if (requestHandler) {
+			requestHandler->onHttpRequest(request, response);
 		}
 	}
 	
