@@ -38,6 +38,7 @@ namespace HTTP {
 		std::string & getHeaderFieldIgnoreCase(const std::string & name);
 		std::string getHeaderFieldIgnoreCase(const std::string & name) const;
 		std::map<std::string, std::string> & getHeaderFields();
+        std::vector<std::string> getParameterNames();
 		std::string getParameter(const std::string & name);
 		std::string getParameter(const char * name);
 		std::vector<std::string> getParameters(std::string & name);

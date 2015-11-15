@@ -33,6 +33,8 @@ namespace HTTP {
 	void HttpResponse::setContentLength(int length) {
 		contentLength = length;
 		header.setHeaderField("Content-Length", Text::toString(length));
+        
+        contentTranferCounter.setContentSize(contentLength);
 	}
 	void HttpResponse::setContentType(string type) {
 		header.setHeaderField("Content-Type", type);
@@ -63,10 +65,12 @@ namespace HTTP {
 		}
 	}
 	void HttpResponse::sendContent() {
-		int len = socket.send((char*)content.c_str(), content.length());
-		if (len != content.length()) {
-			logger.loge("send() error / expected: " + Text::toString(content.length()) + ", but: " + Text::toString(len));
+        size_t contentLength = content.length();
+		int len = socket.send((char*)(content.c_str() + contentTranferCounter.getReadPosition()), contentTranferCounter.getReadSize(contentLength));
+		if (len != contentLength) {
+			logger.loge("send() error / expected: " + Text::toString(contentLength) + ", but: " + Text::toString(len));
 		}
+        contentTranferCounter.read(len);
 		clearBuffer();
 	}
 	void HttpResponse::setComplete() {
@@ -74,7 +78,6 @@ namespace HTTP {
 			setContentLength((int)content.length());
             try {
                 sendHeaderOnce();
-                sendContent();
             } catch (OS::IOException e) {}
 			complete = true;
 		}
@@ -82,5 +85,9 @@ namespace HTTP {
 	bool HttpResponse::hasComplete() {
 		return complete;
 	}
+    
+    bool HttpResponse::completeContentTransfer() {
+        return contentTranferCounter.complete();
+    }
 
 }

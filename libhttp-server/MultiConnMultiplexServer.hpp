@@ -12,7 +12,7 @@ namespace HTTP {
 		int port;
 
 		OS::Selector selector;
-		std::map<int, ClientSession*> clients;
+		std::map<int, Connection*> clients;
 		OS::ServerSocket * server;
 
 	public:
@@ -25,9 +25,9 @@ namespace HTTP {
 		virtual void stop();
 		virtual bool isRunning();
 
-		virtual void onClientConnect(ClientSession & client);
-		virtual void onClientReceive(ClientSession & client, Packet & packet);
-		virtual void onClientDisconnect(ClientSession & client);
+		virtual void onClientConnect(Connection & connection);
+		virtual void onClientReceive(Connection & connection, Packet & packet);
+		virtual void onClientDisconnect(Connection & connection);
 	};
 }
 

@@ -21,13 +21,22 @@ public:
         ChunkedBuffer & buffer = request.getChunkedBuffer();
 		request.readChunkedBuffer(buffer);
         
-		if (!buffer.remain()) {
+		if (request.completeContentRead()) {
             
             cout << request.getHeader().toString() << endl;
             cout << string(buffer.getChunkData(), buffer.getChunkSize()) << endl;
             
             string path = request.getPath();
-            response.write("hello world - " + path);
+            response.write("hello world - " + path + "\n");
+            vector<string> names = request.getParameterNames();
+            for (size_t i = 0; i < names.size(); i++) {
+                string name = names[i];
+                response.write(" - ");
+                response.write(name);
+                response.write(" : ");
+                response.write(request.getParameter(name));
+                response.write("\n");
+            }
             response.setComplete();
         }
     }

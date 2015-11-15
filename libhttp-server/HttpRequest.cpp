@@ -37,6 +37,9 @@ namespace HTTP {
 	map<string, string> & HttpRequest::getHeaderFields() {
 		return header.getHeaderFields();
 	}
+    vector<string> HttpRequest::getParameterNames() {
+        return header.getParameterNames();
+    }
 	string HttpRequest::getParameter(const string & name) {
 		return header.getParameter(name);
 	}

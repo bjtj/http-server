@@ -29,11 +29,12 @@ namespace HTTP {
         HttpConnection(OnHttpRequestHandler * requestHandler);
 		virtual ~HttpConnection();
 
-		virtual void onClientConnect(MultiConn & server, ClientSession & client);
-		virtual void onClientReceive(MultiConn & server, ClientSession & client, Packet & packet);
-		virtual void onClientDisconnect(MultiConn & server, ClientSession & client);
+		virtual void onClientConnect(MultiConn & server, Connection & connection);
+		virtual void onClientReceive(MultiConn & server, Connection & connection, Packet & packet);
+        virtual void onClientWriteable(MultiConn & server, Connection & connection);
+		virtual void onClientDisconnect(MultiConn & server, Connection & connection);
 
-		void prepareRequestAndResponse(ClientSession & client);
+		void prepareRequestAndResponse(Connection & connection);
 
 		virtual void onHttpRequest(HttpRequest & request, HttpResponse & response);
 

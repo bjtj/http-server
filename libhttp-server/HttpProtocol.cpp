@@ -11,7 +11,7 @@ namespace HTTP {
 	/**
 	 * @brief http protocol
 	 */
-    HttpProtocol::HttpProtocol() : handlerSem(1), connSem(1) {
+    HttpProtocol::HttpProtocol() : handlersLock(1), connSem(1) {
         
 		string msg404 = HttpStatusCodes::getMessage(404);
 		string msg500 = HttpStatusCodes::getMessage(500);
@@ -22,36 +22,42 @@ namespace HTTP {
 	HttpProtocol::~HttpProtocol() {
 	}
 	
-	void HttpProtocol::onClientConnect(MultiConn & server, ClientSession & client) {
+	void HttpProtocol::onClientConnect(MultiConn & server, Connection & connection) {
         
         AutoLock lock(connSem);
         
 		HttpConnection * conn = new HttpConnection(this);
-		conns[client.getId()] = conn;
+		conns[connection.getId()] = conn;
 
-		conn->onClientConnect(server, client);
+		conn->onClientConnect(server, connection);
 	}
 
-	void HttpProtocol::onClientReceive(MultiConn & server, ClientSession & client, Packet & packet) {
-        
-        AutoLock lock(connSem);
-       
-		HttpConnection * conn = conns[client.getId()];
+	void HttpProtocol::onClientReceive(MultiConn & server, Connection & connection, Packet & packet) {
+      
+		HttpConnection * conn = conns[connection.getId()];
 		if (conn) {
-			conn->onClientReceive(server, client, packet);
+			conn->onClientReceive(server, connection, packet);
 		}
 	}
+    
+    void HttpProtocol::onClientWriteable(MultiConn &server, Connection &connection) {
+        
+        HttpConnection * conn = conns[connection.getId()];
+        if (conn) {
+            conn->onClientWriteable(server, connection);
+        }
+    }
 
-	void HttpProtocol::onClientDisconnect(MultiConn & server, ClientSession & client) {
+	void HttpProtocol::onClientDisconnect(MultiConn & server, Connection & connection) {
 
         AutoLock lock(connSem);
         
-		HttpConnection * conn = conns[client.getId()];
+		HttpConnection * conn = conns[connection.getId()];
         if (conn) {
-            conn->onClientDisconnect(server, client);
+            conn->onClientDisconnect(server, connection);
             delete conn;
         }
-		conns.erase(client.getId());
+		conns.erase(connection.getId());
 	}
 	
 	string HttpProtocol::pathOnly(string unclearPath) {
@@ -64,7 +70,7 @@ namespace HTTP {
 	
 	void HttpProtocol::vpath(string path, OnHttpRequestHandler * requestHandler) {
         
-        AutoLock lock(handlerSem);
+        AutoLock lock(handlersLock);
         
 		if (!requestHandler) {
 			requestHandlers.erase(path);
@@ -77,7 +83,7 @@ namespace HTTP {
 		map<string, OnHttpRequestHandler*, vpath_comp>::iterator iter;
 		string p = pathOnly(path);
         
-        AutoLock lock(handlerSem);
+        AutoLock lock(handlersLock);
         
 		for (iter = requestHandlers.begin(); iter != requestHandlers.end(); iter++) {
 			if (Text::match(iter->first, p)) {

@@ -31,7 +31,7 @@ namespace HTTP {
         
 	private:
         
-        OS::Semaphore handlerSem;
+        OS::Semaphore handlersLock;
         OS::Semaphore connSem;
 		std::map<int, HttpConnection*> conns;
 		std::map<std::string, OnHttpRequestHandler*, vpath_comp> requestHandlers;
@@ -45,9 +45,10 @@ namespace HTTP {
 		HttpProtocol();
 		virtual ~HttpProtocol();
 
-		virtual void onClientConnect(MultiConn & server, ClientSession & client);
-		virtual void onClientReceive(MultiConn & server, ClientSession & client, Packet & packet);
-		virtual void onClientDisconnect(MultiConn & server, ClientSession & client);
+		virtual void onClientConnect(MultiConn & server, Connection & connection);
+		virtual void onClientReceive(MultiConn & server, Connection & connection, Packet & packet);
+        virtual void onClientWriteable(MultiConn & server, Connection & connection);
+		virtual void onClientDisconnect(MultiConn & server, Connection & connection);
 
 		std::string pathOnly(std::string unclearPath);
 		void vpath(std::string path, OnHttpRequestHandler * requestHandler);

@@ -40,7 +40,7 @@ namespace HTTP {
 	/**
 	 * @brief client session
 	 */
-	class ClientSession {
+	class Connection {
 	private:
 		int id;
 		OS::Socket * socket;
@@ -48,8 +48,8 @@ namespace HTTP {
 		int maxBufferSize;
 		
 	public:
-		ClientSession(OS::Socket * socket, int maxBufferSize);
-		virtual ~ClientSession();
+		Connection(OS::Socket * socket, int maxBufferSize);
+		virtual ~Connection();
 
 		int getId();
 		OS::Socket * getSocket();
@@ -60,7 +60,7 @@ namespace HTTP {
 		bool isClosed();
 		void close();
 
-		bool operator==(const ClientSession &other) const;
+		bool operator==(const Connection &other) const;
 	};
 
 
@@ -72,7 +72,7 @@ namespace HTTP {
 		OnConnectListener() {}
 		virtual ~OnConnectListener() {}
 
-		virtual void onClientConnect(MultiConn & server, ClientSession & client) = 0;
+		virtual void onClientConnect(MultiConn & server, Connection & connection) = 0;
 	};
 
 	/**
@@ -83,8 +83,20 @@ namespace HTTP {
 		OnReceiveListener() {}
 		virtual ~OnReceiveListener() {}
 
-		virtual void onClientReceive(MultiConn & server, ClientSession & client, Packet & packet) = 0;
+		virtual void onClientReceive(MultiConn & server, Connection & connection, Packet & packet) = 0;
 	};
+    
+    /**
+     * @brief on writeable listener
+     */
+    class OnWriteableListener {
+    private:
+    public:
+        OnWriteableListener() {}
+        virtual ~OnWriteableListener() {}
+        
+        virtual void onClientWriteable(MultiConn & server, Connection & connection) = 0;
+    };
 
 	/**
 	 * @brief on disconnect listener
@@ -94,21 +106,20 @@ namespace HTTP {
 		OnDisconnectListener() {}
 		virtual ~OnDisconnectListener() {}
 
-		virtual void onClientDisconnect(MultiConn & server, ClientSession & client) = 0;
+		virtual void onClientDisconnect(MultiConn & server, Connection & connection) = 0;
 	};
 
 	/**
 	 * @brief multi conn protocol
 	 */
-	class MultiConnProtocol : public OnConnectListener,
-							  public OnReceiveListener,
-							  public OnDisconnectListener {
+	class MultiConnProtocol : public OnConnectListener, public OnReceiveListener, public OnWriteableListener, public OnDisconnectListener {
 	public:
         MultiConnProtocol() {}
 		virtual ~MultiConnProtocol() {}
-		virtual void onClientConnect(MultiConn & server, ClientSession & client) = 0;
-		virtual void onClientReceive(MultiConn & server, ClientSession & client, Packet & packet) = 0;
-		virtual void onClientDisconnect(MultiConn & server, ClientSession & client) = 0;
+		virtual void onClientConnect(MultiConn & server, Connection & connection) = 0;
+		virtual void onClientReceive(MultiConn & server, Connection & connection, Packet & packet) = 0;
+        virtual void onClientWriteable(MultiConn & server, Connection & connection) = 0;
+		virtual void onClientDisconnect(MultiConn & server, Connection & connection) = 0;
 	};
 
 
@@ -119,6 +130,7 @@ namespace HTTP {
 	private:
         OnConnectListener * onConnectListener;
 		OnReceiveListener * onReceiveListener;
+        OnWriteableListener * onWriteableListener;
 		OnDisconnectListener * onDisconnectListener;
 		
 	public:
@@ -130,14 +142,14 @@ namespace HTTP {
 		virtual void stop() = 0;
 		virtual bool isRunning() = 0;
 
-		/*virtual bool isClientDisconnected(ClientSession & client) = 0;*/
-
-		virtual void onClientConnect(ClientSession & client);
-		virtual void onClientReceive(ClientSession & client, Packet & packet);
-		virtual void onClientDisconnect(ClientSession & client);
+		virtual void onClientConnect(Connection & connection);
+		virtual void onClientReceive(Connection & connection, Packet & packet);
+        virtual void onClientWriteable(Connection & connection);
+		virtual void onClientDisconnect(Connection & connection);
 
 		void setOnConnectListener(OnConnectListener * onConnectListener);
 		void setOnReceiveListener(OnReceiveListener * onReceiveListener);
+        void setOnWriteableListener(OnWriteableListener * onWriteableListener);
 		void setOnDisconnectListener(OnDisconnectListener * onDisconnectListener);
 
 		void setProtocol(MultiConnProtocol * protocol);

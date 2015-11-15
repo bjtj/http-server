@@ -7,6 +7,7 @@
 
 #include <liboslayer/os.hpp>
 #include "HttpHeader.hpp"
+#include "ChunkedReader.hpp"
 
 namespace HTTP {
 
@@ -21,6 +22,7 @@ namespace HTTP {
 		std::string content;
 		bool headerSent;
 		int contentLength;
+        ReadCounter contentTranferCounter;
 		
 	public:
 		HttpResponse(OS::Socket & socket);
@@ -40,8 +42,9 @@ namespace HTTP {
 		void sendContent();
 		void setComplete();
 		bool hasComplete();
+        
+        bool completeContentTransfer();
 	};
-
 }
 
 #endif

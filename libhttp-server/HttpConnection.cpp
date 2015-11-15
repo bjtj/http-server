@@ -23,11 +23,11 @@ namespace HTTP {
 		releaseResponse();
 	}
 
-	void HttpConnection::onClientConnect(MultiConn & server, ClientSession & client) {
-		client.setBufferSize(1);
+	void HttpConnection::onClientConnect(MultiConn & server, Connection & connection) {
+		connection.setBufferSize(1);
 	}
 
-	void HttpConnection::onClientReceive(MultiConn & server, ClientSession & client, Packet & packet) {
+	void HttpConnection::onClientReceive(MultiConn & server, Connection & connection, Packet & packet) {
 
 		if (!headerReader.complete()) {
 			headerReader.read(packet.getBuffer(), packet.length());
@@ -36,23 +36,32 @@ namespace HTTP {
 
 		if (headerReader.complete()) {
 
-			client.setBufferSize(client.getMaxBufferSize());
-			prepareRequestAndResponse(client);
+			connection.setBufferSize(connection.getMaxBufferSize());
+			prepareRequestAndResponse(connection);
 			
 			request->setContentPacket(packet);
 			onHttpRequest(*request, *response);
-
-			if (response->hasComplete()) {
-				client.close();
-            }
 		}
 	}
+    
+    void HttpConnection::onClientWriteable(MultiConn & server, Connection & connection) {
+        
+        if (response && response->hasComplete()) {
+            if (!response->completeContentTransfer()) {
+                response->sendContent();
+            }
+            
+            if (response->completeContentTransfer()) {
+                connection.close();
+            }
+        }
+    }
 
-	void HttpConnection::onClientDisconnect(MultiConn & server, ClientSession & client) {
+	void HttpConnection::onClientDisconnect(MultiConn & server, Connection & connection) {
 	}
 
-	void HttpConnection::prepareRequestAndResponse(ClientSession & client) {
-		OS::Socket * socket = client.getSocket();
+	void HttpConnection::prepareRequestAndResponse(Connection & connection) {
+		OS::Socket * socket = connection.getSocket();
 		if (!request) {
 			request = new HttpRequest(headerReader.getHeader(), *socket);
 		}

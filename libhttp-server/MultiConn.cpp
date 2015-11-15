@@ -93,48 +93,48 @@ namespace HTTP {
 	/**
 	 * @brief client session
 	 */
-	ClientSession::ClientSession(OS::Socket * socket, int maxBufferSize)
+	Connection::Connection(OS::Socket * socket, int maxBufferSize)
 		: socket(socket), maxBufferSize(maxBufferSize), bufferSize(maxBufferSize) {
 			id = socket->getFd();
 	}
 	
-	ClientSession::~ClientSession() {
+	Connection::~Connection() {
 		if (socket) {
 			delete socket;
 		}
 	}
 
-	int ClientSession::getId() {
+	int Connection::getId() {
 		return id;
 	}
 	
-	Socket * ClientSession::getSocket() {
+	Socket * Connection::getSocket() {
 		return socket;
 	}
 	
-	void ClientSession::setBufferSize(int bufferSize) {
+	void Connection::setBufferSize(int bufferSize) {
 		this->bufferSize = bufferSize;
 	}
 	
-	int ClientSession::getBufferSize() {
+	int Connection::getBufferSize() {
 		return bufferSize;
 	}
 	
-	int ClientSession::getMaxBufferSize() {
+	int Connection::getMaxBufferSize() {
 		return maxBufferSize;
 	}
 
-	bool ClientSession::isClosed() {
+	bool Connection::isClosed() {
 		return (socket ? socket->isClosed() : true);
 	}
 
-	void ClientSession::close() {
+	void Connection::close() {
 		if (socket) {
 			socket->close();
 		}
 	}
 	
-	bool ClientSession::operator==(const ClientSession &other) const {
+	bool Connection::operator==(const Connection &other) const {
 		return (this->socket == other.socket);
 	}
 	
@@ -148,21 +148,27 @@ namespace HTTP {
 	MultiConn::~MultiConn() {
 	}
 	
-	void MultiConn::onClientConnect(ClientSession & client) {
+	void MultiConn::onClientConnect(Connection & connection) {
 		if (onConnectListener) {
-			onConnectListener->onClientConnect(*this, client);
+			onConnectListener->onClientConnect(*this, connection);
 		}
 	}
     
-	void MultiConn::onClientReceive(ClientSession & client, Packet & packet) {
+	void MultiConn::onClientReceive(Connection & connection, Packet & packet) {
 		if (onReceiveListener) {
-			onReceiveListener->onClientReceive(*this, client, packet);
+			onReceiveListener->onClientReceive(*this, connection, packet);
 		}
 	}
     
-	void MultiConn::onClientDisconnect(ClientSession & client) {
+    void MultiConn::onClientWriteable(Connection & connection) {
+        if (onWriteableListener) {
+            onWriteableListener->onClientWriteable(*this, connection);
+        }
+    }
+    
+	void MultiConn::onClientDisconnect(Connection & connection) {
 		if (onDisconnectListener) {
-			onDisconnectListener->onClientDisconnect(*this, client);
+			onDisconnectListener->onClientDisconnect(*this, connection);
 		}
 	}
 
@@ -174,6 +180,10 @@ namespace HTTP {
 		this->onReceiveListener = onReceiveListener;
 	}
     
+    void MultiConn::setOnWriteableListener(OnWriteableListener * onWriteableListener) {
+        this->onWriteableListener = onWriteableListener;
+    }
+    
 	void MultiConn::setOnDisconnectListener(OnDisconnectListener * onDisconnectListener) {
 		this->onDisconnectListener = onDisconnectListener;
 	}
@@ -181,6 +191,7 @@ namespace HTTP {
 	void MultiConn::setProtocol(MultiConnProtocol * protocol) {
 		setOnConnectListener(protocol);
 		setOnReceiveListener(protocol);
+        setOnWriteableListener(protocol);
 		setOnDisconnectListener(protocol);
 	}
 	

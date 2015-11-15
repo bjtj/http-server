@@ -16,44 +16,58 @@ namespace HTTP {
 	/**
 	 * @brief client thread
 	 */
-	ClientHandlerThread::ClientHandlerThread(MultiConnThreadedServer & server, ClientSession & client)
-		: server(server), client(client) {
+	ClientHandlerThread::ClientHandlerThread(MultiConnThreadedServer & server, Connection & connection)
+		: server(server), connection(connection) {
 	}
     
 	ClientHandlerThread::~ClientHandlerThread() {
 	}
     
 	void ClientHandlerThread::run() {
-		Socket * socket = client.getSocket();
+        
+		Socket * socket = connection.getSocket();
 		Selector selector;
 		socket->registerSelector(selector);
 		char buffer[1024] = {0,};
+        
         try {
             while (!interrupted()) {
+                
 				if (selector.select(1000) > 0) {
-					int len = socket->recv(buffer, client.getBufferSize());
-					if (len <= 0) {
-						break;
-					}
-					Packet packet(buffer, len);
-					server.onClientReceive(client, packet);
+                    
+                    if (selector.isReadableSelected(*socket)) {
+                        int len = socket->recv(buffer, connection.getBufferSize());
+                        if (len <= 0) {
+                            break;
+                        }
+                        
+                        Packet packet(buffer, len);
+                        server.onClientReceive(connection, packet);
+                    }
+                    
+                    if (selector.isWriteableSelected(*socket)) {
+                        server.onClientWriteable(connection);
+                    }
+					
 				}
-				if (client.isClosed()) {
+                
+				if (connection.isClosed()) {
 					break;
 				}
             }
         } catch (IOException e) {
+            logger.loge(e.getMessage());
         }
-		server.onClientDisconnect(client);
+		server.onClientDisconnect(connection);
 	}
     
-	ClientSession & ClientHandlerThread::getClient() {
-		return client;
+	Connection & ClientHandlerThread::getClient() {
+		return connection;
 	}
     
 	void ClientHandlerThread::quit() {
         this->interrupt();
-		client.close();
+		connection.close();
 	}
 	
 
@@ -114,37 +128,37 @@ namespace HTTP {
             Socket * client = server->accept();
             
             if (client) {
-                ClientSession * session = new ClientSession(client, 1024);
+                Connection * session = new Connection(client, 1024);
                 onClientConnect(*session);
             }
         }
     }
 	
-	void MultiConnThreadedServer::onClientConnect(ClientSession & client) {
-		ClientHandlerThread * thread = new ClientHandlerThread(*this, client);
+	void MultiConnThreadedServer::onClientConnect(Connection & connection) {
+		ClientHandlerThread * thread = new ClientHandlerThread(*this, connection);
 
 		clientThreadsLock.wait();
-		clientThreads[client.getId()] = thread;
+		clientThreads[connection.getId()] = thread;
 		clientThreadsLock.post();
 
 		thread->start();
-		MultiConn::onClientConnect(client);
+		MultiConn::onClientConnect(connection);
 	}
     
-	void MultiConnThreadedServer::onClientReceive(ClientSession & client, Packet & packet) {
-		MultiConn::onClientReceive(client, packet);
+	void MultiConnThreadedServer::onClientReceive(Connection & connection, Packet & packet) {
+		MultiConn::onClientReceive(connection, packet);
 	}
     
-	void MultiConnThreadedServer::onClientDisconnect(ClientSession & client) {
-		int id = client.getId();
+	void MultiConnThreadedServer::onClientDisconnect(Connection & connection) {
+		int id = connection.getId();
 		
-		MultiConn::onClientDisconnect(client);
+		MultiConn::onClientDisconnect(connection);
 
 		clientThreadsLock.wait();
 		clientThreads.erase(id);
 		clientThreadsLock.post();
 
-		delete &client;
+		delete &connection;
 	}
 
 	void MultiConnThreadedServer::stop() {

@@ -12,13 +12,13 @@ namespace HTTP {
 	class ClientHandlerThread : public OS::Thread {
 	private:
 		MultiConnThreadedServer & server;
-		ClientSession & client;
+		Connection & connection;
 		
 	public:
-		ClientHandlerThread(MultiConnThreadedServer & server, ClientSession & client);
+		ClientHandlerThread(MultiConnThreadedServer & server, Connection & connection);
 		virtual ~ClientHandlerThread();
 		virtual void run();
-		ClientSession & getClient();
+		Connection & getClient();
 		void quit();
 	};
 	
@@ -42,9 +42,9 @@ namespace HTTP {
 		void releaseInvalidThreads();
 
         virtual void listen();
-		virtual void onClientConnect(ClientSession & client);
-		virtual void onClientReceive(ClientSession & client, Packet & packet);
-		virtual void onClientDisconnect(ClientSession & client);
+		virtual void onClientConnect(Connection & connection);
+		virtual void onClientReceive(Connection & connection, Packet & packet);
+		virtual void onClientDisconnect(Connection & connection);
 
 		virtual void stop();
 		virtual bool isRunning();
