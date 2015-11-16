@@ -28,6 +28,16 @@
 		E857BB601BEB9D7700D2022F /* MultiConnThreadedServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E857BB5C1BEB9D7700D2022F /* MultiConnThreadedServer.cpp */; };
 		E857BB611BEB9DC100D2022F /* MultiConnMultiplexServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E857BB5A1BEB9D7700D2022F /* MultiConnMultiplexServer.cpp */; };
 		E857BB621BEB9DC100D2022F /* MultiConnThreadedServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E857BB5C1BEB9D7700D2022F /* MultiConnThreadedServer.cpp */; };
+		E8B160DE1BF9E4FA002D68C7 /* Packet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B160DC1BF9E4FA002D68C7 /* Packet.cpp */; };
+		E8B160DF1BF9E90F002D68C7 /* Packet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B160DC1BF9E4FA002D68C7 /* Packet.cpp */; };
+		E8B160E21BFA9333002D68C7 /* ConnectionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B160E01BFA9333002D68C7 /* ConnectionManager.cpp */; };
+		E8B160E31BFA9333002D68C7 /* ConnectionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B160E01BFA9333002D68C7 /* ConnectionManager.cpp */; };
+		E8B160E61BFA93CB002D68C7 /* Connection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B160E41BFA93CB002D68C7 /* Connection.cpp */; };
+		E8B160E71BFA93CB002D68C7 /* Connection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B160E41BFA93CB002D68C7 /* Connection.cpp */; };
+		E8B160EA1BFA9431002D68C7 /* Communication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B160E81BFA9431002D68C7 /* Communication.cpp */; };
+		E8B160EB1BFA9431002D68C7 /* Communication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B160E81BFA9431002D68C7 /* Communication.cpp */; };
+		E8B160EE1BFA9D71002D68C7 /* DataTransfer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B160EC1BFA9D71002D68C7 /* DataTransfer.cpp */; };
+		E8B160EF1BFA9D71002D68C7 /* DataTransfer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8B160EC1BFA9D71002D68C7 /* DataTransfer.cpp */; };
 		E8E0FEA91BD848EB00292C54 /* http_server.mm in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB23D1BD7D29800E89DC5 /* http_server.mm */; };
 		E8E0FEAB1BD848EB00292C54 /* HttpHeaderReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB2501BD7D2CE00E89DC5 /* HttpHeaderReader.cpp */; };
 		E8E0FEAC1BD848EB00292C54 /* HttpServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8FAB25A1BD7D2CE00E89DC5 /* HttpServer.cpp */; };
@@ -141,6 +151,16 @@
 		E857BB5B1BEB9D7700D2022F /* MultiConnMultiplexServer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MultiConnMultiplexServer.hpp; path = "../../libhttp-server/MultiConnMultiplexServer.hpp"; sourceTree = "<group>"; };
 		E857BB5C1BEB9D7700D2022F /* MultiConnThreadedServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MultiConnThreadedServer.cpp; path = "../../libhttp-server/MultiConnThreadedServer.cpp"; sourceTree = "<group>"; };
 		E857BB5D1BEB9D7700D2022F /* MultiConnThreadedServer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MultiConnThreadedServer.hpp; path = "../../libhttp-server/MultiConnThreadedServer.hpp"; sourceTree = "<group>"; };
+		E8B160DC1BF9E4FA002D68C7 /* Packet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Packet.cpp; path = "../../libhttp-server/Packet.cpp"; sourceTree = "<group>"; };
+		E8B160DD1BF9E4FA002D68C7 /* Packet.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Packet.hpp; path = "../../libhttp-server/Packet.hpp"; sourceTree = "<group>"; };
+		E8B160E01BFA9333002D68C7 /* ConnectionManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConnectionManager.cpp; path = "../../libhttp-server/ConnectionManager.cpp"; sourceTree = "<group>"; };
+		E8B160E11BFA9333002D68C7 /* ConnectionManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ConnectionManager.hpp; path = "../../libhttp-server/ConnectionManager.hpp"; sourceTree = "<group>"; };
+		E8B160E41BFA93CB002D68C7 /* Connection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Connection.cpp; path = "../../libhttp-server/Connection.cpp"; sourceTree = "<group>"; };
+		E8B160E51BFA93CB002D68C7 /* Connection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Connection.hpp; path = "../../libhttp-server/Connection.hpp"; sourceTree = "<group>"; };
+		E8B160E81BFA9431002D68C7 /* Communication.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Communication.cpp; path = "../../libhttp-server/Communication.cpp"; sourceTree = "<group>"; };
+		E8B160E91BFA9431002D68C7 /* Communication.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Communication.hpp; path = "../../libhttp-server/Communication.hpp"; sourceTree = "<group>"; };
+		E8B160EC1BFA9D71002D68C7 /* DataTransfer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DataTransfer.cpp; path = "../../libhttp-server/DataTransfer.cpp"; sourceTree = "<group>"; };
+		E8B160ED1BFA9D71002D68C7 /* DataTransfer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DataTransfer.hpp; path = "../../libhttp-server/DataTransfer.hpp"; sourceTree = "<group>"; };
 		E8E0FEC01BD848EB00292C54 /* libhttp-server-cocoa.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libhttp-server-cocoa.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8FAB2381BD7D29800E89DC5 /* libhttp-server.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libhttp-server.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8FAB23B1BD7D29800E89DC5 /* http_server.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = http_server.h; sourceTree = "<group>"; };
@@ -262,8 +282,18 @@
 				E8FAB25D1BD7D2CE00E89DC5 /* HttpStatusCodes.hpp */,
 				E8FAB25E1BD7D2CE00E89DC5 /* InetAddress.hpp */,
 				E8FAB2631BD7D2CE00E89DC5 /* OnHttpRequestHandler.hpp */,
+				E8B160DC1BF9E4FA002D68C7 /* Packet.cpp */,
+				E8B160DD1BF9E4FA002D68C7 /* Packet.hpp */,
 				E8FAB2641BD7D2CE00E89DC5 /* Url.cpp */,
 				E8FAB2651BD7D2CE00E89DC5 /* Url.hpp */,
+				E8B160E01BFA9333002D68C7 /* ConnectionManager.cpp */,
+				E8B160E11BFA9333002D68C7 /* ConnectionManager.hpp */,
+				E8B160E41BFA93CB002D68C7 /* Connection.cpp */,
+				E8B160E51BFA93CB002D68C7 /* Connection.hpp */,
+				E8B160E81BFA9431002D68C7 /* Communication.cpp */,
+				E8B160E91BFA9431002D68C7 /* Communication.hpp */,
+				E8B160EC1BFA9D71002D68C7 /* DataTransfer.cpp */,
+				E8B160ED1BFA9D71002D68C7 /* DataTransfer.hpp */,
 			);
 			name = "http-server-c++";
 			sourceTree = "<group>";
@@ -376,21 +406,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8B160EF1BFA9D71002D68C7 /* DataTransfer.cpp in Sources */,
+				E8B160DF1BF9E90F002D68C7 /* Packet.cpp in Sources */,
 				E857BB611BEB9DC100D2022F /* MultiConnMultiplexServer.cpp in Sources */,
 				E857BB621BEB9DC100D2022F /* MultiConnThreadedServer.cpp in Sources */,
 				E8E0FEA91BD848EB00292C54 /* http_server.mm in Sources */,
 				E8E0FEAB1BD848EB00292C54 /* HttpHeaderReader.cpp in Sources */,
 				E8E0FEAC1BD848EB00292C54 /* HttpServer.cpp in Sources */,
 				E8E0FEAD1BD848EB00292C54 /* ChunkedReader.cpp in Sources */,
+				E8B160E31BFA9333002D68C7 /* ConnectionManager.cpp in Sources */,
 				E8E0FEAE1BD848EB00292C54 /* HttpParameter.cpp in Sources */,
 				E8E0FEAF1BD848EB00292C54 /* HttpResponse.cpp in Sources */,
 				E8E0FEB01BD848EB00292C54 /* HttpClient.cpp in Sources */,
+				E8B160E71BFA93CB002D68C7 /* Connection.cpp in Sources */,
 				E8E0FEB11BD848EB00292C54 /* HttpRequest.cpp in Sources */,
 				E8E0FEB21BD848EB00292C54 /* MultiConn.cpp in Sources */,
 				E8E0FEB31BD848EB00292C54 /* HttpProtocol.cpp in Sources */,
 				E8E0FEB41BD848EB00292C54 /* Url.cpp in Sources */,
 				E8E0FEB51BD848EB00292C54 /* HttpHeader.cpp in Sources */,
 				E8E0FEB61BD848EB00292C54 /* HttpConnection.cpp in Sources */,
+				E8B160EB1BFA9431002D68C7 /* Communication.cpp in Sources */,
 				E8E0FEB71BD848EB00292C54 /* HttpHeaderParser.cpp in Sources */,
 				E8E0FEB81BD848EB00292C54 /* HttpStatusCodes.cpp in Sources */,
 			);
@@ -400,21 +435,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8B160EE1BFA9D71002D68C7 /* DataTransfer.cpp in Sources */,
 				E8FAB23E1BD7D29800E89DC5 /* http_server.mm in Sources */,
 				E8FAB26B1BD7D2CE00E89DC5 /* HttpHeaderReader.cpp in Sources */,
 				E857BB5F1BEB9D7700D2022F /* MultiConnMultiplexServer.cpp in Sources */,
+				E8B160DE1BF9E4FA002D68C7 /* Packet.cpp in Sources */,
 				E8FAB2701BD7D2CE00E89DC5 /* HttpServer.cpp in Sources */,
 				E8FAB2661BD7D2CE00E89DC5 /* ChunkedReader.cpp in Sources */,
 				E8FAB26C1BD7D2CE00E89DC5 /* HttpParameter.cpp in Sources */,
+				E8B160E21BFA9333002D68C7 /* ConnectionManager.cpp in Sources */,
 				E857BB601BEB9D7700D2022F /* MultiConnThreadedServer.cpp in Sources */,
 				E8FAB26F1BD7D2CE00E89DC5 /* HttpResponse.cpp in Sources */,
 				E8FAB2671BD7D2CE00E89DC5 /* HttpClient.cpp in Sources */,
+				E8B160E61BFA93CB002D68C7 /* Connection.cpp in Sources */,
 				E8FAB26E1BD7D2CE00E89DC5 /* HttpRequest.cpp in Sources */,
 				E8FAB2731BD7D2CE00E89DC5 /* MultiConn.cpp in Sources */,
 				E8FAB26D1BD7D2CE00E89DC5 /* HttpProtocol.cpp in Sources */,
 				E8FAB2741BD7D2CE00E89DC5 /* Url.cpp in Sources */,
 				E8FAB2691BD7D2CE00E89DC5 /* HttpHeader.cpp in Sources */,
 				E8FAB2681BD7D2CE00E89DC5 /* HttpConnection.cpp in Sources */,
+				E8B160EA1BFA9431002D68C7 /* Communication.cpp in Sources */,
 				E8FAB26A1BD7D2CE00E89DC5 /* HttpHeaderParser.cpp in Sources */,
 				E8FAB2711BD7D2CE00E89DC5 /* HttpStatusCodes.cpp in Sources */,
 			);

@@ -41,7 +41,8 @@ namespace HTTP {
                             break;
                         }
                         
-                        Packet packet(buffer, len);
+//                        Packet packet(buffer, len);
+                        Packet packet = Packet::wrap(buffer, len);
                         server.onClientReceive(connection, packet);
                     }
                     

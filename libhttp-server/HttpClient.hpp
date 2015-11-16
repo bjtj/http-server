@@ -462,7 +462,7 @@ namespace HTTP {
                     status = HttpRequestStatus::ERROR_STATUS;
                     break;
                 }
-				chunkedBuffer.readChunkData(buffer, len);
+				chunkedBuffer.write(buffer, len);
 				if (chunkedBuffer.completeData()) {
 					if (pollListener) {
 						pollListener->onResponseDataChunk(*this, responseHeader, chunkedBuffer.getChunkData(), chunkedBuffer.getChunkSize(), userData);

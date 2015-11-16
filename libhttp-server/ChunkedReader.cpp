@@ -1,5 +1,6 @@
 #include "ChunkedReader.hpp"
 
+#include <liboslayer/os.hpp>
 #include <liboslayer/Text.hpp>
 #include <string>
 
@@ -8,6 +9,7 @@
 namespace HTTP {
 
 	using namespace std;
+    using namespace OS;
 	using namespace UTIL;
 
 	static const Logger & logger = LoggerFactory::getDefaultLogger();
@@ -19,7 +21,7 @@ namespace HTTP {
     ChunkedBuffer::ChunkedBuffer(const ChunkedBuffer & other) {
 		chunkDataBuffer = NULL;
         chunkSize = other.chunkSize;
-        chunkDataReadPosition = other.chunkDataReadPosition;
+        pos = other.pos;
 
 		if (chunkSize > 0) {
 			chunkDataBuffer = new char[chunkSize];
@@ -37,18 +39,37 @@ namespace HTTP {
         }
         chunkDataBuffer = NULL;
         chunkSize = 0;
-        chunkDataReadPosition = 0;
+        pos = 0;
     }
     
-    void ChunkedBuffer::readChunkData(const char * data, size_t len) {
+    size_t ChunkedBuffer::read(char * data, size_t len) {
         size_t remain = remainingDataBuffer();
-        size_t writeSize = (len < remain ? len : remain);
-        memcpy(chunkDataBuffer + chunkDataReadPosition, data, writeSize);
-        chunkDataReadPosition += writeSize;
+        size_t readSize = len;
+        if (remain < readSize) {
+            readSize = remain;
+        }
+        
+        if (readSize > 0) {
+            memcpy(data, chunkDataBuffer + pos, readSize);
+            pos += readSize;
+        }
+        
+        return readSize;
     }
-    
+    void ChunkedBuffer::write(const char * data, size_t len) {
+        size_t remain = remainingDataBuffer();
+        if (len > remain) {
+            throw Exception("overflow", -1, 0);
+        }
+        
+        memcpy(chunkDataBuffer + pos, data, len);
+        pos += len;
+    }
+    void ChunkedBuffer::resetPosition() {
+        pos = 0;
+    }
     size_t ChunkedBuffer::remainingDataBuffer() const {
-        return (chunkDataReadPosition <= chunkSize ? chunkSize - chunkDataReadPosition : 0);
+        return (pos <= chunkSize ? chunkSize - pos : 0);
     }
 
     bool ChunkedBuffer::remain() const {
@@ -78,8 +99,12 @@ namespace HTTP {
         return bufferSize > remain ? remain : bufferSize;
     }
     
-    size_t ChunkedBuffer::getCurrentReadPosition() const {
-        return chunkDataReadPosition;
+    size_t ChunkedBuffer::getPosition() const {
+        return pos;
+    }
+    
+    void ChunkedBuffer::setPosition(size_t pos) {
+        this->pos = pos;
     }
     
 
@@ -177,7 +202,7 @@ namespace HTTP {
 		if (chunkedBuffer.getChunkSize() > 0) {
 			char readBuffer[1024] = {0,};
 			while (!chunkedBuffer.completeData() && (len = socket.recv(readBuffer, chunkedBuffer.getReadSize(sizeof(readBuffer)))) > 0) {
-				chunkedBuffer.readChunkData(readBuffer, len);
+				chunkedBuffer.write(readBuffer, len);
 			}
 		}
 

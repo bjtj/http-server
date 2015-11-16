@@ -31,7 +31,7 @@ namespace HTTP {
 		virtual bool isValid();
 
 		virtual void clear();
-		void set(const HttpHeader & other);
+		virtual void setHeader(const HttpHeader & other);
 		
 		virtual void setFirstLine(std::string & firstline);
 		virtual void setParts(std::vector<std::string> & parts);
@@ -84,6 +84,8 @@ namespace HTTP {
 		virtual ~HttpRequestHeader();
 
 		virtual void clear();
+        
+        virtual void setHeader(const HttpHeader & other);
 
 		std::string getMethod() const;
 		void setMethod(const std::string & method) ;

@@ -8,7 +8,8 @@
 #include <liboslayer/os.hpp>
 #include "HttpHeader.hpp"
 #include "ChunkedReader.hpp"
-#include "MultiConn.hpp"
+#include "Packet.hpp"
+//#include "MultiConn.hpp"
 
 namespace HTTP {
 
@@ -19,18 +20,18 @@ namespace HTTP {
 	private:
         HttpRequestHeader header;
 		std::string content;
-		OS::Socket & socket;
-        
         ChunkedBuffer chunkedBuffer;
         std::string stringBuffer;
 
-		Packet contentPacket;
+		Packet * contentPacket;
 		ReadCounter contentReadCounter;
 
 	public:
-		HttpRequest(HttpHeader & header, OS::Socket & socket);
+        HttpRequest();
+		HttpRequest(HttpHeader & header);
 		virtual ~HttpRequest();
 
+        void setHeader(HttpHeader & header);
 		std::string getMethod() const;
 		std::string getPath() const;
 		std::string & getHeaderField(const std::string & name);
@@ -48,12 +49,10 @@ namespace HTTP {
         ChunkedBuffer & getChunkedBuffer();
         std::string & getStringBuffer();
         
-        OS::Socket & getSocket();
-
 		int getContentLength();
 		std::string getContentType();
 
-		void setContentPacket(Packet & packet);
+		void setContentPacket(Packet * packet);
 		void readChunkedBuffer(ChunkedBuffer & buffer);
 		bool completeContentRead();
 	};

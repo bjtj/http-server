@@ -5,9 +5,18 @@
 #include <vector>
 #include <map>
 
+#include <libhttp-server/Packet.hpp>
+#include <libhttp-server/HttpRequest.hpp>
+#include <libhttp-server/HttpHeaderReader.hpp>
+#include <libhttp-server/Connection.hpp>
+#include <libhttp-server/Communication.hpp>
+#include <libhttp-server/ConnectionManager.hpp>
+#include <libhttp-server/DataTransfer.hpp>
+
 using namespace std;
 using namespace OS;
 using namespace UTIL;
+using namespace HTTP;
 
 static const Logger & logger = LoggerFactory::getDefaultLogger();
 
@@ -30,246 +39,261 @@ static const Logger & logger = LoggerFactory::getDefaultLogger();
 //  - handle write
 //  - flag Connection closed
 
-class Packet {
+
+class ChunkedTransfer : public DataTransfer {
 private:
-	char * buffer;
-	size_t size;
-	size_t pos;
-	size_t limit;
-
+    ChunkedReaderBuffer readerBuffer;
 public:
-	Packet(size_t size) : buffer(NULL), size(size), limit(size) {
-		if (size > 0) {
-			buffer = new char[size];
-			memset(buffer, 0, size);
-		}
-	}
-	Packet(const Packet & other) {
-		size = other.size;
-		pos = 0;
-		limit = other.limit;
-		if (size > 0) {
-			buffer = new char[size];
-			memcpy(buffer, other.buffer, size);
-		} else {
-			buffer = NULL;
-		}
-	}
-	virtual ~Packet() {
-		if (buffer) {
-			delete [] buffer;
-		}
-	}
-	void clear() {
-		memset(buffer, 0, size);
-		pos = 0;
-	}
-	size_t remaining() {
-		return limit - pos;
-	}
-	void write(const char * data, size_t len) {
-		size_t remain = remaining();
-		if (len > remain) {
-			throw Exception("overflow", -1, 0);
-		}
-
-		memcpy(buffer + pos, data, len);
-		pos += len;
-	}
-	char * getData() {
-		return buffer;
-	}
-	size_t getLength() {
-		return pos;
-	}
-	void setPosition(size_t position) {
-		if (position > limit) {
-			throw Exception("overlimit", -1, 0);
-		}
-		this->pos = position;
-	}
-	size_t getLimit() {
-		return limit;
-	}
-	void resetLimit() {
-		limit = size;
-	}
-	void setLimit(size_t limit) {
-		if (limit > size) {
-			throw Exception("oversize", -1, 0);
-		}
-		this->limit = limit;
-	}
+    ChunkedTransfer() {
+    }
+    virtual ~ChunkedTransfer() {
+    }
+    virtual void recv(Packet & packet) {
+        char * p = packet.getData();
+        for (size_t i = 0; i < packet.getLength(); i++, p++) {
+            char ch = *p;
+            
+            if (!readerBuffer.hasSizeRecognized()) {
+                readerBuffer.readChunkSize(ch);
+            } else {
+                if (readerBuffer.remainingDataBuffer() < readerBuffer.getChunkSize() + 2) {
+                    
+                    if (readerBuffer.remain()) {
+                        readerBuffer.write(p, 1);
+                    } else {
+                        // ignore \r\n
+                    }
+                } else {
+                    
+                    if (readerBuffer.getChunkSize() == 0) {
+                        setCompleted();
+                    }
+                }
+                
+            }
+        }
+    }
+    virtual void send(Connection & connection) {
+    }
 };
 
-class Connection;
-
-class Communication {
+class FixedTransfer : public DataTransfer {
 private:
+    ChunkedBuffer chunkedBuffer;
 public:
-	Communication() {}
-	virtual ~Communication() {}
-	virtual void onConnected(Connection & connection) = 0;
-	virtual void onDataReceived(Connection & connection, Packet & packet) = 0;
-	virtual void onWriteeable(Connection & connection) = 0;
-	virtual void onDisconnected(Connection & connection) = 0;
-	virtual bool isCommunicationCompleted() = 0;
+    FixedTransfer() {
+    }
+    virtual ~FixedTransfer() {
+    }
+    ChunkedBuffer & getChunkedBuffer() {
+        return chunkedBuffer;
+    }
+    virtual void recv(Packet & packet) {
+        chunkedBuffer.write(packet.getData(), packet.getLength());
+        
+        if (!chunkedBuffer.remain()) {
+            setCompleted();
+        }
+    }
+    virtual void send(Connection & connection) {
+        if (chunkedBuffer.remain()) {
+            char buffer[1024] = {0,};
+            size_t len = chunkedBuffer.read(buffer, sizeof(buffer));
+            connection.send(buffer, len);
+        }
+        
+        if (!chunkedBuffer.remain()) {
+            setCompleted();
+        }
+    }
 };
 
-class Connection {
+class HttpResponse {
 private:
-	Socket & socket;
-	bool terminateSignal;
-	bool completed;
-	Packet packet;
-
+    HttpResponseHeader header;
+    DataTransfer * transfer;
+    
 public:
-	Connection(Socket & socket) : socket(socket), terminateSignal(false), completed(false), packet(4096) {
-	}
-	virtual ~Connection() {
-	}
-
-	int getId() {
-		return socket.getFd();
-	}
-
-	void registerSelector(Selector & selector) {
-		socket.registerSelector(selector);
-	}
-
-	bool isReadableSelected(Selector & selector) {
-		return selector.isReadableSelected(socket);
-	}
-
-	bool isWritableSelected(Selector & selector) {
-		return selector.isReadableSelected(socket);
-	}
-
-	int recv(char * buffer, size_t size) {
-		return socket.recv(buffer, size);
-	}
-
-	int send(const char * data, size_t len) {
-		return socket.send(data, len);
-	}
-
-	void close() {
-		socket.close();
-	}
-	bool isClosed() {
-		return socket.isClosed();
-	}
-
-	void signalTerminate() {
-		terminateSignal = true;
-	}
-
-	bool isTerminateSignaled() {
-		return terminateSignal;
-	}
-
-	void setCompleted() {
-		completed = true;
-	}
-
-	bool isCompleted() {
-		return completed;
-	}
-
-	void setReadSize(size_t readSize) {
-		packet.setLimit(readSize);
-	}
-
-	void resetReadSize() {
-		packet.resetLimit();
-	}
-
-	Packet & read() {
-		packet.clear();
-		int len = recv(packet.getData(), packet.getLimit());
-		packet.setPosition(len);
-		return packet;
-	}
+    HttpResponse() : transfer(NULL) {
+    }
+    virtual ~HttpResponse() {
+        if (transfer) {
+            delete transfer;
+        }
+    }
+    HttpResponseHeader & getHeader() {
+        return header;
+    }
+    void setTransfer(DataTransfer * transfer) {
+        this->transfer = transfer;
+    }
+    DataTransfer * getTransfer() {
+        return transfer;
+    }
 };
 
-class HttpRequest {
+class HttpRequestHandler {
 private:
-	string header;
 public:
-	HttpRequest() {}
-	virtual ~HttpRequest() {}
-
-	string & getHeader() {
-		return header;
-	}
+    
+    virtual void onRequest(HttpRequest & request, HttpResponse & response) {
+        
+        HttpResponseHeader & responseHeader = response.getHeader();
+        
+        responseHeader.setProtocol("HTTP/1.1");
+        responseHeader.setStatusCode(200);
+        responseHeader.setMessage("OK");
+        responseHeader.setHeaderField("Connection", "close");
+        responseHeader.setContentType("text/html");
+        
+        logger.logv(request.getHeader().toString());
+        
+        string content = "Method: " + request.getMethod() + " / Path: " + request.getPath() + "\r\n";
+        content.append("<form method='post'><input type='text' name='name' /></form>");
+        
+        FixedTransfer * transfer = new FixedTransfer;
+        ChunkedBuffer & cb = transfer->getChunkedBuffer();
+        cb.setChunkSize(content.length());
+        cb.write(content.c_str(), content.length());
+        cb.resetPosition();
+        
+        response.setTransfer(transfer);
+        responseHeader.setContentLength((int)content.length());
+        
+    }
+    
+    virtual void onRequestContent(Packet & packet) {
+        
+        logger.logv(string(packet.getData(), packet.getLength()));
+    }
 };
 
 class HttpCommunication : public Communication {
 private:
 	HttpRequest request;
-	bool requestHeaderDone;
+    HttpHeaderReader requestHeaderReader;
+    HttpResponse response;
 	bool requestHeaderHandled;
-	string response;
+    ReadCounter requestContentReadCounter;
 	bool writeable;
 	bool responseHeaderTransferDone;
 	bool responseContentTransferDone;
 	bool communicationCompleted;
+    
+    DataTransfer * requestTransfer;
+    
+    HttpRequestHandler handler;
 
 public:
-	HttpCommunication() : requestHeaderDone(false), requestHeaderHandled(false), writeable(false), responseHeaderTransferDone(false), responseContentTransferDone(false), communicationCompleted(false) {
+	HttpCommunication() : requestHeaderHandled(false), writeable(false), responseHeaderTransferDone(false), responseContentTransferDone(false), communicationCompleted(false), requestTransfer(NULL) {
 	}
 	virtual ~HttpCommunication() {
+        if (requestTransfer) {
+            delete requestTransfer;
+        }
 	}
 
 	virtual void onConnected(Connection & connection) {
-
 		connection.setReadSize(1);
 	}
 
 	virtual void onDataReceived(Connection & connection, Packet & packet) {
 
-		readHeader(connection, packet);
-		if (requestHeaderDone && !requestHeaderHandled) {
-			onRequest(request);
+		readRequestHeaderIfNeed(connection, packet);
+		if (requestHeaderReader.complete()) {
+            
+            if (!requestHeaderHandled) {
+                
+                onRequestHeader(request);
+                requestContentReadCounter.setContentSize(request.getContentLength());
+                
+            } else {
+                
+                requestTransfer->recv(packet);
+                readRequestContent(packet);
+                if (requestTransfer->isCompleted()) {
+                    writeable = true;
+                }
+            }
 		}
 	}
 
-	void readHeader(Connection & connection, Packet & packet) {
+	void readRequestHeaderIfNeed(Connection & connection, Packet & packet) {
 
-		if (!requestHeaderDone) {
-			string chunk(packet.getData(), packet.getLength());
-			request.getHeader().append(chunk);
+		if (!requestHeaderReader.complete()) {
+           
+            requestHeaderReader.read(packet.getData(), (int)packet.getLength());
+
 			packet.clear();
 
-			if (Text::endsWith(request.getHeader(), "\r\n\r\n")) {
-
-				logger.logv(request.getHeader());
-
-				requestHeaderDone = true;
-				connection.resetReadSize();
+			if (requestHeaderReader.complete()) {
+                request.setHeader(requestHeaderReader.getHeader());
+				connection.resetReadLimit();
 			}
 		}
 	}
+    
+    void readRequestContent(Packet & packet) {
+        string chunk(packet.getData(), packet.getLength());
+//        logger.logv("READ: " + chunk);
+        
+        handler.onRequestContent(packet);
+    }
 
-	void onRequest(HttpRequest & request) {
-		response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 5\r\nConnection: close\r\n\r\nhello";
-		writeable = true;
+	void onRequestHeader(HttpRequest & request) {
+        
+        
+        if (request.getHeader().isChunkedTransfer()) {
+            
+            requestTransfer = new ChunkedTransfer;
+            
+        } else {
+            
+            if (request.getContentLength() == 0) {
+                
+                writeable = true;
+                
+            } else {
+                
+                FixedTransfer * transfer = new FixedTransfer;
+                ChunkedBuffer & cb = transfer->getChunkedBuffer();
+                cb.setChunkSize(request.getContentLength());
+                requestTransfer = transfer;
+                
+            }
+        }
+        
+        handler.onRequest(request, response);
+        
+        requestHeaderHandled = true;
 	}
 
-	virtual void onWriteeable(Connection & connection) {
+	virtual void onWriteable(Connection & connection) {
 
 		if (!writeable) {
 			return;
 		}
 
 		if (!responseHeaderTransferDone) {
-			connection.send(response.c_str(), response.length());
-			responseHeaderTransferDone = true;
-			responseContentTransferDone = true;
+            
+            HttpHeader & header = response.getHeader();
+            
+            string headerString = header.toString();
+            connection.send(headerString.c_str(), (int)headerString.length());
+            
+            if (!header.isChunkedTransfer() && header.getContentLength() == 0) {
+                responseContentTransferDone = true;
+            }
+            
+            responseHeaderTransferDone = true;
 		}
 
 		if (!responseContentTransferDone) {
-			// send content if needed
+            
+            response.getTransfer()->send(connection);
+            if (response.getTransfer()->isCompleted()) {
+                responseContentTransferDone = true;
+            }
 		}
 
 		if (responseContentTransferDone) {
@@ -277,10 +301,7 @@ public:
 		}
 	}
 
-	
-
 	virtual void onDisconnected(Connection & connection) {
-		logger.logv("onDisconnected");
 	}
 
 	virtual bool isCommunicationCompleted() {
@@ -288,209 +309,24 @@ public:
 	}
 };
 
-class ConnectionThread : public Thread {
+class HttpCommunicationMaker : public CommunicationMaker {
 private:
-	Connection & connection;
-	Communication & communication;
-	Selector selector;
-
 public:
-	ConnectionThread(Connection & connection, Communication & communication) : connection(connection), communication(communication) {
-	}
-	virtual ~ConnectionThread() {
-	}
-
-	virtual void run() {
-
-		connection.registerSelector(selector);
-
-		try {
-
-			communication.onConnected(connection);
-
-			while (!interrupted() && !connection.isTerminateSignaled()) {
-
-				if (selector.select(1000) > 0) {
-
-					if (connection.isReadableSelected(selector)) {
-						Packet & packet = connection.read();
-						communication.onDataReceived(connection, packet);
-					}
-
-					if (connection.isWritableSelected(selector)) {
-						communication.onWriteeable(connection);
-					}
-				}
-
-				if (connection.isClosed() || communication.isCommunicationCompleted()) {
-					break;
-				}
-			}
-
-		} catch (IOException e) {
-			logger.loge(e.getMessage());
-		}
-
-		// notify disconnection to connection manager
-		communication.onDisconnected(connection);
-		connection.setCompleted();
-
-		delete &communication;
-	}
-};
-
-class ConnectionManager {
-private:
-	ServerSocket * serverSocket;
-	Selector selector;
-	map<int, Connection*> connectionTable;
-	vector<Thread*> threads;
-	Semaphore connectionsLock;
-
-public:
-	ConnectionManager() : serverSocket(NULL), connectionsLock(1) {
-	}
-	virtual ~ConnectionManager() {
-		stop();
-	}
-
-	virtual Connection * makeConnection(Socket & client) {
-		return new Connection(client);
-	}
-
-	virtual void removeConnection(Connection * connection) {
-		delete connection;
-	}
-
-	void onConnect(Socket & client) {
-		Connection * connection = makeConnection(client);
-		Communication * communication = new HttpCommunication;
-
-		connectionsLock.wait();
-		connectionTable[connection->getId()] = connection;
-		connectionsLock.post();
-
-		ConnectionThread * thread = new ConnectionThread(*connection, *communication);
-		threads.push_back(thread);
-		thread->start();
-	}
-
-	void onDisconnect(Connection * connection) {
-
-		connectionsLock.wait();
-		int id = connection->getId();
-		if (connectionTable.find(id) != connectionTable.end()) {
-			removeConnection(connection);
-			connectionTable.erase(id);
-		}
-		
-		connectionsLock.post();
-	}
-
-	void clearConnections() {
-
-		connectionsLock.wait();
-		for (map<int, Connection*>::const_iterator iter = connectionTable.begin(); iter != connectionTable.end(); iter++) {
-			Connection * connection = iter->second;
-
-			connection->signalTerminate();
-			while (!connection->isCompleted()) {
-				idle(10);
-			}
-
-			removeConnection(connection);
-		}
-		connectionTable.clear();
-		connectionsLock.post();
-	}
-
-	void removeCompletedConnections() {
-
-		connectionsLock.wait();
-		for (map<int, Connection*>::const_iterator iter = connectionTable.begin(); iter != connectionTable.end();) {
-			Connection * connection = iter->second;
-			if (connection->isCompleted()) {
-				removeConnection(connection);
-				iter = connectionTable.erase(iter);
-			} else {
-				iter++;
-			}
-		}
-		connectionsLock.post();
-	}
-
-	void start(int port) {
-		if (serverSocket) {
-			return;
-		}
-
-		serverSocket = new ServerSocket(port);
-		serverSocket->setReuseAddr();
-		serverSocket->bind();
-		serverSocket->listen(5);
-
-		serverSocket->registerSelector(selector);
-	}
-
-	void poll(unsigned long timeout) {
-
-		if (selector.select(timeout) > 0) {
-			if (selector.isReadableSelected(*serverSocket)) {
-				Socket * client = serverSocket->accept();
-				if (client) {
-					onConnect(*client);
-				}
-			}
-		}
-
-		removeCompletedConnections();
-		removeCompletedThreads();
-	}
-
-	void removeCompletedThreads() {
-		for (vector<Thread*>::const_iterator iter = threads.begin(); iter != threads.end();) {
-
-			Thread * thread = *iter;
-			if (!thread->isRunning()) {
-				delete thread;
-				iter = threads.erase(iter);
-			} else {
-				iter++;
-			}
-		}
-	}
-
-	void stop() {
-
-		if (!serverSocket) {
-			return;
-		}
-
-		clearConnections();
-
-		stopAllThreads();
-
-		serverSocket->unregisterSelector(selector);
-		serverSocket->close();
-
-		serverSocket = NULL;
-	}
-
-	void stopAllThreads() {
-		for (size_t i = 0; i < threads.size(); i++) {
-			Thread * thread = threads[i];
-			thread->interrupt();
-			thread->join();
-			delete thread;
-		}
-		threads.clear();
-	}
+    HttpCommunicationMaker() {
+    }
+    virtual ~HttpCommunicationMaker() {
+    }
+    
+    virtual Communication * makeCommunication() {
+        return new HttpCommunication;
+    }
 };
 
 int main(int argc, char * args[]) {
 
 	bool done = false;
-	ConnectionManager cm;
+    HttpCommunicationMaker hcm;
+	ConnectionManager cm(hcm);
 
 	cm.start(8083);
 

@@ -10,12 +10,17 @@ namespace HTTP {
 	/**
 	 * @brief http request
 	 */
-	HttpRequest::HttpRequest(HttpHeader & header, OS::Socket & socket)
-		: header(header), socket(socket) {
+    HttpRequest::HttpRequest() {
+        
+    }
+	HttpRequest::HttpRequest(HttpHeader & header)
+		: header(header) {
 	}
 	HttpRequest::~HttpRequest() {
 	}
-	
+    void HttpRequest::setHeader(HttpHeader & header) {
+        this->header.setHeader(header);
+    }
 	string HttpRequest::getMethod() const {
 		return header.getMethod();
 	}
@@ -61,16 +66,13 @@ namespace HTTP {
     string & HttpRequest::getStringBuffer() {
         return stringBuffer;
     }
-    OS::Socket & HttpRequest::getSocket() {
-        return socket;
-    }
 	int HttpRequest::getContentLength() {
 		return header.getContentLength();
 	}
 	string HttpRequest::getContentType() {
 		return header.getContentType();
 	}
-	void HttpRequest::setContentPacket(Packet & packet) {
+	void HttpRequest::setContentPacket(Packet * packet) {
 		this->contentPacket = packet;
 	}
 	void HttpRequest::readChunkedBuffer(ChunkedBuffer & buffer) {
@@ -87,9 +89,9 @@ namespace HTTP {
 				buffer.setChunkSize(len);
 			}
 
-			if (contentPacket.length() > 0) {
-				buffer.readChunkData(contentPacket.getBuffer(), contentPacket.length());
-				contentReadCounter.read(contentPacket.length());
+			if (contentPacket->getLength() > 0) {
+				buffer.write(contentPacket->getData(), contentPacket->getLength());
+				contentReadCounter.read(contentPacket->getLength());
 			}
 		}
 	}

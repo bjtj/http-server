@@ -13,7 +13,7 @@ namespace HTTP {
     private:
         char * chunkDataBuffer;
         size_t chunkSize;
-        size_t chunkDataReadPosition;
+        size_t pos;
 
     public:
         ChunkedBuffer();
@@ -21,7 +21,9 @@ namespace HTTP {
         virtual ~ChunkedBuffer();
         
         void clear();
-        void readChunkData(const char * data, size_t len);
+        size_t read(char * data, size_t len);
+        void write(const char * data, size_t len);
+        void resetPosition();
         size_t remainingDataBuffer() const;
 		bool remain() const;
         bool completeData() const;
@@ -29,7 +31,8 @@ namespace HTTP {
         size_t getChunkSize() const;
         const char * getChunkData() const;
         size_t getReadSize(size_t bufferSize) const;
-        size_t getCurrentReadPosition() const;
+        size_t getPosition() const;
+        void setPosition(size_t pos);
     };
 	
 	/**

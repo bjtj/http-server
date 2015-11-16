@@ -30,7 +30,7 @@ namespace HTTP {
 	void HttpConnection::onClientReceive(MultiConn & server, Connection & connection, Packet & packet) {
 
 		if (!headerReader.complete()) {
-			headerReader.read(packet.getBuffer(), packet.length());
+			headerReader.read(packet.getData(), (int)packet.getLength());
 			packet.clear();
 		}
 
@@ -39,7 +39,7 @@ namespace HTTP {
 			connection.setBufferSize(connection.getMaxBufferSize());
 			prepareRequestAndResponse(connection);
 			
-			request->setContentPacket(packet);
+			request->setContentPacket(&packet);
 			onHttpRequest(*request, *response);
 		}
 	}
@@ -63,7 +63,7 @@ namespace HTTP {
 	void HttpConnection::prepareRequestAndResponse(Connection & connection) {
 		OS::Socket * socket = connection.getSocket();
 		if (!request) {
-			request = new HttpRequest(headerReader.getHeader(), *socket);
+			request = new HttpRequest(headerReader.getHeader());
 		}
 		if (!response) {
 			response = new HttpResponse(*socket);

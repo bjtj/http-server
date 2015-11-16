@@ -65,7 +65,8 @@ namespace HTTP {
                         if (len <= 0) {
                             onClientDisconnect(*connection);
                         } else {
-                            Packet packet(buffer, len);
+//                            Packet packet(buffer, len);
+                            Packet packet = Packet::wrap(buffer, len);
                             onClientReceive(*connection, packet);
                             if (connection->isClosed()) {
                                 onClientDisconnect(*connection);

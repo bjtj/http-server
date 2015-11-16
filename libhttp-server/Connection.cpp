@@ -1,0 +1,74 @@
+#include "Connection.hpp"
+
+namespace HTTP {
+    
+    using namespace std;
+    using namespace OS;
+
+    Connection::Connection(Socket & socket) : socket(socket), terminateSignal(false), completed(false), packet(4096) {
+    }
+    Connection::~Connection() {
+    }
+    
+    int Connection::getId() {
+        return socket.getFd();
+    }
+    
+    void Connection::registerSelector(Selector & selector) {
+        socket.registerSelector(selector);
+    }
+    
+    bool Connection::isReadableSelected(Selector & selector) {
+        return selector.isReadableSelected(socket);
+    }
+    
+    bool Connection::isWritableSelected(Selector & selector) {
+        return selector.isReadableSelected(socket);
+    }
+    
+    int Connection::recv(char * buffer, size_t size) {
+        return socket.recv(buffer, size);
+    }
+    
+    int Connection::send(const char * data, size_t len) {
+        return socket.send(data, len);
+    }
+    
+    void Connection::close() {
+        socket.close();
+    }
+    bool Connection::isClosed() {
+        return socket.isClosed();
+    }
+    
+    void Connection::signalTerminate() {
+        terminateSignal = true;
+    }
+    
+    bool Connection::isTerminateSignaled() {
+        return terminateSignal;
+    }
+    
+    void Connection::setCompleted() {
+        completed = true;
+    }
+    
+    bool Connection::isCompleted() {
+        return completed;
+    }
+    
+    void Connection::setReadSize(size_t readSize) {
+        packet.setLimit(readSize);
+    }
+    
+    void Connection::resetReadLimit() {
+        packet.resetLimit();
+    }
+    
+    Packet & Connection::read() {
+        packet.clear();
+        int len = recv(packet.getData(), packet.getLimit());
+        packet.setPosition(len);
+        return packet;
+    }
+}

@@ -31,7 +31,7 @@ namespace HTTP {
 		fields.clear();
 	}
 
-	void HttpHeader::set(const HttpHeader & other) {
+	void HttpHeader::setHeader(const HttpHeader & other) {
 		valid = other.valid;
 		firstline = other.firstline;
 		part1 = other.part1;
@@ -175,8 +175,7 @@ namespace HTTP {
 	}
 
 	HttpRequestHeader::HttpRequestHeader(const HttpHeader & other) {
-		set(other);
-		parsePath(getPath());
+		setHeader(other);
 	}
 
 	HttpRequestHeader::~HttpRequestHeader() {
@@ -186,6 +185,11 @@ namespace HTTP {
 		HttpHeader::clear();
 		params.clear();
 	}
+    
+    void HttpRequestHeader::setHeader(const HttpHeader & other) {
+        HttpHeader::setHeader(other);
+        parsePath(getPath());
+    }
 
 	string HttpRequestHeader::getMethod() const {
 		return getPart1();
@@ -267,7 +271,7 @@ namespace HTTP {
 		setMessage("OK");
 	}
 	HttpResponseHeader::HttpResponseHeader(const HttpHeader & other) {
-		set(other);
+		setHeader(other);
 	}
 	HttpResponseHeader::~HttpResponseHeader() {
 	}
