@@ -67,7 +67,6 @@ namespace HTTP {
     
 	void ClientHandlerThread::quit() {
         this->interrupt();
-		connection.close();
 	}
 	
 
@@ -111,10 +110,10 @@ namespace HTTP {
 		while (iter != clientThreads.end()) {
 			ClientHandlerThread * thread = iter->second;
 			if (!thread) {
-				clientThreads.erase(iter++);
+				iter = clientThreads.erase(iter);
 			} else if (!thread->isRunning()) {
 				delete thread;
-				clientThreads.erase(iter++);
+				iter = clientThreads.erase(iter);
 			} else {
 				++iter;
 			}

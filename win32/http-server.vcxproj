@@ -21,6 +21,7 @@
     <ClInclude Include="..\libhttp-server\HttpParameter.hpp" />
     <ClInclude Include="..\libhttp-server\HttpProtocol.hpp" />
     <ClInclude Include="..\libhttp-server\HttpRequest.hpp" />
+    <ClInclude Include="..\libhttp-server\HttpRequestDispatcher.hpp" />
     <ClInclude Include="..\libhttp-server\HttpResponse.hpp" />
     <ClInclude Include="..\libhttp-server\HttpServer.hpp" />
     <ClInclude Include="..\libhttp-server\HttpStatusCodes.hpp" />
@@ -29,6 +30,7 @@
     <ClInclude Include="..\libhttp-server\MultiConnMultiplexServer.hpp" />
     <ClInclude Include="..\libhttp-server\MultiConnThreadedServer.hpp" />
     <ClInclude Include="..\libhttp-server\OnHttpRequestHandler.hpp" />
+    <ClInclude Include="..\libhttp-server\Packet.hpp" />
     <ClInclude Include="..\libhttp-server\Url.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -41,17 +43,19 @@
     <ClCompile Include="..\libhttp-server\HttpParameter.cpp" />
     <ClCompile Include="..\libhttp-server\HttpProtocol.cpp" />
     <ClCompile Include="..\libhttp-server\HttpRequest.cpp" />
+    <ClCompile Include="..\libhttp-server\HttpRequestDispatcher.cpp" />
     <ClCompile Include="..\libhttp-server\HttpResponse.cpp" />
     <ClCompile Include="..\libhttp-server\HttpServer.cpp" />
     <ClCompile Include="..\libhttp-server\HttpStatusCodes.cpp" />
     <ClCompile Include="..\libhttp-server\MultiConn.cpp" />
     <ClCompile Include="..\libhttp-server\MultiConnMultiplexServer.cpp" />
     <ClCompile Include="..\libhttp-server\MultiConnThreadedServer.cpp" />
+    <ClCompile Include="..\libhttp-server\Packet.cpp" />
     <ClCompile Include="..\libhttp-server\Url.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\oslayer\win32\oslayer.vcxproj">
-      <Project>{2367396a-6d69-5e61-11dc-66efbb2456d0}</Project>
+      <Project>{62f62888-b617-d1c5-dd02-0cc27e78a455}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
