@@ -58,12 +58,15 @@ namespace HTTP {
 		virtual void removeHeaderField(std::string name);
 		virtual void removeHeaderFieldIgnoreCase(std::string name);
 
+        /* HTTP */
+        
 		std::string getContentType() const;
 		void setContentType(std::string contentType);
 		int getContentLength() const;
 		void setContentLength(int contentLength);
 		bool isChunkedTransfer() const;
 		void setChunkedTransfer(bool chunked);
+        void setConnection(const std::string & connection);
 
 		virtual std::string toString() const;
 

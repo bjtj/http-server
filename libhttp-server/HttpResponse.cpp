@@ -15,10 +15,13 @@ namespace HTTP {
 	/**
 	 * @brief http response constructor
 	 */
-	HttpResponse::HttpResponse(/*OS::Socket & socket*/)
-		: /*socket(socket), */complete(false), headerSent(false), contentLength(-1) {
+	HttpResponse::HttpResponse()
+    : complete(false), headerSent(false), contentLength(-1), transfer(NULL) {
 	}
 	HttpResponse::~HttpResponse() {
+        if (transfer) {
+            delete transfer;
+        }
 	}
 	void HttpResponse::setStatusCode(int code) {
 		header.setStatusCode(code);
@@ -42,50 +45,6 @@ namespace HTTP {
 	}
 	void HttpResponse::clearBuffer() {
 		content = "";
-	}
-	int HttpResponse::send(Socket & socket, const char * buf, int size) {
-		if (contentLength > 0) {
-			sendHeaderOnce(socket);
-			return socket.send((char *)buf, size);
-		}
-		return 0;
-	}
-	int HttpResponse::write(const string & content) {
-		this->content += content;
-		return (int)content.length();
-	}
-	int HttpResponse::write(const char * buf, int size) {
-		this->content += string(buf, size);
-		return size;
-	}
-	void HttpResponse::sendHeaderOnce(Socket & socket) {
-		if (!hasHeaderSent()) {
-			string header_string = header.toString();
-			socket.send((char*)header_string.c_str(), header_string.length());
-			headerSent = true;
-		}
-	}
-	bool HttpResponse::hasHeaderSent() {
-		return headerSent;
-	}
-	void HttpResponse::sendContent(Socket & socket) {
-        size_t contentLength = content.length();
-		sendHeaderOnce(socket);
-		int len = socket.send((char*)(content.c_str() + contentTranferCounter.getReadPosition()), contentTranferCounter.getReadSize(contentLength));
-		if (len != contentLength) {
-			logger.loge("send() error / expected: " + Text::toString(contentLength) + ", but: " + Text::toString(len));
-		}
-        contentTranferCounter.read(len);
-		clearBuffer();
-	}
-	void HttpResponse::setComplete() {
-		if (!complete) {
-			setContentLength((int)content.length());
-			complete = true;
-		}
-	}
-	bool HttpResponse::hasComplete() {
-		return complete;
 	}
     
     bool HttpResponse::completeContentTransfer() {

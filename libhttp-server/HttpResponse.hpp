@@ -38,13 +38,6 @@ namespace HTTP {
 		void setContentType(std::string type);
 
 		void clearBuffer();
-		int send(OS::Socket & socket, const char * buf, int size);
-		int write(const std::string & content);
-		int write(const char * buf, int size);
-		void sendHeaderOnce(OS::Socket & socket);
-		bool hasHeaderSent();
-		void sendContent(OS::Socket & socket);
-		void setComplete();
 		bool hasComplete();
         
         bool completeContentTransfer();

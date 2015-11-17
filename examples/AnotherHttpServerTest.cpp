@@ -55,29 +55,64 @@ public:
         
         HttpResponseHeader & responseHeader = response.getHeader();
         
-        responseHeader.setProtocol("HTTP/1.1");
-        responseHeader.setStatusCode(200);
-        responseHeader.setMessage("OK");
-        responseHeader.setHeaderField("Connection", "close");
-
+        response.setStatusCode(200, "OK");
         response.setContentType("text/html");
+        
+        responseHeader.setConnection("close");
         
         logger.logv(request.getHeader().toString());
         
         string content = prefix + "Method: " + request.getMethod() + " / Path: " + request.getPath() + "\r\n";
         content.append("<form method='post'><input type='text' name='name' /></form>");
         
-        setFixedTrnasfer(response, content);
+        setFixedTransfer(response, content);
     }
     
-    virtual void onHttpRequestContent(HttpRequest & request, Packet & packet) {
-
-		DataTransfer * transfer = request.getTransfer();
-		if (transfer->isCompleted()) {
-			logger.logv(transfer->getString());
-		}
+    virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
+    }
+    
+    virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+        DataTransfer * transfer = request.getTransfer();
+        if (transfer) {
+            logger.logv(transfer->getString());
+        }
+        
+        response.setStatusCode(404, "ERROR~~");
+        setFixedTransfer(response, "404 Error~");
     }
 };
+
+
+class RfcHttpRequestHandler : public HttpRequestHandler {
+private:
+public:
+    RfcHttpRequestHandler() {}
+    virtual ~RfcHttpRequestHandler() {}
+    
+    virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) {
+        
+        HttpResponseHeader & responseHeader = response.getHeader();
+        
+        response.setStatusCode(200, "OK");
+        response.setContentType("text/plain");
+        
+        responseHeader.setConnection("close");
+        
+        logger.logv(request.getHeader().toString());
+        
+        File file("res/rfc3261.txt");
+        FileReader reader(file);
+        string content = reader.dumpAsString();
+        setFixedTransfer(response, content);
+    }
+    
+    virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
+    }
+    
+    virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+    }
+};
+
 
 class PT : public Thread {
 private:
@@ -187,7 +222,8 @@ public:
 
 		try {
 
-			FileReader reader(File("res/rfc3261.txt"));
+            File file("res/rfc3261.txt");
+			FileReader reader(file);
 			string content = reader.dumpAsString();
 
 			socket.connect();
@@ -214,6 +250,38 @@ public:
 };
 
 
+class SampleGetHttpClient {
+private:
+    Socket socket;
+public:
+    SampleGetHttpClient(const char * remoteAddr, int port) : socket(remoteAddr, port) {
+    }
+    virtual ~SampleGetHttpClient() {
+    }
+    
+    void send() {
+        
+        try {
+            
+            socket.connect();
+            string header = "GET /hello HTTP/1.1\r\nContent-Length: 0\r\n\r\n";
+            socket.send(header.c_str(), (int)header.length());
+            
+            // wait
+            
+            while (1) {
+                char buffer[1024] = {0,};
+                int len = socket.recv(buffer, sizeof(buffer));
+                logger.logv(string(buffer, len));
+            }
+            
+        } catch (IOException e) {
+            logger.loge("sample fixed client exception/" + e.getMessage());
+        }
+    }
+};
+
+
 size_t readline(char * buffer, size_t max) {
 	fgets(buffer, (int)max - 1, stdin);
 	buffer[strlen(buffer) - 1] = 0;
@@ -230,6 +298,9 @@ void recent() {
 
 	SampleHttpRequestHandler byebye("Byebye!");
 	server.registerRequestHandler("/byebye", &byebye);
+    
+    RfcHttpRequestHandler rfc;
+    server.registerRequestHandler("/rfc", &rfc);
 
 	server.startAsync();
 
@@ -249,6 +320,12 @@ void recent() {
 			SampleFixedHttpClient client("127.0.0.1", 8083);
 			client.send();
 		}
+        
+        if (!strcmp(buffer, "g")) {
+            SampleGetHttpClient client("127.0.0.1", 8083);
+            client.send();
+        }
+        
 	}
 
 	server.stop();

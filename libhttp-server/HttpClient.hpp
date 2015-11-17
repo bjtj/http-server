@@ -331,7 +331,7 @@ namespace HTTP {
             this->requestHeader.appendHeaderFields(additionalHeaderFields);
             
             this->writeLen = 0;
-            this->contentBuffer.clear();
+            this->contentBuffer.resetPosition();
             this->userData = userData;
             
             clearBuffer();
@@ -396,7 +396,7 @@ namespace HTTP {
                         pollListener->onResponseHeader(*this, responseHeader, userData);
                     }
                     responseHeaderReader.clear();
-                    contentBuffer.clear();
+                    contentBuffer.resetPosition();
 
                     if (responseHeader.isChunkedTransfer()) {
 						chunkedBuffer.clear();
@@ -451,7 +451,7 @@ namespace HTTP {
 			case HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_DATA_STATUS:
 			{
 				if (chunkedBuffer.getChunkSize() == 0) {
-					consumeBuffer.clear();
+					consumeBuffer.resetPosition();
 					consumeBuffer.setContentSize(2);
 					status = HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_DATA_TRAILING_STATUS;
 					break;
@@ -468,7 +468,7 @@ namespace HTTP {
 						pollListener->onResponseDataChunk(*this, responseHeader, chunkedBuffer.getChunkData(), chunkedBuffer.getChunkSize(), userData);
 					}
 
-					consumeBuffer.clear();
+					consumeBuffer.resetPosition();
 					consumeBuffer.setContentSize(2);
 					status = HttpRequestStatus::RECV_RESPONSE_READ_CHUNK_DATA_TRAILING_STATUS;
 				}

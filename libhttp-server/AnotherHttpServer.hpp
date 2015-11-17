@@ -11,30 +11,14 @@
 #include "ChunkedReader.hpp"
 #include "DataTransfer.hpp"
 #include "ChunkedTransfer.hpp"
+#include "FixedTransfer.hpp"
 
 #include <liboslayer/os.hpp>
 #include <liboslayer/Text.hpp>
 
 namespace HTTP {
 
-	/**
-	 * @brief FixedTransfer
-	 */
-	class FixedTransfer : public DataTransfer {
-	private:
-
-		ChunkedBuffer chunkedBuffer;
-
-	public:
-
-		FixedTransfer();
-		virtual ~FixedTransfer();
-		ChunkedBuffer & getChunkedBuffer();
-		virtual void recv(Packet & packet);
-		virtual void send(Connection & connection);
-
-		virtual std::string getString();
-	};
+	
 
 	/**
 	 * @brief HttpRequestHandler
@@ -47,9 +31,10 @@ namespace HTTP {
 		virtual ~HttpRequestHandler();
     
 		virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) = 0;
-		virtual void onHttpRequestContent(HttpRequest & request, Packet & packet) = 0;
+		virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) = 0;
+        virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) = 0;
 
-		void setFixedTrnasfer(HttpResponse & response, const std::string & content);
+		void setFixedTransfer(HttpResponse & response, const std::string & content);
 	};
 
 	/**
@@ -139,8 +124,8 @@ namespace HTTP {
 		virtual void onConnected(Connection & connection);
 		virtual void onDataReceived(Connection & connection, Packet & packet);
 		void readRequestHeaderIfNeed(Connection & connection, Packet & packet);
-		void readRequestContent(HttpRequest & request, Packet & packet);
-		void onRequestHeader(HttpRequest & request);
+		void readRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet);
+		void onRequestHeader(HttpRequest & request, HttpResponse & response);
 		void prepareRequestContentTransfer(HttpRequest & request);
 		virtual void onWriteable(Connection & connection);
 		void sendResponseHeader(Connection & connection);

@@ -152,6 +152,9 @@ namespace HTTP {
 			removeHeaderFieldIgnoreCase("Transfer-Encoding");
 		}
 	}
+    void HttpHeader::setConnection(const std::string & connection) {
+        setHeaderField("Connection", connection);
+    }
 	
 	string HttpHeader::toString() const {
 		string ret = makeFirstLine() + "\r\n";

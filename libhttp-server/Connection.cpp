@@ -23,7 +23,7 @@ namespace HTTP {
     }
     
     bool Connection::isWritableSelected(Selector & selector) {
-        return selector.isReadableSelected(socket);
+        return selector.isWriteableSelected(socket);
     }
     
     int Connection::recv(char * buffer, size_t size) {

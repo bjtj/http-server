@@ -8,42 +8,7 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-	static const Logger & logger = LoggerFactory::getDefaultLogger();
-
-
-	/**
-	 * @brief FixedTransfer
-	 */
-
-    FixedTransfer::FixedTransfer() {
-    }
-    FixedTransfer::~FixedTransfer() {
-    }
-    ChunkedBuffer & FixedTransfer::getChunkedBuffer() {
-        return chunkedBuffer;
-    }
-    void FixedTransfer::recv(Packet & packet) {
-        chunkedBuffer.write(packet.getData(), packet.getLength());
-        
-        if (!chunkedBuffer.remain()) {
-            setCompleted();
-        }
-    }
-    void FixedTransfer::send(Connection & connection) {
-        if (chunkedBuffer.remain()) {
-            char buffer[1024] = {0,};
-            size_t len = chunkedBuffer.read(buffer, sizeof(buffer));
-            connection.send(buffer, len);
-        }
-        
-        if (!chunkedBuffer.remain()) {
-            setCompleted();
-        }
-    }
-
-	string FixedTransfer::getString() {
-		return string(chunkedBuffer.getChunkData(), chunkedBuffer.getChunkSize());
-	}
+//	static const Logger & logger = LoggerFactory::getDefaultLogger();
 
 	/**
 	 * @brief HttpRequestHandler
@@ -54,13 +19,15 @@ namespace HTTP {
 	HttpRequestHandler::~HttpRequestHandler() {
 	}
     
-	void HttpRequestHandler::setFixedTrnasfer(HttpResponse & response, const string & content) {
-		FixedTransfer * transfer = new FixedTransfer;
+	void HttpRequestHandler::setFixedTransfer(HttpResponse & response, const string & content) {
+		FixedTransfer * transfer = new FixedTransfer(content.length());
         ChunkedBuffer & cb = transfer->getChunkedBuffer();
-        cb.setChunkSize(content.length());
         cb.write(content.c_str(), content.length());
         cb.resetPosition();
         
+        if (response.getTransfer()) {
+            delete response.getTransfer();
+        }
         response.setTransfer(transfer);
 		response.setContentLength((int)content.length());
 	}
@@ -121,15 +88,19 @@ namespace HTTP {
             
             if (!requestHeaderHandled) {
                 
-                onRequestHeader(request);
+                onRequestHeader(request, response);
                 requestContentReadCounter.setContentSize(request.getContentLength());
                 
             } else {
                 
 				DataTransfer * transfer = request.getTransfer();
 				transfer->recv(packet);
-                readRequestContent(request, packet);
+                readRequestContent(request, response, packet);
                 if (transfer->isCompleted()) {
+                    HttpRequestHandler * handler = dispatcher->getRequestHandler(request.getPath());
+                    if (handler) {
+                        handler->onHttpRequestContentCompleted(request, response);
+                    }
                     writeable = true;
                 }
             }
@@ -151,14 +122,14 @@ namespace HTTP {
 		}
 	}
     
-    void HttpCommunication::readRequestContent(HttpRequest & request, Packet & packet) {
+    void HttpCommunication::readRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
 		HttpRequestHandler * handler = dispatcher->getRequestHandler(request.getPath());
 		if (handler) {
-			handler->onHttpRequestContent(request, packet);
+			handler->onHttpRequestContent(request, response, packet);
 		}
     }
 
-	void HttpCommunication::onRequestHeader(HttpRequest & request) {
+	void HttpCommunication::onRequestHeader(HttpRequest & request, HttpResponse & response) {
         
         prepareRequestContentTransfer(request);
         
@@ -168,6 +139,9 @@ namespace HTTP {
 		}
 
 		if (!request.getTransfer()) {
+            if (handler) {
+                handler->onHttpRequestContentCompleted(request, response);
+            }
 			writeable = true;
 		}
         
@@ -177,14 +151,10 @@ namespace HTTP {
 	void HttpCommunication::prepareRequestContentTransfer(HttpRequest & request) {
 
 		if (request.getHeader().isChunkedTransfer()) {
-			logger.logv("choose chunked tranfer");
 			request.setTransfer(new ChunkedTransfer);
         } else {
-			logger.logv("choose fixed tranfer");
             if (request.getContentLength() > 0) {
-                FixedTransfer * transfer = new FixedTransfer;
-                ChunkedBuffer & cb = transfer->getChunkedBuffer();
-                cb.setChunkSize(request.getContentLength());
+                FixedTransfer * transfer = new FixedTransfer(request.getContentLength());
 				request.setTransfer(transfer);
             }
         }
@@ -196,8 +166,6 @@ namespace HTTP {
 		if (!writeable) {
 			return;
 		}
-
-		logger.logv("write something...");
 
 		if (!responseHeaderTransferDone) {
             sendResponseHeader(connection);
@@ -217,6 +185,7 @@ namespace HTTP {
 		HttpResponseHeader & header = response.getHeader();
             
         string headerString = header.toString();
+//        logger.logv(headerString);
         connection.send(headerString.c_str(), (int)headerString.length());
             
         if (!header.isChunkedTransfer() && header.getContentLength() == 0) {
