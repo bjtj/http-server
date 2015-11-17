@@ -11,6 +11,8 @@
 #include "Packet.hpp"
 //#include "MultiConn.hpp"
 
+#include "DataTransfer.hpp"
+
 namespace HTTP {
 
 	/**
@@ -25,6 +27,8 @@ namespace HTTP {
 
 		Packet * contentPacket;
 		ReadCounter contentReadCounter;
+
+		DataTransfer * transfer;
 
 	public:
         HttpRequest();
@@ -55,6 +59,9 @@ namespace HTTP {
 		void setContentPacket(Packet * packet);
 		void readChunkedBuffer(ChunkedBuffer & buffer);
 		bool completeContentRead();
+
+		DataTransfer * getTransfer();
+		void setTransfer(DataTransfer * transfer);
 	};
 
 }

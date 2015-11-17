@@ -8,6 +8,7 @@
 #include <liboslayer/os.hpp>
 #include "HttpHeader.hpp"
 #include "ChunkedReader.hpp"
+#include "DataTransfer.hpp"
 
 namespace HTTP {
 
@@ -17,15 +18,17 @@ namespace HTTP {
 	class HttpResponse {
 	private:
 		HttpResponseHeader header;
-        OS::Socket & socket;
+        /*OS::Socket & socket;*/
 		bool complete;
 		std::string content;
 		bool headerSent;
 		int contentLength;
         ReadCounter contentTranferCounter;
+
+		DataTransfer * transfer;
 		
 	public:
-		HttpResponse(OS::Socket & socket);
+		HttpResponse(/*OS::Socket & socket*/);
 		virtual ~HttpResponse();
 
 		void setStatusCode(int code);
@@ -35,15 +38,20 @@ namespace HTTP {
 		void setContentType(std::string type);
 
 		void clearBuffer();
-		int send(const char * buf, int size);
+		int send(OS::Socket & socket, const char * buf, int size);
 		int write(const std::string & content);
 		int write(const char * buf, int size);
-		void sendHeaderOnce();
-		void sendContent();
+		void sendHeaderOnce(OS::Socket & socket);
+		bool hasHeaderSent();
+		void sendContent(OS::Socket & socket);
 		void setComplete();
 		bool hasComplete();
         
         bool completeContentTransfer();
+
+		HttpResponseHeader & getHeader();
+		void setTransfer(DataTransfer * transfer);
+		DataTransfer * getTransfer();
 	};
 }
 

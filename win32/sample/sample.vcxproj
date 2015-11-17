@@ -56,6 +56,10 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>mkdir  $(ProjectDir)\res
+xcopy /y $(SolutionDir)\..\examples\res $(ProjectDir)\res</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -90,7 +94,7 @@
     <ClCompile Include="..\..\examples\HttpServerPoll.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\examples\multiconn.cpp" />
+    <ClCompile Include="..\..\examples\AnotherHttpServerTest.cpp" />
     <ClCompile Include="..\..\examples\PostTest.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>

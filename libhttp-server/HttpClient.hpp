@@ -458,7 +458,7 @@ namespace HTTP {
 				}
 				char buffer[4096] = {0,};
                 int len;
-                if ((len = read(timeout, buffer, chunkedBuffer.getReadSize(sizeof(buffer)))) < 0) {
+                if ((len = read(timeout, buffer, chunkedBuffer.getReadableSize(sizeof(buffer)))) < 0) {
                     status = HttpRequestStatus::ERROR_STATUS;
                     break;
                 }

@@ -21,6 +21,7 @@ namespace HTTP {
         virtual ~ChunkedBuffer();
         
         void clear();
+		void reset();
         size_t read(char * data, size_t len);
         void write(const char * data, size_t len);
         void resetPosition();
@@ -30,7 +31,7 @@ namespace HTTP {
         void setChunkSize(size_t size);
         size_t getChunkSize() const;
         const char * getChunkData() const;
-        size_t getReadSize(size_t bufferSize) const;
+        size_t getReadableSize(size_t bufferSize) const;
         size_t getPosition() const;
         void setPosition(size_t pos);
     };
@@ -64,7 +65,7 @@ namespace HTTP {
 		ReadCounter(size_t contentSize);
 		virtual ~ReadCounter();
 
-		void clear();
+		void resetPosition();
 		void read(size_t len);
 		size_t remaining() const;
 		bool complete() const;

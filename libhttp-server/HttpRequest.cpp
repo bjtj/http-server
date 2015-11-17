@@ -10,13 +10,15 @@ namespace HTTP {
 	/**
 	 * @brief http request
 	 */
-    HttpRequest::HttpRequest() {
-        
+    HttpRequest::HttpRequest() : contentPacket(NULL), transfer(NULL) {
     }
 	HttpRequest::HttpRequest(HttpHeader & header)
 		: header(header) {
 	}
 	HttpRequest::~HttpRequest() {
+		if (transfer) {
+			delete transfer;
+		}
 	}
     void HttpRequest::setHeader(HttpHeader & header) {
         this->header.setHeader(header);
@@ -98,5 +100,12 @@ namespace HTTP {
 
 	bool HttpRequest::completeContentRead() {
 		return contentReadCounter.complete();
+	}
+
+	DataTransfer * HttpRequest::getTransfer() {
+		return transfer;
+	}
+	void HttpRequest::setTransfer(DataTransfer * transfer) {
+		this->transfer = transfer;
 	}
 }

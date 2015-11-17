@@ -7,6 +7,7 @@
 namespace HTTP {
 
 	using namespace std;
+	using namespace OS;
 	using namespace UTIL;
 
 	const static Logger & logger = LoggerFactory::getDefaultLogger();
@@ -14,8 +15,8 @@ namespace HTTP {
 	/**
 	 * @brief http response constructor
 	 */
-	HttpResponse::HttpResponse(OS::Socket & socket)
-		: socket(socket), complete(false), headerSent(false), contentLength(-1) {
+	HttpResponse::HttpResponse(/*OS::Socket & socket*/)
+		: /*socket(socket), */complete(false), headerSent(false), contentLength(-1) {
 	}
 	HttpResponse::~HttpResponse() {
 	}
@@ -42,9 +43,9 @@ namespace HTTP {
 	void HttpResponse::clearBuffer() {
 		content = "";
 	}
-	int HttpResponse::send(const char * buf, int size) {
+	int HttpResponse::send(Socket & socket, const char * buf, int size) {
 		if (contentLength > 0) {
-			sendHeaderOnce();
+			sendHeaderOnce(socket);
 			return socket.send((char *)buf, size);
 		}
 		return 0;
@@ -57,15 +58,19 @@ namespace HTTP {
 		this->content += string(buf, size);
 		return size;
 	}
-	void HttpResponse::sendHeaderOnce() {
-		if (!headerSent) {
+	void HttpResponse::sendHeaderOnce(Socket & socket) {
+		if (!hasHeaderSent()) {
 			string header_string = header.toString();
 			socket.send((char*)header_string.c_str(), header_string.length());
 			headerSent = true;
 		}
 	}
-	void HttpResponse::sendContent() {
+	bool HttpResponse::hasHeaderSent() {
+		return headerSent;
+	}
+	void HttpResponse::sendContent(Socket & socket) {
         size_t contentLength = content.length();
+		sendHeaderOnce(socket);
 		int len = socket.send((char*)(content.c_str() + contentTranferCounter.getReadPosition()), contentTranferCounter.getReadSize(contentLength));
 		if (len != contentLength) {
 			logger.loge("send() error / expected: " + Text::toString(contentLength) + ", but: " + Text::toString(len));
@@ -76,9 +81,6 @@ namespace HTTP {
 	void HttpResponse::setComplete() {
 		if (!complete) {
 			setContentLength((int)content.length());
-            try {
-                sendHeaderOnce();
-            } catch (OS::IOException e) {}
 			complete = true;
 		}
 	}
@@ -89,5 +91,13 @@ namespace HTTP {
     bool HttpResponse::completeContentTransfer() {
         return contentTranferCounter.complete();
     }
-
+	HttpResponseHeader & HttpResponse::getHeader() {
+		return header;
+	}
+	void HttpResponse::setTransfer(DataTransfer * transfer) {
+        this->transfer = transfer;
+    }
+    DataTransfer * HttpResponse::getTransfer() {
+        return transfer;
+    }
 }

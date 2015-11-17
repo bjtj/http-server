@@ -2,7 +2,7 @@
 
 namespace HTTP {
     
-    DataTransfer::DataTransfer() {
+    DataTransfer::DataTransfer() : completed(false) {
     }
     
     DataTransfer::~DataTransfer() {

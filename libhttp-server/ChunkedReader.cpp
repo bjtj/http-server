@@ -41,6 +41,11 @@ namespace HTTP {
         chunkSize = 0;
         pos = 0;
     }
+
+	void ChunkedBuffer::reset() {
+		memset(chunkDataBuffer, 0, chunkSize);
+		pos = 0;
+	}
     
     size_t ChunkedBuffer::read(char * data, size_t len) {
         size_t remain = remainingDataBuffer();
@@ -84,6 +89,7 @@ namespace HTTP {
         clear();
         this->chunkSize = chunkSize;
         chunkDataBuffer = new char[chunkSize];
+		reset();
     }
     
     size_t ChunkedBuffer::getChunkSize() const {
@@ -94,7 +100,7 @@ namespace HTTP {
         return chunkDataBuffer;
     }
     
-    size_t ChunkedBuffer::getReadSize(size_t bufferSize) const {
+    size_t ChunkedBuffer::getReadableSize(size_t bufferSize) const {
         size_t remain = remainingDataBuffer();
         return bufferSize > remain ? remain : bufferSize;
     }
@@ -144,7 +150,7 @@ namespace HTTP {
 	ReadCounter::~ReadCounter() {
 	}
 
-	void ReadCounter::clear() {
+	void ReadCounter::resetPosition() {
 		pos = 0;
 	}
 	void ReadCounter::read(size_t len) {
@@ -201,7 +207,7 @@ namespace HTTP {
 		int len = 0;
 		if (chunkedBuffer.getChunkSize() > 0) {
 			char readBuffer[1024] = {0,};
-			while (!chunkedBuffer.completeData() && (len = socket.recv(readBuffer, chunkedBuffer.getReadSize(sizeof(readBuffer)))) > 0) {
+			while (!chunkedBuffer.completeData() && (len = socket.recv(readBuffer, chunkedBuffer.getReadableSize(sizeof(readBuffer)))) > 0) {
 				chunkedBuffer.write(readBuffer, len);
 			}
 		}

@@ -36,7 +36,7 @@
     <ClCompile Include="..\..\examples\PostTest.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\examples\multiconn.cpp">
+    <ClCompile Include="..\..\examples\AnotherHttpServerTest.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
