@@ -18,6 +18,7 @@
     <ClInclude Include="..\libhttp-server\Connection.hpp" />
     <ClInclude Include="..\libhttp-server\ConnectionManager.hpp" />
     <ClInclude Include="..\libhttp-server\DataTransfer.hpp" />
+    <ClInclude Include="..\libhttp-server\FixedTransfer.hpp" />
     <ClInclude Include="..\libhttp-server\HttpClient.hpp" />
     <ClInclude Include="..\libhttp-server\HttpClientThreadPool.hpp" />
     <ClInclude Include="..\libhttp-server\HttpHeader.hpp" />
@@ -39,6 +40,7 @@
     <ClCompile Include="..\libhttp-server\Connection.cpp" />
     <ClCompile Include="..\libhttp-server\ConnectionManager.cpp" />
     <ClCompile Include="..\libhttp-server\DataTransfer.cpp" />
+    <ClCompile Include="..\libhttp-server\FixedTransfer.cpp" />
     <ClCompile Include="..\libhttp-server\HttpClient.cpp" />
     <ClCompile Include="..\libhttp-server\HttpHeader.cpp" />
     <ClCompile Include="..\libhttp-server\HttpHeaderParser.cpp" />

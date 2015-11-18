@@ -10,6 +10,9 @@
 
 namespace HTTP {
     
+	/**
+	 * @brief ConnectionMaker
+	 */
     
     class ConnectionMaker {
     private:
@@ -21,6 +24,10 @@ namespace HTTP {
         virtual Connection * makeConnection() = 0;
     };
     
+	/**
+	 * @brief CommunicationMaker
+	 */
+
     class CommunicationMaker {
     private:
     public:
@@ -31,6 +38,10 @@ namespace HTTP {
         virtual Communication * makeCommunication() = 0;
     };
     
+	/**
+	 * @brief ConnectionThread
+	 */
+
     class ConnectionThread : public OS::Thread {
     private:
         Connection & connection;
@@ -43,6 +54,11 @@ namespace HTTP {
         virtual void run();
     };
     
+
+	/**
+	 * @brief ConnectionManager
+	 */
+
     class ConnectionManager {
     private:
         OS::ServerSocket * serverSocket;
@@ -60,12 +76,14 @@ namespace HTTP {
         void onConnect(OS::Socket & client);
         void onDisconnect(Connection * connection);
         void clearConnections();
-        void removeCompletedConnections();
         void start(int port);
         void poll(unsigned long timeout);
+		void removeCompletedConnections();
         void removeCompletedThreads();
         void stop();
         void stopAllThreads();
+
+		void startCommunication(Communication * communication, Connection * connection);
     };
 }
 

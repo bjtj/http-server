@@ -10,6 +10,9 @@ namespace HTTP {
     
     static const Logger & logger = LoggerFactory::getDefaultLogger();
     
+	/**
+	 * @brief ConnectionThread
+	 */
 
     ConnectionThread::ConnectionThread(Connection & connection, Communication & communication) : connection(connection), communication(communication) {
     }
@@ -53,6 +56,9 @@ namespace HTTP {
         delete &communication;
     }
 
+	/**
+	 * @brief ConnectionManager
+	 */
 
     ConnectionManager::ConnectionManager(CommunicationMaker & communicationMaker) : serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker) {
     }
@@ -77,13 +83,10 @@ namespace HTTP {
         connectionTable[connection->getId()] = connection;
         connectionsLock.post();
         
-        ConnectionThread * thread = new ConnectionThread(*connection, *communication);
-        threads.push_back(thread);
-        thread->start();
+		startCommunication(communication, connection);
     }
     
     void ConnectionManager::onDisconnect(Connection * connection) {
-        
         connectionsLock.wait();
         int id = connection->getId();
         if (connectionTable.find(id) != connectionTable.end()) {
@@ -95,7 +98,6 @@ namespace HTTP {
     }
     
     void ConnectionManager::clearConnections() {
-        
         connectionsLock.wait();
         for (map<int, Connection*>::const_iterator iter = connectionTable.begin(); iter != connectionTable.end(); iter++) {
             Connection * connection = iter->second;
@@ -108,21 +110,6 @@ namespace HTTP {
             removeConnection(connection);
         }
         connectionTable.clear();
-        connectionsLock.post();
-    }
-    
-    void ConnectionManager::removeCompletedConnections() {
-        
-        connectionsLock.wait();
-        for (map<int, Connection*>::const_iterator iter = connectionTable.begin(); iter != connectionTable.end();) {
-            Connection * connection = iter->second;
-            if (connection->isCompleted()) {
-                removeConnection(connection);
-                iter = connectionTable.erase(iter);
-            } else {
-                iter++;
-            }
-        }
         connectionsLock.post();
     }
     
@@ -140,7 +127,6 @@ namespace HTTP {
     }
     
     void ConnectionManager::poll(unsigned long timeout) {
-        
         if (selector.select(timeout) > 0) {
             if (selector.isReadableSelected(*serverSocket)) {
                 Socket * client = serverSocket->accept();
@@ -153,10 +139,23 @@ namespace HTTP {
         removeCompletedConnections();
         removeCompletedThreads();
     }
+
+	void ConnectionManager::removeCompletedConnections() {
+        connectionsLock.wait();
+        for (map<int, Connection*>::const_iterator iter = connectionTable.begin(); iter != connectionTable.end();) {
+            Connection * connection = iter->second;
+            if (connection->isCompleted()) {
+                removeConnection(connection);
+                iter = connectionTable.erase(iter);
+            } else {
+                iter++;
+            }
+        }
+        connectionsLock.post();
+    }
     
     void ConnectionManager::removeCompletedThreads() {
         for (vector<Thread*>::const_iterator iter = threads.begin(); iter != threads.end();) {
-            
             Thread * thread = *iter;
             if (!thread->isRunning()) {
                 delete thread;
@@ -168,7 +167,6 @@ namespace HTTP {
     }
     
     void ConnectionManager::stop() {
-        
         if (!serverSocket) {
             return;
         }
@@ -193,4 +191,9 @@ namespace HTTP {
         threads.clear();
     }
 
+	void ConnectionManager::startCommunication(Communication * communication, Connection * connection) {
+		ConnectionThread * thread = new ConnectionThread(*connection, *communication);
+        threads.push_back(thread);
+        thread->start();
+	}
 }

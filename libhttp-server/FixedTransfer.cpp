@@ -30,9 +30,8 @@ namespace HTTP {
     }
     void FixedTransfer::send(Connection & connection) {
         if (chunkedBuffer.remain()) {
-            char buffer[1024] = {0,};
-            size_t len = chunkedBuffer.read(buffer, sizeof(buffer));
-            connection.send(buffer, len);
+			int len = connection.send(chunkedBuffer.getChunkData(), chunkedBuffer.remainingDataBuffer());
+			chunkedBuffer.setPosition(len);
         }
         
         if (!chunkedBuffer.remain()) {
