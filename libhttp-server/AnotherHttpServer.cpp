@@ -48,7 +48,7 @@ namespace HTTP {
 
 		response.clearTransfer();
 		response.setTransfer(transfer);
-		response.setContentLength(file.getSize());
+		response.setContentLength((unsigned long long)file.getSize());
 	}
 	
 	/**
