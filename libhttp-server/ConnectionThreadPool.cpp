@@ -45,8 +45,6 @@ namespace HTTP {
 
 	void ConnectionThread::connectionTask() {
 
-		// logger.logv("++ connectionTask");
-
 		connection->registerSelector(selector);
 
 		try {
@@ -83,8 +81,6 @@ namespace HTTP {
         
         delete communication;
 		communication = NULL;
-
-		// logger.logv("-- connectionTask");
 	}
 
 
