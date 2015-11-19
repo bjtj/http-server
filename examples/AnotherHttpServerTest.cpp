@@ -100,10 +100,12 @@ public:
         
         logger.logv(request.getHeader().toString());
         
-        File file("res/rfc3261.txt");
+        /*File file("res/rfc3261.txt");
         FileReader reader(file);
         string content = reader.dumpAsString();
-        setFixedTransfer(response, content);
+        setFixedTransfer(response, content);*/
+
+		 setFileTransfer(response, "res/rfc3261.txt");
     }
     
     virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
@@ -159,8 +161,9 @@ void old() {
 class SampleChunkedHttpClient {
 private:
 	Socket socket;
+	string path;
 public:
-	SampleChunkedHttpClient(const char * remoteAddr, int port) : socket(remoteAddr, port) {
+	SampleChunkedHttpClient(const char * remoteAddr, int port, const string & path) : socket(remoteAddr, port), path(path) {
 	}
 	virtual ~SampleChunkedHttpClient() {
 	}
@@ -170,7 +173,7 @@ public:
 		try {
 
 			socket.connect();
-			string header = "POST /hello HTTP/1.1\r\nTransfer-Encoding: chunked\r\n\r\n";
+			string header = "POST " + path + " HTTP/1.1\r\nTransfer-Encoding: chunked\r\n\r\n";
 			socket.send(header.c_str(), (int)header.length());
 
 			for (size_t i = 0; i < 4096; i++) {
@@ -212,8 +215,9 @@ public:
 class SampleFixedHttpClient {
 private:
 	Socket socket;
+	string path;
 public:
-	SampleFixedHttpClient(const char * remoteAddr, int port) : socket(remoteAddr, port) {
+	SampleFixedHttpClient(const char * remoteAddr, int port, const string & path) : socket(remoteAddr, port), path(path) {
 	}
 	virtual ~SampleFixedHttpClient() {
 	}
@@ -227,7 +231,7 @@ public:
 			string content = reader.dumpAsString();
 
 			socket.connect();
-			string header = "POST /hello HTTP/1.1\r\nContent-Length: " + Text::toString(content.length()) + "\r\n\r\n";
+			string header = "POST " + path + " HTTP/1.1\r\nContent-Length: " + Text::toString(content.length()) + "\r\n\r\n";
 			socket.send(header.c_str(), (int)header.length());
 			int sentLen = socket.send(content.c_str(), content.length());
 
@@ -253,8 +257,9 @@ public:
 class SampleGetHttpClient {
 private:
     Socket socket;
+	string path;
 public:
-    SampleGetHttpClient(const char * remoteAddr, int port) : socket(remoteAddr, port) {
+    SampleGetHttpClient(const char * remoteAddr, int port, const string & path) : socket(remoteAddr, port), path(path) {
     }
     virtual ~SampleGetHttpClient() {
     }
@@ -264,7 +269,7 @@ public:
         try {
             
             socket.connect();
-            string header = "GET /hello HTTP/1.1\r\nContent-Length: 0\r\n\r\n";
+            string header = "GET " + path + " HTTP/1.1\r\nContent-Length: 0\r\n\r\n";
             socket.send(header.c_str(), (int)header.length());
             
             // wait
@@ -312,17 +317,17 @@ void recent() {
 		}
 
 		if (!strcmp(buffer, "c")) {
-			SampleChunkedHttpClient client("127.0.0.1", 8083);
+			SampleChunkedHttpClient client("127.0.0.1", 8083, "/hello");
 			client.send();
 		}
 
 		if (!strcmp(buffer, "f")) {
-			SampleFixedHttpClient client("127.0.0.1", 8083);
+			SampleFixedHttpClient client("127.0.0.1", 8083, "/hello");
 			client.send();
 		}
         
         if (!strcmp(buffer, "g")) {
-            SampleGetHttpClient client("127.0.0.1", 8083);
+            SampleGetHttpClient client("127.0.0.1", 8083, "/hello");
             client.send();
         }
         

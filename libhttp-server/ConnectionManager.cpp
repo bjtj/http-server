@@ -11,56 +11,11 @@ namespace HTTP {
     static const Logger & logger = LoggerFactory::getDefaultLogger();
     
 	/**
-	 * @brief ConnectionThread
-	 */
-
-    ConnectionThread::ConnectionThread(Connection & connection, Communication & communication) : connection(connection), communication(communication) {
-    }
-    ConnectionThread::~ConnectionThread() {
-    }
-    
-    void ConnectionThread::run() {
-        
-        connection.registerSelector(selector);
-        
-        try {
-            communication.onConnected(connection);
-            while (!interrupted() && !connection.isTerminateSignaled()) {
-                if (selector.select(1000) > 0) {
-                    
-                    if (connection.isReadableSelected(selector)) {
-                        Packet & packet = connection.read();
-                        communication.onDataReceived(connection, packet);
-                    }
-                    
-                    if (connection.isWritableSelected(selector)) {
-                        communication.onWriteable(connection);
-                    }
-                }
-
-                if (connection.isClosed() || communication.isCommunicationCompleted()) {
-                    break;
-                }
-            }
-            
-        } catch (IOException e) {
-            logger.loge(e.getMessage());
-        }
-        
-        connection.close();
-        
-        // notify disconnection to connection manager
-        communication.onDisconnected(connection);
-        connection.setCompleted();
-        
-        delete &communication;
-    }
-
-	/**
 	 * @brief ConnectionManager
 	 */
 
-    ConnectionManager::ConnectionManager(CommunicationMaker & communicationMaker) : serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker) {
+    ConnectionManager::ConnectionManager(CommunicationMaker & communicationMaker)
+		: serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker), threadPool(10) {
     }
 
     ConnectionManager::~ConnectionManager() {
@@ -124,6 +79,8 @@ namespace HTTP {
         serverSocket->listen(5);
         
         serverSocket->registerSelector(selector);
+
+		threadPool.start();
     }
     
     void ConnectionManager::poll(unsigned long timeout) {
@@ -155,15 +112,7 @@ namespace HTTP {
     }
     
     void ConnectionManager::removeCompletedThreads() {
-        for (vector<Thread*>::const_iterator iter = threads.begin(); iter != threads.end();) {
-            Thread * thread = *iter;
-            if (!thread->isRunning()) {
-                delete thread;
-                iter = threads.erase(iter);
-            } else {
-                iter++;
-            }
-        }
+		threadPool.collectUnflaggedThreads();
     }
     
     void ConnectionManager::stop() {
@@ -182,18 +131,10 @@ namespace HTTP {
     }
     
     void ConnectionManager::stopAllThreads() {
-        for (size_t i = 0; i < threads.size(); i++) {
-            Thread * thread = threads[i];
-            thread->interrupt();
-            thread->join();
-            delete thread;
-        }
-        threads.clear();
+		threadPool.stop();
     }
 
 	void ConnectionManager::startCommunication(Communication * communication, Connection * connection) {
-		ConnectionThread * thread = new ConnectionThread(*connection, *communication);
-        threads.push_back(thread);
-        thread->start();
+		threadPool.createConnection(communication, connection);
 	}
 }

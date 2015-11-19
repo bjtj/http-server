@@ -76,6 +76,31 @@ namespace HTTP {
 		size_t getReadPosition();
 	};
 
+
+	/**
+	 * @brief ReadCounter
+	 */
+	class LargeReadCounter {
+	private:
+		unsigned long long pos;
+		unsigned long long contentSize;
+	public:
+		LargeReadCounter();
+		LargeReadCounter(unsigned long long contentSize);
+		virtual ~LargeReadCounter();
+
+		void resetPosition();
+		void read(unsigned long long len);
+		unsigned long long remaining() const;
+		bool complete() const;
+
+		void setContentSize(unsigned long long contentSize);
+		unsigned long long getContentSize();
+        unsigned long long getReadSize(unsigned long long bufferSize) const;
+		unsigned long long getReadPosition();
+	};
+
+
 	/**
 	 * @brief Chunked Reader
 	 */

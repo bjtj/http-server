@@ -17,6 +17,7 @@ namespace HTTP {
         virtual ~Connection();
         int getId();
         void registerSelector(OS::Selector & selector);
+		void unregisterSelector(OS::Selector & selector);
         bool isReadableSelected(OS::Selector & selector);
         bool isWritableSelected(OS::Selector & selector);
         int recv(char * buffer, size_t size);

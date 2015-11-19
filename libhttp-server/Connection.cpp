@@ -17,6 +17,10 @@ namespace HTTP {
     void Connection::registerSelector(Selector & selector) {
         socket.registerSelector(selector);
     }
+
+	void Connection::unregisterSelector(Selector & selector) {
+        socket.unregisterSelector(selector);
+    }
     
     bool Connection::isReadableSelected(Selector & selector) {
         return selector.isReadableSelected(socket);

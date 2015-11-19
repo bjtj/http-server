@@ -16,7 +16,7 @@ namespace HTTP {
 	 * @brief http response constructor
 	 */
 	HttpResponse::HttpResponse()
-    : complete(false), headerSent(false), contentLength(-1), transfer(NULL) {
+    : headerSent(false), transfer(NULL) {
 	}
 	HttpResponse::~HttpResponse() {
         if (transfer) {
@@ -35,21 +35,17 @@ namespace HTTP {
 		header.setParts(parts);
 	}
 	void HttpResponse::setContentLength(int length) {
-		contentLength = length;
-		header.setHeaderField("Content-Length", Text::toString(length));
-        
-        contentTranferCounter.setContentSize(contentLength);
+		header.setContentLength(length);
+	}
+	void HttpResponse::setContentLength(size_t length) {
+		header.setContentLength(length);
+	}
+	void HttpResponse::setContentLength(unsigned long long length) {
+		header.setContentLength(length);
 	}
 	void HttpResponse::setContentType(string type) {
 		header.setHeaderField("Content-Type", type);
 	}
-	void HttpResponse::clearBuffer() {
-		content = "";
-	}
-    
-    bool HttpResponse::completeContentTransfer() {
-        return contentTranferCounter.complete();
-    }
 	HttpResponseHeader & HttpResponse::getHeader() {
 		return header;
 	}
@@ -59,4 +55,10 @@ namespace HTTP {
     DataTransfer * HttpResponse::getTransfer() {
         return transfer;
     }
+	void HttpResponse::clearTransfer() {
+		if (transfer) {
+			delete transfer;
+			transfer = NULL;
+		}
+	}
 }

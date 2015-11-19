@@ -64,6 +64,8 @@ namespace HTTP {
 		void setContentType(std::string contentType);
 		int getContentLength() const;
 		void setContentLength(int contentLength);
+		void setContentLength(size_t contentLength);
+		void setContentLength(unsigned long long contentLength);
 		bool isChunkedTransfer() const;
 		void setChunkedTransfer(bool chunked);
         void setConnection(const std::string & connection);

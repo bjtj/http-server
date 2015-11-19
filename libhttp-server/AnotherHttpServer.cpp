@@ -1,5 +1,10 @@
 #include "AnotherHttpServer.hpp"
 
+#include "ChunkedTransfer.hpp"
+#include "FixedTransfer.hpp"
+#include "FileTransfer.hpp"
+
+#include <liboslayer/FileReaderWriter.hpp>
 #include <liboslayer/Logger.hpp>
 
 namespace HTTP {
@@ -7,8 +12,6 @@ namespace HTTP {
 	using namespace std;
 	using namespace OS;
 	using namespace UTIL;
-
-//	static const Logger & logger = LoggerFactory::getDefaultLogger();
 
 	/**
 	 * @brief HttpRequestHandler
@@ -20,16 +23,32 @@ namespace HTTP {
 	}
     
 	void HttpRequestHandler::setFixedTransfer(HttpResponse & response, const string & content) {
+
 		FixedTransfer * transfer = new FixedTransfer(content.length());
         ChunkedBuffer & cb = transfer->getChunkedBuffer();
         cb.write(content.c_str(), content.length());
         cb.resetPosition();
-        
-        if (response.getTransfer()) {
-            delete response.getTransfer();
-        }
+
+        response.clearTransfer();
         response.setTransfer(transfer);
-		response.setContentLength((int)content.length());
+		response.setContentLength(content.length());
+	}
+
+	void HttpRequestHandler::setFileTransfer(HttpResponse & response, const string & filepath) {
+
+		File file(filepath);
+		setFileTransfer(response, file);
+	}
+
+	void HttpRequestHandler::setFileTransfer(HttpResponse & response, OS::File & file) {
+
+		FileReader * reader = new FileReader(file);
+
+		FileTransfer * transfer = new FileTransfer(reader, file.getSize());
+
+		response.clearTransfer();
+		response.setTransfer(transfer);
+		response.setContentLength(file.getSize());
 	}
 	
 	/**
@@ -185,7 +204,6 @@ namespace HTTP {
 		HttpResponseHeader & header = response.getHeader();
             
         string headerString = header.toString();
-//        logger.logv(headerString);
         connection.send(headerString.c_str(), (int)headerString.length());
             
         if (!header.isChunkedTransfer() && header.getContentLength() == 0) {

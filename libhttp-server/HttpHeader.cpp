@@ -142,6 +142,12 @@ namespace HTTP {
 	void HttpHeader::setContentLength(int contentLength) {
 		setHeaderField("Content-Length", Text::toString(contentLength));
 	}
+	void HttpHeader::setContentLength(size_t contentLength) {
+		setHeaderField("Content-Length", Text::toString(contentLength));
+	}
+	void HttpHeader::setContentLength(unsigned long long contentLength) {
+		setHeaderField("Content-Length", Text::toString(contentLength));
+	}
 	bool HttpHeader::isChunkedTransfer() const {
 		return Text::equalsIgnoreCase(getHeaderFieldIgnoreCase("Transfer-Encoding"), "chunked");
 	}

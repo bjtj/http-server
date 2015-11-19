@@ -10,8 +10,6 @@
 #include "HttpResponse.hpp"
 #include "ChunkedReader.hpp"
 #include "DataTransfer.hpp"
-#include "ChunkedTransfer.hpp"
-#include "FixedTransfer.hpp"
 
 #include <liboslayer/os.hpp>
 #include <liboslayer/Text.hpp>
@@ -35,6 +33,8 @@ namespace HTTP {
         virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) = 0;
 
 		void setFixedTransfer(HttpResponse & response, const std::string & content);
+		void setFileTransfer(HttpResponse & response, const std::string & filepath);
+		void setFileTransfer(HttpResponse & response, OS::File & file);
 	};
 
 	/**

@@ -4,6 +4,7 @@
 #include <liboslayer/os.hpp>
 #include "Connection.hpp"
 #include "Communication.hpp"
+#include "ConnectionThreadPool.hpp"
 
 #include <map>
 #include <vector>
@@ -39,23 +40,6 @@ namespace HTTP {
     };
     
 	/**
-	 * @brief ConnectionThread
-	 */
-
-    class ConnectionThread : public OS::Thread {
-    private:
-        Connection & connection;
-        Communication & communication;
-        OS::Selector selector;
-        
-    public:
-        ConnectionThread(Connection & connection, Communication & communication);
-        virtual ~ConnectionThread();
-        virtual void run();
-    };
-    
-
-	/**
 	 * @brief ConnectionManager
 	 */
 
@@ -64,9 +48,10 @@ namespace HTTP {
         OS::ServerSocket * serverSocket;
         OS::Selector selector;
         std::map<int, Connection*> connectionTable;
-        std::vector<OS::Thread*> threads;
         OS::Semaphore connectionsLock;
         CommunicationMaker & communicationMaker;
+
+		ConnectionThreadPool threadPool;
         
     public:
         ConnectionManager(CommunicationMaker & communicationMaker);

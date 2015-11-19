@@ -179,6 +179,47 @@ namespace HTTP {
 		return pos;
 	}
 
+
+	/**
+	 * @brief ReadCounter
+	 */
+	LargeReadCounter::LargeReadCounter() : pos(0), contentSize(0) {
+	}
+	LargeReadCounter::LargeReadCounter(unsigned long long contentSize) : pos(0), contentSize(contentSize) {
+	}
+	LargeReadCounter::~LargeReadCounter() {
+	}
+
+	void LargeReadCounter::resetPosition() {
+		pos = 0;
+	}
+	void LargeReadCounter::read(unsigned long long len) {
+		size_t writeSize = len < remaining() ? len : remaining();
+		pos += writeSize;
+	}
+	unsigned long long LargeReadCounter::remaining() const {
+		return (pos < contentSize ? contentSize - pos : 0);
+	}
+	bool LargeReadCounter::complete() const {
+		return remaining() == 0;
+	}
+
+	void LargeReadCounter::setContentSize(unsigned long long contentSize) {
+		this->contentSize = contentSize;
+	}
+	unsigned long long LargeReadCounter::getContentSize() {
+		return contentSize;
+	}
+    unsigned long long LargeReadCounter::getReadSize(unsigned long long bufferSize) const {
+		size_t remain = remaining();
+        return bufferSize > remain ? remain : bufferSize;
+	}
+
+	unsigned long long LargeReadCounter::getReadPosition() {
+		return pos;
+	}
+
+
 	/**
 	 * @brief Chunked Reader
 	 */
