@@ -1,34 +1,57 @@
 libhttp_serverincdir=${includedir}/libhttp-server
 libhttp_serverinc_HEADERS = \
+	AnotherHttpClient.hpp \
+	AnotherHttpServer.hpp \
 	ChunkedReader.hpp \
+	ChunkedTransfer.hpp \
+	Communication.hpp \
+	Connection.hpp \
+	ConnectionManager.hpp \
+	ConnectionThreadPool.hpp \
+	DataTransfer.hpp \
+	FileTransfer.hpp \
+	FixedTransfer.hpp \
 	HttpClient.hpp \
 	HttpClientThreadPool.hpp \
-	HttpConnection.hpp \
 	HttpHeader.hpp \
 	HttpHeaderParser.hpp \
 	HttpHeaderReader.hpp \
 	HttpParameter.hpp \
-	HttpProtocol.hpp \
 	HttpRequest.hpp \
 	HttpResponse.hpp \
 	HttpServer.hpp \
 	HttpStatusCodes.hpp \
 	InetAddress.hpp \
-	Logger.hpp \
-	MultiConn.hpp \
-	OnHttpRequestHandler.hpp \
+	Packet.hpp \
 	Url.hpp
 
 lib_LTLIBRARIES = libhttp-server.la
 libhttp_server_la_SOURCES = \
+	AnotherHttpClient.cpp \
+	AnotherHttpClient.hpp \
+	AnotherHttpServer.cpp \
+	AnotherHttpServer.hpp \
 	ChunkedReader.cpp \
 	ChunkedReader.hpp \
+	ChunkedTransfer.cpp \
+	ChunkedTransfer.hpp \
+	Communication.cpp \
+	Communication.hpp \
+	Connection.cpp \
+	Connection.hpp \
+	ConnectionManager.cpp \
+	ConnectionManager.hpp \
+	ConnectionThreadPool.cpp \
+	ConnectionThreadPool.hpp \
+	DataTransfer.cpp \
+	DataTransfer.hpp \
+	FileTransfer.cpp \
+	FileTransfer.hpp \
+	FixedTransfer.cpp \
+	FixedTransfer.hpp \
 	HttpClient.cpp \
 	HttpClient.hpp \
-	HttpClientThreadPool.cpp \
 	HttpClientThreadPool.hpp \
-	HttpConnection.cpp \
-	HttpConnection.hpp \
 	HttpHeader.cpp \
 	HttpHeader.hpp \
 	HttpHeaderParser.cpp \
@@ -37,24 +60,19 @@ libhttp_server_la_SOURCES = \
 	HttpHeaderReader.hpp \
 	HttpParameter.cpp \
 	HttpParameter.hpp \
-	HttpProtocol.cpp \
-	HttpProtocol.hpp \
 	HttpRequest.cpp \
 	HttpRequest.hpp \
 	HttpResponse.cpp \
 	HttpResponse.hpp \
-	HttpServer.cpp \
 	HttpServer.hpp \
 	HttpStatusCodes.cpp \
 	HttpStatusCodes.hpp \
 	InetAddress.hpp \
-	Logger.cpp \
-	Logger.hpp \
-	MultiConn.cpp \
-	MultiConn.hpp \
-	OnHttpRequestHandler.hpp \
+	Packet.cpp \
+	Packet.hpp \
 	Url.cpp \
 	Url.hpp
+
 
 libhttp_server_la_CXXFLAGS = $(PTHREAD_CXXFLAGS) $(LIBOSLAYER_CFLAGS)
 libhttp_server_la_LIBADD = $(LIBOSLAYER_LIBS)

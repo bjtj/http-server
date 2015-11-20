@@ -99,11 +99,11 @@ namespace HTTP {
 
 	void ConnectionManager::removeCompletedConnections() {
         connectionsLock.wait();
-        for (map<int, Connection*>::const_iterator iter = connectionTable.begin(); iter != connectionTable.end();) {
+        for (map<int, Connection*>::iterator iter = connectionTable.begin(); iter != connectionTable.end();) {
             Connection * connection = iter->second;
             if (connection->isCompleted()) {
                 removeConnection(connection);
-                iter = connectionTable.erase(iter);
+                connectionTable.erase(iter++);
             } else {
                 iter++;
             }
