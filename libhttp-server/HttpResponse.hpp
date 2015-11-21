@@ -37,6 +37,7 @@ namespace HTTP {
         bool completeContentTransfer();
 
 		HttpResponseHeader & getHeader();
+        void setHeader(HttpHeader & header);
 		void setTransfer(DataTransfer * transfer);
 		DataTransfer * getTransfer();
 		void clearTransfer();

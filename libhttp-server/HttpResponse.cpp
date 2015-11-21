@@ -49,6 +49,9 @@ namespace HTTP {
 	HttpResponseHeader & HttpResponse::getHeader() {
 		return header;
 	}
+    void HttpResponse::setHeader(HttpHeader & header) {
+        this->header.setHeader(header);
+    }
 	void HttpResponse::setTransfer(DataTransfer * transfer) {
         this->transfer = transfer;
     }

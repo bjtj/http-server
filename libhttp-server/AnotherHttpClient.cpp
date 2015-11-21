@@ -136,6 +136,13 @@ namespace HTTP {
 			headerReader.read(&buf, 1);
 
 			if (headerReader.complete()) {
+                
+                response.setHeader(headerReader.getHeader());
+                
+                if (responseListener) {
+                    responseListener->onResponseHeader(response);
+                }
+                
 				responseHeaderReceived = true;
 			}
 		}
@@ -156,5 +163,9 @@ namespace HTTP {
 			}
 		}
 	}
+    
+    void AnotherHttpClient::setOnResponseHeaderListener(OnResponseHeaderListener * responseListener) {
+        this->responseListener = responseListener;
+    }
 
 }

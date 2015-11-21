@@ -44,6 +44,8 @@ namespace HTTP {
 		bool complete;
 
 		HttpHeaderReader headerReader;
+        
+        OnResponseHeaderListener * responseListener;
 
 	public:
 
@@ -60,6 +62,8 @@ namespace HTTP {
 		void sendRequestContent();
 		void recvResponseHeader();
 		void recvResponseContent();
+        
+        void setOnResponseHeaderListener(OnResponseHeaderListener * responseListener);
 	};
 
 }
