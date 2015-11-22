@@ -12,6 +12,8 @@ namespace HTTP {
     public:
         DataTransfer();
         virtual ~DataTransfer();
+        
+        virtual void reset() = 0;
         virtual void recv(Packet & packet) = 0;
         virtual void send(Connection & connection) = 0;
 

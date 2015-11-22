@@ -112,7 +112,7 @@ namespace HTTP {
                 
             } else {
                 
-				DataTransfer * transfer = request.getTransfer();
+                AutoRef<DataTransfer> transfer = request.getTransfer();
 				transfer->recv(packet);
                 readRequestContent(request, response, packet);
                 if (transfer->isCompleted()) {
@@ -157,7 +157,8 @@ namespace HTTP {
 			handler->onHttpRequest(request, response);
 		}
 
-		if (!request.getTransfer()) {
+        AutoRef<DataTransfer> transfer = request.getTransfer();
+        if (transfer.empty()) {
             if (handler) {
                 handler->onHttpRequestContentCompleted(request, response);
             }
@@ -215,9 +216,9 @@ namespace HTTP {
 
 	void HttpCommunication::sendResponseContent(Connection & connection) {
 
-		DataTransfer * responseTransfer = response.getTransfer();
+        AutoRef<DataTransfer> responseTransfer = response.getTransfer();
 
-		if (responseTransfer) {
+		if (!responseTransfer.empty()) {
 			responseTransfer->send(connection);
 			if (responseTransfer->isCompleted()) {
 				responseContentTransferDone = true;

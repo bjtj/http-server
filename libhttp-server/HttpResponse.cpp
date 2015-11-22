@@ -15,14 +15,14 @@ namespace HTTP {
 	/**
 	 * @brief http response constructor
 	 */
-	HttpResponse::HttpResponse()
-    : headerSent(false), transfer(NULL) {
+	HttpResponse::HttpResponse() {
 	}
 	HttpResponse::~HttpResponse() {
-        if (transfer) {
-            delete transfer;
-        }
 	}
+    void HttpResponse::clear() {
+        header.clear();
+        clearTransfer();
+    }
 	void HttpResponse::setStatusCode(int code) {
 		header.setStatusCode(code);
 		header.setMessage(HttpStatusCodes::getMessage(code));
@@ -52,16 +52,13 @@ namespace HTTP {
     void HttpResponse::setHeader(HttpHeader & header) {
         this->header.setHeader(header);
     }
-	void HttpResponse::setTransfer(DataTransfer * transfer) {
+    void HttpResponse::setTransfer(AutoRef<DataTransfer> transfer) {
         this->transfer = transfer;
     }
-    DataTransfer * HttpResponse::getTransfer() {
+    AutoRef<DataTransfer> HttpResponse::getTransfer() {
         return transfer;
     }
 	void HttpResponse::clearTransfer() {
-		if (transfer) {
-			delete transfer;
-			transfer = NULL;
-		}
+        transfer = NULL;
 	}
 }

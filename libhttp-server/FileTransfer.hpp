@@ -25,10 +25,11 @@ namespace HTTP {
 
 	public:
 
-		FileTransfer(UTIL::FileReader * reader, unsigned long long  size);
+		FileTransfer(UTIL::FileReader * reader, unsigned long long size);
 		FileTransfer(UTIL::FileWriter * writer, unsigned long long size);
 		virtual ~FileTransfer();
 
+        virtual void reset();
 		virtual void recv(Packet & packet);
 		virtual void send(Connection & connection);
 

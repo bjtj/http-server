@@ -72,8 +72,9 @@ public:
     }
     
     virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
-        DataTransfer * transfer = request.getTransfer();
-        if (transfer) {
+        
+        AutoRef<DataTransfer> transfer = request.getTransfer();
+        if (!transfer.empty()) {
             logger.logv(transfer->getString());
         }
         
@@ -99,11 +100,6 @@ public:
         responseHeader.setConnection("close");
         
         logger.logv(request.getHeader().toString());
-        
-        /*File file("res/rfc3261.txt");
-        FileReader reader(file);
-        string content = reader.dumpAsString();
-        setFixedTransfer(response, content);*/
 
 		 setFileTransfer(response, "res/rfc3261.txt");
     }

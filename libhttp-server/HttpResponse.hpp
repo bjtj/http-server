@@ -6,6 +6,7 @@
 #include <map>
 
 #include <liboslayer/os.hpp>
+#include <liboslayer/AutoRef.hpp>
 #include "HttpHeader.hpp"
 #include "ChunkedReader.hpp"
 #include "DataTransfer.hpp"
@@ -18,13 +19,14 @@ namespace HTTP {
 	class HttpResponse {
 	private:
 		HttpResponseHeader header;
-		bool headerSent;
 		
-		DataTransfer * transfer;
+        UTIL::AutoRef<DataTransfer> transfer;
 		
 	public:
 		HttpResponse();
 		virtual ~HttpResponse();
+        
+        void clear();
 
 		void setStatusCode(int code);
 		void setStatusCode(int code, std::string message);
@@ -38,8 +40,8 @@ namespace HTTP {
 
 		HttpResponseHeader & getHeader();
         void setHeader(HttpHeader & header);
-		void setTransfer(DataTransfer * transfer);
-		DataTransfer * getTransfer();
+        void setTransfer(UTIL::AutoRef<DataTransfer> transfer);
+        UTIL::AutoRef<DataTransfer> getTransfer();
 		void clearTransfer();
 	};
 }

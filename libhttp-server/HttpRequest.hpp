@@ -6,10 +6,10 @@
 #include <map>
 
 #include <liboslayer/os.hpp>
+#include <liboslayer/AutoRef.hpp>
 #include "HttpHeader.hpp"
 #include "ChunkedReader.hpp"
 #include "Packet.hpp"
-//#include "MultiConn.hpp"
 
 #include "DataTransfer.hpp"
 
@@ -21,19 +21,15 @@ namespace HTTP {
 	class HttpRequest {
 	private:
         HttpRequestHeader header;
-		std::string content;
-        ChunkedBuffer chunkedBuffer;
-        std::string stringBuffer;
 
-		Packet * contentPacket;
-		ReadCounter contentReadCounter;
-
-		DataTransfer * transfer;
+        UTIL::AutoRef<DataTransfer> transfer;
 
 	public:
         HttpRequest();
 		HttpRequest(HttpHeader & header);
 		virtual ~HttpRequest();
+        
+        void clear();
 
         void setHeader(HttpHeader & header);
 		std::string getMethod() const;
@@ -50,18 +46,13 @@ namespace HTTP {
 
 		HttpRequestHeader & getHeader();
 		const HttpRequestHeader & getHeader() const;
-        ChunkedBuffer & getChunkedBuffer();
-        std::string & getStringBuffer();
-        
+       
 		int getContentLength();
 		std::string getContentType();
 
-		void setContentPacket(Packet * packet);
-		void readChunkedBuffer(ChunkedBuffer & buffer);
-		bool completeContentRead();
-
-		DataTransfer * getTransfer();
-		void setTransfer(DataTransfer * transfer);
+        UTIL::AutoRef<DataTransfer> getTransfer();
+        void setTransfer(UTIL::AutoRef<DataTransfer> transfer);
+        void clearTransfer();
 	};
 
 }

@@ -21,6 +21,11 @@ namespace HTTP {
     ChunkedTransfer::~ChunkedTransfer() {
     }
 
+    void ChunkedTransfer::reset() {
+        stringBuffer.clear();
+        readerBuffer.clear();
+        trailingCounter.resetPosition();
+    }
     void ChunkedTransfer::recv(Packet & packet) {
 
         char * p = packet.getData();

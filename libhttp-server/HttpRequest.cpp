@@ -10,16 +10,17 @@ namespace HTTP {
 	/**
 	 * @brief http request
 	 */
-    HttpRequest::HttpRequest() : contentPacket(NULL), transfer(NULL) {
+    HttpRequest::HttpRequest() {
     }
 	HttpRequest::HttpRequest(HttpHeader & header)
 		: header(header) {
 	}
 	HttpRequest::~HttpRequest() {
-		if (transfer) {
-			delete transfer;
-		}
 	}
+    void HttpRequest::clear() {
+        header.clear();
+        clearTransfer();
+    }
     void HttpRequest::setHeader(HttpHeader & header) {
         this->header.setHeader(header);
     }
@@ -62,50 +63,19 @@ namespace HTTP {
 	const HttpRequestHeader & HttpRequest::getHeader() const {
 		return header;
 	}
-    ChunkedBuffer & HttpRequest::getChunkedBuffer() {
-        return chunkedBuffer;
-    }
-    string & HttpRequest::getStringBuffer() {
-        return stringBuffer;
-    }
 	int HttpRequest::getContentLength() {
 		return header.getContentLength();
 	}
 	string HttpRequest::getContentType() {
 		return header.getContentType();
 	}
-	void HttpRequest::setContentPacket(Packet * packet) {
-		this->contentPacket = packet;
-	}
-	void HttpRequest::readChunkedBuffer(ChunkedBuffer & buffer) {
-
-		int len = getContentLength();
-
-		if (len > 0) {
-
-			if (len != contentReadCounter.getContentSize()) {
-				contentReadCounter.setContentSize(len);
-			}
-
-			if (len != buffer.getChunkSize()) {
-				buffer.setChunkSize(len);
-			}
-
-			if (contentPacket->getLength() > 0) {
-				buffer.write(contentPacket->getData(), contentPacket->getLength());
-				contentReadCounter.read(contentPacket->getLength());
-			}
-		}
-	}
-
-	bool HttpRequest::completeContentRead() {
-		return contentReadCounter.complete();
-	}
-
-	DataTransfer * HttpRequest::getTransfer() {
-		return transfer;
-	}
-	void HttpRequest::setTransfer(DataTransfer * transfer) {
-		this->transfer = transfer;
-	}
+    UTIL::AutoRef<DataTransfer> HttpRequest::getTransfer() {
+        return transfer;
+    }
+    void HttpRequest::setTransfer(UTIL::AutoRef<DataTransfer> transfer) {
+        this->transfer = transfer;
+    }
+    void HttpRequest::clearTransfer() {
+        transfer = NULL;
+    }
 }

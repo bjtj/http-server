@@ -161,6 +161,10 @@ namespace HTTP {
     void HttpHeader::setConnection(const std::string & connection) {
         setHeaderField("Connection", connection);
     }
+    
+    bool HttpHeader::keepConnection() {
+        return Text::equalsIgnoreCase(getHeaderFieldIgnoreCase("Connection"), "keep-alive");
+    }
 	
 	string HttpHeader::toString() const {
 		string ret = makeFirstLine() + "\r\n";
@@ -266,6 +270,9 @@ namespace HTTP {
 		params[name].appendValue(value);
 	}
 
+    void HttpRequestHeader::setHost(const std::string & host) {
+        setHeaderField("Host", host);
+    }
 
 
 
@@ -303,5 +310,10 @@ namespace HTTP {
 	void HttpResponseHeader::setMessage(const std::string & message)  {
 		setPart3(message);
 	}
-
+    bool HttpResponseHeader::isRedirection() {
+        return (getStatusCode() == 301 || getStatusCode() == 302);
+    }
+    string HttpResponseHeader::getRedirectionLocation() {
+        return getHeaderFieldIgnoreCase("Location");
+    }
 }

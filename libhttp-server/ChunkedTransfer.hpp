@@ -21,6 +21,7 @@ namespace HTTP {
 
 		ChunkedTransfer();
 		virtual ~ChunkedTransfer();
+        virtual void reset();
 		virtual void recv(Packet & packet);
 		virtual void send(Connection & connection);
 

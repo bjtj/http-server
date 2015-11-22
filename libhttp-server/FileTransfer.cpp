@@ -22,6 +22,10 @@ namespace HTTP {
 		}
 	}
 
+    void FileTransfer::reset() {
+        readCounter.resetPosition();
+        // TODO: file reader / writer reset position
+    }
 	void FileTransfer::recv(Packet & packet) {
 
 		readCounter.read(packet.getLength());

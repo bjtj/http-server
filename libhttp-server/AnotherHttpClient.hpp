@@ -15,12 +15,14 @@ namespace HTTP {
 	/**
 	 * @brief OnResponseHeaderListener
 	 */
-	class OnResponseHeaderListener {
+	class OnResponseListener {
 	private:
 	public:
-		OnResponseHeaderListener();
-		virtual ~OnResponseHeaderListener();
+		OnResponseListener();
+		virtual ~OnResponseListener();
 		virtual void onResponseHeader(HttpResponse & response) = 0;
+        virtual void onTransferDone(DataTransfer * transfer) = 0;
+        virtual void onError() = 0;
 	};
 
 	/**
@@ -43,27 +45,47 @@ namespace HTTP {
 		bool interrupted;
 		bool complete;
 
-		HttpHeaderReader headerReader;
+		HttpHeaderReader responseHeaderReader;
         
-        OnResponseHeaderListener * responseListener;
+        OnResponseListener * responseListener;
+        
+        bool followRedirect;
 
 	public:
 
-		AnotherHttpClient(Url & url);
+        AnotherHttpClient();
+		AnotherHttpClient(const Url & url);
 		virtual ~AnotherHttpClient();
 
-		void setDataTransfer(DataTransfer * transfer);
+        void reconnect();
 		void connect();
+        void closeConnection();
+        void setUrl(const Url & url);
+        void setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer);
+        void setDataTransfer(UTIL::AutoRef<DataTransfer> transfer);
 		void execute();
+        void communicate();
 		void interrupt();
-		void clean();
-
+		void clear();
+        void clearStates();
+        
 		void sendRequestHeader();
 		void sendRequestContent();
 		void recvResponseHeader();
 		void recvResponseContent();
         
-        void setOnResponseHeaderListener(OnResponseHeaderListener * responseListener);
+        void onResponseTransferDone();
+        void setComplete();
+        
+        bool needRedirect();
+        void handleRedirect();
+        void setFollowRedirect(bool followRedirect);
+                
+        void setOnResponseListener(OnResponseListener * responseListener);
+        
+        Url & getUrl();
+        HttpResponse & getResponse();
+        
 	};
 
 }

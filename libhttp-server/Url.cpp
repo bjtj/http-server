@@ -41,6 +41,22 @@ namespace HTTP {
 	string Url::getPath() const {
 		return path;
 	}
+    string Url::getPathAndQuery() const {
+        string query = getQueryString();
+        if (!query.empty()) {
+            query = "?" + query;
+        }
+        return path + query;
+    }
+    string Url::getPathWithoutPrefix(const string & prefix) {
+        if (Text::startsWith(this->path, prefix)) {
+            return this->path.substr(prefix.length());
+        }
+        return this->path;
+    }
+    string Url::getQueryString() const {
+        return Text::toString(parameters.toNameValueList(), "=", "&");
+    }
 	void Url::setScheme(const string & scheme) {
 		this->scheme = scheme;
 	}
@@ -75,12 +91,12 @@ namespace HTTP {
         }
     }
 
-	void Url::appendParam(string name, string value) {
-		params.push_back(make_pair(name, value));
+	void Url::setParameter(const string & name, const string & value) {
+        parameters.append(name, value);
 	}
 	
-	vector<pair<string, string> > & Url::getParams() {
-		return params;
+	StringListMap & Url::getParameters() {
+		return parameters;
 	}
     
     void Url::setUrl(const string & urlStr) {
@@ -93,7 +109,7 @@ namespace HTTP {
 		
 		size_t f = urlStr.find("://");
 		if (f == string::npos) {
-			throw -1;
+			throw UrlParseException("no protocol found", -1, 0);
 		}
 		scheme = urlStr.substr(0, f);
 		urlStr = urlStr.substr(f + 3);
@@ -102,6 +118,13 @@ namespace HTTP {
 			vector<string> addr = parseAddress(urlStr.substr(0, f));
 			setAddress(addr);
 			path = urlStr.substr(f);
+            
+            size_t q = path.find("?");
+            if (q != string::npos) {
+                string query = path.substr(q + 1);
+                path = path.substr(0, q);
+                parseQuery(query);
+            }
 		} else {
 			vector<string> addr = parseAddress(urlStr);
 			setAddress(addr);
@@ -109,7 +132,7 @@ namespace HTTP {
 		}
 	}
 
-	vector<string> Url::parseAddress(string address) {
+	vector<string> Url::parseAddress(const string & address) {
 		vector<string> ret;
 		size_t f = address.find(":");
 		if (f != string::npos) {
@@ -129,26 +152,44 @@ namespace HTTP {
 			port = "80";
 		}
 	}
+    
+    void Url::parseQuery(const string & query) {
+        parameters.clear();
+        if (query.empty()) {
+            return;
+        }
+        
+        vector<string> queries = Text::split(query, "&");
+        for (size_t i = 0; i < queries.size(); i++) {
+            string & q = queries[i];
+            size_t f = q.find("=");
+            
+            if (f == string::npos) {
+                string name = q;
+                string value;
+                
+                setParameter(name, value);
+            } else {
+                string name = q.substr(0, f);
+                string value = q.substr(f+1);
+                
+                setParameter(name, value);
+            }
+        }
+    }
 
 	string Url::getAddress() const {
 		return host + (port.empty() ? "" : ":" + port);
 	}
     
-    string Url::enoughPath(const string & path) {
-        if (Text::startsWith(this->path, path)) {
-            return this->path.substr(path.length());
-        }
-        return this->path;
-    }
-
 	string Url::toString() {
-		string p;
-		p = UTIL::Text::toMapString(params, "=", "&");
-		if (!p.empty()) {
-			p = "?" + p;
-		}
+        
+        string p = getPathAndQuery();
+        if (Text::startsWith(p, "/")) {
+            p = p.substr(1);
+        }
 
-		return scheme + "://" + host + ":" + port + "/" + enoughPath("/") + p;
+		return scheme + "://" + host + ":" + port + "/" + p;
 	}
 
 	Url& Url::operator=(const char * urlStr) {
@@ -166,7 +207,7 @@ namespace HTTP {
 		host.clear();
 		port.clear();
 		path.clear();
-		params.clear();
+		parameters.clear();
 	}
 
 }

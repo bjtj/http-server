@@ -19,6 +19,8 @@ namespace HTTP {
         FixedTransfer(size_t size);
         virtual ~FixedTransfer();
         ChunkedBuffer & getChunkedBuffer();
+        
+        virtual void reset();
         virtual void recv(Packet & packet);
         virtual void send(Connection & connection);
         

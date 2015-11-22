@@ -1,18 +1,27 @@
 #ifndef __URL_HPP__
 #define __URL_HPP__
 
+#include <liboslayer/os.hpp>
+#include <liboslayer/StringElement.hpp>
 #include <vector>
 #include <string>
 
 namespace HTTP {
-
+    
+    DECL_NAMED_ONLY_EXCEPTION(UrlParseException);
+    
+    /**
+     * @brief Url
+     */
 	class Url {
 	private:
 		std::string scheme;
 		std::string host;
 		std::string port;
 		std::string path;
-		std::vector<std::pair<std::string, std::string> > params;
+//		std::vector<std::pair<std::string, std::string> > params;
+//        UTIL::LinkedStringProperties parameters;
+        UTIL::StringListMap parameters;
 
 	public:
         Url();
@@ -26,6 +35,9 @@ namespace HTTP {
 		std::string getPort() const;
 		int getIntegerPort() const;
 		std::string getPath() const;
+        std::string getPathAndQuery() const;
+        std::string getPathWithoutPrefix(const std::string & prefix);
+        std::string getQueryString() const;
 		void setScheme(const std::string & scheme);
 		void setProtocol(const std::string & scheme);
 		void setHost(const std::string & host);
@@ -33,17 +45,18 @@ namespace HTTP {
 		void setPath(const std::string & path);
         void setRelativePath(const std::string & relativePath);
 
-		void appendParam(std::string name, std::string value);
-		std::vector<std::pair<std::string, std::string> > & getParams();
+		void setParameter(const std::string & name, const std::string & value);
+        UTIL::StringListMap & getParameters();
 
         void setUrl(const std::string & urlStr);
 		void parseUrlString(std::string urlStr);
-		std::vector<std::string> parseAddress(std::string address);
+		std::vector<std::string> parseAddress(const std::string & address);
 		void setAddress(std::vector<std::string> & addr);
+        void parseQuery(const std::string & query);
 
 		std::string getAddress() const;
 
-        std::string enoughPath(const std::string & path);
+        
 		virtual std::string toString();
 
 		Url& operator=(const std::string & urlStr);

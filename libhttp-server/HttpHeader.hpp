@@ -69,6 +69,7 @@ namespace HTTP {
 		bool isChunkedTransfer() const;
 		void setChunkedTransfer(bool chunked);
         void setConnection(const std::string & connection);
+        bool keepConnection();
 
 		virtual std::string toString() const;
 
@@ -106,6 +107,8 @@ namespace HTTP {
 		std::string getParameter(std::string name);
 		std::vector<std::string> getParameters(std::string name);
 		void setParameter(std::string name, std::string value);
+        
+        void setHost(const std::string & host);
 	};
 
 	/**
@@ -121,9 +124,12 @@ namespace HTTP {
 		std::string getProtocol() const;
 		void setProtocol(const std::string & protocol);
 		int getStatusCode() const;
-		void setStatusCode(int statusCode) ;
+		void setStatusCode(int statusCode);
 		std::string getMessage() const;
-		void setMessage(const std::string & message) ;
+		void setMessage(const std::string & message);
+        
+        bool isRedirection();
+        std::string getRedirectionLocation();
 	};
 }
 

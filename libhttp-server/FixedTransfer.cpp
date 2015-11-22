@@ -21,6 +21,9 @@ namespace HTTP {
     ChunkedBuffer & FixedTransfer::getChunkedBuffer() {
         return chunkedBuffer;
     }
+    void FixedTransfer::reset() {
+        chunkedBuffer.clear();
+    }
     void FixedTransfer::recv(Packet & packet) {
         chunkedBuffer.write(packet.getData(), packet.getLength());
         
