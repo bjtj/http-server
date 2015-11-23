@@ -23,7 +23,7 @@ namespace HTTP {
 		virtual ~OnResponseListener();
 		virtual void onResponseHeader(HttpResponse & response) = 0;
         virtual void onTransferDone(DataTransfer * transfer) = 0;
-        virtual void onError() = 0;
+        virtual void onError(OS::Exception & e) = 0;
 	};
 
 	/**

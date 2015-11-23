@@ -62,9 +62,9 @@ namespace HTTP {
             listener->onRequestComplete(httpClient.getUrl(), httpClient.getResponse(), content, &userData);
         }
     }
-    void AnotherHttpClientThread::onError() {
+    void AnotherHttpClientThread::onError(Exception & e) {
         if (listener) {
-            listener->onRequestError(httpClient.getUrl(), &userData);
+            listener->onRequestError(e, httpClient.getUrl(), &userData);
         }
     }
     

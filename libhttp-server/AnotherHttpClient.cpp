@@ -113,7 +113,7 @@ namespace HTTP {
 
 	void AnotherHttpClient::setChunkedTransfer(ChunkedTransfer * transfer) {
         HttpRequestHeader & header = request.getHeader();
-		request.getHeader().setChunkedTransfer(true);
+		header.setChunkedTransfer(true);
 		request.setTransfer(transfer);
         
     }
@@ -147,7 +147,7 @@ namespace HTTP {
 
 		} catch (IOException e) {
             if (responseListener) {
-                responseListener->onError();
+                responseListener->onError(e);
             }
 		}
 

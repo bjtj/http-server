@@ -5,6 +5,7 @@
 
 using namespace std;
 using namespace HTTP;
+using namespace OS;
 using namespace UTIL;
 
 class ResponseHandler : public OnResponseListener {
@@ -34,8 +35,8 @@ public:
             cout << content << endl;
         }
     }
-    virtual void onError() {
-        cout << "Error" << endl;
+    virtual void onError(Exception & e) {
+        cout << "Error/e: " << e.getMessage() << endl;
     }
 };
 
@@ -49,7 +50,8 @@ void s_test() {
     
     client.setFollowRedirect(true);
     
-    client.setUrl("http://www.google.com");
+//    client.setUrl("http://www.google.com");
+    client.setUrl("http://192.168.0.22:32469/DeviceDescription.xml");
     client.setRequest("GET", LinkedStringMap(), NULL);
     client.execute();
 }
@@ -95,10 +97,9 @@ void s_post() {
 }
 
 int main(int argc, char * args[]) {
-    //s_test();
+    s_test();
     //s_test_reuse();
-
-	s_post();
+//	s_post();
 
 	getchar();
     

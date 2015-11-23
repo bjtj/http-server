@@ -28,7 +28,7 @@ namespace HTTP {
         virtual ~OnRequestCompleteListener() {}
         
         virtual void onRequestComplete(Url & url, HttpResponse & response, const std::string & content, UserData * userData) = 0;
-        virtual void onRequestError(Url & url, UserData * userData) = 0;
+        virtual void onRequestError(OS::Exception & e, Url & url, UserData * userData) = 0;
     };
     
     
@@ -50,7 +50,7 @@ namespace HTTP {
         
         virtual void onResponseHeader(HttpResponse & response);
         virtual void onTransferDone(DataTransfer * transfer);
-        virtual void onError();
+        virtual void onError(OS::Exception & e);
         
         void setOnRequestCompleteListener(OnRequestCompleteListener * listener);
         

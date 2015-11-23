@@ -5,6 +5,7 @@
 #include <libhttp-server/FixedTransfer.hpp>
 
 using namespace std;
+using namespace OS;
 using namespace HTTP;
 using namespace UTIL;
 
@@ -24,8 +25,8 @@ public:
             cout << content << endl;
         }
     }
-    virtual void onRequestError(Url & url, UserData * userData) {
-        cout << "Error/url: " << url.toString() << endl;
+    virtual void onRequestError(Exception & e, Url & url, UserData * userData) {
+        cout << "Error/url: " << url.toString() << "/e: " << e.getMessage() << endl;
     }
 };
 
