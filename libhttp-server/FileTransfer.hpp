@@ -32,6 +32,7 @@ namespace HTTP {
         virtual void reset();
 		virtual void recv(Packet & packet);
 		virtual void send(Connection & connection);
+		virtual unsigned long long getSize();
 
 		virtual std::string getString();
 	};

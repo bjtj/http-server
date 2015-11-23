@@ -79,9 +79,28 @@ void s_test_reuse() {
     client.execute();
 }
 
+void s_post() {
+
+	AnotherHttpClient client;
+    
+    ResponseHandler handler;
+    client.setOnResponseListener(&handler);
+    
+    client.setFollowRedirect(true);
+    
+    client.setUrl("http://httpbin.org/post");
+    client.setRequest("POST", LinkedStringMap(), new FixedTransfer("hello", 5));
+    client.execute();
+
+}
+
 int main(int argc, char * args[]) {
-//    s_test();
-//    s_test_reuse();
+    //s_test();
+    //s_test_reuse();
+
+	s_post();
+
+	getchar();
     
     return 0;
 }

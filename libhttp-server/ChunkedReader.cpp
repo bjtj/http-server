@@ -41,11 +41,6 @@ namespace HTTP {
         chunkSize = 0;
         pos = 0;
     }
-
-	void ChunkedBuffer::reset() {
-		memset(chunkDataBuffer, 0, chunkSize);
-		pos = 0;
-	}
     
     size_t ChunkedBuffer::read(char * data, size_t len) {
         size_t remain = remainingDataBuffer();
@@ -89,7 +84,8 @@ namespace HTTP {
         clear();
         this->chunkSize = chunkSize;
         chunkDataBuffer = new char[chunkSize];
-		reset();
+		memset(chunkDataBuffer, 0, chunkSize);
+		resetPosition();
     }
     
     size_t ChunkedBuffer::getChunkSize() const {
@@ -194,7 +190,7 @@ namespace HTTP {
 		pos = 0;
 	}
 	void LargeReadCounter::read(unsigned long long len) {
-		size_t writeSize = len < remaining() ? len : remaining();
+		unsigned long long writeSize = len < remaining() ? len : remaining();
 		pos += writeSize;
 	}
 	unsigned long long LargeReadCounter::remaining() const {
@@ -211,7 +207,7 @@ namespace HTTP {
 		return contentSize;
 	}
     unsigned long long LargeReadCounter::getReadSize(unsigned long long bufferSize) const {
-		size_t remain = remaining();
+		unsigned long long remain = remaining();
         return bufferSize > remain ? remain : bufferSize;
 	}
 

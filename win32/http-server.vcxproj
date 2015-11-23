@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\libhttp-server\AnotherHttpClient.hpp" />
+    <ClInclude Include="..\libhttp-server\AnotherHttpClientThreadPool.hpp" />
     <ClInclude Include="..\libhttp-server\AnotherHttpServer.hpp" />
     <ClInclude Include="..\libhttp-server\ChunkedReader.hpp" />
     <ClInclude Include="..\libhttp-server\ChunkedTransfer.hpp" />
@@ -37,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\libhttp-server\AnotherHttpClient.cpp" />
+    <ClCompile Include="..\libhttp-server\AnotherHttpClientThreadPool.cpp" />
     <ClCompile Include="..\libhttp-server\AnotherHttpServer.cpp" />
     <ClCompile Include="..\libhttp-server\ChunkedReader.cpp" />
     <ClCompile Include="..\libhttp-server\ChunkedTransfer.cpp" />

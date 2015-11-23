@@ -16,13 +16,18 @@ namespace HTTP {
     FixedTransfer::FixedTransfer(size_t size) {
         chunkedBuffer.setChunkSize(size);
     }
+	FixedTransfer::FixedTransfer(const char * content, size_t size) {
+		chunkedBuffer.setChunkSize(size);
+		chunkedBuffer.write(content, size);
+		chunkedBuffer.resetPosition();
+	}
     FixedTransfer::~FixedTransfer() {
     }
     ChunkedBuffer & FixedTransfer::getChunkedBuffer() {
         return chunkedBuffer;
     }
     void FixedTransfer::reset() {
-        chunkedBuffer.clear();
+        chunkedBuffer.resetPosition();
     }
     void FixedTransfer::recv(Packet & packet) {
         chunkedBuffer.write(packet.getData(), packet.getLength());
@@ -41,6 +46,10 @@ namespace HTTP {
             setCompleted();
         }
     }
+
+	unsigned long long FixedTransfer::getSize() {
+		return chunkedBuffer.getChunkSize();
+	}
     
     string FixedTransfer::getString() {
         return string(chunkedBuffer.getChunkData(), chunkedBuffer.getChunkSize());

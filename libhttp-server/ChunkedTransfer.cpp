@@ -69,6 +69,10 @@ namespace HTTP {
 		// TODO: need chunk generator
 	}
 
+	unsigned long long ChunkedTransfer::getSize() {
+		throw Exception("unpredictable", -1, 0);
+	}
+
 	string ChunkedTransfer::getString() {
 		return stringBuffer;
 	}

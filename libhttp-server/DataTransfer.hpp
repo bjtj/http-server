@@ -16,6 +16,7 @@ namespace HTTP {
         virtual void reset() = 0;
         virtual void recv(Packet & packet) = 0;
         virtual void send(Connection & connection) = 0;
+		virtual unsigned long long getSize();
 
         void setCompleted();
         virtual bool isCompleted();

@@ -7,6 +7,7 @@
 #include "HttpResponse.hpp"
 #include "HttpHeaderReader.hpp"
 #include "DataTransfer.hpp"
+#include "ChunkedTransfer.hpp"
 #include "Packet.hpp"
 #include "Url.hpp"
 
@@ -62,7 +63,9 @@ namespace HTTP {
         void closeConnection();
         void setUrl(const Url & url);
         void setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer);
+		void setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, ChunkedTransfer * transfer);
         void setDataTransfer(UTIL::AutoRef<DataTransfer> transfer);
+		void setChunkedTransfer(ChunkedTransfer * chunkedTransfer);
 		void execute();
         void communicate();
 		void interrupt();

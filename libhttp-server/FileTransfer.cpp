@@ -56,6 +56,10 @@ namespace HTTP {
         }
 	}
 
+	unsigned long long FileTransfer::getSize() {
+		return readCounter.getContentSize();
+	}
+
 	string FileTransfer::getString() {
 		return "";
 	}

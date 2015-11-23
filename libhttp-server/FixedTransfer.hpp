@@ -17,12 +17,14 @@ namespace HTTP {
     public:
         
         FixedTransfer(size_t size);
+		FixedTransfer(const char * content, size_t size);
         virtual ~FixedTransfer();
         ChunkedBuffer & getChunkedBuffer();
         
         virtual void reset();
         virtual void recv(Packet & packet);
         virtual void send(Connection & connection);
+		virtual unsigned long long getSize();
         
         virtual std::string getString();
     };

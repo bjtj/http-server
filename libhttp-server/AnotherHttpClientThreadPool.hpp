@@ -68,6 +68,7 @@ namespace HTTP {
         virtual ~AnotherHttpClientThreadPool();
         
         void setRequest(const Url & url, const std::string & method, UTIL::AutoRef<DataTransfer> transfer, UTIL::AutoRef<UserData> userData);
+		void setRequest(const Url & url, const std::string & method, const std::map<std::string, std::string> & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, UTIL::AutoRef<UserData> userData);
         void setRequest(const Url & url, const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, UTIL::AutoRef<UserData> userData);
         
         void setOnRequestCompleteListener(OnRequestCompleteListener * listener);

@@ -21,7 +21,6 @@ namespace HTTP {
         virtual ~ChunkedBuffer();
         
         void clear();
-		void reset();
         size_t read(char * data, size_t len);
         void write(const char * data, size_t len);
         void resetPosition();

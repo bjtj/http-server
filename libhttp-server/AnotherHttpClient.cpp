@@ -1,6 +1,5 @@
 #include "AnotherHttpClient.hpp"
 
-#include <liboslayer/Logger.hpp>
 #include <liboslayer/Text.hpp>
 #include <string>
 
@@ -9,8 +8,6 @@ namespace HTTP {
 	using namespace std;
 	using namespace OS;
 	using namespace UTIL;
-
-	static const Logger & logger = LoggerFactory::getDefaultLogger();
 
 	/**
 	 * @brief OnResponseHeaderListener
@@ -87,14 +84,38 @@ namespace HTTP {
         
         setDataTransfer(transfer);
     }
+
+	void AnotherHttpClient::setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, ChunkedTransfer * transfer) {
+		HttpRequestHeader & header = request.getHeader();
+        header.setMethod(method);
+        header.setPath(url.getPath());
+        header.setProtocol("HTTP/1.1");
+        
+        for (size_t i = 0; i < additionalHeaderFields.size(); i++) {
+            const NameValue & nv = additionalHeaderFields.const_getByIndex(i);
+            header[nv.getName()] = nv.getValue();
+        }
+        
+        header.setHost(url.getAddress());
+        
+        setChunkedTransfer(transfer);
+	}
     
     void AnotherHttpClient::setDataTransfer(AutoRef<DataTransfer> transfer) {
         HttpRequestHeader & header = request.getHeader();
         if (transfer.empty()) {
             header.setContentLength(0);
         } else {
+			request.getHeader().setContentLength(transfer->getSize());
             request.setTransfer(transfer);
         }
+    }
+
+	void AnotherHttpClient::setChunkedTransfer(ChunkedTransfer * transfer) {
+        HttpRequestHeader & header = request.getHeader();
+		request.getHeader().setChunkedTransfer(true);
+		request.setTransfer(transfer);
+        
     }
     
 	void AnotherHttpClient::execute() {
@@ -189,7 +210,7 @@ namespace HTTP {
 	}
 	void AnotherHttpClient::sendRequestContent() {
 
-		if (!requestHeaderSent) {
+		if (!requestHeaderSent || readable) {
 			return;
 		}
 

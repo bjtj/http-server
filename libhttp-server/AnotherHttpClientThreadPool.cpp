@@ -8,7 +8,7 @@ namespace HTTP {
     using namespace std;
     using namespace OS;
     using namespace UTIL;
-    
+   
     /**
      * @brief
      */
@@ -24,7 +24,7 @@ namespace HTTP {
     void AnotherHttpClientThread::setRequest(const Url & url, const string & method, const LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer) {
         httpClient.setUrl(url);
         httpClient.setRequest(method, additionalHeaderFields, transfer);
-        httpClient.setFollowRedirect(true);\
+        httpClient.setFollowRedirect(true);
         setFlag(true);
     }
     void AnotherHttpClientThread::run() {
@@ -37,6 +37,7 @@ namespace HTTP {
             }
             
             httpClient.execute();
+			userData = NULL;
             
             setFlag(false);
         }
@@ -104,6 +105,16 @@ namespace HTTP {
         
         setRequest(url, method, LinkedStringMap(), transfer, userData);
     }
+
+	void AnotherHttpClientThreadPool::setRequest(const Url & url, const string & method, const map<string, string> & additionalHeaderFields, AutoRef<DataTransfer> transfer, AutoRef<UserData> userData) {
+
+		LinkedStringMap lst;
+		for (map<string, string>::const_iterator iter = additionalHeaderFields.begin(); iter != additionalHeaderFields.end(); iter++) {
+			lst[iter->first] = iter->second;
+		}
+
+		setRequest(url, method, lst, transfer, userData);
+	}
     
     void AnotherHttpClientThreadPool::setRequest(const Url & url, const string & method, const UTIL::LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer, AutoRef<UserData> userData) {
         AnotherHttpClientThread * thread = (AnotherHttpClientThread *)acquire();

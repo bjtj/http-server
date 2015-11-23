@@ -84,6 +84,9 @@
     <ClInclude Include="..\libhttp-server\AnotherHttpClient.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\libhttp-server\AnotherHttpClientThreadPool.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\libhttp-server\HttpClient.cpp">
@@ -147,6 +150,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\libhttp-server\AnotherHttpClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\AnotherHttpClientThreadPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
