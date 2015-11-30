@@ -21,6 +21,13 @@ namespace HTTP {
 		chunkedBuffer.write(content, size);
 		chunkedBuffer.resetPosition();
 	}
+	FixedTransfer::FixedTransfer(const string & content) {
+		size_t size = content.length();
+		chunkedBuffer.setChunkSize(size);
+		chunkedBuffer.write(content.c_str(), size);
+		chunkedBuffer.resetPosition();
+
+	}
     FixedTransfer::~FixedTransfer() {
     }
     ChunkedBuffer & FixedTransfer::getChunkedBuffer() {

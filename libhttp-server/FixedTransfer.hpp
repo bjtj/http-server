@@ -18,6 +18,7 @@ namespace HTTP {
         
         FixedTransfer(size_t size);
 		FixedTransfer(const char * content, size_t size);
+		FixedTransfer(const std::string & content);
         virtual ~FixedTransfer();
         ChunkedBuffer & getChunkedBuffer();
         

@@ -22,27 +22,6 @@ using namespace HTTP;
 
 static const Logger & logger = LoggerFactory::getDefaultLogger();
 
-// 1. connection manager
-//  - add connection
-//  - remove connection
-
-// 2. thread way
-//  - make thread
-//  - make connection session
-//  - let it go
-
-// 3. multiplex way
-//  - register client fd
-//  - bypass read/write states
-
-
-// Connection
-//  - handle recv
-//  - handle write
-//  - flag Connection closed
-
-
-
 class SampleHttpRequestHandler : public HttpRequestHandler {
 private:
 	string prefix;
@@ -51,7 +30,7 @@ public:
 	SampleHttpRequestHandler(string prefix) : prefix(prefix) {}
 	virtual ~SampleHttpRequestHandler() {}
     
-    virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) {
+    virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
         
         HttpResponseHeader & responseHeader = response.getHeader();
         
@@ -77,9 +56,6 @@ public:
         if (!transfer.empty()) {
             logger.logv(transfer->getString());
         }
-        
-        response.setStatusCode(404, "ERROR~~");
-        setFixedTransfer(response, "404 Error~");
     }
 };
 
@@ -90,7 +66,7 @@ public:
     RfcHttpRequestHandler() {}
     virtual ~RfcHttpRequestHandler() {}
     
-    virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) {
+    virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
         
         HttpResponseHeader & responseHeader = response.getHeader();
         

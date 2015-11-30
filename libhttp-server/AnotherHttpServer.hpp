@@ -28,7 +28,7 @@ namespace HTTP {
 		HttpRequestHandler();
 		virtual ~HttpRequestHandler();
     
-		virtual void onHttpRequest(HttpRequest & request, HttpResponse & response) = 0;
+		virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) = 0;
 		virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) = 0;
         virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) = 0;
 
@@ -126,12 +126,14 @@ namespace HTTP {
 		void readRequestHeaderIfNeed(Connection & connection, Packet & packet);
 		void readRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet);
 		void onRequestHeader(HttpRequest & request, HttpResponse & response);
+		void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response);
 		void prepareRequestContentTransfer(HttpRequest & request);
 		virtual void onWriteable(Connection & connection);
 		void sendResponseHeader(Connection & connection);
 		void sendResponseContent(Connection & connection);
 		virtual void onDisconnected(Connection & connection);
 		virtual bool isCommunicationCompleted();
+		void handleError(HttpRequest & request, HttpResponse & response, int errorCode);
 	};
 
 	/**

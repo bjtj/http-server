@@ -116,10 +116,7 @@ namespace HTTP {
 				transfer->recv(packet);
                 readRequestContent(request, response, packet);
                 if (transfer->isCompleted()) {
-                    HttpRequestHandler * handler = dispatcher->getRequestHandler(request.getPath());
-                    if (handler) {
-                        handler->onHttpRequestContentCompleted(request, response);
-                    }
+                    onHttpRequestContentCompleted(request, response);
                     writeable = true;
                 }
             }
@@ -154,18 +151,26 @@ namespace HTTP {
         
 		HttpRequestHandler * handler = dispatcher->getRequestHandler(request.getPath());
 		if (handler) {
-			handler->onHttpRequest(request, response);
+			handler->onHttpRequestHeaderCompleted(request, response);
 		}
 
         AutoRef<DataTransfer> transfer = request.getTransfer();
         if (transfer.empty()) {
-            if (handler) {
-                handler->onHttpRequestContentCompleted(request, response);
-            }
+            onHttpRequestContentCompleted(request, response);
 			writeable = true;
 		}
         
         requestHeaderHandled = true;
+	}
+
+	void HttpCommunication::onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+
+		HttpRequestHandler * handler = dispatcher->getRequestHandler(request.getPath());
+        if (handler) {
+            handler->onHttpRequestContentCompleted(request, response);
+        } else {
+			handleError(request, response, 404);
+		}
 	}
 
 	void HttpCommunication::prepareRequestContentTransfer(HttpRequest & request) {
@@ -205,13 +210,14 @@ namespace HTTP {
 		HttpResponseHeader & header = response.getHeader();
             
         string headerString = header.toString();
-        connection.send(headerString.c_str(), (int)headerString.length());
+        int writeLen = connection.send(headerString.c_str(), (int)headerString.length());
+
+		// TODO: check write length and compare the header string length
+		responseHeaderTransferDone = true;
             
         if (!header.isChunkedTransfer() && header.getContentLength() == 0) {
             responseContentTransferDone = true;
         }
-            
-        responseHeaderTransferDone = true;
 	}
 
 	void HttpCommunication::sendResponseContent(Connection & connection) {
@@ -233,6 +239,21 @@ namespace HTTP {
 
 	bool HttpCommunication::isCommunicationCompleted() {
 		return communicationCompleted;
+	}
+
+	void HttpCommunication::handleError(HttpRequest & request, HttpResponse & response, int errorCode) {
+
+		response.setStatusCode(errorCode);
+		response.getHeader().setConnection("close");
+
+		switch (errorCode) {
+		case 404:
+			response.setContentType("text/html");
+			string content = "<html><head><title>404 not found</title></head><body><h1>404 not found</h1><p>Sorry, page not found.</p></body></html>";
+			response.setContentLength(content.length());
+			response.setTransfer(new FixedTransfer(content));
+			break;
+		}
 	}
 	
 	/**
