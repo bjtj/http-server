@@ -1,6 +1,8 @@
 #include <liboslayer/os.hpp>
 #include <liboslayer/Utils.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
+#include <libhttp-server/FileTransfer.hpp>
+#include <libhttp-server/HttpEncoderDecoder.hpp>
 
 using namespace std;
 using namespace OS;
@@ -27,6 +29,8 @@ public:
 			path = ".";
 		}
 
+		path = HttpDecoder::decode(path);
+
 		string content;
 
 		try {
@@ -37,15 +41,20 @@ public:
 			content.append("<head>");
 			content.append("</head>");
 			content.append("<body>");
+			content.append("<form>Path: <input type=\"text\" name=\"path\"/></form>");
 			content.append("<ul>");
 			for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
 				content.append("<li>");
 				if (iter->isDirectory()) {
+					content.append("<span style=\"display:inline-block;width:15px;\">D</span>");
 					content.append("<a href=\"browse?path=" + File::mergePaths(path, iter->getName()) + "\">");
-					content.append(iter->getName());
+					content.append(iter->getName());					
 					content.append("</a>");
 				} else {
+					content.append("<span style=\"display:inline-block;width:15px;\">&nbsp;</span>");
+					content.append("<a href=\"file?path=" + File::mergePaths(path, iter->getName()) + "\">");
 					content.append(iter->getName());
+					content.append("</a>");
 				}
 				content.append("</li>");
 			}
@@ -67,6 +76,75 @@ public:
     }
 };
 
+class FileDownloadHttpRequestHandler : public HttpRequestHandler {
+private:
+public:
+	FileDownloadHttpRequestHandler() {}
+	virtual ~FileDownloadHttpRequestHandler() {}
+
+	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+        
+        HttpResponseHeader & responseHeader = response.getHeader();
+        
+        response.setStatusCode(200, "OK");
+        response.setContentType("text/plain");
+		responseHeader.setConnection("close");
+
+		string path = request.getParameter("path");
+		if (path.empty()) {
+			response.setStatusCode(404);
+			setFixedTransfer(response, "File not found / path: " + path);
+			return;
+		}
+
+		File file(path);
+		if (!file.isFile()) {
+			response.setStatusCode(400);
+			setFixedTransfer(response, "Not a file / path: " + path);
+			return;
+		}
+
+		string type = guessContentType(path);
+		if (!type.empty()) {
+			response.setContentType(type);
+		} else {
+			response.setContentType("Application/octet-stream");
+			response.getHeader().setHeaderField("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+		}
+
+		setFileTransfer(response, file);
+    }
+
+	string guessContentType(const string & path) {
+		string ext = File::getExtension(path);
+		if (ext.empty()) {
+			return "";
+		}
+
+		map<string, string> types;
+		types["txt"] = "text/plain";
+		types["htm"] = "text/html";
+		types["html"] = "text/html";
+		types["css"] = "text/css";
+		types["js"] = "text/javascript";
+		types["xml"] = "text/xml";
+
+		for (map<string, string>::iterator iter = types.begin(); iter != types.end(); iter++) {
+			if (Text::equalsIgnoreCase(ext, iter->first)) {
+				return iter->second;
+			}
+		}
+
+		return "";
+	}
+    
+    virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
+    }
+    
+    virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+    }
+};
+
 size_t readline(char * buffer, size_t max) {
 	fgets(buffer, (int)max - 1, stdin);
 	buffer[strlen(buffer) - 1] = 0;
@@ -79,6 +157,8 @@ int main(int argc, char * args[]) {
 
 	FileBrowseHttpRequestHandler browse;
 	server.registerRequestHandler("/browse", &browse);
+	FileDownloadHttpRequestHandler file;
+	server.registerRequestHandler("/file", &file);
 
 	server.startAsync();
 

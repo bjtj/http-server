@@ -48,5 +48,8 @@
     <ClCompile Include="..\..\examples\AnotherHttpServerFileBrowseTest.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\examples\HttpEncoderDecoderTest.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
