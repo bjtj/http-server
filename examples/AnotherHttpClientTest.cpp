@@ -15,7 +15,7 @@ public:
     }
     virtual ~ResponseHandler() {
     }
-    virtual void onResponseHeader(HttpResponse & response) {
+    virtual void onResponseHeader(HttpResponse & response, AutoRef<UserData> userData) {
         
         cout << response.getHeader().toString() << endl;
         
@@ -29,13 +29,13 @@ public:
             // do nothing
         }
     }
-    virtual void onTransferDone(DataTransfer * transfer) {
+    virtual void onTransferDone(HttpResponse & response, DataTransfer * transfer, AutoRef<UserData> userData) {
         if (transfer) {
             string content = transfer->getString();
             cout << content << endl;
         }
     }
-    virtual void onError(Exception & e) {
+    virtual void onError(Exception & e, AutoRef<UserData> userData) {
         cout << "Error/e: " << e.getMessage() << endl;
     }
 };

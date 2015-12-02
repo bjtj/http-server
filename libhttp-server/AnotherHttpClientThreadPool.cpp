@@ -42,7 +42,7 @@ namespace HTTP {
             setFlag(false);
         }
     }
-    void AnotherHttpClientThread::onResponseHeader(HttpResponse & response) {
+    void AnotherHttpClientThread::onResponseHeader(HttpResponse & response, AutoRef<UserData> userData) {
        
         if (response.getHeader().isChunkedTransfer()) {
             response.setTransfer(AutoRef<DataTransfer>(new ChunkedTransfer));
@@ -52,7 +52,7 @@ namespace HTTP {
             // do nothing
         }
     }
-    void AnotherHttpClientThread::onTransferDone(DataTransfer * transfer) {
+    void AnotherHttpClientThread::onTransferDone(HttpResponse & response, DataTransfer * transfer, AutoRef<UserData> userData) {
         string content;
         if (transfer) {
             content = transfer->getString();
@@ -62,7 +62,7 @@ namespace HTTP {
             listener->onRequestComplete(httpClient.getUrl(), httpClient.getResponse(), content, &userData);
         }
     }
-    void AnotherHttpClientThread::onError(Exception & e) {
+    void AnotherHttpClientThread::onError(Exception & e, AutoRef<UserData> userData) {
         if (listener) {
             listener->onRequestError(e, httpClient.getUrl(), &userData);
         }

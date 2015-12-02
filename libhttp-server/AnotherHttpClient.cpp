@@ -85,7 +85,7 @@ namespace HTTP {
         setDataTransfer(transfer);
     }
 
-	void AnotherHttpClient::setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, ChunkedTransfer * transfer) {
+	void AnotherHttpClient::setChunkedRequest(const string & method, const LinkedStringMap & additionalHeaderFields, ChunkedTransfer * transfer) {
 		HttpRequestHeader & header = request.getHeader();
         header.setMethod(method);
         header.setPath(url.getPath());
@@ -147,7 +147,7 @@ namespace HTTP {
 
 		} catch (IOException e) {
             if (responseListener) {
-                responseListener->onError(e);
+                responseListener->onError(e, userData);
             }
 		}
 
@@ -240,7 +240,7 @@ namespace HTTP {
                 response.setHeader(responseHeaderReader.getHeader());
                 
                 if (responseListener) {
-                    responseListener->onResponseHeader(response);
+                    responseListener->onResponseHeader(response, userData);
                 }
                 
 				responseHeaderReceived = true;
@@ -272,7 +272,7 @@ namespace HTTP {
     void AnotherHttpClient::setComplete() {
         if (responseListener) {
             AutoRef<DataTransfer> transfer = response.getTransfer();
-            responseListener->onTransferDone(&transfer);
+            responseListener->onTransferDone(response, &transfer, userData);
         }
         complete = true;
     }
@@ -304,4 +304,8 @@ namespace HTTP {
     HttpResponse & AnotherHttpClient::getResponse() {
         return response;
     }
+
+	void AnotherHttpClient::setUserData(AutoRef<UserData> userData) {
+		this->userData = userData;
+	}
 }

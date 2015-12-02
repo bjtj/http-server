@@ -2,6 +2,7 @@
 #define __ANOTHER_HPP_CLIENT_HPP__
 
 #include <liboslayer/os.hpp>
+#include <liboslayer/AutoRef.hpp>
 #include "Connection.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
@@ -14,6 +15,16 @@
 namespace HTTP {
 
 	/**
+	 * @brief UserData
+	 */
+	class UserData {
+    private:
+    public:
+        UserData() {}
+        virtual ~UserData() {}
+    };
+
+	/**
 	 * @brief OnResponseHeaderListener
 	 */
 	class OnResponseListener {
@@ -21,9 +32,9 @@ namespace HTTP {
 	public:
 		OnResponseListener();
 		virtual ~OnResponseListener();
-		virtual void onResponseHeader(HttpResponse & response) = 0;
-        virtual void onTransferDone(DataTransfer * transfer) = 0;
-        virtual void onError(OS::Exception & e) = 0;
+		virtual void onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData) = 0;
+        virtual void onTransferDone(HttpResponse & response, DataTransfer * transfer, UTIL::AutoRef<UserData> userData) = 0;
+        virtual void onError(OS::Exception & e, UTIL::AutoRef<UserData> userData) = 0;
 	};
 
 	/**
@@ -52,6 +63,8 @@ namespace HTTP {
         
         bool followRedirect;
 
+		UTIL::AutoRef<UserData> userData;
+
 	public:
 
         AnotherHttpClient();
@@ -63,7 +76,7 @@ namespace HTTP {
         void closeConnection();
         void setUrl(const Url & url);
         void setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer);
-		void setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, ChunkedTransfer * transfer);
+		void setChunkedRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, ChunkedTransfer * transfer);
         void setDataTransfer(UTIL::AutoRef<DataTransfer> transfer);
 		void setChunkedTransfer(ChunkedTransfer * chunkedTransfer);
 		void execute();
@@ -85,6 +98,8 @@ namespace HTTP {
         void setFollowRedirect(bool followRedirect);
                 
         void setOnResponseListener(OnResponseListener * responseListener);
+
+		void setUserData(UTIL::AutoRef<UserData> userData);
         
         Url & getUrl();
         HttpResponse & getResponse();

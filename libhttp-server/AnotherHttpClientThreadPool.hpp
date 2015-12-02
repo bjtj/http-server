@@ -10,14 +10,6 @@
 
 namespace HTTP {
     
-    
-    class UserData {
-    private:
-    public:
-        UserData() {}
-        virtual ~UserData() {}
-    };
-    
     /**
      * @brief
      */
@@ -48,9 +40,9 @@ namespace HTTP {
         void setRequest(const Url & url, const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer);
         virtual void run();
         
-        virtual void onResponseHeader(HttpResponse & response);
-        virtual void onTransferDone(DataTransfer * transfer);
-        virtual void onError(OS::Exception & e);
+        virtual void onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData);
+        virtual void onTransferDone(HttpResponse & response, DataTransfer * transfer, UTIL::AutoRef<UserData> userData);
+        virtual void onError(OS::Exception & e, UTIL::AutoRef<UserData> userData);
         
         void setOnRequestCompleteListener(OnRequestCompleteListener * listener);
         
