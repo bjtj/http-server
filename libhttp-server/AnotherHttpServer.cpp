@@ -210,7 +210,8 @@ namespace HTTP {
 		HttpResponseHeader & header = response.getHeader();
             
         string headerString = header.toString();
-        int writeLen = connection.send(headerString.c_str(), (int)headerString.length());
+//        int writeLen =
+        connection.send(headerString.c_str(), (int)headerString.length());
 
 		// TODO: check write length and compare the header string length
 		responseHeaderTransferDone = true;
