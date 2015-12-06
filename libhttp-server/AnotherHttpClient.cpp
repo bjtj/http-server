@@ -7,6 +7,7 @@ namespace HTTP {
 
 	using namespace std;
 	using namespace OS;
+	using namespace XOS;
 	using namespace UTIL;
 
 	/**
@@ -41,12 +42,12 @@ namespace HTTP {
 		if (!connection) {
 			string remoteHost = url.getHost();
 			int remotePort = url.getIntegerPort();
-			socket = new Socket(remoteHost.c_str(), remotePort);
-            
+
+			socket = new Socket;
+            socket->connect(OS::InetAddress(remoteHost, remotePort));
+
 			connection = new Connection(*socket);
             connection->registerSelector(selector);
-            
-            socket->connect();
 		}
 	}
     

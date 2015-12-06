@@ -2,6 +2,7 @@
 #define __HTTP_CLIENT_HPP__
 
 #include <liboslayer/os.hpp>
+#include <liboslayer/Socket.hpp>
 #include <liboslayer/Text.hpp>
 #include <liboslayer/StringElement.hpp>
 #include <map>
@@ -24,7 +25,7 @@ namespace HTTP {
     public:
         HttpResponseDump();
         virtual ~HttpResponseDump();
-        static std::string dump(const HttpHeader & responseHeader, OS::Socket & socket);
+        static std::string dump(const HttpHeader & responseHeader, XOS::Socket & socket);
     };
     
     /**
@@ -125,14 +126,11 @@ namespace HTTP {
     template <typename T>
 	class HttpClient {
         
-        
-        
 	private:
-        
         
         OS::Semaphore sem;
 		std::string httpProtocol;
-		OS::Socket * socket;
+		XOS::Socket * socket;
 		std::map<std::string, std::string> defaultHeaderFields;
 		bool followRedirect;
         OS::Selector selector;
@@ -159,7 +157,7 @@ namespace HTTP {
 		HttpClient();
 		virtual ~HttpClient();
 
-		OS::Socket *  connect(Url & url);
+		XOS::Socket * connect(Url & url);
 		void disconnect();
         bool isFollowRedirect() const;
 		void setFollowRedirect(bool followRedirect);
@@ -195,14 +193,14 @@ namespace HTTP {
 	private:
         
         
-		void disconnect(OS::Socket * socket);
+		void disconnect(XOS::Socket * socket);
 		HttpHeader makeRequestHeader(const std::string & method,
 									 const std::string & path,
 									 const std::string & protocol,
 									 const std::string & targetHost);
-		void sendRequestPacket(OS::Socket & socket, HttpHeader & header, const char * buffer, size_t len);
-        void sendRequestHeaderWithContentLength(OS::Socket & socket, HttpHeader & header, size_t contentLength);
-        void sendRequestContent(OS::Socket & socket, const char * content, size_t contentLength);
+		void sendRequestPacket(XOS::Socket & socket, HttpHeader & header, const char * buffer, size_t len);
+        void sendRequestHeaderWithContentLength(XOS::Socket & socket, HttpHeader & header, size_t contentLength);
+        void sendRequestContent(XOS::Socket & socket, const char * content, size_t contentLength);
 		bool checkIfRedirect(HttpHeader & responseHeader);
         void processRedirect();
         
@@ -225,9 +223,9 @@ namespace HTTP {
     }
 
 	template<typename T>
-    OS::Socket * HttpClient<T>::connect(Url & url) {
+    XOS::Socket * HttpClient<T>::connect(Url & url) {
 		
-		OS::Socket * socket = new OS::Socket(url.getHost().c_str(), url.getIntegerPort());
+		XOS::Socket * socket = new XOS::Socket(url.getHost().c_str(), url.getIntegerPort());
 
 		try {
 			socket->connect();
@@ -247,7 +245,7 @@ namespace HTTP {
     }
     
     template<typename T>
-    void HttpClient<T>::disconnect(OS::Socket * socket) {
+    void HttpClient<T>::disconnect(XOS::Socket * socket) {
 		if (socket) {
 			socket->close();
 			delete socket;
@@ -596,7 +594,7 @@ namespace HTTP {
     }
     
     template<typename T>
-    void HttpClient<T>::sendRequestPacket(OS::Socket & socket, HttpHeader & header, const char * buffer, size_t len) {
+    void HttpClient<T>::sendRequestPacket(XOS::Socket & socket, HttpHeader & header, const char * buffer, size_t len) {
         header.setContentLength((int)len);
         std::string headerStr = header.toString();
         socket.send(headerStr.c_str(), headerStr.length());
@@ -605,14 +603,14 @@ namespace HTTP {
         }
     }
     template<typename T>
-    void HttpClient<T>::sendRequestHeaderWithContentLength(OS::Socket & socket, HttpHeader & header, size_t contentLength) {
+    void HttpClient<T>::sendRequestHeaderWithContentLength(XOS::Socket & socket, HttpHeader & header, size_t contentLength) {
         header.setContentLength((int)contentLength);
         std::string headerStr = header.toString();
         socket.send(headerStr.c_str(), headerStr.length());
     }
     
     template<typename T>
-    void HttpClient<T>::sendRequestContent(OS::Socket & socket, const char * content, size_t contentLength) {
+    void HttpClient<T>::sendRequestContent(XOS::Socket & socket, const char * content, size_t contentLength) {
         if (content && contentLength > 0) {
             int len = socket.send(content, contentLength);
 			if (len != contentLength) {

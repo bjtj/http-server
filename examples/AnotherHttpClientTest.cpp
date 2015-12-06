@@ -50,8 +50,7 @@ void s_test() {
     
     client.setFollowRedirect(true);
     
-//    client.setUrl("http://www.google.com");
-    client.setUrl("http://192.168.0.22:32469/DeviceDescription.xml");
+	client.setUrl("http://www.google.com");
     client.setRequest("GET", LinkedStringMap(), NULL);
     client.execute();
 }

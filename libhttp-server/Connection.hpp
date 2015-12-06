@@ -3,17 +3,18 @@
 
 #include "Packet.hpp"
 #include <liboslayer/os.hpp>
+#include <liboslayer/Socket.hpp>
 
 namespace HTTP {
     class Connection {
     private:
-        OS::Socket & socket;
+        XOS::Socket & socket;
         bool terminateSignal;
         bool completed;
         Packet packet;
         
     public:
-        Connection(OS::Socket & socket);
+        Connection(XOS::Socket & socket);
         virtual ~Connection();
         int getId();
         void registerSelector(OS::Selector & selector);

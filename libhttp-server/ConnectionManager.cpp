@@ -6,6 +6,7 @@ namespace HTTP {
     
     using namespace std;
     using namespace OS;
+	using namespace XOS;
     using namespace UTIL;
     
     static const Logger & logger = LoggerFactory::getDefaultLogger();
@@ -74,7 +75,7 @@ namespace HTTP {
         }
         
         serverSocket = new ServerSocket(port);
-        serverSocket->setReuseAddr();
+        serverSocket->setReuseAddr(true);
         serverSocket->bind();
         serverSocket->listen(5);
         

@@ -4,6 +4,7 @@ namespace HTTP {
     
     using namespace std;
     using namespace OS;
+	using namespace XOS;
 
     Connection::Connection(Socket & socket) : socket(socket), terminateSignal(false), completed(false), packet(4096) {
     }
