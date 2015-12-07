@@ -11,9 +11,9 @@ using namespace HTTP;
 
 class FileBrowseHttpRequestHandler : public HttpRequestHandler {
 private:
-
+	string defaultPath;
 public:
-	FileBrowseHttpRequestHandler() {}
+	FileBrowseHttpRequestHandler(const string & defaultPath) : defaultPath(defaultPath) {}
 	virtual ~FileBrowseHttpRequestHandler() {}
     
     virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
@@ -26,7 +26,7 @@ public:
 
 		string path = request.getParameter("path");
 		if (path.empty()) {
-			path = ".";
+			path = defaultPath;
 		}
 
 		path = HttpDecoder::decode(path);
@@ -41,9 +41,14 @@ public:
 			content.append("<head>");
 			content.append("</head>");
 			content.append("<body>");
-			content.append("<form>Path: <input type=\"text\" name=\"path\"/></form>");
+			// content.append("<form>Path: <input type=\"text\" name=\"path\"/></form>");
 			content.append("<ul>");
 			for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
+
+				if (iter->isDirectory() && (iter->getName().compare("..") || iter->getName().compare("."))) {
+					continue;
+				}
+				
 				content.append("<li>");
 				if (iter->isDirectory()) {
 					content.append("<span style=\"display:inline-block;width:15px;\">D</span>");
@@ -146,16 +151,23 @@ public:
 };
 
 size_t readline(char * buffer, size_t max) {
-	fgets(buffer, (int)max - 1, stdin);
-	buffer[strlen(buffer) - 1] = 0;
-	return strlen(buffer);
+	if (fgets(buffer, (int)max - 1, stdin)) {
+		buffer[strlen(buffer) - 1] = 0;
+		return strlen(buffer);
+	}
+	return 0;
 }
 
 int main(int argc, char * args[]) {
 
+	string path = ".";
+	if (argc > 1) {
+		path = args[1];
+	}
+
 	AnotherHttpServer server(8083);
 
-	FileBrowseHttpRequestHandler browse;
+	FileBrowseHttpRequestHandler browse(path);
 	server.registerRequestHandler("/browse", &browse);
 	FileDownloadHttpRequestHandler file;
 	server.registerRequestHandler("/file", &file);
