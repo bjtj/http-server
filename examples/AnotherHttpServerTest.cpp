@@ -1,4 +1,5 @@
 #include <liboslayer/os.hpp>
+#include <liboslayer/Socket.hpp>
 #include <liboslayer/FileReaderWriter.hpp>
 #include <liboslayer/Text.hpp>
 #include <liboslayer/Logger.hpp>
@@ -17,6 +18,7 @@
 
 using namespace std;
 using namespace OS;
+using namespace XOS;
 using namespace UTIL;
 using namespace HTTP;
 
@@ -134,8 +136,9 @@ class SampleChunkedHttpClient {
 private:
 	Socket socket;
 	string path;
+	InetAddress remoteAddr;
 public:
-	SampleChunkedHttpClient(const char * remoteAddr, int port, const string & path) : socket(remoteAddr, port), path(path) {
+	SampleChunkedHttpClient(const char * remoteAddr, int port, const string & path) : remoteAddr(remoteAddr, port), path(path) {
 	}
 	virtual ~SampleChunkedHttpClient() {
 	}
@@ -144,7 +147,7 @@ public:
 
 		try {
 
-			socket.connect();
+			socket.connect(remoteAddr);
 			string header = "POST " + path + " HTTP/1.1\r\nTransfer-Encoding: chunked\r\n\r\n";
 			socket.send(header.c_str(), (int)header.length());
 
@@ -188,8 +191,9 @@ class SampleFixedHttpClient {
 private:
 	Socket socket;
 	string path;
+	InetAddress remoteAddr;
 public:
-	SampleFixedHttpClient(const char * remoteAddr, int port, const string & path) : socket(remoteAddr, port), path(path) {
+	SampleFixedHttpClient(const char * remoteAddr, int port, const string & path) : remoteAddr(remoteAddr, port), path(path) {
 	}
 	virtual ~SampleFixedHttpClient() {
 	}
@@ -202,7 +206,7 @@ public:
 			FileReader reader(file);
 			string content = reader.dumpAsString();
 
-			socket.connect();
+			socket.connect(remoteAddr);
 			string header = "POST " + path + " HTTP/1.1\r\nContent-Length: " + Text::toString(content.length()) + "\r\n\r\n";
 			socket.send(header.c_str(), (int)header.length());
 			int sentLen = socket.send(content.c_str(), content.length());
@@ -230,8 +234,9 @@ class SampleGetHttpClient {
 private:
     Socket socket;
 	string path;
+	InetAddress remoteAddr;
 public:
-    SampleGetHttpClient(const char * remoteAddr, int port, const string & path) : socket(remoteAddr, port), path(path) {
+    SampleGetHttpClient(const char * remoteAddr, int port, const string & path) : remoteAddr(remoteAddr, port), path(path) {
     }
     virtual ~SampleGetHttpClient() {
     }
@@ -240,7 +245,7 @@ public:
         
         try {
             
-            socket.connect();
+            socket.connect(remoteAddr);
             string header = "GET " + path + " HTTP/1.1\r\nContent-Length: 0\r\n\r\n";
             socket.send(header.c_str(), (int)header.length());
             
@@ -260,9 +265,11 @@ public:
 
 
 size_t readline(char * buffer, size_t max) {
-	fgets(buffer, (int)max - 1, stdin);
-	buffer[strlen(buffer) - 1] = 0;
-	return strlen(buffer);
+	if (fgets(buffer, (int)max - 1, stdin)) {
+		buffer[strlen(buffer) - 1] = 0;
+		return strlen(buffer);
+	}
+	return 0;
 }
 
 void recent() {
