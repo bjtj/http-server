@@ -48,7 +48,7 @@ namespace HTTP {
 		HttpResponse response;
 
 		Connection * connection;
-		XOS::Socket * socket;
+		OS::Socket * socket;
 		OS::Selector selector;
 
 		bool requestHeaderSent;

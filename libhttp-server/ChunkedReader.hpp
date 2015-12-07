@@ -106,11 +106,11 @@ namespace HTTP {
 	 */
 	class ChunkedReader {
 	private:
-		XOS::Socket & socket;
+		OS::Socket & socket;
 		ChunkedReaderBuffer chunkedBuffer;
 		
 	public:
-		ChunkedReader(XOS::Socket & socket);
+		ChunkedReader(OS::Socket & socket);
 		virtual ~ChunkedReader();
 
 		size_t minSize(size_t a, size_t b);

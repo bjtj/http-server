@@ -45,7 +45,7 @@ namespace HTTP {
 
     class ConnectionManager {
     private:
-        XOS::ServerSocket * serverSocket;
+        OS::ServerSocket * serverSocket;
         OS::Selector selector;
         std::map<int, Connection*> connectionTable;
         OS::Semaphore connectionsLock;
@@ -56,9 +56,9 @@ namespace HTTP {
     public:
         ConnectionManager(CommunicationMaker & communicationMaker);
         virtual ~ConnectionManager();
-        virtual Connection * makeConnection(XOS::Socket & client);
+        virtual Connection * makeConnection(OS::Socket & client);
         virtual void removeConnection(Connection * connection);
-        void onConnect(XOS::Socket & client);
+        void onConnect(OS::Socket & client);
         void onDisconnect(Connection * connection);
         void clearConnections();
         void start(int port);

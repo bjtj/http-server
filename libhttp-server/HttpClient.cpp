@@ -5,7 +5,6 @@
 
 using namespace std;;
 using namespace OS;
-using namespace XOS;
 using namespace UTIL;
 
 namespace HTTP {

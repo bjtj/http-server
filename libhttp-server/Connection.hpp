@@ -8,13 +8,13 @@
 namespace HTTP {
     class Connection {
     private:
-        XOS::Socket & socket;
+        OS::Socket & socket;
         bool terminateSignal;
         bool completed;
         Packet packet;
         
     public:
-        Connection(XOS::Socket & socket);
+        Connection(OS::Socket & socket);
         virtual ~Connection();
         int getId();
         void registerSelector(OS::Selector & selector);

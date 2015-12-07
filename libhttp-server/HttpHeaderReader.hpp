@@ -26,8 +26,8 @@ namespace HTTP {
 		void clear();
 		bool complete();
 		int cutEndPos();
-		void append(char * data, int size);
-		int read(char * data, int size);
+		void append(const char * data, int size);
+		int read(const char * data, int size);
 		bool parse();
 		HttpHeader & getHeader();
 	};
