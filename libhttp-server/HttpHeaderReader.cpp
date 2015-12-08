@@ -26,11 +26,11 @@ namespace HTTP {
 		buffer = buffer.substr(0, f + 4);
 		return (int)diff;
 	}
-	void HttpHeaderReader::append(const char * data, int size) {
+	void HttpHeaderReader::append(const char * data, size_t size) {
 		string x = string(data, size);
 		buffer += x;
 	}
-	int HttpHeaderReader::read(const char * data, int size) {
+	size_t HttpHeaderReader::read(const char * data, size_t size) {
 		if (complete()) {
 			return 0;
 		}
