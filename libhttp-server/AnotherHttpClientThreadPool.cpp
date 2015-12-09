@@ -25,6 +25,8 @@ namespace HTTP {
         httpClient.setUrl(url);
         httpClient.setRequest(method, additionalHeaderFields, transfer);
         httpClient.setFollowRedirect(true);
+        httpClient.setUserData(userData);
+        userData = NULL;
         setFlag(true);
     }
     void AnotherHttpClientThread::run() {
@@ -37,7 +39,6 @@ namespace HTTP {
             }
             
             httpClient.execute();
-			userData = NULL;
             
             setFlag(false);
         }

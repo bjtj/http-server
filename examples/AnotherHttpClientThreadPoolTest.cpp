@@ -9,6 +9,19 @@ using namespace OS;
 using namespace HTTP;
 using namespace UTIL;
 
+class MyUserData : public UserData {
+private:
+    string msg;
+public:
+    MyUserData(const string & msg) : msg(msg) {
+    }
+    virtual ~MyUserData() {
+    }
+    string toString() {
+        return msg;
+    }
+};
+
 class SampleOnRequestCompleteListener : public OnRequestCompleteListener {
 private:
 public:
@@ -23,6 +36,8 @@ public:
             
             cout << "url : " << url.toString() << endl;
             cout << content << endl;
+            
+            cout << "User Data: " << (userData == NULL ? "(null)" : ((MyUserData*)userData)->toString()) << endl;
         }
     }
     virtual void onRequestError(Exception & e, Url & url, UserData * userData) {
@@ -58,7 +73,7 @@ int main(int argc, char * args[]) {
             }
 
 			if (!strcmp(buffer, "e")) {
-				pool.setRequest(Url("http://example.com"), "GET", NULL, NULL);
+				pool.setRequest(Url("http://example.com"), "GET", NULL, AutoRef<UserData>(new MyUserData("Hello~")));
 			}
 
 			if (Text::startsWith(buffer, "get ")) {
