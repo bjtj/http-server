@@ -45,7 +45,7 @@ public:
 			content.append("<ul>");
 			for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
 
-				if (iter->isDirectory() && (iter->getName().compare("..") || iter->getName().compare("."))) {
+				if (!filter(*iter)) {
 					continue;
 				}
 				
@@ -73,6 +73,13 @@ public:
 
         setFixedTransfer(response, content);
     }
+
+	bool filter(File & file) {
+		if (file.isDirectory() && (file.getName().compare("..") || file.getName().compare("."))) {
+			return false;
+		}
+		return true;
+	}
     
     virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
     }
@@ -165,7 +172,9 @@ int main(int argc, char * args[]) {
 		path = args[1];
 	}
 
-	AnotherHttpServer server(8083);
+	int port = 8083;
+
+	AnotherHttpServer server(port);
 
 	FileBrowseHttpRequestHandler browse(path);
 	server.registerRequestHandler("/browse", &browse);
@@ -179,6 +188,8 @@ int main(int argc, char * args[]) {
 		if (readline(buffer, sizeof(buffer)) > 0) {
 			if (!strcmp(buffer, "q")) {
 				break;
+			} else if (!strcmp(buffer, "s")) {
+				printf("Listen port: %d\n", port);
 			}
 		}
 	}

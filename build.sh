@@ -18,6 +18,12 @@ reconf() {
 	autoreconf -i
 }
 
+reconf_if_need() {
+	if [ ! -f configure ]; then
+		reconf
+	fi
+}
+
 build() {
 	mkdir -p $DIR_BUILD
 	mkdir -p $DIR_WORLD
@@ -37,6 +43,7 @@ case $OPT in
 		reconf
 		;;
 	build)
+		reconf_if_need
 		build
 		;;
 	all)
@@ -47,6 +54,7 @@ case $OPT in
 		cd $DIR_BUILD && make && make install
 		;;
 	install)
+		reconf_if_need
 		install
 		;;
 	dist)
