@@ -1,5 +1,5 @@
 #include "AnotherHttpClient.hpp"
-
+#include "FixedTransfer.hpp"
 #include <liboslayer/Text.hpp>
 #include <string>
 
@@ -16,6 +16,17 @@ namespace HTTP {
 	}
 
 	OnResponseListener::~OnResponseListener() {
+	}
+
+	DataTransfer * OnResponseListener::createDataTransfer(HttpHeader & header) {
+		if (header.isChunkedTransfer()) {
+			return new ChunkedTransfer;
+		}
+		else if (header.getContentLength() > 0) {
+			FixedTransfer * transfer = new FixedTransfer(header.getContentLength());
+			return transfer;
+		}
+		return NULL;
 	}
 
 	/**

@@ -32,6 +32,7 @@ namespace HTTP {
 	public:
 		OnResponseListener();
 		virtual ~OnResponseListener();
+		virtual DataTransfer * createDataTransfer(HttpHeader & header);
 		virtual void onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData) = 0;
         virtual void onTransferDone(HttpResponse & response, DataTransfer * transfer, UTIL::AutoRef<UserData> userData) = 0;
         virtual void onError(OS::Exception & e, UTIL::AutoRef<UserData> userData) = 0;
