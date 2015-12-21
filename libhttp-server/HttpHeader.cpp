@@ -177,33 +177,26 @@ namespace HTTP {
 	string & HttpHeader::operator[] (const string & headerFieldName) {
 		return getHeaderFieldIgnoreCase(headerFieldName);
 	}
-	
 
 	/**
 	 * @brief HttpRequestHeader
 	 */
 
-
 	HttpRequestHeader::HttpRequestHeader() {
 	}
-
 	HttpRequestHeader::HttpRequestHeader(const HttpHeader & other) {
 		setHeader(other);
 	}
-
 	HttpRequestHeader::~HttpRequestHeader() {
 	}
-
 	void HttpRequestHeader::clear() {
 		HttpHeader::clear();
 		params.clear();
 	}
-    
     void HttpRequestHeader::setHeader(const HttpHeader & other) {
         HttpHeader::setHeader(other);
-        parsePath(getPath());
+        parsePath(getPart2());
     }
-
 	string HttpRequestHeader::getMethod() const {
 		return getPart1();
 	}
@@ -211,9 +204,10 @@ namespace HTTP {
 		setPart1(method);
 	}
 	string HttpRequestHeader::getPath() const {
-		return getPart2();
+		return resourcePath;
 	}
 	void HttpRequestHeader::setPath(const string & path) {
+		setPart2(path);
 		parsePath(path);
 	}
 	string HttpRequestHeader::getProtocol() const {
@@ -226,10 +220,10 @@ namespace HTTP {
 
 		size_t sep = path.find("?");
 		if (sep != string::npos) {
-			setPart2(path.substr(0, sep));
+			resourcePath = path.substr(0, sep);
 			parseQuery(path.substr(sep + 1));
 		} else {
-			setPart2(path);
+			resourcePath = path;
 		}
 	}
 	void HttpRequestHeader::parseQuery(const string & query) {
@@ -274,13 +268,10 @@ namespace HTTP {
         setHeaderField("Host", host);
     }
 
-
-
 	/**
 	 * @brief HttpResponseHeader
 	 */
-
-
+	
 	HttpResponseHeader::HttpResponseHeader() {
 		setProtocol("HTTP/1.1");
 		setStatusCode(200);

@@ -33,7 +33,7 @@ namespace HTTP {
 		OnResponseListener();
 		virtual ~OnResponseListener();
 		virtual DataTransfer * createDataTransfer(HttpHeader & header);
-		virtual void onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData) = 0;
+		virtual void onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData);
         virtual void onTransferDone(HttpResponse & response, DataTransfer * transfer, UTIL::AutoRef<UserData> userData) = 0;
         virtual void onError(OS::Exception & e, UTIL::AutoRef<UserData> userData) = 0;
 	};
@@ -44,6 +44,7 @@ namespace HTTP {
 	class AnotherHttpClient {
 	private:
 
+		bool debug;
 		Url url;
 		HttpRequest request;
 		HttpResponse response;
@@ -72,6 +73,7 @@ namespace HTTP {
 		AnotherHttpClient(const Url & url);
 		virtual ~AnotherHttpClient();
 
+		void setDebug(bool debug);
         void reconnect();
 		void connect();
         void closeConnection();

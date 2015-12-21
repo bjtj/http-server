@@ -8,6 +8,27 @@ using namespace HTTP;
 using namespace OS;
 using namespace UTIL;
 
+class DumpResponseHandler : public OnResponseListener {
+private:
+	string dump;
+public:
+    DumpResponseHandler() {
+    }
+    virtual ~DumpResponseHandler() {
+    }
+    virtual void onTransferDone(HttpResponse & response, DataTransfer * transfer, AutoRef<UserData> userData) {
+        if (transfer) {
+            dump = transfer->getString();
+        }
+    }
+    virtual void onError(Exception & e, AutoRef<UserData> userData) {
+        cout << "Error/e: " << e.getMessage() << endl;
+    }
+	string & getDump() {
+		return dump;
+	}
+};
+
 class ResponseHandler : public OnResponseListener {
 private:
 public:
@@ -95,10 +116,45 @@ void s_post() {
 
 }
 
+void s_dump() {
+
+	AnotherHttpClient client;
+    
+    DumpResponseHandler handler;
+    client.setOnResponseListener(&handler);
+    
+    client.setFollowRedirect(true);
+    client.setUrl("http://httpbin.org/post");
+    client.setRequest("POST", LinkedStringMap(), new FixedTransfer("hello", 5));
+    client.execute();
+
+	string dump = handler.getDump();
+	cout << "Dump: " << dump << endl;
+}
+
+void s_query() {
+
+	AnotherHttpClient client;
+	client.setDebug(true);
+    
+    DumpResponseHandler handler;
+    client.setOnResponseListener(&handler);
+    
+    client.setFollowRedirect(true);
+    client.setUrl("http://10.0.12.96:2869/upnphost/udhisapi.dll?content=uuid:27151292-513d-4dcd-912a-a2b8cdc0a128");
+    client.setRequest("GET", LinkedStringMap(), NULL);
+    client.execute();
+
+	string dump = handler.getDump();
+	cout << "Dump: " << dump << endl;
+}
+
 int main(int argc, char * args[]) {
-    s_test();
-    //s_test_reuse();
-//	s_post();
+    // s_test();
+    // s_test_reuse();
+	// s_post();
+	// s_dump();
+	s_query();
 
 	getchar();
     

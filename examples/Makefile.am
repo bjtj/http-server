@@ -1,4 +1,11 @@
-noinst_PROGRAMS=AnotherHttpServerTest HttpClientTest FileBrowseHttpServerTest
+noinst_PROGRAMS=AnotherHttpClientTest AnotherHttpServerTest HttpClientTest FileBrowseHttpServerTest urlTest
+
+AnotherHttpClientTest_SOURCES = AnotherHttpClientTest.cpp
+AnotherHttpClientTest_CPPFLAGS = -I$(top_srcdir)
+AnotherHttpClientTest_CXXFLAGS=$(PTHREAD_CXXFLAGS)
+AnotherHttpClientTest_LDFLAGS=$(PTHREAD_CFLAGS)
+AnotherHttpClientTest_LDADD = ../libhttp-server/libhttp-server.la
+
 
 AnotherHttpServerTest_SOURCES = AnotherHttpServerTest.cpp
 AnotherHttpServerTest_CPPFLAGS = -I$(top_srcdir)
@@ -17,4 +24,10 @@ FileBrowseHttpServerTest_CPPFLAGS = -I$(top_srcdir)
 FileBrowseHttpServerTest_CXXFLAGS=$(PTHREAD_CXXFLAGS)
 FileBrowseHttpServerTest_LDFLAGS=$(PTHREAD_CFLAGS)
 FileBrowseHttpServerTest_LDADD = ../libhttp-server/libhttp-server.la
+
+urlTest_SOURCES = urlTest.cpp
+urlTest_CPPFLAGS = -I$(top_srcdir)
+urlTest_CXXFLAGS=$(PTHREAD_CXXFLAGS)
+urlTest_LDFLAGS=$(PTHREAD_CFLAGS)
+urlTest_LDADD = ../libhttp-server/libhttp-server.la
 

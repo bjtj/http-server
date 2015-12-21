@@ -19,8 +19,6 @@ namespace HTTP {
 		std::string host;
 		std::string port;
 		std::string path;
-//		std::vector<std::pair<std::string, std::string> > params;
-//        UTIL::LinkedStringProperties parameters;
         UTIL::StringListMap parameters;
 
 	public:

@@ -82,6 +82,7 @@ namespace HTTP {
 	 */
 	class HttpRequestHeader : public HttpHeader {
 	private:
+		std::string resourcePath;
 		std::map<std::string, HttpParameter> params;
 
 	public:

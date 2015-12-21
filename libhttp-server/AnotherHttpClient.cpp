@@ -1,6 +1,7 @@
 #include "AnotherHttpClient.hpp"
 #include "FixedTransfer.hpp"
 #include <liboslayer/Text.hpp>
+#include <liboslayer/Logger.hpp>
 #include <string>
 
 namespace HTTP {
@@ -28,19 +29,26 @@ namespace HTTP {
 		}
 		return NULL;
 	}
+	void OnResponseListener::onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData) {
+		response.setTransfer(createDataTransfer(response.getHeader()));
+	}
 
 	/**
 	 * @brief AnotherHttpClient
 	 */
     
-    AnotherHttpClient::AnotherHttpClient() : connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), followRedirect(false) {
+    AnotherHttpClient::AnotherHttpClient() : debug(false), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), followRedirect(false) {
         
     }
     
-	AnotherHttpClient::AnotherHttpClient(const Url & url) : url(url), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), followRedirect(false) {
+	AnotherHttpClient::AnotherHttpClient(const Url & url) : debug(false), url(url), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), followRedirect(false) {
 	}
     
 	AnotherHttpClient::~AnotherHttpClient() {
+	}
+
+	void AnotherHttpClient::setDebug(bool debug) {
+		this->debug = debug;
 	}
     
     void AnotherHttpClient::reconnect() {
@@ -83,9 +91,9 @@ namespace HTTP {
     void AnotherHttpClient::setRequest(const string & method, const LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer) {
         HttpRequestHeader & header = request.getHeader();
         header.setMethod(method);
-        header.setPath(url.getPath());
+        header.setPath(url.getPathAndQuery());
         header.setProtocol("HTTP/1.1");
-        
+
         for (size_t i = 0; i < additionalHeaderFields.size(); i++) {
             const NameValue & nv = additionalHeaderFields.const_getByIndex(i);
             header[nv.getName()] = nv.getValue();
@@ -215,6 +223,10 @@ namespace HTTP {
 
 		if (!requestHeaderSent) {
 			string header = request.getHeader().toString();
+			if (debug) {
+				Logger logger = LoggerFactory::getDefaultLogger();
+				logger.logd(header);
+			}
 			connection->send(header.c_str(), header.length());
 			requestHeaderSent = true;
 		}
