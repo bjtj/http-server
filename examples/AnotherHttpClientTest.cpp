@@ -141,7 +141,7 @@ void s_query() {
     client.setOnResponseListener(&handler);
     
     client.setFollowRedirect(true);
-    client.setUrl("http://10.0.12.96:2869/upnphost/udhisapi.dll?content=uuid:27151292-513d-4dcd-912a-a2b8cdc0a128");
+    client.setUrl("http://httpbin.org/get?name=nick");
     client.setRequest("GET", LinkedStringMap(), NULL);
     client.execute();
 
