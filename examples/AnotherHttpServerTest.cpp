@@ -133,7 +133,6 @@ void old() {
 
 class SampleChunkedHttpClient {
 private:
-	Socket socket;
 	string path;
 	InetAddress remoteAddr;
 public:
@@ -146,7 +145,8 @@ public:
 
 		try {
 
-			socket.connect(remoteAddr);
+			Socket socket(remoteAddr);
+			socket.connect();
 			string header = "POST " + path + " HTTP/1.1\r\nTransfer-Encoding: chunked\r\n\r\n";
 			socket.send(header.c_str(), (int)header.length());
 
@@ -188,7 +188,6 @@ public:
 
 class SampleFixedHttpClient {
 private:
-	Socket socket;
 	string path;
 	InetAddress remoteAddr;
 public:
@@ -205,7 +204,8 @@ public:
 			FileReader reader(file);
 			string content = reader.dumpAsString();
 
-			socket.connect(remoteAddr);
+			Socket socket(remoteAddr);
+			socket.connect();
 			string header = "POST " + path + " HTTP/1.1\r\nContent-Length: " + Text::toString(content.length()) + "\r\n\r\n";
 			socket.send(header.c_str(), (int)header.length());
 			int sentLen = socket.send(content.c_str(), content.length());
@@ -231,7 +231,6 @@ public:
 
 class SampleGetHttpClient {
 private:
-    Socket socket;
 	string path;
 	InetAddress remoteAddr;
 public:
@@ -243,8 +242,8 @@ public:
     void send() {
         
         try {
-            
-            socket.connect(remoteAddr);
+            Socket socket(remoteAddr);
+            socket.connect();
             string header = "GET " + path + " HTTP/1.1\r\nContent-Length: 0\r\n\r\n";
             socket.send(header.c_str(), (int)header.length());
             

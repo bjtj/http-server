@@ -225,10 +225,10 @@ namespace HTTP {
 	template<typename T>
     OS::Socket * HttpClient<T>::connect(Url & url) {
 		
-		OS::Socket * socket = new OS::Socket;
+		OS::Socket * socket = new OS::Socket(OS::InetAddress(url.getHost(), url.getIntegerPort()));
 
 		try {
-            socket->connect(OS::InetAddress(url.getHost(), url.getIntegerPort()));
+            socket->connect();
 		} catch (OS::IOException e) {
 			delete socket;
 			socket = NULL;
