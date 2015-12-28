@@ -50,6 +50,7 @@ namespace HTTP {
 		void parseUrlString(std::string urlStr);
 		std::vector<std::string> parseAddress(const std::string & address);
 		void setAddress(std::vector<std::string> & addr);
+		void parsePath(const std::string & resource);
         void parseQuery(const std::string & query);
 
 		std::string getAddress() const;

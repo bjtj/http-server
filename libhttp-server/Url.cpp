@@ -75,18 +75,19 @@ namespace HTTP {
             p = "/" + p;
         }
 		this->path = p;
+		parsePath(this->path);
 	}
     void Url::setRelativePath(const string & relativePath) {
         
         if (Text::startsWith(relativePath, "/")) {
-            setPath(relativePath);
+			setPath(relativePath);
         } else {
             size_t l = path.find_last_of("/");
             if (l == string::npos) {
-                setPath(relativePath);
+				setPath(relativePath);
             } else {
                 string prefix = path.substr(0, l+1);
-                path = prefix + relativePath;
+				setPath(prefix + relativePath);
             }
         }
     }
@@ -111,20 +112,14 @@ namespace HTTP {
 		if (f == string::npos) {
 			throw UrlParseException("no protocol found", -1, 0);
 		}
+		
 		scheme = urlStr.substr(0, f);
 		urlStr = urlStr.substr(f + 3);
 		f = urlStr.find("/");
 		if (f != string::npos) {
 			vector<string> addr = parseAddress(urlStr.substr(0, f));
 			setAddress(addr);
-			path = urlStr.substr(f);
-            
-            size_t q = path.find("?");
-            if (q != string::npos) {
-                string query = path.substr(q + 1);
-                path = path.substr(0, q);
-                parseQuery(query);
-            }
+			parsePath(urlStr.substr(f));
 		} else {
 			vector<string> addr = parseAddress(urlStr);
 			setAddress(addr);
@@ -150,6 +145,18 @@ namespace HTTP {
 			port = addr[1];
 		} else {
 			port = "80";
+		}
+	}
+
+	void Url::parsePath(const string & resource) {
+		size_t q = resource.find("?");
+		if (q != string::npos) {
+			string query = resource.substr(q + 1);
+			path = resource.substr(0, q);
+			parseQuery(query);
+		} else {
+			path = resource;
+			parameters.clear();
 		}
 	}
     
