@@ -122,8 +122,8 @@ namespace HTTP {
 		virtual ~HttpCommunication();
 
 		virtual void onConnected(Connection & connection);
-		virtual void onDataReceived(Connection & connection, Packet & packet);
-		void readRequestHeaderIfNeed(Connection & connection, Packet & packet);
+		virtual void onReceivable(Connection & connection);
+		void readRequestHeaderIfNeed(Connection & connection);
 		void readRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet);
 		void onRequestHeader(HttpRequest & request, HttpResponse & response);
 		void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response);

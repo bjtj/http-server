@@ -65,6 +65,10 @@ namespace HTTP {
         packet.setLimit(readSize);
     }
     
+	size_t Connection::getLimit() {
+		return packet.getLimit();
+	}
+
     void Connection::resetReadLimit() {
         packet.resetLimit();
     }
@@ -75,4 +79,8 @@ namespace HTTP {
         packet.setPosition(len);
         return packet;
     }
+
+	Packet & Connection::getPacket() {
+		return packet;
+	}
 }

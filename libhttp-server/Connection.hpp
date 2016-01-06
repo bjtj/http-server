@@ -30,8 +30,10 @@ namespace HTTP {
         void setCompleted();
         bool isCompleted();
         void setReadSize(size_t readSize);
+		size_t getLimit();
         void resetReadLimit();
         Packet & read();
+		Packet & getPacket();
     };
 }
 

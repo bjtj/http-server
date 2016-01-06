@@ -97,12 +97,11 @@ namespace HTTP {
 	}
 
 	void HttpCommunication::onConnected(Connection & connection) {
-		connection.setReadSize(1);
 	}
 
-	void HttpCommunication::onDataReceived(Connection & connection, Packet & packet) {
+	void HttpCommunication::onReceivable(Connection & connection) {
 
-		readRequestHeaderIfNeed(connection, packet);
+		readRequestHeaderIfNeed(connection);
 		if (requestHeaderReader.complete()) {
             
             if (!requestHeaderHandled) {
@@ -113,8 +112,8 @@ namespace HTTP {
             } else {
                 
                 AutoRef<DataTransfer> transfer = request.getTransfer();
-				transfer->recv(packet);
-                readRequestContent(request, response, packet);
+				transfer->recv(connection);
+                readRequestContent(request, response, connection.getPacket());
                 if (transfer->isCompleted()) {
                     onHttpRequestContentCompleted(request, response);
                     writeable = true;
@@ -123,10 +122,12 @@ namespace HTTP {
 		}
 	}
 
-	void HttpCommunication::readRequestHeaderIfNeed(Connection & connection, Packet & packet) {
+	void HttpCommunication::readRequestHeaderIfNeed(Connection & connection) {
 
 		if (!requestHeaderReader.complete()) {
            
+			connection.setReadSize(1);
+			Packet & packet = connection.read();
             requestHeaderReader.read(packet.getData(), (int)packet.getLength());
 
 			packet.clear();

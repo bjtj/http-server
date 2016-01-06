@@ -26,8 +26,9 @@ namespace HTTP {
         readerBuffer.clear();
         trailingCounter.resetPosition();
     }
-    void ChunkedTransfer::recv(Packet & packet) {
+	void ChunkedTransfer::recv(Connection & connection) {
 
+		Packet & packet = connection.read();
         char * p = packet.getData();
 		size_t packetLength = packet.getLength();
         for (size_t i = 0; i < packetLength; i++, p++) {

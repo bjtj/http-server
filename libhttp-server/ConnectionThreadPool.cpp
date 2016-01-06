@@ -53,8 +53,7 @@ namespace HTTP {
                 if (selector.select(1000) > 0) {
                     
                     if (connection->isReadableSelected(selector)) {
-                        Packet & packet = connection->read();
-                        communication->onDataReceived(*connection, packet);
+                        communication->onReceivable(*connection);
                     }
                     
                     if (connection->isWritableSelected(selector)) {

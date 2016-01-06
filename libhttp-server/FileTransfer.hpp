@@ -30,7 +30,7 @@ namespace HTTP {
 		virtual ~FileTransfer();
 
         virtual void reset();
-		virtual void recv(Packet & packet);
+		virtual void recv(Connection & connection);
 		virtual void send(Connection & connection);
 		virtual unsigned long long getSize();
 

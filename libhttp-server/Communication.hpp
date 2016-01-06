@@ -11,7 +11,7 @@ namespace HTTP {
         Communication();
         virtual ~Communication();
         virtual void onConnected(Connection & connection) = 0;
-        virtual void onDataReceived(Connection & connection, Packet & packet) = 0;
+		virtual void onReceivable(Connection & connection) = 0;
         virtual void onWriteable(Connection & connection) = 0;
         virtual void onDisconnected(Connection & connection) = 0;
         virtual bool isCommunicationCompleted() = 0;

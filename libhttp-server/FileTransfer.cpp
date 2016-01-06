@@ -26,8 +26,9 @@ namespace HTTP {
         readCounter.resetPosition();
         // TODO: file reader / writer reset position
     }
-	void FileTransfer::recv(Packet & packet) {
+	void FileTransfer::recv(Connection & connection) {
 
+		Packet & packet = connection.read();
 		readCounter.read(packet.getLength());
 
 		if (writer) {

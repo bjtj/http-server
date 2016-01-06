@@ -36,7 +36,9 @@ namespace HTTP {
     void FixedTransfer::reset() {
         chunkedBuffer.resetPosition();
     }
-    void FixedTransfer::recv(Packet & packet) {
+	void FixedTransfer::recv(Connection & connection) {
+		connection.setReadSize(chunkedBuffer.getReadableSize(connection.getLimit()));
+		Packet & packet = connection.read();
         chunkedBuffer.write(packet.getData(), packet.getLength());
         
         if (!chunkedBuffer.remain()) {

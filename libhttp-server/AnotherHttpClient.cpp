@@ -61,8 +61,8 @@ namespace HTTP {
 			string remoteHost = url.getHost();
 			int remotePort = url.getIntegerPort();
 
-			socket = new Socket;
-            socket->connect(OS::InetAddress(remoteHost, remotePort));
+			socket = new Socket(OS::InetAddress(remoteHost, remotePort));
+            socket->connect();
 
 			connection = new Connection(*socket);
             connection->registerSelector(selector);
@@ -280,8 +280,7 @@ namespace HTTP {
 				return;
 			}
 
-			Packet & packet = connection->read();
-			transfer->recv(packet);
+			transfer->recv(*connection);
 			if (transfer->isCompleted()) {
                 onResponseTransferDone();
 			}
