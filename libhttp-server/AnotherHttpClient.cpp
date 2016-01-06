@@ -37,11 +37,11 @@ namespace HTTP {
 	 * @brief AnotherHttpClient
 	 */
     
-    AnotherHttpClient::AnotherHttpClient() : debug(false), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), followRedirect(false) {
+    AnotherHttpClient::AnotherHttpClient() : debug(false), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), followRedirect(false) {
         
     }
     
-	AnotherHttpClient::AnotherHttpClient(const Url & url) : debug(false), url(url), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), followRedirect(false) {
+	AnotherHttpClient::AnotherHttpClient(const Url & url) : debug(false), url(url), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), followRedirect(false) {
 	}
     
 	AnotherHttpClient::~AnotherHttpClient() {
@@ -66,6 +66,19 @@ namespace HTTP {
 
 			connection = new Connection(*socket);
             connection->registerSelector(selector);
+		}
+	}
+	void AnotherHttpClient::connect(unsigned long timeout) {
+
+		if (!connection) {
+			string remoteHost = url.getHost();
+			int remotePort = url.getIntegerPort();
+
+			socket = new Socket(OS::InetAddress(remoteHost, remotePort));
+			socket->connect(timeout);
+
+			connection = new Connection(*socket);
+			connection->registerSelector(selector);
 		}
 	}
     
@@ -144,7 +157,11 @@ namespace HTTP {
             while (!interrupted) {
                 
                 clearStates();
-                connect();
+				if (connectionTimeout > 0) {
+					connect(connectionTimeout);
+				} else {
+					connect();
+				}
                 
                 AutoRef<DataTransfer> transfer = request.getTransfer();
                 if (!transfer.empty()) {
@@ -298,6 +315,9 @@ namespace HTTP {
         }
         complete = true;
     }
+	void AnotherHttpClient::setConnectionTimeout(unsigned long timeout) {
+		this->connectionTimeout = timeout;
+	}
     
     bool AnotherHttpClient::needRedirect() {
         return followRedirect ? response.getHeader().isRedirection() : false;

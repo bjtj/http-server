@@ -63,6 +63,7 @@ namespace HTTP {
         
         OnResponseListener * responseListener;
         
+		unsigned long connectionTimeout;
         bool followRedirect;
 
 		UTIL::AutoRef<UserData> userData;
@@ -76,6 +77,7 @@ namespace HTTP {
 		void setDebug(bool debug);
         void reconnect();
 		void connect();
+		void connect(unsigned long timeout);
         void closeConnection();
         void setUrl(const Url & url);
         void setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer);
@@ -96,6 +98,7 @@ namespace HTTP {
         void onResponseTransferDone();
         void setComplete();
         
+		void setConnectionTimeout(unsigned long timeout);
         bool needRedirect();
         void handleRedirect();
         void setFollowRedirect(bool followRedirect);

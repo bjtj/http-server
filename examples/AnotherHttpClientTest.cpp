@@ -39,16 +39,7 @@ public:
     virtual void onResponseHeader(HttpResponse & response, AutoRef<UserData> userData) {
         
         cout << response.getHeader().toString() << endl;
-        
-        if (response.getHeader().isChunkedTransfer()) {
-            ChunkedTransfer * transfer = new ChunkedTransfer;
-            response.setTransfer(transfer);
-        } else if (response.getHeader().getContentLength() > 0) {
-            FixedTransfer * transfer = new FixedTransfer(response.getHeader().getContentLength());
-            response.setTransfer(transfer);
-        } else {
-            // do nothing
-        }
+        response.setTransfer(createDataTransfer(response.getHeader()));
     }
     virtual void onTransferDone(HttpResponse & response, DataTransfer * transfer, AutoRef<UserData> userData) {
         if (transfer) {
@@ -72,6 +63,7 @@ void s_test() {
     client.setFollowRedirect(true);
     
 	client.setUrl("http://www.google.com");
+	client.setConnectionTimeout(5000);
     client.setRequest("GET", LinkedStringMap(), NULL);
     client.execute();
 }
