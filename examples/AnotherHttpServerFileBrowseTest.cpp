@@ -29,7 +29,9 @@ public:
 			path = defaultPath;
 		}
 
-		path = HttpDecoder::decode(path);
+		bool debug = !request.getParameter("debug").empty();
+
+		path = HttpDecoder::decode(HttpDecoder::decode_plus(path));
 
 		string content;
 
@@ -41,7 +43,9 @@ public:
 			content.append("<head>");
 			content.append("</head>");
 			content.append("<body>");
-			// content.append("<form>Path: <input type=\"text\" name=\"path\"/></form>");
+			if (debug) {
+				content.append("<form>Path: <input type=\"text\" name=\"path\"/></form>");
+			}
 			content.append("<ul>");
 			for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
 
@@ -53,7 +57,7 @@ public:
 				if (iter->isDirectory()) {
 					content.append("<span style=\"display:inline-block;width:15px;\">D</span>");
 					content.append("<a href=\"browse?path=" + File::mergePaths(path, iter->getName()) + "\">");
-					content.append(iter->getName());					
+					content.append(iter->getName());
 					content.append("</a>");
 				} else {
 					content.append("<span style=\"display:inline-block;width:15px;\">&nbsp;</span>");
@@ -75,7 +79,7 @@ public:
     }
 
 	bool filter(File & file) {
-		if (file.isDirectory() && (file.getName().compare("..") || file.getName().compare("."))) {
+		if (!(file.getName().compare("..") || !file.getName().compare("."))) {
 			return false;
 		}
 		return true;
@@ -108,6 +112,9 @@ public:
 			setFixedTransfer(response, "File not found / path: " + path);
 			return;
 		}
+
+		path = HttpDecoder::decode(HttpDecoder::decode_plus(path));
+		printf("** Path: %s\n", path.c_str());
 
 		File file(path);
 		if (!file.isFile()) {

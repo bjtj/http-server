@@ -78,4 +78,7 @@ namespace HTTP {
 		return ret;
 	}
 
+	string HttpDecoder::decode_plus(const string & text) {
+		return Text::replaceAll(text, "+", " ");
+	}
 }

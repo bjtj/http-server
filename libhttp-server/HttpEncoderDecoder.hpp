@@ -23,6 +23,7 @@ namespace HTTP {
 		virtual ~HttpDecoder();
 
 		static std::string decode(const std::string & text);
+		static std::string decode_plus(const std::string & text);
 	};
 }
 
