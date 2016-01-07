@@ -79,7 +79,7 @@ public:
     }
 
 	bool filter(File & file) {
-		if (!(file.getName().compare("..") || !file.getName().compare("."))) {
+		if (!file.getName().compare("..") || !file.getName().compare(".")) {
 			return false;
 		}
 		return true;
@@ -178,6 +178,8 @@ int main(int argc, char * args[]) {
 	if (argc > 1) {
 		path = args[1];
 	}
+
+	System::getInstance()->ignoreSigpipe();
 
 	int port = 8083;
 
