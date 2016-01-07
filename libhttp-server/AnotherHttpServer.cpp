@@ -112,12 +112,17 @@ namespace HTTP {
             } else {
                 
                 AutoRef<DataTransfer> transfer = request.getTransfer();
-				transfer->recv(connection);
-                readRequestContent(request, response, connection.getPacket());
-                if (transfer->isCompleted()) {
-                    onHttpRequestContentCompleted(request, response);
+				if (!transfer.empty()) {
+					transfer->recv(connection);
+					readRequestContent(request, response, connection.getPacket());
+					if (transfer->isCompleted()) {
+						onHttpRequestContentCompleted(request, response);
+						writeable = true;
+					}
+				} else {
+					onHttpRequestContentCompleted(request, response);
                     writeable = true;
-                }
+				}
             }
 		}
 	}

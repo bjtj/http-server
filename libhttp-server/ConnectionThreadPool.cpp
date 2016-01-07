@@ -36,7 +36,11 @@ namespace HTTP {
 				continue;
 			}
 
-			connectionTask();
+			try {
+				connectionTask();
+			} catch (NullException e) {
+				logger.loge(e.getMessage());
+			}
 
 			setFlag(false);
 		}
