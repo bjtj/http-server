@@ -25,61 +25,98 @@ public:
 		responseHeader.setConnection("close");
 
 		string path = request.getParameter("path");
-		if (path.empty()) {
+        if (path.empty()) {
 			path = defaultPath;
 		}
+        
+        if (!Text::startsWith(path, defaultPath) || path.find("..") != string::npos) {
+            response.setStatusCode(403);
+            setFixedTransfer(response, "Not permitted");
+            return;
+        }
 
 		bool debug = !request.getParameter("debug").empty();
+        //bool login = !request.getParameter("pass").compare("love");
+        bool login = true;
 
 		path = HttpDecoder::decode(HttpDecoder::decode_plus(path));
 
 		string content;
-
-		try {
-
-			vector<File> files = File::list(path);
-
-			content.append("<html>");
-			content.append("<head>");
-			content.append("</head>");
-			content.append("<body>");
-			if (debug) {
-				content.append("<form>Path: <input type=\"text\" name=\"path\"/></form>");
-			}
-			content.append("<ul>");
-			for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
-
-				if (!filter(*iter)) {
-					continue;
-				}
-				
-				content.append("<li>");
-				if (iter->isDirectory()) {
-					content.append("<span style=\"display:inline-block;width:15px;\">D</span>");
-					content.append("<a href=\"browse?path=" + File::mergePaths(path, iter->getName()) + "\">");
-					content.append(iter->getName());
-					content.append("</a>");
-				} else {
-					content.append("<span style=\"display:inline-block;width:15px;\">&nbsp;</span>");
-					content.append("<a href=\"file?path=" + File::mergePaths(path, iter->getName()) + "\">");
-					content.append(iter->getName());
-					content.append("</a>");
-				}
-				content.append("</li>");
-			}
-			content.append("</ul>");
-			content.append("</body>");
-			content.append("</html>");
-
-		} catch (IOException e) {
-			content = "Access failed : " + path;
-		}
+        
+        if (!login) {
+            content.append("<!DOCTYPE html>");
+            content.append("<html>");
+            content.append("<head>");
+            content.append("<title>browse</title>");
+            content.append("<style type=\"text/css\">body {font-family: arial; font-size: 10pt;}</style>");
+            content.append("<meta charset=\"UTF-8\">");
+            content.append("</head>");
+            content.append("<body>");
+            content.append("<form method=\"GET\">Password: <input type=\"password\" name=\"pass\"/></form>");
+            content.append("</body>");
+            content.append("</html>");
+        } else {
+            content = renderDir(path, debug);
+        }
 
         setFixedTransfer(response, content);
     }
+    
+    string renderDir(const string & path, bool debug) {
+        
+        string content;
+        
+        try {
+            
+            vector<File> files = File::list(path);
+            
+            content.append("<!DOCTYPE html>");
+            content.append("<html>");
+            content.append("<head>");
+            content.append("<title>browse</title>");
+            content.append("<style type=\"text/css\">body {font-family: arial; font-size: 10pt;}</style>");
+            content.append("<meta charset=\"UTF-8\">");
+            content.append("</head>");
+            content.append("<body>");
+            if (debug) {
+                content.append("<form>Path: <input type=\"text\" name=\"path\"/></form>");
+            }
+            content.append("<h1>TJ Entertainment</h1>");
+            content.append("<p><a href=\"browse\">home</a></p>");
+            content.append("<ul>");
+            for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
+                
+                if (!filter(*iter)) {
+                    continue;
+                }
+                
+                content.append("<li>");
+                if (iter->isDirectory()) {
+                    content.append("<span style=\"display:inline-block;width:15px;\">D</span>");
+                    content.append("<a href=\"browse?path=" + File::mergePaths(path, iter->getName()) + "\">");
+                    content.append(iter->getName());
+                    content.append("</a>");
+                } else {
+                    content.append("<span style=\"display:inline-block;width:15px;\">&nbsp;</span>");
+                    content.append("<a href=\"file?path=" + File::mergePaths(path, iter->getName()) + "\">");
+                    content.append(iter->getName());
+                    content.append("</a>");
+                }
+                content.append("</li>");
+            }
+            content.append("</ul>");
+            content.append("</body>");
+            content.append("</html>");
+            
+        } catch (IOException e) {
+            content = "Access failed : " + path;
+        }
+        
+        return content;
+    }
 
 	bool filter(File & file) {
-		if (!file.getName().compare("..") || !file.getName().compare(".")) {
+        if (Text::startsWith(file.getName(), ".")) {
 			return false;
 		}
 		return true;
@@ -177,7 +214,13 @@ int main(int argc, char * args[]) {
 	string path = ".";
 	if (argc > 1) {
 		path = args[1];
-	}
+    } else {
+        char buffer[1024] = {0,};
+        printf("Default path: ");
+        if (readline(buffer, sizeof(buffer)) > 0) {
+            path = buffer;
+        }
+    }
 
 	System::getInstance()->ignoreSigpipe();
 
