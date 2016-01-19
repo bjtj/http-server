@@ -15,11 +15,19 @@ namespace HTTP {
 	 */
 
     ConnectionManager::ConnectionManager(CommunicationMaker & communicationMaker)
-		: serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker), threadPool(10) {
+		: serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker), threadPool(20) {
+            serverSocketMaker = new DefaultServerSocketMaker;
+    }
+    
+    ConnectionManager::ConnectionManager(CommunicationMaker & communicationMaker, ServerSocketMaker * serverSocketMaker)
+    : serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker), threadPool(20), serverSocketMaker(serverSocketMaker) {
     }
 
     ConnectionManager::~ConnectionManager() {
         stop();
+        if (serverSocketMaker) {
+            delete serverSocketMaker;
+        }
     }
     
     Connection * ConnectionManager::makeConnection(Socket & client) {
@@ -73,7 +81,8 @@ namespace HTTP {
             return;
         }
         
-        serverSocket = new ServerSocket(port);
+        // serverSocket = new ServerSocket(port);
+        serverSocket = serverSocketMaker->makeServerSocket(port);
         serverSocket->setReuseAddr(true);
         serverSocket->bind();
         serverSocket->listen(5);

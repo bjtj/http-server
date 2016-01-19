@@ -169,6 +169,7 @@ namespace HTTP {
 	public:
 
 		AnotherHttpServer(int port);
+        AnotherHttpServer(int port, ServerSocketMaker * serverSocketMaker);
 		virtual ~AnotherHttpServer();
 
 		void registerRequestHandler(const std::string & pattern, HttpRequestHandler * handler);

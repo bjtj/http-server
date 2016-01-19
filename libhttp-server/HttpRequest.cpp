@@ -78,4 +78,10 @@ namespace HTTP {
     void HttpRequest::clearTransfer() {
         transfer = NULL;
     }
+    void HttpRequest::setRemoteAddress(const OS::InetAddress & remoteAddress) {
+        this->remoteAddress = remoteAddress;
+    }
+    OS::InetAddress & HttpRequest::getRemoteAddress() {
+        return remoteAddress;
+    }
 }

@@ -366,6 +366,15 @@
 					../../,
 					../../../oslayer,
 				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-I/usr/local/ssl/openssl_x86_64/include",
+				);
+				OTHER_LDFLAGS = (
+					"-L/usr/local/ssl/openssl_x86_64/lib",
+					"-lssl",
+					"-lcrypto",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -376,6 +385,15 @@
 				HEADER_SEARCH_PATHS = (
 					../../,
 					../../../oslayer,
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-I/usr/local/ssl/openssl_x86_64/include",
+				);
+				OTHER_LDFLAGS = (
+					"-L/usr/local/ssl/openssl_x86_64/lib",
+					"-lssl",
+					"-lcrypto",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

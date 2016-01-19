@@ -21,8 +21,8 @@ namespace HTTP {
 	class HttpRequest {
 	private:
         HttpRequestHeader header;
-
         UTIL::AutoRef<DataTransfer> transfer;
+        OS::InetAddress remoteAddress;
 
 	public:
         HttpRequest();
@@ -53,6 +53,9 @@ namespace HTTP {
         UTIL::AutoRef<DataTransfer> getTransfer();
         void setTransfer(UTIL::AutoRef<DataTransfer> transfer);
         void clearTransfer();
+        
+        void setRemoteAddress(const OS::InetAddress & remoteAddress);
+        OS::InetAddress & getRemoteAddress();
 	};
 
 }

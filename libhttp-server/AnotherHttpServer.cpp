@@ -97,6 +97,7 @@ namespace HTTP {
 	}
 
 	void HttpCommunication::onConnected(Connection & connection) {
+        request.setRemoteAddress(connection.getRemoteAddress());
 	}
 
 	void HttpCommunication::onReceivable(Connection & connection) {
@@ -300,13 +301,17 @@ namespace HTTP {
 
 	AnotherHttpServer::AnotherHttpServer(int port) : port(port), httpCommunicationMaker(&dispatcher), connectionManager(httpCommunicationMaker), thread(NULL) {
 	}
-
+    
+    AnotherHttpServer::AnotherHttpServer(int port, ServerSocketMaker * serverSocketMaker) : port(port), httpCommunicationMaker(&dispatcher), connectionManager(httpCommunicationMaker, serverSocketMaker), thread(NULL) {
+    }
+    
 	AnotherHttpServer::~AnotherHttpServer() {
 	}
 
 	void AnotherHttpServer::registerRequestHandler(const string & pattern, HttpRequestHandler * handler) {
 		dispatcher.registerRequestHandler(pattern, handler);
 	}
+    
 	void AnotherHttpServer::unregisterRequestHandler(const string & pattern) {
 		dispatcher.unregisterRequestHandler(pattern);
 	}

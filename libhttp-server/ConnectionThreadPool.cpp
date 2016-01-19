@@ -54,15 +54,21 @@ namespace HTTP {
 		try {
             communication->onConnected(*connection);
             while (!interrupted() && !connection->isTerminateSignaled()) {
-                if (selector.select(1000) > 0) {
-                    
-                    if (connection->isReadableSelected(selector)) {
-                        communication->onReceivable(*connection);
+                
+                if (connection->isSelectable()) {
+                    if (selector.select(1000) > 0) {
+                        
+                        if (connection->isReadableSelected(selector)) {
+                            communication->onReceivable(*connection);
+                        }
+                        
+                        if (connection->isWritableSelected(selector)) {
+                            communication->onWriteable(*connection);
+                        }
                     }
-                    
-                    if (connection->isWritableSelected(selector)) {
-                        communication->onWriteable(*connection);
-                    }
+                } else {
+                    communication->onReceivable(*connection);
+                    communication->onWriteable(*connection);
                 }
 
                 if (connection->isClosed() || communication->isCommunicationCompleted()) {

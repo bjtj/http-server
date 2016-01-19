@@ -14,6 +14,10 @@ namespace HTTP {
         return socket.getFd();
     }
     
+    bool Connection::isSelectable() {
+        return socket.isSelectable();
+    }
+    
     void Connection::registerSelector(Selector & selector) {
         socket.registerSelector(selector);
     }
@@ -83,4 +87,8 @@ namespace HTTP {
 	Packet & Connection::getPacket() {
 		return packet;
 	}
+    
+    InetAddress Connection::getRemoteAddress() {
+        return socket.getRemoteInetAddress();
+    }
 }

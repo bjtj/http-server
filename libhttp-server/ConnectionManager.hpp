@@ -11,6 +11,24 @@
 
 namespace HTTP {
     
+    class ServerSocketMaker {
+    private:
+    public:
+        ServerSocketMaker() {}
+        virtual ~ServerSocketMaker() {}
+        virtual OS::ServerSocket * makeServerSocket(int port) = 0;
+    };
+    
+    class DefaultServerSocketMaker : public ServerSocketMaker {
+    private:
+    public:
+        DefaultServerSocketMaker() {}
+        virtual ~DefaultServerSocketMaker() {}
+        virtual OS::ServerSocket * makeServerSocket(int port) {
+            return new OS::ServerSocket(port);
+        }
+    };
+    
 	/**
 	 * @brief ConnectionMaker
 	 */
@@ -45,6 +63,7 @@ namespace HTTP {
 
     class ConnectionManager {
     private:
+        ServerSocketMaker * serverSocketMaker;
         OS::ServerSocket * serverSocket;
         OS::Selector selector;
         std::map<int, Connection*> connectionTable;
@@ -55,6 +74,7 @@ namespace HTTP {
         
     public:
         ConnectionManager(CommunicationMaker & communicationMaker);
+        ConnectionManager(CommunicationMaker & communicationMaker, ServerSocketMaker * serverSocketMaker);
         virtual ~ConnectionManager();
         virtual Connection * makeConnection(OS::Socket & client);
         virtual void removeConnection(Connection * connection);

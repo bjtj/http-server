@@ -1,4 +1,5 @@
 #include <liboslayer/os.hpp>
+#include <liboslayer/SecureSocket.hpp>
 #include <liboslayer/Utils.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/FileTransfer.hpp>
@@ -29,6 +30,8 @@ public:
 			path = defaultPath;
 		}
         
+        printf("** Path: %s [%s:%d]\n", path.c_str(), request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort());
+        
         if (!Text::startsWith(path, defaultPath) || path.find("..") != string::npos) {
             response.setStatusCode(403);
             setFixedTransfer(response, "Not permitted");
@@ -36,7 +39,7 @@ public:
         }
 
 		bool debug = !request.getParameter("debug").empty();
-        //bool login = !request.getParameter("pass").compare("love");
+        //bool login = !request.getParameter("pass").compare("secret");
         bool login = true;
 
 		path = HttpDecoder::decode(HttpDecoder::decode_plus(path));
@@ -151,7 +154,7 @@ public:
 		}
 
 		path = HttpDecoder::decode(HttpDecoder::decode_plus(path));
-		printf("** Path: %s\n", path.c_str());
+		printf("** Path: %s [%s:%d]\n", path.c_str(), request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort());
 
 		File file(path);
 		if (!file.isFile()) {
@@ -209,6 +212,26 @@ size_t readline(char * buffer, size_t max) {
 	return 0;
 }
 
+string prompt(const char * msg) {
+    char buffer[1024] = {0,};
+    printf("%s", msg);
+    if (readline(buffer, sizeof(buffer)) > 0) {
+        return string(buffer);
+    }
+    return "";
+}
+int promptInteger(const char * msg) {
+    string ret = prompt(msg);
+    return Text::toInt(ret);
+}
+bool promptBoolean(const char * msg) {
+    string ret = prompt(msg);
+    if (ret.compare("yes") || ret.compare("y")) {
+        return true;
+    }
+    return false;
+}
+
 int main(int argc, char * args[]) {
 
 	string path = ".";
@@ -221,19 +244,47 @@ int main(int argc, char * args[]) {
             path = buffer;
         }
     }
-
+    
+    int port = promptInteger("Port: ");
+    bool secure = promptBoolean("Secure[y/n]: ");
+    string certPath;
+    string keyPath;
+    if (secure) {
+        certPath = prompt("Cert Path: ");
+        keyPath = prompt("Key Path: ");
+    }
+    
 	System::getInstance()->ignoreSigpipe();
 
-	int port = 8083;
-
-	AnotherHttpServer server(port);
+    AnotherHttpServer * server = NULL;
+    
+    if (secure) {
+        class SecureServerSocketMaker : public ServerSocketMaker {
+        private:
+            string certPath;
+            string keyPath;
+        public:
+            SecureServerSocketMaker(string certPath, string keyPath) : certPath(certPath), keyPath(keyPath) {}
+            virtual ~SecureServerSocketMaker() {}
+            virtual ServerSocket * makeServerSocket(int port) {
+                SecureServerSocket * ret = new SecureServerSocket(port);
+                ret->loadCert(certPath, keyPath);
+                return ret;
+            }
+        };
+        server = new AnotherHttpServer(port, new SecureServerSocketMaker(certPath, keyPath));
+    } else {
+        server = new AnotherHttpServer(port);
+    }
 
 	FileBrowseHttpRequestHandler browse(path);
-	server.registerRequestHandler("/browse", &browse);
+	server->registerRequestHandler("/browse", &browse);
 	FileDownloadHttpRequestHandler file;
-	server.registerRequestHandler("/file", &file);
+	server->registerRequestHandler("/file", &file);
 
-	server.startAsync();
+    printf("Listening... %d\n", port);
+    
+	server->startAsync();
 
 	while (1) {
 		char buffer[1024] = {0,};
@@ -246,5 +297,9 @@ int main(int argc, char * args[]) {
 		}
 	}
 
-	server.stop();
+	server->stop();
+    delete server;
+    
+    return 0;
 }
+

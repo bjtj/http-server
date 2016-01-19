@@ -17,6 +17,7 @@ namespace HTTP {
         Connection(OS::Socket & socket);
         virtual ~Connection();
         int getId();
+        bool isSelectable();
         void registerSelector(OS::Selector & selector);
 		void unregisterSelector(OS::Selector & selector);
         bool isReadableSelected(OS::Selector & selector);
@@ -34,6 +35,7 @@ namespace HTTP {
         void resetReadLimit();
         Packet & read();
 		Packet & getPacket();
+        OS::InetAddress getRemoteAddress();
     };
 }
 
