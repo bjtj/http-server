@@ -1,6 +1,7 @@
 #include <liboslayer/os.hpp>
 #include <liboslayer/SecureSocket.hpp>
 #include <liboslayer/Utils.hpp>
+#include <liboslayer/Properties.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/FileTransfer.hpp>
 #include <libhttp-server/HttpEncoderDecoder.hpp>
@@ -232,39 +233,61 @@ bool promptBoolean(const char * msg) {
     return false;
 }
 
+class ServerConfig {
+private:
+	int port;
+	bool secure;
+	string certPath;
+    string keyPath;
+	string defaultBrowsePath;
+	
+public:
+    ServerConfig() : port(8083), secure(false), defaultBrowsePath(".") {}
+    virtual ~ServerConfig() {}
+	void load(const string & configPath) {
+		Properties props;
+		props.loadFromFile(configPath);
+		port = props.getIntegerProperty("listen.port");
+		string secureString = props.getProperty("secure");
+		secure = secureString.empty() == false && !secureString.compare("y");
+		certPath = props.getProperty("cert.path");
+		keyPath = props.getProperty("key.path");
+		defaultBrowsePath = props.getProperty("default.browse.path");
+	}
+	int getPort() {return port;}
+	bool isSecure() {return secure;}
+	string getCertPath() {return certPath;}
+	string getKeyPath() {return keyPath;}
+	string getDefaultBrowsePath() {return defaultBrowsePath;}
+};
+
+
 int main(int argc, char * args[]) {
 
-	string path = ".";
+	ServerConfig config;
+	
 	if (argc > 1) {
-		path = args[1];
+		config.load(args[1]);
     } else {
         char buffer[1024] = {0,};
-        printf("Default path: ");
+        printf("Configuration file path: ");
         if (readline(buffer, sizeof(buffer)) > 0) {
-            path = buffer;
+			config.load(buffer);
         }
-    }
-    
-    int port = promptInteger("Port: ");
-    bool secure = promptBoolean("Secure[y/n]: ");
-    string certPath;
-    string keyPath;
-    if (secure) {
-        certPath = prompt("Cert Path: ");
-        keyPath = prompt("Key Path: ");
     }
     
 	System::getInstance()->ignoreSigpipe();
 
     AnotherHttpServer * server = NULL;
     
-    if (secure) {
+    if (config.isSecure()) {
         class SecureServerSocketMaker : public ServerSocketMaker {
         private:
             string certPath;
             string keyPath;
         public:
-            SecureServerSocketMaker(string certPath, string keyPath) : certPath(certPath), keyPath(keyPath) {}
+            SecureServerSocketMaker(string certPath, string keyPath) :
+				certPath(certPath), keyPath(keyPath) {}
             virtual ~SecureServerSocketMaker() {}
             virtual ServerSocket * makeServerSocket(int port) {
                 SecureServerSocket * ret = new SecureServerSocket(port);
@@ -272,17 +295,19 @@ int main(int argc, char * args[]) {
                 return ret;
             }
         };
-        server = new AnotherHttpServer(port, new SecureServerSocketMaker(certPath, keyPath));
+        server = new AnotherHttpServer(config.getPort(),
+									   new SecureServerSocketMaker(config.getCertPath(),
+																   config.getKeyPath()));
     } else {
-        server = new AnotherHttpServer(port);
+        server = new AnotherHttpServer(config.getPort());
     }
 
-	FileBrowseHttpRequestHandler browse(path);
+	FileBrowseHttpRequestHandler browse(config.getDefaultBrowsePath());
 	server->registerRequestHandler("/browse", &browse);
 	FileDownloadHttpRequestHandler file;
 	server->registerRequestHandler("/file", &file);
 
-    printf("Listening... %d\n", port);
+    printf("Listening... %d\n", config.getPort());
     
 	server->startAsync();
 
@@ -292,7 +317,7 @@ int main(int argc, char * args[]) {
 			if (!strcmp(buffer, "q")) {
 				break;
 			} else if (!strcmp(buffer, "s")) {
-				printf("Listen port: %d\n", port);
+				printf("Listen port: %d\n", config.getPort());
 			}
 		}
 	}
