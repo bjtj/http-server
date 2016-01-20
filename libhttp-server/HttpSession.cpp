@@ -1,23 +1,42 @@
 #include "HttpSession.hpp"
 
+using namespace OS;
+
 namespace HTTP {
+
+	static unsigned long s_tick() {
+		return tick_milli();
+	}
 
 	unsigned long HttpSession::id_idx = 0;
 
-	HttpSession::HttpSession(unsigned long creationTime) : lastAccessTime(creationTime) {
+	HttpSession::HttpSession() {
 		id = id_idx++;
+		creationTime = s_tick();
+		lastAccessTime = s_tick();
 	}
+	
 	HttpSession::~HttpSession() {
 	}
 
-	unsigned long HttpSession::getLastAccessTime() {
-		return lastAccessTime;
+	unsigned long HttpSession::getId() {
+		return id;
 	}
-	void HttpSession::setLastAccessTime(unsigned long time) {
-		this->lastAccessTime = time;
+
+	void HttpSession::updateLastAccessTime() {
+		lastAccessTime = s_tick();
 	}
-	bool HttpSession::testOutdated(unsigned long currentTime, unsigned long timeout) {
-		return (currentTime - lastAccessTime > timeout);
+	
+	unsigned long HttpSession::getTimeout() {
+		return timeout;
+	}
+	
+	void HttpSession::setTimeout(unsigned long timeout) {
+		this->timeout = timeout;
+	}
+	
+	bool HttpSession::oudated() {
+		return (s_tick() - lastAccessTime > timeout);
 	}
 
 	std::string & HttpSession::operator[](const std::string & name) {

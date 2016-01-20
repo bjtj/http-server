@@ -9,16 +9,21 @@ namespace HTTP {
 	private:
 		static unsigned long id_idx;
 		unsigned long id;
+		unsigned long creationTime;
 		unsigned long lastAccessTime;
+		unsigned long timeout;
 		UTIL::StringMap props;
+		
 	public:
-		HttpSession(unsigned long creationTime);
+		HttpSession();
 		virtual ~HttpSession();
 
-		unsigned long getLastAccessTime();
-		void setLastAccessTime(unsigned long time);
-		bool testOutdated(unsigned long currentTime, unsigned long timeout);
-
+		unsigned long getId();
+		void updateLastAccessTime();
+		unsigned long getTimeout();
+		void setTimeout(unsigned long timeout);
+		bool oudated();
+		
 		std::string & operator[](const std::string & name);
 	};
 }
