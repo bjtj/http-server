@@ -303,9 +303,9 @@ int main(int argc, char * args[]) {
     }
 
 	FileBrowseHttpRequestHandler browse(config.getDefaultBrowsePath());
-	server->registerRequestHandler("/browse", &browse);
+	server->registerRequestHandler("/browse*", &browse);
 	FileDownloadHttpRequestHandler file;
-	server->registerRequestHandler("/file", &file);
+	server->registerRequestHandler("/file*", &file);
 
     printf("Listening... %d\n", config.getPort());
     

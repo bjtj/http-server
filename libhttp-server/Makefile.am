@@ -21,6 +21,7 @@ libhttp_serverinc_HEADERS = AnotherHttpClient.hpp \
 	HttpRequest.hpp \
 	HttpResponse.hpp \
 	HttpSession.hpp \
+	HttpSessionManager.hpp \
 	HttpStatusCodes.hpp \
 	InetAddress.hpp \
 	Packet.hpp \
@@ -70,6 +71,8 @@ libhttp_server_la_SOURCES = AnotherHttpClient.cpp \
 	HttpResponse.hpp \
 	HttpSession.cpp \
 	HttpSession.hpp \
+	HttpSessionManager.cpp \
+	HttpSessionManager.hpp \
 	HttpStatusCodes.cpp \
 	HttpStatusCodes.hpp \
 	InetAddress.hpp \
