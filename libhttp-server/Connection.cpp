@@ -91,4 +91,8 @@ namespace HTTP {
     InetAddress Connection::getRemoteAddress() {
         return socket.getRemoteInetAddress();
     }
+
+	InetAddress Connection::getLocalAddress() {
+        return socket.getLocalInetAddress();
+    }
 }

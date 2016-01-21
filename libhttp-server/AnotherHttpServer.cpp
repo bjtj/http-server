@@ -98,6 +98,7 @@ namespace HTTP {
 
 	void HttpCommunication::onConnected(Connection & connection) {
         request.setRemoteAddress(connection.getRemoteAddress());
+		request.setLocalAddress(connection.getLocalAddress());
 	}
 
 	void HttpCommunication::onReceivable(Connection & connection) {

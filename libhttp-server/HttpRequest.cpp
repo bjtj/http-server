@@ -84,4 +84,10 @@ namespace HTTP {
     OS::InetAddress & HttpRequest::getRemoteAddress() {
         return remoteAddress;
     }
+	void HttpRequest::setLocalAddress(const OS::InetAddress & localAddress) {
+		this->localAddress = localAddress;
+	}
+	OS::InetAddress & HttpRequest::getLocalAddress() {
+		return localAddress;
+	}
 }

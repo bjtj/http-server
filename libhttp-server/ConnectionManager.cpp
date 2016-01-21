@@ -41,7 +41,7 @@ namespace HTTP {
     void ConnectionManager::onConnect(Socket & client) {
         Connection * connection = makeConnection(client);
         Communication * communication = communicationMaker.makeCommunication();
-        
+
         connectionsLock.wait();
         connectionTable[connection->getId()] = connection;
         connectionsLock.post();

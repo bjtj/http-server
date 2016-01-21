@@ -36,6 +36,7 @@ namespace HTTP {
         Packet & read();
 		Packet & getPacket();
         OS::InetAddress getRemoteAddress();
+		OS::InetAddress getLocalAddress();
     };
 }
 

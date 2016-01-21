@@ -5,11 +5,122 @@
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/FileTransfer.hpp>
 #include <libhttp-server/HttpEncoderDecoder.hpp>
+#include <libhttp-server/HttpSessionManager.hpp>
 
 using namespace std;
 using namespace OS;
 using namespace UTIL;
 using namespace HTTP;
+
+HttpSessionManager sessionManager(30 * 60 * 1000);
+
+class SessionTool {
+private:
+public:
+    SessionTool() {}
+    virtual ~SessionTool() {}
+
+	static string getSessionId(HttpRequest & request) {
+		string path = request.getPath();
+		size_t f = 0;
+		if ((f = path.find(";")) != string::npos) {
+			return path.substr(f + 1);
+		}
+		return "";
+	}
+
+	static HttpSession & getSession(HttpRequest & request) {
+		string sessionId = getSessionId(request);
+		HttpSession & session = (sessionId.empty() || !sessionManager.hasSession(Text::toInt(sessionId))) ?
+			sessionManager.createSession() : sessionManager.getSession(Text::toInt(sessionId));
+		
+		if (session.outdated()) {
+			sessionManager.destroySession(session.getId());
+			return sessionManager.createSession();
+		}
+		return session;
+	}
+
+	static string urlMan(const string & u, HttpSession & session) {
+		return u + ";" + Text::toString(session.getId());
+	}
+};
+
+
+class LoginHttpRequestHandler : public HttpRequestHandler {
+private:
+public:
+	LoginHttpRequestHandler() {}
+	virtual ~LoginHttpRequestHandler() {}
+
+	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+		HttpSession & session = SessionTool::getSession(request);
+		session.updateLastAccessTime();
+
+		bool login = !session["login"].compare("yes");
+
+		if (!login) {
+			if (!request.getParameter("pass").compare("secret")) {
+				login = true;
+				session["login"] = "yes";
+			}
+		}
+
+		string content;
+
+		if (!login) {
+			HttpResponseHeader & responseHeader = response.getHeader();
+			response.setStatusCode(200, "OK");
+			response.setContentType("text/html");
+			responseHeader.setConnection("close");
+			
+            content.append("<!DOCTYPE html>");
+            content.append("<html>");
+            content.append("<head>");
+            content.append("<title>browse</title>");
+            content.append("<style type=\"text/css\">body {font-family: arial; font-size: 10pt;}</style>");
+            content.append("<meta charset=\"UTF-8\">");
+            content.append("</head>");
+            content.append("<body>");
+            content.append("<form method=\"GET\" action=\"" + SessionTool::urlMan("login", session) + "\">" +
+						   "Password: <input type=\"password\" name=\"pass\"/></form>");
+            content.append("</body>");
+            content.append("</html>");
+        } else {
+			HttpResponseHeader & responseHeader = response.getHeader();
+			response.setStatusCode(302);
+			responseHeader.setHeaderField("Location", "https://" +
+										  request.getLocalAddress().getHost() + ":" +
+										  Text::toString(request.getLocalAddress().getPort()) + "/" +
+										  SessionTool::urlMan("browse", session));
+			response.setContentType("text/html");
+			responseHeader.setConnection("close");
+			content.append("<!DOCTYPE html>");
+            content.append("<html>");
+            content.append("<head>");
+            content.append("<title>browse</title>");
+            content.append("<style type=\"text/css\">body {font-family: arial; font-size: 10pt;}</style>");
+            content.append("<meta charset=\"UTF-8\">");
+            content.append("</head>");
+            content.append("<body>");
+			content.append("<a href=\"" + SessionTool::urlMan("browse", session) + "\">home</a>");
+			content.append("</body>");
+            content.append("</html>");
+			// HttpResponseHeader & responseHeader = response.getHeader();
+			// HttpRequestHeader & requestHeader = request.getHeader();
+            // response.setStatusCode(302);
+			// responseHeader.setHeaderField("Location", "https://");
+			// responseHeader.setConnection("close");
+        }
+
+		setFixedTransfer(response, content);
+	}
+	virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
+    }
+    
+    virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+    }
+};
 
 class FileBrowseHttpRequestHandler : public HttpRequestHandler {
 private:
@@ -19,6 +130,9 @@ public:
 	virtual ~FileBrowseHttpRequestHandler() {}
     
     virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+
+		HttpSession & session = SessionTool::getSession(request);
+		session.updateLastAccessTime();
         
         HttpResponseHeader & responseHeader = response.getHeader();
         
@@ -31,7 +145,8 @@ public:
 			path = defaultPath;
 		}
         
-        printf("** Path: %s [%s:%d]\n", path.c_str(), request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort());
+        printf("** Path: %s [%s:%d]\n", path.c_str(),
+			   request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort());
         
         if (!Text::startsWith(path, defaultPath) || path.find("..") != string::npos) {
             response.setStatusCode(403);
@@ -40,14 +155,18 @@ public:
         }
 
 		bool debug = !request.getParameter("debug").empty();
-        //bool login = !request.getParameter("pass").compare("secret");
-        bool login = true;
+        bool login = !session["login"].compare("yes");
 
 		path = HttpDecoder::decode(HttpDecoder::decode_plus(path));
 
 		string content;
         
         if (!login) {
+			response.setStatusCode(302);
+			responseHeader.setHeaderField("Location", "https://" +
+										  request.getLocalAddress().getHost() + ":" +
+										  Text::toString(request.getLocalAddress().getPort()) + "/" +
+										  SessionTool::urlMan("login", session));
             content.append("<!DOCTYPE html>");
             content.append("<html>");
             content.append("<head>");
@@ -56,17 +175,17 @@ public:
             content.append("<meta charset=\"UTF-8\">");
             content.append("</head>");
             content.append("<body>");
-            content.append("<form method=\"GET\">Password: <input type=\"password\" name=\"pass\"/></form>");
+			content.append("<a href=\"" + SessionTool::urlMan("login", session) + "\">login</a>");
             content.append("</body>");
             content.append("</html>");
         } else {
-            content = renderDir(path, debug);
+            content = renderDir(path, debug, session);
         }
 
         setFixedTransfer(response, content);
     }
     
-    string renderDir(const string & path, bool debug) {
+    string renderDir(const string & path, bool debug, HttpSession & session) {
         
         string content;
         
@@ -86,7 +205,7 @@ public:
                 content.append("<form>Path: <input type=\"text\" name=\"path\"/></form>");
             }
             content.append("<h1>TJ Entertainment</h1>");
-            content.append("<p><a href=\"browse\">home</a></p>");
+            content.append("<p><a href=\"" + SessionTool::urlMan("browse", session) + "\">home</a></p>");
             content.append("<ul>");
             for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
                 
@@ -97,12 +216,14 @@ public:
                 content.append("<li>");
                 if (iter->isDirectory()) {
                     content.append("<span style=\"display:inline-block;width:15px;\">D</span>");
-                    content.append("<a href=\"browse?path=" + File::mergePaths(path, iter->getName()) + "\">");
+                    content.append("<a href=\"" + SessionTool::urlMan("browse", session) + "?path=" +
+								   File::mergePaths(path, iter->getName()) + "\">");
                     content.append(iter->getName());
                     content.append("</a>");
                 } else {
                     content.append("<span style=\"display:inline-block;width:15px;\">&nbsp;</span>");
-                    content.append("<a href=\"file?path=" + File::mergePaths(path, iter->getName()) + "\">");
+                    content.append("<a href=\"" + SessionTool::urlMan("file", session) + "?path=" +
+								   File::mergePaths(path, iter->getName()) + "\">");
                     content.append(iter->getName());
                     content.append("</a>");
                 }
@@ -140,12 +261,40 @@ public:
 	virtual ~FileDownloadHttpRequestHandler() {}
 
 	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+
+		HttpSession & session = SessionTool::getSession(request);
+		session.updateLastAccessTime();
         
         HttpResponseHeader & responseHeader = response.getHeader();
-        
+
         response.setStatusCode(200, "OK");
         response.setContentType("text/plain");
 		responseHeader.setConnection("close");
+
+		bool login = !session["login"].compare("yes");
+
+		if (!login) {
+			response.setStatusCode(302);
+			responseHeader.setHeaderField("Location", "https://" +
+										  request.getLocalAddress().getHost() + ":" +
+										  Text::toString(request.getLocalAddress().getPort()) + "/" +
+										  SessionTool::urlMan("login", session));
+			response.setContentType("text/html");
+			string content;
+            content.append("<!DOCTYPE html>");
+            content.append("<html>");
+            content.append("<head>");
+            content.append("<title>browse</title>");
+            content.append("<style type=\"text/css\">body {font-family: arial; font-size: 10pt;}</style>");
+            content.append("<meta charset=\"UTF-8\">");
+            content.append("</head>");
+            content.append("<body>");
+			content.append("<a href=\"" + SessionTool::urlMan("login", session) + "\">login</a>");
+            content.append("</body>");
+            content.append("</html>");
+			setFixedTransfer(response, content);
+			return;
+        }
 
 		string path = request.getParameter("path");
 		if (path.empty()) {
@@ -306,6 +455,8 @@ int main(int argc, char * args[]) {
 	server->registerRequestHandler("/browse*", &browse);
 	FileDownloadHttpRequestHandler file;
 	server->registerRequestHandler("/file*", &file);
+	LoginHttpRequestHandler login;
+	server->registerRequestHandler("/login*", &login);
 
     printf("Listening... %d\n", config.getPort());
     

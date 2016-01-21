@@ -23,6 +23,7 @@ namespace HTTP {
         HttpRequestHeader header;
         UTIL::AutoRef<DataTransfer> transfer;
         OS::InetAddress remoteAddress;
+		OS::InetAddress localAddress;
 
 	public:
         HttpRequest();
@@ -56,6 +57,8 @@ namespace HTTP {
         
         void setRemoteAddress(const OS::InetAddress & remoteAddress);
         OS::InetAddress & getRemoteAddress();
+		void setLocalAddress(const OS::InetAddress & localAddress);
+		OS::InetAddress & getLocalAddress();
 	};
 
 }
