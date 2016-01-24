@@ -12,7 +12,41 @@ using namespace OS;
 using namespace UTIL;
 using namespace HTTP;
 
+const Logger & logger = LoggerFactory::getDefaultLogger();
 HttpSessionManager sessionManager(30 * 60 * 1000);
+
+class ServerConfig {
+private:
+    string host;
+    int port;
+    bool secure;
+    string certPath;
+    string keyPath;
+    string defaultBrowsePath;
+    
+public:
+    ServerConfig() : port(8083), secure(false), defaultBrowsePath(".") {}
+    virtual ~ServerConfig() {}
+    void load(const string & configPath) {
+        Properties props;
+        props.loadFromFile(configPath);
+        host = props.getProperty("domain.host");
+        port = props.getIntegerProperty("listen.port");
+        string secureString = props.getProperty("secure");
+        secure = secureString.empty() == false && !secureString.compare("y");
+        certPath = props.getProperty("cert.path");
+        keyPath = props.getProperty("key.path");
+        defaultBrowsePath = props.getProperty("default.browse.path");
+    }
+    string getHost() { return host; }
+    int getPort() { return port; }
+    bool isSecure() { return secure; }
+    string getCertPath() { return certPath; }
+    string getKeyPath() { return keyPath; }
+    string getDefaultBrowsePath() { return defaultBrowsePath; }
+};
+
+ServerConfig config;
 
 class SessionTool {
 private:
@@ -89,8 +123,9 @@ public:
         } else {
 			HttpResponseHeader & responseHeader = response.getHeader();
 			response.setStatusCode(302);
-			responseHeader.setHeaderField("Location", "https://" +
-										  request.getLocalAddress().getHost() + ":" +
+            
+            responseHeader.setHeaderField("Location", (config.isSecure() ? "https://" : "http://") +
+										  config.getHost() + ":" +
 										  Text::toString(request.getLocalAddress().getPort()) + "/" +
 										  SessionTool::urlMan("browse", session));
 			response.setContentType("text/html");
@@ -106,11 +141,6 @@ public:
 			content.append("<a href=\"" + SessionTool::urlMan("browse", session) + "\">home</a>");
 			content.append("</body>");
             content.append("</html>");
-			// HttpResponseHeader & responseHeader = response.getHeader();
-			// HttpRequestHeader & requestHeader = request.getHeader();
-            // response.setStatusCode(302);
-			// responseHeader.setHeaderField("Location", "https://");
-			// responseHeader.setConnection("close");
         }
 
 		setFixedTransfer(response, content);
@@ -145,8 +175,8 @@ public:
 			path = defaultPath;
 		}
         
-        printf("** Path: %s [%s:%d]\n", path.c_str(),
-			   request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort());
+        logger.logd(Text::format("** Path: %s [%s:%d]", path.c_str(),
+                                 request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort()));
         
         if (!Text::startsWith(path, defaultPath) || path.find("..") != string::npos) {
             response.setStatusCode(403);
@@ -163,8 +193,8 @@ public:
         
         if (!login) {
 			response.setStatusCode(302);
-			responseHeader.setHeaderField("Location", "https://" +
-										  request.getLocalAddress().getHost() + ":" +
+			responseHeader.setHeaderField("Location", (config.isSecure() ? "https://" : "http://") +
+										  config.getHost() + ":" +
 										  Text::toString(request.getLocalAddress().getPort()) + "/" +
 										  SessionTool::urlMan("login", session));
             content.append("<!DOCTYPE html>");
@@ -275,8 +305,8 @@ public:
 
 		if (!login) {
 			response.setStatusCode(302);
-			responseHeader.setHeaderField("Location", "https://" +
-										  request.getLocalAddress().getHost() + ":" +
+			responseHeader.setHeaderField("Location", (config.isSecure() ? "https://" : "http://") +
+										  config.getHost() + ":" +
 										  Text::toString(request.getLocalAddress().getPort()) + "/" +
 										  SessionTool::urlMan("login", session));
 			response.setContentType("text/html");
@@ -304,7 +334,7 @@ public:
 		}
 
 		path = HttpDecoder::decode(HttpDecoder::decode_plus(path));
-		printf("** Path: %s [%s:%d]\n", path.c_str(), request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort());
+        logger.logd(Text::format("** Path: %s [%s:%d]", path.c_str(), request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort()));
 
 		File file(path);
 		if (!file.isFile()) {
@@ -382,38 +412,10 @@ bool promptBoolean(const char * msg) {
     return false;
 }
 
-class ServerConfig {
-private:
-	int port;
-	bool secure;
-	string certPath;
-    string keyPath;
-	string defaultBrowsePath;
-	
-public:
-    ServerConfig() : port(8083), secure(false), defaultBrowsePath(".") {}
-    virtual ~ServerConfig() {}
-	void load(const string & configPath) {
-		Properties props;
-		props.loadFromFile(configPath);
-		port = props.getIntegerProperty("listen.port");
-		string secureString = props.getProperty("secure");
-		secure = secureString.empty() == false && !secureString.compare("y");
-		certPath = props.getProperty("cert.path");
-		keyPath = props.getProperty("key.path");
-		defaultBrowsePath = props.getProperty("default.browse.path");
-	}
-	int getPort() {return port;}
-	bool isSecure() {return secure;}
-	string getCertPath() {return certPath;}
-	string getKeyPath() {return keyPath;}
-	string getDefaultBrowsePath() {return defaultBrowsePath;}
-};
+
 
 
 int main(int argc, char * args[]) {
-
-	ServerConfig config;
 	
 	if (argc > 1) {
 		config.load(args[1]);
