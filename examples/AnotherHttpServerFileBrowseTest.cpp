@@ -6,6 +6,7 @@
 #include <libhttp-server/FileTransfer.hpp>
 #include <libhttp-server/HttpEncoderDecoder.hpp>
 #include <libhttp-server/HttpSessionManager.hpp>
+#include <libhttp-server/Url.hpp>
 
 using namespace std;
 using namespace OS;
@@ -81,6 +82,27 @@ public:
 };
 
 
+static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse & response, HttpSession & session, const string & uri) {
+    
+    HttpResponseHeader & header = response.getHeader();
+    
+    string host = config.getHost();
+    string port = Text::toString(request.getLocalAddress().getPort());
+    if (!request.getHeaderField("Host").empty()) {
+        Url url("http://" + request.getHeaderField("Host"));
+        host = url.getHost();
+        port = url.getPort();
+    }
+    
+    response.setStatusCode(302);
+    header.setHeaderField("Location", (config.isSecure() ? "https://" : "http://") +
+                          host + ":" + port + "/" +
+                          SessionTool::urlMan(uri, session));
+    response.setContentType("text/html");
+    header.setConnection("close");
+}
+
+
 class LoginHttpRequestHandler : public HttpRequestHandler {
 private:
 public:
@@ -121,26 +143,9 @@ public:
             content.append("</body>");
             content.append("</html>");
         } else {
-			HttpResponseHeader & responseHeader = response.getHeader();
-			response.setStatusCode(302);
             
-            responseHeader.setHeaderField("Location", (config.isSecure() ? "https://" : "http://") +
-										  config.getHost() + ":" +
-										  Text::toString(request.getLocalAddress().getPort()) + "/" +
-										  SessionTool::urlMan("browse", session));
-			response.setContentType("text/html");
-			responseHeader.setConnection("close");
-			content.append("<!DOCTYPE html>");
-            content.append("<html>");
-            content.append("<head>");
-            content.append("<title>browse</title>");
-            content.append("<style type=\"text/css\">body {font-family: arial; font-size: 10pt;}</style>");
-            content.append("<meta charset=\"UTF-8\">");
-            content.append("</head>");
-            content.append("<body>");
-			content.append("<a href=\"" + SessionTool::urlMan("browse", session) + "\">home</a>");
-			content.append("</body>");
-            content.append("</html>");
+            redirect(config, request, response, session, "browse");
+            return;
         }
 
 		setFixedTransfer(response, content);
@@ -192,22 +197,10 @@ public:
 		string content;
         
         if (!login) {
-			response.setStatusCode(302);
-			responseHeader.setHeaderField("Location", (config.isSecure() ? "https://" : "http://") +
-										  config.getHost() + ":" +
-										  Text::toString(request.getLocalAddress().getPort()) + "/" +
-										  SessionTool::urlMan("login", session));
-            content.append("<!DOCTYPE html>");
-            content.append("<html>");
-            content.append("<head>");
-            content.append("<title>browse</title>");
-            content.append("<style type=\"text/css\">body {font-family: arial; font-size: 10pt;}</style>");
-            content.append("<meta charset=\"UTF-8\">");
-            content.append("</head>");
-            content.append("<body>");
-			content.append("<a href=\"" + SessionTool::urlMan("login", session) + "\">login</a>");
-            content.append("</body>");
-            content.append("</html>");
+            
+            redirect(config, request, response, session, "login");
+            return;
+            
         } else {
             content = renderDir(path, debug, session);
         }
@@ -304,26 +297,9 @@ public:
 		bool login = !session["login"].compare("yes");
 
 		if (!login) {
-			response.setStatusCode(302);
-			responseHeader.setHeaderField("Location", (config.isSecure() ? "https://" : "http://") +
-										  config.getHost() + ":" +
-										  Text::toString(request.getLocalAddress().getPort()) + "/" +
-										  SessionTool::urlMan("login", session));
-			response.setContentType("text/html");
-			string content;
-            content.append("<!DOCTYPE html>");
-            content.append("<html>");
-            content.append("<head>");
-            content.append("<title>browse</title>");
-            content.append("<style type=\"text/css\">body {font-family: arial; font-size: 10pt;}</style>");
-            content.append("<meta charset=\"UTF-8\">");
-            content.append("</head>");
-            content.append("<body>");
-			content.append("<a href=\"" + SessionTool::urlMan("login", session) + "\">login</a>");
-            content.append("</body>");
-            content.append("</html>");
-			setFixedTransfer(response, content);
-			return;
+            
+            redirect(config, request, response, session, "login");
+            return;
         }
 
 		string path = request.getParameter("path");
@@ -422,9 +398,8 @@ int main(int argc, char * args[]) {
     } else {
         char buffer[1024] = {0,};
         printf("Configuration file path: ");
-        if (readline(buffer, sizeof(buffer)) > 0) {
-			config.load(buffer);
-        }
+        readline(buffer, sizeof(buffer));
+        config.load(buffer);
     }
     
 	System::getInstance()->ignoreSigpipe();
