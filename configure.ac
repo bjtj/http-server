@@ -41,7 +41,12 @@ AC_TYPE_SIZE_T
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([gettimeofday memset mkdir socket strcasecmp])
+AC_CHECK_FUNCS([gettimeofday memset mkdir socket strcasecmp SSL_library_init])
+
+if test $ac_cv_func_SSL_library_init = no; then
+   AC_CHECK_LIB(ssl, SSL_library_init, [LIBS="-lssl -lcrypto $LIBS"
+   AC_DEFINE(HAVE_OPENSSL, 1, [Define to 1 if you have the 'SSL_library_init' function.])])
+fi
 
 AC_CONFIG_FILES([Makefile
 				 libhttp-server/Makefile

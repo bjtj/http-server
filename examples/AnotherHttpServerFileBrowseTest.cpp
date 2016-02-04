@@ -7,6 +7,7 @@
 #include <libhttp-server/HttpEncoderDecoder.hpp>
 #include <libhttp-server/HttpSessionManager.hpp>
 #include <libhttp-server/Url.hpp>
+#include <liboslayer/Lisp.hpp>
 
 using namespace std;
 using namespace OS;
@@ -324,11 +325,100 @@ public:
 			response.setContentType(type);
 		} else {
 			response.setContentType("Application/octet-stream");
-			response.getHeader().setHeaderField("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+			response.getHeader().setHeaderField("Content-Disposition",
+												"attachment; filename=\"" + file.getName() + "\"");
+		}
+
+		if (type == "Application/x-lisp") {
+			FileReader reader(file);
+			LISP::Env env;
+			LISP::native(env);
+			web(env, session);
+			env["*path*"] = LISP::text(path);
+			string content = parseLispPage(env, reader.dumpAsString());
+			response.setContentType("text/html");
+			setFixedTransfer(response, content);
+			return;
 		}
 
 		setFileTransfer(response, file);
     }
+
+	void web(LISP::Env & env, HttpSession & session) {
+		class LispSession : public LISP::Procedure {
+		private:
+			HttpSession & session;
+		public:
+			LispSession(const string & name, HttpSession & session) :
+				LISP::Procedure(name), session(session) {}
+			virtual ~LispSession() {}
+			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
+				string url = args[0].toString();
+				return LISP::text(SessionTool::urlMan(url, session));
+			}
+		};
+		env["url"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispSession("url", session)));
+	}
+
+	bool eval(LISP::Var & var, LISP::Env & env) {
+		try {
+			LISP::eval(var, env);
+			return !env.quit();
+		} catch (const char * e) {
+			cout << "ERROR: " << e << endl;
+			return false;
+		} catch (string & e) {
+			cout << "ERROR: " << e << endl;
+			return false;
+		}
+	}
+
+	bool compile(const string & line, LISP::Env & env) {
+		LISP::Var var = LISP::parse(line);
+		return eval(var, env);
+	}
+
+	string parseLispPage(LISP::Env & env, const string & src) {
+		
+		size_t f = 0;
+		size_t s = 0;
+		while ((f = src.find("<%", f)) != string::npos) {
+
+			if (f - s > 0) {
+				string txt = src.substr(s, f - s);
+				LISP::Var & content = env["*content*"];
+				env["*content*"] = LISP::text(content.nil() ? txt : content.toString() + txt);
+			}
+			
+			size_t e = src.find("%>", f);
+			string code = src.substr(f + 2, e - (f + 2));
+
+			if (*code.begin() == '=') {
+				string line = Text::trim(code.substr(1));
+				line = "(string-append *content* " + line + ")";
+				compile(line, env);
+			} else {
+				vector<string> lines = Text::split(code, "\n");
+				for (vector<string>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
+					string & line = *iter;
+					if (!line.empty()) {
+						if (!compile(line, env)) {
+							break;
+						}
+					}
+				}
+			}
+
+			s = f = e + 2;
+		}
+		if (!env.quit() && s < src.length()) {
+			string txt = src.substr(s);
+			LISP::Var & content = env["*content*"];
+			env["*content*"] = LISP::text(content.nil() ? txt : content.toString() + txt);
+		}
+
+		return env["*content*"].toString();
+	}
 
 	string guessContentType(const string & path) {
 		string ext = File::getExtension(path);
@@ -343,6 +433,7 @@ public:
 		types["css"] = "text/css";
 		types["js"] = "text/javascript";
 		types["xml"] = "text/xml";
+		types["lsp"] = "Application/x-lisp";
 
 		for (map<string, string>::iterator iter = types.begin(); iter != types.end(); iter++) {
 			if (Text::equalsIgnoreCase(ext, iter->first)) {
