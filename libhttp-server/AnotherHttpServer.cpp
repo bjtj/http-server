@@ -21,6 +21,11 @@ namespace HTTP {
 	}
 	HttpRequestHandler::~HttpRequestHandler() {
 	}
+
+	void HttpRequestHandler::onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
+	}
+	void HttpRequestHandler::onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+	}
     
 	void HttpRequestHandler::setFixedTransfer(HttpResponse & response, const string & content) {
 

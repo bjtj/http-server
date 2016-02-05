@@ -78,7 +78,10 @@ public:
 	}
 
 	static string urlMan(const string & u, HttpSession & session) {
-		return u + ";" + Text::toString(session.getId());
+		size_t f = u.find("?");
+		string path = (f == string::npos) ? u : u.substr(0, f);
+		string rest = (f == string::npos) ? "" : u.substr(f);
+		return path + ";" + Text::toString(session.getId()) + rest;
 	}
 };
 
@@ -151,11 +154,6 @@ public:
 
 		setFixedTransfer(response, content);
 	}
-	virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
-    }
-    
-    virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
-    }
 };
 
 class FileBrowseHttpRequestHandler : public HttpRequestHandler {
@@ -203,6 +201,14 @@ public:
             return;
             
         } else {
+
+			vector<File> files = File::list(path);
+			for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
+				if (iter->getName() == "index.lsp") {
+					redirect(config, request, response, session, "file?path=" + File::mergePaths(path, iter->getName()));
+				}
+			}
+			
             content = renderDir(path, debug, session);
         }
 
@@ -270,12 +276,6 @@ public:
 		}
 		return true;
 	}
-    
-    virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
-    }
-    
-    virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
-    }
 };
 
 class FileDownloadHttpRequestHandler : public HttpRequestHandler {
@@ -443,12 +443,6 @@ public:
 
 		return "";
 	}
-    
-    virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
-    }
-    
-    virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
-    }
 };
 
 size_t readline(char * buffer, size_t max) {

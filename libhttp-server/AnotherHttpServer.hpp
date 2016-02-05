@@ -29,8 +29,8 @@ namespace HTTP {
 		virtual ~HttpRequestHandler();
     
 		virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) = 0;
-		virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) = 0;
-        virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) = 0;
+		virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet);
+        virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response);
 
 		void setFixedTransfer(HttpResponse & response, const std::string & content);
 		void setFileTransfer(HttpResponse & response, const std::string & filepath);
