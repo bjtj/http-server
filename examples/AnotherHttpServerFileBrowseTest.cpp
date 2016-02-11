@@ -25,8 +25,10 @@ private:
     string certPath;
     string keyPath;
     string defaultBrowsePath;
+    string browseIndexPath;
     
 public:
+    
     ServerConfig() : port(8083), secure(false), defaultBrowsePath(".") {}
     virtual ~ServerConfig() {}
     void load(const string & configPath) {
@@ -39,6 +41,7 @@ public:
         certPath = props.getProperty("cert.path");
         keyPath = props.getProperty("key.path");
         defaultBrowsePath = props.getProperty("default.browse.path");
+        browseIndexPath = props.getProperty("browse.index");
     }
     string getHost() { return host; }
     int getPort() { return port; }
@@ -46,6 +49,7 @@ public:
     string getCertPath() { return certPath; }
     string getKeyPath() { return keyPath; }
     string getDefaultBrowsePath() { return defaultBrowsePath; }
+    string getBrowseIndexPath() { return browseIndexPath; }
 };
 
 ServerConfig config;
@@ -106,6 +110,96 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
     header.setConnection("close");
 }
 
+class LispPage {
+private:
+    LISP::Env global_env;
+public:
+    LispPage() {
+        LISP::native(global_env);
+    }
+    virtual ~LispPage() {}
+    LISP::Env & env() {return global_env;}
+    void applyWeb(HttpSession & session) {
+        applyWeb(global_env, session);
+    }
+    void applyWeb(LISP::Env & env, HttpSession & session) {
+        class LispSession : public LISP::Procedure {
+        private:
+            HttpSession & session;
+        public:
+            LispSession(const string & name, HttpSession & session) :
+            LISP::Procedure(name), session(session) {}
+            virtual ~LispSession() {}
+            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
+                string url = args[0].toString();
+                return LISP::text(SessionTool::urlMan(url, session));
+            }
+        };
+        env["url"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispSession("url", session)));
+    }
+    
+    bool eval(LISP::Var & var, LISP::Env & env) {
+        try {
+            LISP::eval(var, env);
+            return !env.quit();
+        } catch (const char * e) {
+            cout << "ERROR: " << e << endl;
+            return false;
+        } catch (string & e) {
+            cout << "ERROR: " << e << endl;
+            return false;
+        }
+    }
+    
+    bool compile(const string & line, LISP::Env & env) {
+        LISP::Var var = LISP::parse(line);
+        return eval(var, env);
+    }
+    string parseLispPage(const string & src) {
+        return parseLispPage(global_env, src);
+    }
+    string parseLispPage(LISP::Env & env, const string & src) {
+        
+        size_t f = 0;
+        size_t s = 0;
+        while ((f = src.find("<%", f)) != string::npos) {
+            
+            if (f - s > 0) {
+                string txt = src.substr(s, f - s);
+                LISP::Var & content = env["*content*"];
+                env["*content*"] = LISP::text(content.nil() ? txt : content.toString() + txt);
+            }
+            
+            size_t e = src.find("%>", f);
+            string code = src.substr(f + 2, e - (f + 2));
+            
+            if (*code.begin() == '=') {
+                string line = Text::trim(code.substr(1));
+                line = "(string-append *content* " + line + ")";
+                compile(line, env);
+            } else {
+                vector<string> lines = Text::split(code, "\n");
+                for (vector<string>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
+                    string & line = *iter;
+                    if (!line.empty()) {
+                        if (!compile(line, env)) {
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            s = f = e + 2;
+        }
+        if (!env.quit() && s < src.length()) {
+            string txt = src.substr(s);
+            LISP::Var & content = env["*content*"];
+            env["*content*"] = LISP::text(content.nil() ? txt : content.toString() + txt);
+        }
+        
+        return env["*content*"].toString();
+    }
+};
 
 class LoginHttpRequestHandler : public HttpRequestHandler {
 private:
@@ -159,8 +253,9 @@ public:
 class FileBrowseHttpRequestHandler : public HttpRequestHandler {
 private:
 	string defaultPath;
+    string browseIndexPath;
 public:
-	FileBrowseHttpRequestHandler(const string & defaultPath) : defaultPath(defaultPath) {}
+	FileBrowseHttpRequestHandler(const string & defaultPath, const string & browseIndexPath) : defaultPath(defaultPath), browseIndexPath(browseIndexPath) {}
 	virtual ~FileBrowseHttpRequestHandler() {}
     
     virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
@@ -201,15 +296,23 @@ public:
             return;
             
         } else {
-
-			vector<File> files = File::list(path);
-			for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
-				if (iter->getName() == "index.lsp") {
-					redirect(config, request, response, session, "file?path=" + File::mergePaths(path, iter->getName()));
-				}
-			}
-			
-            content = renderDir(path, debug, session);
+            
+            if (!browseIndexPath.empty()) {
+                File file(browseIndexPath);
+                FileReader reader(file);
+                LispPage page;
+                page.applyWeb(session);
+                page.env()["*path*"] = LISP::text(path);
+                content = page.parseLispPage(reader.dumpAsString());
+            } else {
+                vector<File> files = File::list(path);
+                for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
+                    if (iter->getName() == "index.lsp") {
+                        redirect(config, request, response, session, "file?path=" + File::mergePaths(path, iter->getName()));
+                    }
+                }
+                content = renderDir(path, debug, session);
+            }
         }
 
         setFixedTransfer(response, content);
@@ -331,11 +434,18 @@ public:
 
 		if (type == "Application/x-lisp") {
 			FileReader reader(file);
-			LISP::Env env;
-			LISP::native(env);
-			web(env, session);
-			env["*path*"] = LISP::text(path);
-			string content = parseLispPage(env, reader.dumpAsString());
+            
+            LispPage page;
+            page.applyWeb(session);
+            page.env()["*path*"] = LISP::text(path);
+            string content = page.parseLispPage(reader.dumpAsString());
+            
+//			LISP::Env env;
+//			LISP::native(env);
+//			web(env, session);
+//			env["*path*"] = LISP::text(path);
+//			string content = parseLispPage(env, reader.dumpAsString());
+            
 			response.setContentType("text/html");
 			setFixedTransfer(response, content);
 			return;
@@ -343,82 +453,6 @@ public:
 
 		setFileTransfer(response, file);
     }
-
-	void web(LISP::Env & env, HttpSession & session) {
-		class LispSession : public LISP::Procedure {
-		private:
-			HttpSession & session;
-		public:
-			LispSession(const string & name, HttpSession & session) :
-				LISP::Procedure(name), session(session) {}
-			virtual ~LispSession() {}
-			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				string url = args[0].toString();
-				return LISP::text(SessionTool::urlMan(url, session));
-			}
-		};
-		env["url"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispSession("url", session)));
-	}
-
-	bool eval(LISP::Var & var, LISP::Env & env) {
-		try {
-			LISP::eval(var, env);
-			return !env.quit();
-		} catch (const char * e) {
-			cout << "ERROR: " << e << endl;
-			return false;
-		} catch (string & e) {
-			cout << "ERROR: " << e << endl;
-			return false;
-		}
-	}
-
-	bool compile(const string & line, LISP::Env & env) {
-		LISP::Var var = LISP::parse(line);
-		return eval(var, env);
-	}
-
-	string parseLispPage(LISP::Env & env, const string & src) {
-		
-		size_t f = 0;
-		size_t s = 0;
-		while ((f = src.find("<%", f)) != string::npos) {
-
-			if (f - s > 0) {
-				string txt = src.substr(s, f - s);
-				LISP::Var & content = env["*content*"];
-				env["*content*"] = LISP::text(content.nil() ? txt : content.toString() + txt);
-			}
-			
-			size_t e = src.find("%>", f);
-			string code = src.substr(f + 2, e - (f + 2));
-
-			if (*code.begin() == '=') {
-				string line = Text::trim(code.substr(1));
-				line = "(string-append *content* " + line + ")";
-				compile(line, env);
-			} else {
-				vector<string> lines = Text::split(code, "\n");
-				for (vector<string>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
-					string & line = *iter;
-					if (!line.empty()) {
-						if (!compile(line, env)) {
-							break;
-						}
-					}
-				}
-			}
-
-			s = f = e + 2;
-		}
-		if (!env.quit() && s < src.length()) {
-			string txt = src.substr(s);
-			LISP::Var & content = env["*content*"];
-			env["*content*"] = LISP::text(content.nil() ? txt : content.toString() + txt);
-		}
-
-		return env["*content*"].toString();
-	}
 
 	string guessContentType(const string & path) {
 		string ext = File::getExtension(path);
@@ -474,8 +508,6 @@ bool promptBoolean(const char * msg) {
 }
 
 
-
-
 int main(int argc, char * args[]) {
 	
 	if (argc > 1) {
@@ -513,7 +545,7 @@ int main(int argc, char * args[]) {
         server = new AnotherHttpServer(config.getPort());
     }
 
-	FileBrowseHttpRequestHandler browse(config.getDefaultBrowsePath());
+	FileBrowseHttpRequestHandler browse(config.getDefaultBrowsePath(), config.getBrowseIndexPath());
 	server->registerRequestHandler("/browse*", &browse);
 	FileDownloadHttpRequestHandler file;
 	server->registerRequestHandler("/file*", &file);
