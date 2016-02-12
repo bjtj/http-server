@@ -10,13 +10,12 @@
 #include "HttpResponse.hpp"
 #include "ChunkedReader.hpp"
 #include "DataTransfer.hpp"
+#include "HttpServerConfig.hpp"
 
 #include <liboslayer/os.hpp>
 #include <liboslayer/Text.hpp>
 
 namespace HTTP {
-
-	
 
 	/**
 	 * @brief HttpRequestHandler
@@ -113,7 +112,6 @@ namespace HTTP {
 		bool responseContentTransferDone;
 		bool communicationCompleted;
     
-		// DataTransfer * requestTransfer;
 		HttpRequestHandlerDispatcher * dispatcher;
 
 	public:
@@ -159,6 +157,7 @@ namespace HTTP {
 	class AnotherHttpServer {
 	private:
 
+		HttpServerConfig config;
 		int port;
 
 		SimpleHttpRequestHandlerDispatcher dispatcher;
@@ -168,8 +167,8 @@ namespace HTTP {
 
 	public:
 
-		AnotherHttpServer(int port);
-        AnotherHttpServer(int port, ServerSocketMaker * serverSocketMaker);
+		AnotherHttpServer(HttpServerConfig config);
+        AnotherHttpServer(HttpServerConfig config, ServerSocketMaker * serverSocketMaker);
 		virtual ~AnotherHttpServer();
 
 		void registerRequestHandler(const std::string & pattern, HttpRequestHandler * handler);

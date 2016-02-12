@@ -17,7 +17,7 @@ using namespace HTTP;
 const Logger & logger = LoggerFactory::getDefaultLogger();
 HttpSessionManager sessionManager(30 * 60 * 1000);
 
-class ServerConfig {
+class ServerConfig : public HttpServerConfig {
 private:
     string host;
     int port;
@@ -29,19 +29,18 @@ private:
     
 public:
     
-    ServerConfig() : port(8083), secure(false), defaultBrowsePath(".") {}
+    ServerConfig() : port(0), secure(false), defaultBrowsePath(".") {}
     virtual ~ServerConfig() {}
     void load(const string & configPath) {
-        Properties props;
-        props.loadFromFile(configPath);
-        host = props.getProperty("domain.host");
-        port = props.getIntegerProperty("listen.port");
-        string secureString = props.getProperty("secure");
+        loadFromFile(configPath);
+        host = getProperty("domain.host");
+        port = getIntegerProperty("listen.port");
+        string secureString = getProperty("secure");
         secure = secureString.empty() == false && !secureString.compare("y");
-        certPath = props.getProperty("cert.path");
-        keyPath = props.getProperty("key.path");
-        defaultBrowsePath = props.getProperty("default.browse.path");
-        browseIndexPath = props.getProperty("browse.index");
+        certPath = getProperty("cert.path");
+        keyPath = getProperty("key.path");
+        defaultBrowsePath = getProperty("default.browse.path");
+        browseIndexPath = getProperty("browse.index");
     }
     string getHost() { return host; }
     int getPort() { return port; }
@@ -440,12 +439,6 @@ public:
             page.env()["*path*"] = LISP::text(path);
             string content = page.parseLispPage(reader.dumpAsString());
             
-//			LISP::Env env;
-//			LISP::native(env);
-//			web(env, session);
-//			env["*path*"] = LISP::text(path);
-//			string content = parseLispPage(env, reader.dumpAsString());
-            
 			response.setContentType("text/html");
 			setFixedTransfer(response, content);
 			return;
@@ -522,7 +515,8 @@ int main(int argc, char * args[]) {
 	System::getInstance()->ignoreSigpipe();
 
     AnotherHttpServer * server = NULL;
-    
+
+	config.setProperty("thread.count", 20);
     if (config.isSecure()) {
         class SecureServerSocketMaker : public ServerSocketMaker {
         private:
@@ -537,12 +531,14 @@ int main(int argc, char * args[]) {
                 ret->loadCert(certPath, keyPath);
                 return ret;
             }
+			virtual void releaseSocket(ServerSocket * sock) {
+				delete sock;
+			}
         };
-        server = new AnotherHttpServer(config.getPort(),
-									   new SecureServerSocketMaker(config.getCertPath(),
-																   config.getKeyPath()));
+        server = new AnotherHttpServer(config, new SecureServerSocketMaker(config.getCertPath(),
+																		   config.getKeyPath()));
     } else {
-        server = new AnotherHttpServer(config.getPort());
+        server = new AnotherHttpServer(config);
     }
 
 	FileBrowseHttpRequestHandler browse(config.getDefaultBrowsePath(), config.getBrowseIndexPath());

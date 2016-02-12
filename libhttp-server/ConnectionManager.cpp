@@ -14,20 +14,20 @@ namespace HTTP {
 	 * @brief ConnectionManager
 	 */
 
-    ConnectionManager::ConnectionManager(CommunicationMaker & communicationMaker)
-		: serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker), threadPool(20) {
+    ConnectionManager::ConnectionManager(CommunicationMaker & communicationMaker, size_t threadCount)
+		: serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker), threadPool(threadCount) {
             serverSocketMaker = new DefaultServerSocketMaker;
     }
     
-    ConnectionManager::ConnectionManager(CommunicationMaker & communicationMaker, ServerSocketMaker * serverSocketMaker)
-    : serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker), threadPool(20), serverSocketMaker(serverSocketMaker) {
+    ConnectionManager::ConnectionManager(CommunicationMaker & communicationMaker, size_t threadCount, ServerSocketMaker * serverSocketMaker)
+    : serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker), threadPool(threadCount), serverSocketMaker(serverSocketMaker) {
     }
 
     ConnectionManager::~ConnectionManager() {
         stop();
-        if (serverSocketMaker) {
-            delete serverSocketMaker;
-        }
+		if (serverSocketMaker) {
+			delete serverSocketMaker;
+		}
     }
     
     Connection * ConnectionManager::makeConnection(Socket & client) {
@@ -45,7 +45,6 @@ namespace HTTP {
         connectionsLock.wait();
         connectionTable[connection->getId()] = connection;
         connectionsLock.post();
-        
 		startCommunication(communication, connection);
     }
     
@@ -56,7 +55,6 @@ namespace HTTP {
             removeConnection(connection);
             connectionTable.erase(id);
         }
-        
         connectionsLock.post();
     }
     
@@ -64,12 +62,10 @@ namespace HTTP {
         connectionsLock.wait();
         for (map<int, Connection*>::const_iterator iter = connectionTable.begin(); iter != connectionTable.end(); iter++) {
             Connection * connection = iter->second;
-            
             connection->signalTerminate();
             while (!connection->isCompleted()) {
                 idle(10);
             }
-            
             removeConnection(connection);
         }
         connectionTable.clear();
@@ -81,15 +77,25 @@ namespace HTTP {
             return;
         }
         
-        // serverSocket = new ServerSocket(port);
         serverSocket = serverSocketMaker->makeServerSocket(port);
         serverSocket->setReuseAddr(true);
         serverSocket->bind();
         serverSocket->listen(5);
-        
         serverSocket->registerSelector(selector);
-
 		threadPool.start();
+    }
+
+	void ConnectionManager::stop() {
+        if (!serverSocket) {
+            return;
+        }
+        
+        clearConnections();
+        stopAllThreads();
+        serverSocket->unregisterSelector(selector);
+        serverSocket->close();
+		serverSocketMaker->releaseSocket(serverSocket);
+        serverSocket = NULL;
     }
     
     void ConnectionManager::poll(unsigned long timeout) {
@@ -101,7 +107,6 @@ namespace HTTP {
                 }
             }
         }
-        
         removeCompletedConnections();
         removeCompletedThreads();
     }
@@ -123,22 +128,7 @@ namespace HTTP {
     void ConnectionManager::removeCompletedThreads() {
 		threadPool.collectUnflaggedThreads();
     }
-    
-    void ConnectionManager::stop() {
-        if (!serverSocket) {
-            return;
-        }
-        
-        clearConnections();
-        
-        stopAllThreads();
-        
-        serverSocket->unregisterSelector(selector);
-        serverSocket->close();
-        
-        serverSocket = NULL;
-    }
-    
+   
     void ConnectionManager::stopAllThreads() {
 		threadPool.stop();
     }

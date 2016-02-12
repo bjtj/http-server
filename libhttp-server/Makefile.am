@@ -20,6 +20,7 @@ libhttp_serverinc_HEADERS = AnotherHttpClient.hpp \
 	HttpParameter.hpp \
 	HttpRequest.hpp \
 	HttpResponse.hpp \
+	HttpServerConfig.hpp \
 	HttpSession.hpp \
 	HttpSessionManager.hpp \
 	HttpStatusCodes.hpp \
@@ -69,6 +70,7 @@ libhttp_server_la_SOURCES = AnotherHttpClient.cpp \
 	HttpRequest.hpp \
 	HttpResponse.cpp \
 	HttpResponse.hpp \
+	HttpServerConfig.hpp \
 	HttpSession.cpp \
 	HttpSession.hpp \
 	HttpSessionManager.cpp \

@@ -223,9 +223,7 @@ namespace HTTP {
 		HttpResponseHeader & header = response.getHeader();
             
         string headerString = header.toString();
-//        int writeLen =
         connection.send(headerString.c_str(), (int)headerString.length());
-
 		// TODO: check write length and compare the header string length
 		responseHeaderTransferDone = true;
             
@@ -305,10 +303,10 @@ namespace HTTP {
 		}
 	};
 
-	AnotherHttpServer::AnotherHttpServer(int port) : port(port), httpCommunicationMaker(&dispatcher), connectionManager(httpCommunicationMaker), thread(NULL) {
+	AnotherHttpServer::AnotherHttpServer(HttpServerConfig config) : port(config.getIntegerProperty("listen.port")), httpCommunicationMaker(&dispatcher), connectionManager(httpCommunicationMaker, config.getIntegerProperty("thread.count", 20)), thread(NULL) {
 	}
     
-    AnotherHttpServer::AnotherHttpServer(int port, ServerSocketMaker * serverSocketMaker) : port(port), httpCommunicationMaker(&dispatcher), connectionManager(httpCommunicationMaker, serverSocketMaker), thread(NULL) {
+    AnotherHttpServer::AnotherHttpServer(HttpServerConfig config, ServerSocketMaker * serverSocketMaker) : port(config.getIntegerProperty("listen.port")), httpCommunicationMaker(&dispatcher), connectionManager(httpCommunicationMaker, config.getIntegerProperty("thread.count", 20), serverSocketMaker), thread(NULL) {
     }
     
 	AnotherHttpServer::~AnotherHttpServer() {

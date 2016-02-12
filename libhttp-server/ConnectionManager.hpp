@@ -10,15 +10,22 @@
 #include <vector>
 
 namespace HTTP {
-    
+
+	/**
+	 * @brief server socket maker
+	 */
     class ServerSocketMaker {
     private:
     public:
         ServerSocketMaker() {}
         virtual ~ServerSocketMaker() {}
         virtual OS::ServerSocket * makeServerSocket(int port) = 0;
+		virtual void releaseSocket(OS::ServerSocket * sock) = 0;
     };
-    
+
+	/**
+	 * @brief default server socket maker
+	 */
     class DefaultServerSocketMaker : public ServerSocketMaker {
     private:
     public:
@@ -27,6 +34,9 @@ namespace HTTP {
         virtual OS::ServerSocket * makeServerSocket(int port) {
             return new OS::ServerSocket(port);
         }
+		virtual void releaseSocket(OS::ServerSocket * sock) {
+			delete sock;
+		}
     };
     
 	/**
@@ -73,8 +83,8 @@ namespace HTTP {
 		ConnectionThreadPool threadPool;
         
     public:
-        ConnectionManager(CommunicationMaker & communicationMaker);
-        ConnectionManager(CommunicationMaker & communicationMaker, ServerSocketMaker * serverSocketMaker);
+        ConnectionManager(CommunicationMaker & communicationMaker, size_t threadCount);
+        ConnectionManager(CommunicationMaker & communicationMaker, size_t threadCount, ServerSocketMaker * serverSocketMaker);
         virtual ~ConnectionManager();
         virtual Connection * makeConnection(OS::Socket & client);
         virtual void removeConnection(Connection * connection);

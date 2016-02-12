@@ -116,7 +116,7 @@ void old() {
 	dispatcher.registerRequestHandler("/byebye", &byebye);
 
     HttpCommunicationMaker hcm(&dispatcher);
-	ConnectionManager cm(hcm);
+	ConnectionManager cm(hcm, 20);
 
 	cm.start(8083);
 
