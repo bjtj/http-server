@@ -176,6 +176,7 @@
 		E8B161341BFDF2F0002D68C7 /* FileTransfer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileTransfer.cpp; path = "../../libhttp-server/FileTransfer.cpp"; sourceTree = "<group>"; };
 		E8B161351BFDF2F0002D68C7 /* FileTransfer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FileTransfer.hpp; path = "../../libhttp-server/FileTransfer.hpp"; sourceTree = "<group>"; };
 		E8E0FEC01BD848EB00292C54 /* libhttp-server-cocoa.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libhttp-server-cocoa.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8E5232C1C6D957800D1B409 /* HttpServerConfig.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpServerConfig.hpp; path = "../../libhttp-server/HttpServerConfig.hpp"; sourceTree = "<group>"; };
 		E8FAB2381BD7D29800E89DC5 /* libhttp-server.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libhttp-server.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8FAB23B1BD7D29800E89DC5 /* http_server.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = http_server.h; sourceTree = "<group>"; };
 		E8FAB23D1BD7D29800E89DC5 /* http_server.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = http_server.mm; sourceTree = "<group>"; };
@@ -254,6 +255,7 @@
 		E8FAB2441BD7D2A500E89DC5 /* http-server-c++ */ = {
 			isa = PBXGroup;
 			children = (
+				E8E5232C1C6D957800D1B409 /* HttpServerConfig.hpp */,
 				E87F36681C51067A00970869 /* HttpSession.cpp */,
 				E87F36691C51067A00970869 /* HttpSession.hpp */,
 				E87F366A1C51067A00970869 /* HttpSessionManager.cpp */,
