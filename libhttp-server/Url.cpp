@@ -92,6 +92,12 @@ namespace HTTP {
         }
     }
 
+	Url Url::relativePath(const string & relativePath) {
+		Url u = *this;
+		u.setRelativePath(relativePath);
+		return u;
+	}
+
 	void Url::setParameter(const string & name, const string & value) {
         parameters.append(name, value);
 	}
