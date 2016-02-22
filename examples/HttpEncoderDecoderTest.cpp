@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <cstdlib>
+#include <cstdio>
 #include <libhttp-server/HttpEncoderDecoder.hpp>
 
 using namespace std;
