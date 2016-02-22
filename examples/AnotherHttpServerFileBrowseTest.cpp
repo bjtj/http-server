@@ -84,7 +84,7 @@ public:
 		size_t f = u.find("?");
 		string path = (f == string::npos) ? u : u.substr(0, f);
 		string rest = (f == string::npos) ? "" : u.substr(f);
-		return path + ";" + Text::toString(session.getId()) + rest;
+        return path + ";" + Text::toString(session.getId()) + rest;
 	}
 };
 
@@ -135,6 +135,29 @@ public:
             }
         };
         env["url"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispSession("url", session)));
+        
+        class Enc : public LISP::Procedure {
+        private:
+        public:
+            Enc(const string & name) : LISP::Procedure(name) {}
+            virtual ~Enc() {}
+            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
+                return LISP::text(HttpEncoder::encode(LISP::eval(args[0], env).toString()));
+            }
+        };
+        
+        class Dec : public LISP::Procedure {
+        private:
+        public:
+            Dec(const string & name) : LISP::Procedure(name) {}
+            virtual ~Dec() {}
+            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
+                return LISP::text(HttpDecoder::decode(LISP::eval(args[0], env).toString()));
+            }
+        };
+        
+        env["url-encode"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Enc("url-encode")));
+        env["url-decode"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Dec("url-decode")));
     }
     
     bool eval(LISP::Var & var, LISP::Env & env) {
@@ -518,6 +541,9 @@ int main(int argc, char * args[]) {
 
 	config.setProperty("thread.count", 20);
     if (config.isSecure()) {
+        
+#if defined(USE_OPENSSL)
+        
         class SecureServerSocketMaker : public ServerSocketMaker {
         private:
             string certPath;
@@ -537,6 +563,9 @@ int main(int argc, char * args[]) {
         };
         server = new AnotherHttpServer(config, new SecureServerSocketMaker(config.getCertPath(),
 																		   config.getKeyPath()));
+#else
+        throw "SSL not supported";
+#endif
     } else {
         server = new AnotherHttpServer(config);
     }

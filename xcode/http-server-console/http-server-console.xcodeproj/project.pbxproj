@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6C59ABF31C7ACFE200F814A4 /* AnotherHttpServerFileBrowseTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6C4A9F511C0BEEA500A45604 /* AnotherHttpServerFileBrowseTest.cpp */; };
 		E82789341BDCEDB70009E46A /* libhttp-server-cocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E82789311BDCED9C0009E46A /* libhttp-server-cocoa.a */; };
 		E82789401BDCEE130009E46A /* liboslayer-cocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E827893D1BDCEE050009E46A /* liboslayer-cocoa.a */; };
-		E860A87F1C493EC7007ADE6D /* AnotherHttpServerFileBrowseTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6C4A9F511C0BEEA500A45604 /* AnotherHttpServerFileBrowseTest.cpp */; };
 		E8B1611F1BFB6314002D68C7 /* res in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8B1611E1BFB6314002D68C7 /* res */; };
 /* End PBXBuildFile section */
 
@@ -73,6 +73,7 @@
 
 /* Begin PBXFileReference section */
 		6C4A9F511C0BEEA500A45604 /* AnotherHttpServerFileBrowseTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AnotherHttpServerFileBrowseTest.cpp; path = ../../../examples/AnotherHttpServerFileBrowseTest.cpp; sourceTree = "<group>"; };
+		6C59ABEF1C7AC66400F814A4 /* AnotherHttpServerDump.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AnotherHttpServerDump.cpp; path = ../../../examples/AnotherHttpServerDump.cpp; sourceTree = "<group>"; };
 		E8075A1E1C03658C00EBE4B8 /* AnotherHttpClientTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AnotherHttpClientTest.cpp; path = ../../../examples/AnotherHttpClientTest.cpp; sourceTree = "<group>"; };
 		E827891E1BDCED880009E46A /* http-server-console */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "http-server-console"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E82789211BDCED880009E46A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -131,6 +132,7 @@
 				E8075A1E1C03658C00EBE4B8 /* AnotherHttpClientTest.cpp */,
 				E87E25391C0200E0007C3B99 /* AnotherHttpClientThreadPoolTest.cpp */,
 				E8B160F51BFB4DB8002D68C7 /* AnotherHttpServerTest.cpp */,
+				6C59ABEF1C7AC66400F814A4 /* AnotherHttpServerDump.cpp */,
 				E8447C6C1BF2A5F3000E2903 /* HttpHeaderTest.cpp */,
 				E857BB511BEB9C2C00D2022F /* HttpClientPoll.cpp */,
 				E857BB521BEB9C2C00D2022F /* HttpClientTest.cpp */,
@@ -262,7 +264,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E860A87F1C493EC7007ADE6D /* AnotherHttpServerFileBrowseTest.cpp in Sources */,
+				6C59ABF31C7ACFE200F814A4 /* AnotherHttpServerFileBrowseTest.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -310,7 +312,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
-					"HAVE_OPENSSL=1",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -348,7 +349,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = "HAVE_OPENSSL=1";
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -364,6 +365,10 @@
 		E82789261BDCED880009E46A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
 				HEADER_SEARCH_PATHS = (
 					../../,
 					../../../oslayer,
@@ -383,6 +388,7 @@
 		E82789271BDCED880009E46A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				HEADER_SEARCH_PATHS = (
 					../../,
 					../../../oslayer,
