@@ -118,25 +118,14 @@ public:
     }
     virtual ~LispPage() {}
     LISP::Env & env() {return global_env;}
-    void applyWeb(HttpSession & session) {
-        applyWeb(global_env, session);
+	void applyWeb() {
+        applyWeb(global_env);
     }
-    void applyWeb(LISP::Env & env, HttpSession & session) {
-        class LispSession : public LISP::Procedure {
-        private:
-            HttpSession & session;
-        public:
-            LispSession(const string & name, HttpSession & session) :
-            LISP::Procedure(name), session(session) {}
-            virtual ~LispSession() {}
-            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-                string url = args[0].toString();
-                return LISP::text(SessionTool::urlMan(url, session));
-            }
-        };
-        env["url"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispSession("url", session)));
-        
-        class Enc : public LISP::Procedure {
+    void applySession(HttpSession & session) {
+        applySession(global_env, session);
+    }
+	void applyWeb(LISP::Env & env) {
+		class Enc : public LISP::Procedure {
         private:
         public:
             Enc(const string & name) : LISP::Procedure(name) {}
@@ -158,6 +147,24 @@ public:
         
         env["url-encode"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Enc("url-encode")));
         env["url-decode"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Dec("url-decode")));
+	}
+    void applySession(LISP::Env & env, HttpSession & session) {
+		
+        class LispSession : public LISP::Procedure {
+        private:
+            HttpSession & session;
+        public:
+            LispSession(const string & name, HttpSession & session) :
+            LISP::Procedure(name), session(session) {}
+            virtual ~LispSession() {}
+            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
+                string url = args[0].toString();
+                return LISP::text(SessionTool::urlMan(url, session));
+            }
+        };
+        env["url"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispSession("url", session)));
+        
+        
     }
     
     bool eval(LISP::Var & var, LISP::Env & env) {
@@ -323,7 +330,8 @@ public:
                 File file(browseIndexPath);
                 FileReader reader(file);
                 LispPage page;
-                page.applyWeb(session);
+                page.applyWeb();
+				page.applySession(session);
                 page.env()["*path*"] = LISP::text(path);
                 content = page.parseLispPage(reader.dumpAsString());
             } else {
@@ -458,7 +466,8 @@ public:
 			FileReader reader(file);
             
             LispPage page;
-            page.applyWeb(session);
+            page.applyWeb();
+			page.applySession(session);
             page.env()["*path*"] = LISP::text(path);
             string content = page.parseLispPage(reader.dumpAsString());
             
@@ -492,6 +501,27 @@ public:
 		}
 
 		return "";
+	}
+};
+
+class SinglePageHttpRequestHandler : public HttpRequestHandler {
+private:
+	string path;
+public:
+	SinglePageHttpRequestHandler(const string & path) : path(path) {}
+	virtual ~SinglePageHttpRequestHandler() {}
+
+	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+		File file(path);
+		FileReader reader(file);
+            
+		LispPage page;
+		page.applyWeb();
+		string content = page.parseLispPage(reader.dumpAsString());
+
+		response.setStatusCode(200);
+		response.setContentType("text/html");
+		setFixedTransfer(response, content);
 	}
 };
 
@@ -576,6 +606,8 @@ int main(int argc, char * args[]) {
 	server->registerRequestHandler("/file*", &file);
 	LoginHttpRequestHandler login;
 	server->registerRequestHandler("/login*", &login);
+	SinglePageHttpRequestHandler single(config["default.page"]);
+	server->registerRequestHandler("/", &single);
 
     printf("Listening... %d\n", config.getPort());
     
