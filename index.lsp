@@ -32,7 +32,7 @@
 (defun anchor-file (item) (format nil "<a href=\"~a?path=~a/~a\">~a</a>" (url "file") *dir* (url-encode item) item))
 (defun print-file (item) (format nil "~a~a (~:d ~a)" (mark "&nbsp;") (anchor-file (pathname-name item)) (size (file-length item)) (size-type (file-length item))))
 (defun print-dir (item) (format nil "~a~a" (mark "D") (anchor-browse (pathname-name item))))
-(defun filter (item) (not (or (eq (pathname-name item) "..") (eq (pathname-name item) ".") (eq (pathname-name item) "index.lsp"))))
+(defun filter (item) (not (or (string-prefix-p (pathname-name item) ".") (string= (pathname-name item) "index.lsp"))))
 (dolist (x (dir *dir*)) (if (filter x) (write (li (if (filep x) (print-file x) (print-dir x)))) nil))
 %>
 </ul>

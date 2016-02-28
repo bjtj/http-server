@@ -121,9 +121,6 @@ public:
 	void applyWeb() {
         applyWeb(global_env);
     }
-    void applySession(HttpSession & session) {
-        applySession(global_env, session);
-    }
 	void applyWeb(LISP::Env & env) {
 		class Enc : public LISP::Procedure {
         private:
@@ -148,6 +145,9 @@ public:
         env["url-encode"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Enc("url-encode")));
         env["url-decode"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Dec("url-decode")));
 	}
+	void applySession(HttpSession & session) {
+        applySession(global_env, session);
+    }
     void applySession(LISP::Env & env, HttpSession & session) {
 		
         class LispSession : public LISP::Procedure {
@@ -162,10 +162,56 @@ public:
                 return LISP::text(SessionTool::urlMan(url, session));
             }
         };
-        env["url"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispSession("url", session)));
-        
-        
+        env["url"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispSession("url", session)));        
     }
+	void applyRequest(HttpRequest & request) {
+        applyRequest(global_env, request);
+    }
+	void applyRequest(LISP::Env & env, HttpRequest & request) {
+		class LispRequest : public LISP::Procedure {
+        private:
+            HttpRequest & request;
+        public:
+            LispRequest(const string & name, HttpRequest & request) :
+            LISP::Procedure(name), request(request) {}
+            virtual ~LispRequest() {}
+            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
+
+				string paramName = LISP::eval(args[0], env).toString();
+				if (name.getSymbol() == "get-request-param") {
+					return LISP::text(request.getParameter(paramName));
+				}
+				
+                return "nil";
+            }
+        };
+        env["get-request-param"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispRequest("request*", request)));
+	}
+
+	void applyResponse(HttpResponse & response) {
+        applyResponse(global_env, response);
+    }
+	void applyResponse(LISP::Env & env, HttpResponse & response) {
+		class LispResponse : public LISP::Procedure {
+        private:
+            HttpResponse & response;
+        public:
+            LispResponse(const string & name, HttpResponse & response) :
+            LISP::Procedure(name), response(response) {}
+            virtual ~LispResponse() {}
+            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
+
+				if (name.getSymbol() == "set-status-code") {
+					int status = (int)LISP::eval(args[0], env).getInteger().getInteger();
+					response.setStatusCode(status);
+					return LISP::Integer(status);
+				}
+				
+                return "nil";
+            }
+        };
+        env["set-status-code"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispResponse("response*", response)));
+	}
     
     bool eval(LISP::Var & var, LISP::Env & env) {
         try {
@@ -514,13 +560,16 @@ public:
 	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
 		File file(path);
 		FileReader reader(file);
-            
-		LispPage page;
-		page.applyWeb();
-		string content = page.parseLispPage(reader.dumpAsString());
 
 		response.setStatusCode(200);
 		response.setContentType("text/html");
+            
+		LispPage page;
+		page.applyWeb();
+		page.applyRequest(request);
+		page.applyResponse(response);
+		string content = page.parseLispPage(reader.dumpAsString());
+		
 		setFixedTransfer(response, content);
 	}
 };
