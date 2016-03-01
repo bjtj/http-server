@@ -158,12 +158,29 @@ public:
             LISP::Procedure(name), session(session) {}
             virtual ~LispSession() {}
             virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-                string url = args[0].toString();
-                return LISP::text(SessionTool::urlMan(url, session));
+
+				if (name.getSymbol() == "url") {
+					string url = args[0].toString();
+					return LISP::text(SessionTool::urlMan(url, session));
+				} else if (name.getSymbol() == "get-session-value") {
+					string name = LISP::eval(args[0], env).toString();
+					return LISP::text(session[name]);
+				} else if (name.getSymbol() == "set-session-value") {
+					string name = LISP::eval(args[0], env).toString();
+					string value = LISP::eval(args[1], env).toString();
+					session[name] = value;
+					return LISP::text(value);
+				}
+
+				return "nil";
+                
             }
         };
-        env["url"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispSession("url", session)));        
-    }
+		UTIL::AutoRef<LISP::Procedure> proc(new LispSession("url", session));
+        env["url"] = LISP::Var(proc);
+		env["get-session-value"] = LISP::Var(proc);
+		env["set-session-value"] = LISP::Var(proc);
+	}
 	void applyRequest(HttpRequest & request) {
         applyRequest(global_env, request);
     }
@@ -176,7 +193,6 @@ public:
             LISP::Procedure(name), request(request) {}
             virtual ~LispRequest() {}
             virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-
 				string paramName = LISP::eval(args[0], env).toString();
 				if (name.getSymbol() == "get-request-param") {
 					return LISP::text(request.getParameter(paramName));
@@ -205,12 +221,19 @@ public:
 					int status = (int)LISP::eval(args[0], env).getInteger().getInteger();
 					response.setStatusCode(status);
 					return LISP::Integer(status);
+				} else if (name.getSymbol() == "set-response-header-field") {
+					string name = LISP::eval(args[0], env).toString();
+					string value = LISP::eval(args[1], env).toString();
+					response.getHeader().setHeaderField(name, value);
+					return LISP::text(value);
 				}
 				
                 return "nil";
             }
         };
-        env["set-status-code"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispResponse("response*", response)));
+		UTIL::AutoRef<LISP::Procedure> proc(new LispResponse("response*", response));
+        env["set-status-code"] = LISP::Var(proc);
+		env["set-response-header-field"] = LISP::Var(proc);
 	}
     
     bool eval(LISP::Var & var, LISP::Env & env) {
@@ -558,6 +581,10 @@ public:
 	virtual ~SinglePageHttpRequestHandler() {}
 
 	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+
+		HttpSession & session = SessionTool::getSession(request);
+		session.updateLastAccessTime();
+		
 		File file(path);
 		FileReader reader(file);
 
@@ -566,6 +593,7 @@ public:
             
 		LispPage page;
 		page.applyWeb();
+		page.applySession(session);
 		page.applyRequest(request);
 		page.applyResponse(response);
 		string content = page.parseLispPage(reader.dumpAsString());
@@ -657,6 +685,7 @@ int main(int argc, char * args[]) {
 	server->registerRequestHandler("/login*", &login);
 	SinglePageHttpRequestHandler single(config["default.page"]);
 	server->registerRequestHandler("/", &single);
+	server->registerRequestHandler("/index.htm*", &single);
 
     printf("Listening... %d\n", config.getPort());
     
