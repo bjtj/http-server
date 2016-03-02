@@ -393,34 +393,31 @@ public:
 		path = HttpDecoder::decode(HttpDecoder::decode_plus(path));
 
 		string content;
-        
-        // if (!login) {
-            
-        //     redirect(config, request, response, session, "login");
-        //     return;
-            
-        // } else {
-            
-            if (!browseIndexPath.empty()) {
-                File file(browseIndexPath);
-                FileReader reader(file);
-                LispPage page;
-                page.applyWeb();
-				page.applySession(session);
-				page.applyRequest(request);
-				page.applyResponse(response);
-                page.env()["*path*"] = LISP::text(path);
-                content = page.parseLispPage(reader.dumpAsString());
-            } else {
-                vector<File> files = File::list(path);
-                for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
-                    if (iter->getName() == "index.lsp") {
-                        redirect(config, request, response, session, "file?path=" + File::mergePaths(path, iter->getName()));
-                    }
-                }
-                content = renderDir(path, debug, session);
-            }
-        // }
+
+		if (!browseIndexPath.empty()) {
+			File file(browseIndexPath);
+			FileReader reader(file);
+			LispPage page;
+			page.applyWeb();
+			page.applySession(session);
+			page.applyRequest(request);
+			page.applyResponse(response);
+			page.env()["*path*"] = LISP::text(path);
+			content = page.parseLispPage(reader.dumpAsString());
+		} else {
+			if (!login) {
+				redirect(config, request, response, session, "login");
+				return;
+			} else {
+				vector<File> files = File::list(path);
+				for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
+					if (iter->getName() == "index.lsp") {
+						redirect(config, request, response, session, "file?path=" + File::mergePaths(path, iter->getName()));
+					}
+				}
+				content = renderDir(path, debug, session);
+			}
+		}
 
 		if (response.needRedirect()) {
 			redirect(config, request, response, session, response.getRedirectLocation());
