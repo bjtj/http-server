@@ -226,6 +226,10 @@ public:
 					string value = LISP::eval(args[1], env).toString();
 					response.getHeader().setHeaderField(name, value);
 					return LISP::text(value);
+				} else if (name.getSymbol() == "set-redirect") {
+					string location = LISP::eval(args[0], env).toString();
+					response.setRedirect(location);
+					return LISP::text(location);
 				}
 				
                 return "nil";
@@ -234,6 +238,8 @@ public:
 		UTIL::AutoRef<LISP::Procedure> proc(new LispResponse("response*", response));
         env["set-status-code"] = LISP::Var(proc);
 		env["set-response-header-field"] = LISP::Var(proc);
+		env["set-redirect"] = LISP::Var(proc);
+		
 	}
     
     bool eval(LISP::Var & var, LISP::Env & env) {
@@ -260,7 +266,7 @@ public:
         
         size_t f = 0;
         size_t s = 0;
-        while ((f = src.find("<%", f)) != string::npos) {
+        while (!env.quit() && (f = src.find("<%", f)) != string::npos) {
             
             if (f - s > 0) {
                 string txt = src.substr(s, f - s);
@@ -388,12 +394,12 @@ public:
 
 		string content;
         
-        if (!login) {
+        // if (!login) {
             
-            redirect(config, request, response, session, "login");
-            return;
+        //     redirect(config, request, response, session, "login");
+        //     return;
             
-        } else {
+        // } else {
             
             if (!browseIndexPath.empty()) {
                 File file(browseIndexPath);
@@ -401,6 +407,8 @@ public:
                 LispPage page;
                 page.applyWeb();
 				page.applySession(session);
+				page.applyRequest(request);
+				page.applyResponse(response);
                 page.env()["*path*"] = LISP::text(path);
                 content = page.parseLispPage(reader.dumpAsString());
             } else {
@@ -412,7 +420,12 @@ public:
                 }
                 content = renderDir(path, debug, session);
             }
-        }
+        // }
+
+		if (response.needRedirect()) {
+			redirect(config, request, response, session, response.getRedirectLocation());
+			return;
+		}
 
         setFixedTransfer(response, content);
     }

@@ -15,7 +15,7 @@ namespace HTTP {
 	/**
 	 * @brief http response constructor
 	 */
-	HttpResponse::HttpResponse() {
+	HttpResponse::HttpResponse() : _needRedirect(false) {
 	}
 	HttpResponse::~HttpResponse() {
 	}
@@ -60,5 +60,18 @@ namespace HTTP {
     }
 	void HttpResponse::clearTransfer() {
         transfer = NULL;
+	}
+
+	void HttpResponse::setRedirect(const string & location) {
+		_needRedirect = true;
+		redirectLocation = location;
+	}
+
+	string HttpResponse::getRedirectLocation() {
+		return redirectLocation;
+	}
+
+	bool HttpResponse::needRedirect() {
+		return _needRedirect;
 	}
 }

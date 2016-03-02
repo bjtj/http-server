@@ -17,10 +17,10 @@ namespace HTTP {
 		HttpSessionManager(unsigned long timeout);
 		virtual ~HttpSessionManager();
 		void clear();
-		void removeOutdatedSessions();	
-		bool hasSession(unsigned long id);	
+		void removeOutdatedSessions();
+		bool hasSession(unsigned long id);
 		HttpSession & getSession(unsigned long id);
-		HttpSession & createSession();	
+		HttpSession & createSession();
 		void destroySession(unsigned long id);
 		std::vector<HttpSession*> & getSessions();
 	};

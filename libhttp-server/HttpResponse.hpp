@@ -19,8 +19,9 @@ namespace HTTP {
 	class HttpResponse {
 	private:
 		HttpResponseHeader header;
-		
         UTIL::AutoRef<DataTransfer> transfer;
+		bool _needRedirect;
+		std::string redirectLocation;
 		
 	public:
 		HttpResponse();
@@ -43,6 +44,10 @@ namespace HTTP {
         void setTransfer(UTIL::AutoRef<DataTransfer> transfer);
         UTIL::AutoRef<DataTransfer> getTransfer();
 		void clearTransfer();
+
+		void setRedirect(const std::string & location);
+		std::string getRedirectLocation();
+		bool needRedirect();
 	};
 }
 
