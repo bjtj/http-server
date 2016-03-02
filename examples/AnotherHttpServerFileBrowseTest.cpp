@@ -6,6 +6,8 @@
 #include <libhttp-server/FileTransfer.hpp>
 #include <libhttp-server/HttpEncoderDecoder.hpp>
 #include <libhttp-server/HttpSessionManager.hpp>
+#include <libhttp-server/HttpSessionTool.hpp>
+#include <libhttp-server/LispPage.hpp>
 #include <libhttp-server/Url.hpp>
 #include <liboslayer/Lisp.hpp>
 
@@ -53,42 +55,6 @@ public:
 
 ServerConfig config;
 
-class SessionTool {
-private:
-public:
-    SessionTool() {}
-    virtual ~SessionTool() {}
-
-	static string getSessionId(HttpRequest & request) {
-		string path = request.getPath();
-		size_t f = 0;
-		if ((f = path.find(";")) != string::npos) {
-			return path.substr(f + 1);
-		}
-		return "";
-	}
-
-	static HttpSession & getSession(HttpRequest & request) {
-		string sessionId = getSessionId(request);
-		HttpSession & session = (sessionId.empty() || !sessionManager.hasSession(Text::toInt(sessionId))) ?
-			sessionManager.createSession() : sessionManager.getSession(Text::toInt(sessionId));
-		
-		if (session.outdated()) {
-			sessionManager.destroySession(session.getId());
-			return sessionManager.createSession();
-		}
-		return session;
-	}
-
-	static string urlMan(const string & u, HttpSession & session) {
-		size_t f = u.find("?");
-		string path = (f == string::npos) ? u : u.substr(0, f);
-		string rest = (f == string::npos) ? "" : u.substr(f);
-        return path + ";" + Text::toString(session.getId()) + rest;
-	}
-};
-
-
 static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse & response, HttpSession & session, const string & uri) {
     
     HttpResponseHeader & header = response.getHeader();
@@ -104,206 +70,12 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
     response.setStatusCode(302);
     header.setHeaderField("Location", (config.isSecure() ? "https://" : "http://") +
                           host + ":" + port + "/" +
-                          SessionTool::urlMan(uri, session));
+                          HttpSessionTool::urlMan(uri, session));
     response.setContentType("text/html");
     header.setConnection("close");
 }
 
-class LispPage {
-private:
-    LISP::Env global_env;
-public:
-    LispPage() {
-        LISP::native(global_env);
-    }
-    virtual ~LispPage() {}
-    LISP::Env & env() {return global_env;}
-	void applyWeb() {
-        applyWeb(global_env);
-    }
-	void applyWeb(LISP::Env & env) {
-		class Enc : public LISP::Procedure {
-        private:
-        public:
-            Enc(const string & name) : LISP::Procedure(name) {}
-            virtual ~Enc() {}
-            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-                return LISP::text(HttpEncoder::encode(LISP::eval(args[0], env).toString()));
-            }
-        };
-        
-        class Dec : public LISP::Procedure {
-        private:
-        public:
-            Dec(const string & name) : LISP::Procedure(name) {}
-            virtual ~Dec() {}
-            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-                return LISP::text(HttpDecoder::decode(LISP::eval(args[0], env).toString()));
-            }
-        };
-        
-        env["url-encode"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Enc("url-encode")));
-        env["url-decode"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Dec("url-decode")));
-	}
-	void applySession(HttpSession & session) {
-        applySession(global_env, session);
-    }
-    void applySession(LISP::Env & env, HttpSession & session) {
-		
-        class LispSession : public LISP::Procedure {
-        private:
-            HttpSession & session;
-        public:
-            LispSession(const string & name, HttpSession & session) :
-            LISP::Procedure(name), session(session) {}
-            virtual ~LispSession() {}
-            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
 
-				if (name.getSymbol() == "url") {
-					string url = args[0].toString();
-					return LISP::text(SessionTool::urlMan(url, session));
-				} else if (name.getSymbol() == "get-session-value") {
-					string name = LISP::eval(args[0], env).toString();
-					return LISP::text(session[name]);
-				} else if (name.getSymbol() == "set-session-value") {
-					string name = LISP::eval(args[0], env).toString();
-					string value = LISP::eval(args[1], env).toString();
-					session[name] = value;
-					return LISP::text(value);
-				}
-
-				return "nil";
-                
-            }
-        };
-		UTIL::AutoRef<LISP::Procedure> proc(new LispSession("url", session));
-        env["url"] = LISP::Var(proc);
-		env["get-session-value"] = LISP::Var(proc);
-		env["set-session-value"] = LISP::Var(proc);
-	}
-	void applyRequest(HttpRequest & request) {
-        applyRequest(global_env, request);
-    }
-	void applyRequest(LISP::Env & env, HttpRequest & request) {
-		class LispRequest : public LISP::Procedure {
-        private:
-            HttpRequest & request;
-        public:
-            LispRequest(const string & name, HttpRequest & request) :
-            LISP::Procedure(name), request(request) {}
-            virtual ~LispRequest() {}
-            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				string paramName = LISP::eval(args[0], env).toString();
-				if (name.getSymbol() == "get-request-param") {
-					return LISP::text(request.getParameter(paramName));
-				}
-				
-                return "nil";
-            }
-        };
-        env["get-request-param"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispRequest("request*", request)));
-	}
-
-	void applyResponse(HttpResponse & response) {
-        applyResponse(global_env, response);
-    }
-	void applyResponse(LISP::Env & env, HttpResponse & response) {
-		class LispResponse : public LISP::Procedure {
-        private:
-            HttpResponse & response;
-        public:
-            LispResponse(const string & name, HttpResponse & response) :
-            LISP::Procedure(name), response(response) {}
-            virtual ~LispResponse() {}
-            virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-
-				if (name.getSymbol() == "set-status-code") {
-					int status = (int)LISP::eval(args[0], env).getInteger().getInteger();
-					response.setStatusCode(status);
-					return LISP::Integer(status);
-				} else if (name.getSymbol() == "set-response-header-field") {
-					string name = LISP::eval(args[0], env).toString();
-					string value = LISP::eval(args[1], env).toString();
-					response.getHeader().setHeaderField(name, value);
-					return LISP::text(value);
-				} else if (name.getSymbol() == "set-redirect") {
-					string location = LISP::eval(args[0], env).toString();
-					response.setRedirect(location);
-					return LISP::text(location);
-				}
-				
-                return "nil";
-            }
-        };
-		UTIL::AutoRef<LISP::Procedure> proc(new LispResponse("response*", response));
-        env["set-status-code"] = LISP::Var(proc);
-		env["set-response-header-field"] = LISP::Var(proc);
-		env["set-redirect"] = LISP::Var(proc);
-		
-	}
-    
-    bool eval(LISP::Var & var, LISP::Env & env) {
-        try {
-            LISP::eval(var, env);
-            return !env.quit();
-        } catch (const char * e) {
-            cout << "ERROR: " << e << endl;
-            return false;
-        } catch (string & e) {
-            cout << "ERROR: " << e << endl;
-            return false;
-        }
-    }
-    
-    bool compile(const string & line, LISP::Env & env) {
-        LISP::Var var = LISP::parse(line);
-        return eval(var, env);
-    }
-    string parseLispPage(const string & src) {
-        return parseLispPage(global_env, src);
-    }
-    string parseLispPage(LISP::Env & env, const string & src) {
-        
-        size_t f = 0;
-        size_t s = 0;
-        while (!env.quit() && (f = src.find("<%", f)) != string::npos) {
-            
-            if (f - s > 0) {
-                string txt = src.substr(s, f - s);
-                LISP::Var & content = env["*content*"];
-                env["*content*"] = LISP::text(content.nil() ? txt : content.toString() + txt);
-            }
-            
-            size_t e = src.find("%>", f);
-            string code = src.substr(f + 2, e - (f + 2));
-            
-            if (*code.begin() == '=') {
-                string line = Text::trim(code.substr(1));
-                line = "(string-append *content* " + line + ")";
-                compile(line, env);
-            } else {
-                vector<string> lines = Text::split(code, "\n");
-                for (vector<string>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
-                    string & line = *iter;
-                    if (!line.empty()) {
-                        if (!compile(line, env)) {
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            s = f = e + 2;
-        }
-        if (!env.quit() && s < src.length()) {
-            string txt = src.substr(s);
-            LISP::Var & content = env["*content*"];
-            env["*content*"] = LISP::text(content.nil() ? txt : content.toString() + txt);
-        }
-        
-        return env["*content*"].toString();
-    }
-};
 
 class LoginHttpRequestHandler : public HttpRequestHandler {
 private:
@@ -312,7 +84,7 @@ public:
 	virtual ~LoginHttpRequestHandler() {}
 
 	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
-		HttpSession & session = SessionTool::getSession(request);
+		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
 		session.updateLastAccessTime();
 
 		bool login = !session["login"].compare("yes");
@@ -340,7 +112,7 @@ public:
             content.append("<meta charset=\"UTF-8\">");
             content.append("</head>");
             content.append("<body>");
-            content.append("<form method=\"GET\" action=\"" + SessionTool::urlMan("login", session) + "\">" +
+            content.append("<form method=\"GET\" action=\"" + HttpSessionTool::urlMan("login", session) + "\">" +
 						   "Password: <input type=\"password\" name=\"pass\"/></form>");
             content.append("</body>");
             content.append("</html>");
@@ -364,7 +136,7 @@ public:
     
     virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
 
-		HttpSession & session = SessionTool::getSession(request);
+		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
 		session.updateLastAccessTime();
         
         HttpResponseHeader & responseHeader = response.getHeader();
@@ -447,7 +219,7 @@ public:
                 content.append("<form>Path: <input type=\"text\" name=\"path\"/></form>");
             }
             content.append("<h1>TJ Entertainment</h1>");
-            content.append("<p><a href=\"" + SessionTool::urlMan("browse", session) + "\">home</a></p>");
+            content.append("<p><a href=\"" + HttpSessionTool::urlMan("browse", session) + "\">home</a></p>");
             content.append("<ul>");
             for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
                 
@@ -458,13 +230,13 @@ public:
                 content.append("<li>");
                 if (iter->isDirectory()) {
                     content.append("<span style=\"display:inline-block;width:15px;\">D</span>");
-                    content.append("<a href=\"" + SessionTool::urlMan("browse", session) + "?path=" +
+                    content.append("<a href=\"" + HttpSessionTool::urlMan("browse", session) + "?path=" +
 								   File::mergePaths(path, iter->getName()) + "\">");
                     content.append(iter->getName());
                     content.append("</a>");
                 } else {
                     content.append("<span style=\"display:inline-block;width:15px;\">&nbsp;</span>");
-                    content.append("<a href=\"" + SessionTool::urlMan("file", session) + "?path=" +
+                    content.append("<a href=\"" + HttpSessionTool::urlMan("file", session) + "?path=" +
 								   File::mergePaths(path, iter->getName()) + "\">");
                     content.append(iter->getName());
                     content.append("</a>");
@@ -498,7 +270,7 @@ public:
 
 	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
 
-		HttpSession & session = SessionTool::getSession(request);
+		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
 		session.updateLastAccessTime();
         
         HttpResponseHeader & responseHeader = response.getHeader();
@@ -592,7 +364,7 @@ public:
 
 	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
 
-		HttpSession & session = SessionTool::getSession(request);
+		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
 		session.updateLastAccessTime();
 		
 		File file(path);
