@@ -1,4 +1,4 @@
-noinst_PROGRAMS=AnotherHttpClientTest AnotherHttpServerTest HttpClientTest FileBrowseHttpServerTest urlTest sessionTest httpEncoderDecoderTest
+noinst_PROGRAMS=AnotherHttpClientTest AnotherHttpServerTest HttpClientTest FileBrowseHttpServerTest urlTest sessionTest httpEncoderDecoderTest WebApp
 
 AnotherHttpClientTest_SOURCES = AnotherHttpClientTest.cpp
 AnotherHttpClientTest_CPPFLAGS = -I$(top_srcdir)
@@ -42,3 +42,9 @@ httpEncoderDecoderTest_CPPFLAGS = -I$(top_srcdir)
 httpEncoderDecoderTest_CXXFLAGS=$(PTHREAD_CXXFLAGS)
 httpEncoderDecoderTest_LDFLAGS=$(PTHREAD_CFLAGS)
 httpEncoderDecoderTest_LDADD = ../libhttp-server/libhttp-server.la
+
+WebApp_SOURCES = WebApp.cpp
+WebApp_CPPFLAGS = -I$(top_srcdir)
+WebApp_CXXFLAGS=$(PTHREAD_CXXFLAGS)
+WebApp_LDFLAGS=$(PTHREAD_CFLAGS)
+WebApp_LDADD = ../libhttp-server/libhttp-server.la
