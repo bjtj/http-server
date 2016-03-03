@@ -92,7 +92,7 @@ namespace HTTP {
 		virtual ~SimpleHttpRequestHandlerDispatcher();
 		virtual void registerRequestHandler(const std::string & pattern, HttpRequestHandler * handler);
 		virtual void unregisterRequestHandler(const std::string & pattern);
-		virtual HttpRequestHandler * getRequestHandler(const std::string & query);
+		virtual HttpRequestHandler * getRequestHandler(const std::string & path);
 	};
 
 	/**

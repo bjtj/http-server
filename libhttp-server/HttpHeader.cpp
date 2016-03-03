@@ -218,28 +218,98 @@ namespace HTTP {
 	}
 	void HttpRequestHeader::parsePath(const string & path) {
 
-		size_t sep = path.find("?");
-		if (sep != string::npos) {
-			resourcePath = path.substr(0, sep);
-			parseQuery(path.substr(sep + 1));
-		} else {
-			resourcePath = path;
+		params.clear();
+		
+		resourcePath = extractResourcePath(path);
+		vector<NameValue> nvs = parseSemiColonParameters(extractWithoutQuery(extractWithoutFragment(path)));
+		setParameters(nvs);
+		parseQuery(extractQuery(extractWithoutFragment(path)));
+		fragment = extractFragment(path);
+	}
+	string HttpRequestHeader::extractResourcePath(const string & path) {
+		string ret = extractWithoutFragment(path);
+		ret = extractWithoutQuery(ret);
+		ret = extractWithoutSemicolon(ret);
+		return ret;
+	}
+	string HttpRequestHeader::extractWithoutSemicolon(const string & path) {
+		size_t s = path.find(";");
+		if (s != string::npos) {
+			return path.substr(0, s);
 		}
+		return path;
+	}
+	string HttpRequestHeader::extractWithoutQuery(const string & path) {
+		size_t s = path.find("?");
+		if (s != string::npos) {
+			return path.substr(0, s);
+		}
+		return path;
+	}
+	string HttpRequestHeader::extractQuery(const string & path) {
+		size_t s = path.find("?");
+		if (s != string::npos) {
+			return extractWithoutFragment(path.substr(s + 1));
+		}
+		return "";
+	}
+	string HttpRequestHeader::extractWithoutFragment(const string & path) {
+		size_t s = path.find("#");
+		if (s != string::npos) {
+			return path.substr(0, s);
+		}
+		return path;
+	}
+	string HttpRequestHeader::extractFragment(const string & path) {
+		size_t s = path.find("#");
+		if (s != string::npos) {
+			return path.substr(s + 1);
+		}
+		return "";
+	}
+	vector<NameValue> HttpRequestHeader::parseSemiColonParameters(const string & path) {
+
+		vector<NameValue> nvs;
+		
+		size_t s = path.find(";");
+		if (s == string::npos) {
+			return nvs;
+		}
+
+		while (s != string::npos) {
+			size_t f = path.find(";", s + 1);
+			string part;
+			if (f != string::npos) {
+				part = path.substr(s + 1, f);
+			} else {
+				part = path.substr(s + 1);
+			}
+			NameValue nv = parseNameValue(part);
+			nvs.push_back(nv);
+			s = f;
+		}
+
+		return nvs;
+	}
+	NameValue HttpRequestHeader::parseNameValue(const string & text) {
+		NameValue nv;
+		size_t f = text.find("=");
+		if (f != string::npos) {
+			nv.name() = text.substr(0, f);
+			nv.value() = text.substr(f + 1);
+		} else {
+			nv.name() = text;
+		}
+		return nv;
 	}
 	void HttpRequestHeader::parseQuery(const string & query) {
-		params.clear();
 		if (query.empty()) {
 			return;
 		}
 		vector<string> queries = Text::split(query, "&");
 		for (size_t i = 0; i < queries.size(); i++) {
-			string q = queries[i];
-			size_t sep = q.find("=");
-			if (sep != string::npos) {
-				setParameter(q.substr(0, sep), q.substr(sep + 1));
-			} else {
-				setParameter(q, "");
-			}
+			NameValue nv = parseNameValue(queries[i]);
+			setParameter(nv.name(), nv.value());
 		}
 	}
     vector<string> HttpRequestHeader::getParameterNames() {
@@ -262,6 +332,12 @@ namespace HTTP {
 			params[name] = param;
 		}
 		params[name].appendValue(value);
+	}
+
+	void HttpRequestHeader::setParameters(vector<NameValue> & nvs) {
+		for (vector<NameValue>::iterator iter = nvs.begin(); iter != nvs.end(); iter++) {
+			setParameter(iter->name(), iter->value());
+		}
 	}
 
     void HttpRequestHeader::setHost(const std::string & host) {

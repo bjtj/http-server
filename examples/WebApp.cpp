@@ -137,7 +137,7 @@ int main(int argc, char * args[]) {
 
 	SinglePageHttpRequestHandler single(config["default.page"]);
 	server->registerRequestHandler("/", &single);
-	server->registerRequestHandler("/index.htm*", &single);
+	server->registerRequestHandler("/index.htm", &single);
 
     printf("Listening... %d\n", config.getPort());
     
@@ -150,6 +150,12 @@ int main(int argc, char * args[]) {
 				break;
 			} else if (!strcmp(buffer, "s")) {
 				printf("Listen port: %d\n", config.getPort());
+			} else if (!strcmp(buffer, "apps")) {
+				// TODO: app list
+			} else if (!strcmp(buffer, "load")) {
+				// TODO: load app -> url -> path
+			} else if (!strcmp(buffer, "unload")) {
+				// TODO: unload app -> url
 			}
 		}
 	}

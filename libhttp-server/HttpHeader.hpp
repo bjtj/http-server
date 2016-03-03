@@ -7,6 +7,7 @@
 #include <map>
 #include <cstdlib>
 
+#include <liboslayer/StringElement.hpp>
 #include "HttpParameter.hpp"
 
 namespace HTTP {
@@ -84,6 +85,7 @@ namespace HTTP {
 	private:
 		std::string resourcePath;
 		std::map<std::string, HttpParameter> params;
+		std::string fragment;
 
 	public:
 		HttpRequestHeader();
@@ -91,24 +93,28 @@ namespace HTTP {
 		virtual ~HttpRequestHeader();
 
 		virtual void clear();
-        
         virtual void setHeader(const HttpHeader & other);
-
 		std::string getMethod() const;
 		void setMethod(const std::string & method) ;
 		std::string getPath() const;
 		void setPath(const std::string & path) ;
 		std::string getProtocol() const;
 		void setProtocol(const std::string & protocol) ;
-
+		std::string extractResourcePath(const std::string & path);
+		std::string extractWithoutSemicolon(const std::string & path);
+		std::string extractWithoutQuery(const std::string & path);
+		std::string extractQuery(const std::string & path);
+		std::string extractWithoutFragment(const std::string & path);
+		std::string extractFragment(const std::string & path);
+		std::vector<UTIL::NameValue> parseSemiColonParameters(const std::string & path);
+		UTIL::NameValue parseNameValue(const std::string & text);
 		void parsePath(const std::string & path);
 		void parseQuery(const std::string & query);
-
         std::vector<std::string> getParameterNames();
 		std::string getParameter(std::string name);
 		std::vector<std::string> getParameters(std::string name);
 		void setParameter(std::string name, std::string value);
-        
+		void setParameters(std::vector<UTIL::NameValue> & nvs);
         void setHost(const std::string & host);
 	};
 

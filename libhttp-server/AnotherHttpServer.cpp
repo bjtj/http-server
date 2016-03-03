@@ -81,10 +81,10 @@ namespace HTTP {
 		}
 	}
 
-	HttpRequestHandler * SimpleHttpRequestHandlerDispatcher::getRequestHandler(const string & query) {
+	HttpRequestHandler * SimpleHttpRequestHandlerDispatcher::getRequestHandler(const string & path) {
 		for (vector<RequestHandlerNode>::iterator iter = handlers.begin(); iter != handlers.end(); iter++) {
 			RequestHandlerNode & node = *iter;
-			if (node.patternMatch(query)) {
+			if (node.patternMatch(path)) {
 				return node.getHandler();
 			}
 		}

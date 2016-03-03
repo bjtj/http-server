@@ -51,6 +51,7 @@ fi
 AC_CONFIG_FILES([Makefile
 				 libhttp-server/Makefile
                  examples/Makefile
+				 tests/Makefile
 				 http-server.pc])
 
 AC_OUTPUT

@@ -460,14 +460,14 @@ int main(int argc, char * args[]) {
     }
 
 	FileBrowseHttpRequestHandler browse(config.getDefaultBrowsePath(), config.getBrowseIndexPath());
-	server->registerRequestHandler("/browse*", &browse);
+	server->registerRequestHandler("/browse", &browse);
 	FileDownloadHttpRequestHandler file;
-	server->registerRequestHandler("/file*", &file);
+	server->registerRequestHandler("/file", &file);
 	LoginHttpRequestHandler login;
-	server->registerRequestHandler("/login*", &login);
+	server->registerRequestHandler("/login", &login);
 	SinglePageHttpRequestHandler single(config["default.page"]);
 	server->registerRequestHandler("/", &single);
-	server->registerRequestHandler("/index.htm*", &single);
+	server->registerRequestHandler("/index.htm", &single);
 
     printf("Listening... %d\n", config.getPort());
     

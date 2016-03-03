@@ -38,6 +38,11 @@ install() {
 	$BASE/configure && make && sudo make install
 }
 
+check() {
+	cd $DIR_BUILD
+	make check
+}
+
 case $OPT in
 	reconf)
 		reconf
@@ -56,6 +61,9 @@ case $OPT in
 	install)
 		reconf_if_need
 		install
+		;;
+	check)
+		check
 		;;
 	dist)
 		cd $DIR_BUILD && make dist
