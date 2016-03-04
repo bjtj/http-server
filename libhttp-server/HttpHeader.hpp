@@ -45,19 +45,21 @@ namespace HTTP {
 		virtual void setPart3(const std::string & part);
 
 		std::string makeFirstLine() const;
-		
-		virtual std::string & getHeaderField(const std::string & name);
-        virtual std::string getHeaderField(const std::string & name) const;
-		virtual std::string & getHeaderFieldIgnoreCase(const std::string & name);
-		virtual std::string getHeaderFieldIgnoreCase(const std::string & name) const;
-		virtual int getHeaderFieldAsInteger(std::string name) const;
-		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name) const;
-		virtual void setHeaderField(std::string name, std::string value);
-		virtual void setHeaderFields(std::map<std::string, std::string> & fields);
-		virtual void appendHeaderFields(const std::map<std::string, std::string> & fields);
-		virtual std::map<std::string, std::string> & getHeaderFields();
-		virtual void removeHeaderField(std::string name);
-		virtual void removeHeaderFieldIgnoreCase(std::string name);
+
+		bool hasHeaderField(const std::string & name) const;
+		std::string & getHeaderField(const std::string & name);
+		std::string getHeaderField(const std::string & name) const;
+		bool hasHeaderFieldIgnoreCase(const std::string & name) const;
+		std::string & getHeaderFieldIgnoreCase(const std::string & name);
+		std::string getHeaderFieldIgnoreCase(const std::string & name) const;
+		int getHeaderFieldAsInteger(std::string name) const;
+		int getHeaderFieldIgnoreCaseAsInteger(std::string name) const;
+		void setHeaderField(std::string name, std::string value);
+		void setHeaderFields(std::map<std::string, std::string> & fields);
+		void appendHeaderFields(const std::map<std::string, std::string> & fields);
+		std::map<std::string, std::string> & getHeaderFields();
+		void removeHeaderField(std::string name);
+		void removeHeaderFieldIgnoreCase(std::string name);
 
         /* HTTP */
         

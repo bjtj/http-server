@@ -24,7 +24,6 @@ namespace HTTP {
 
 	void HttpRequestHandler::onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
 	}
-
 	void HttpRequestHandler::onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
 	}
 	void HttpRequestHandler::onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {

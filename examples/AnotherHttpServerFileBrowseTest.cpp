@@ -4,7 +4,6 @@
 #include <liboslayer/Properties.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/FileTransfer.hpp>
-#include <libhttp-server/HttpEncoderDecoder.hpp>
 #include <libhttp-server/HttpSessionManager.hpp>
 #include <libhttp-server/HttpSessionTool.hpp>
 #include <libhttp-server/LispPage.hpp>
@@ -162,8 +161,6 @@ public:
 		bool debug = !request.getParameter("debug").empty();
         bool login = !session["login"].compare("yes");
 
-		path = HttpDecoder::decode(HttpDecoder::decode_plus(path));
-
 		string content;
 
 		if (!browseIndexPath.empty()) {
@@ -294,7 +291,6 @@ public:
 			return;
 		}
 
-		path = HttpDecoder::decode(HttpDecoder::decode_plus(path));
         logger.logd(Text::format("** Path: %s [%s:%d]", path.c_str(), request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort()));
 
 		File file(path);

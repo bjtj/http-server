@@ -2,6 +2,7 @@
 #include "LispPage.hpp"
 #include "HttpEncoderDecoder.hpp"
 #include "HttpSessionTool.hpp"
+#include <liboslayer/FileReaderWriter.hpp>
 
 namespace HTTP {
 
@@ -140,7 +141,23 @@ namespace HTTP {
 		env["set-status-code"] = LISP::Var(proc);
 		env["set-response-header-field"] = LISP::Var(proc);
 		env["set-redirect"] = LISP::Var(proc);
-		
+	}
+	void LispPage::applyLoadPage() {
+		applyLoadPage(global_env);
+	}
+	void LispPage::applyLoadPage(LISP::Env & env) {
+		class LispLoadPage : public LISP::Procedure {
+		private:
+		public:
+			LispLoadPage(const string & name) : LISP::Procedure(name) {}
+			virtual ~LispLoadPage() {}
+			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
+				FileReader reader(LISP::pathname(LISP::eval(args[0], env)).getFile());
+				return LISP::text(LispPage::parseLispPage(env, reader.dumpAsString()));
+			}
+		};
+		UTIL::AutoRef<LISP::Procedure> proc(new LispLoadPage("load-page"));
+		env["load-page"] = LISP::Var(proc);
 	}
     
 	bool LispPage::eval(LISP::Var & var, LISP::Env & env) {

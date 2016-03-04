@@ -4,7 +4,6 @@
 #include <liboslayer/Properties.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/FileTransfer.hpp>
-#include <libhttp-server/HttpEncoderDecoder.hpp>
 #include <libhttp-server/HttpSessionManager.hpp>
 #include <libhttp-server/HttpSessionTool.hpp>
 #include <libhttp-server/LispPage.hpp>
@@ -66,7 +65,11 @@ public:
 	SinglePageHttpRequestHandler(const string & path) : path(path) {}
 	virtual ~SinglePageHttpRequestHandler() {}
 
-	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+	virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+
+		if (request.isWwwFormUrlEncoded()) {
+			request.parseWwwFormUrlencoded();
+		}
 
 		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
 		session.updateLastAccessTime();
@@ -82,6 +85,7 @@ public:
 		page.applySession(session);
 		page.applyRequest(request);
 		page.applyResponse(response);
+		page.applyLoadPage();
 		string content = page.parseLispPage(reader.dumpAsString());
 		
 		setFixedTransfer(response, content);

@@ -62,6 +62,6 @@ namespace HTTP {
 	}
 
 	string FileTransfer::getString() {
-		return "";
+		throw Exception("FileTrasnfer not support getString()", -1, 0);
 	}
 }

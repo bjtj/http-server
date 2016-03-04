@@ -51,6 +51,8 @@ namespace HTTP {
 		int getContentLength();
 		std::string getContentType();
 
+		bool isWwwFormUrlEncoded();
+		void parseWwwFormUrlencoded();
         UTIL::AutoRef<DataTransfer> getTransfer();
         void setTransfer(UTIL::AutoRef<DataTransfer> transfer);
         void clearTransfer();

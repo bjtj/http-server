@@ -69,6 +69,15 @@ namespace HTTP {
 	string HttpRequest::getContentType() {
 		return header.getContentType();
 	}
+	bool HttpRequest::isWwwFormUrlEncoded() {
+		return (header.getContentType().empty() || header.getContentType() == "application/x-www-form-urlencoded");
+	}
+	void HttpRequest::parseWwwFormUrlencoded() {
+		if (transfer.nil()) {
+			return;
+		}
+		header.parseQuery(transfer->getString());
+	}
     UTIL::AutoRef<DataTransfer> HttpRequest::getTransfer() {
         return transfer;
     }

@@ -1,12 +1,11 @@
 #include <liboslayer/Text.hpp>
-
+#include "HttpEncoderDecoder.hpp"
 #include "HttpHeader.hpp"
 
 namespace HTTP {
 
 	using namespace std;
 	using namespace UTIL;
-
 
 	/**
 	 * @brief HttpHeader
@@ -74,6 +73,9 @@ namespace HTTP {
 	string HttpHeader::makeFirstLine() const {
 		return (part1 + " " + part2 + " " + part3);
 	}
+	bool HttpHeader::hasHeaderField(const std::string & name) const {
+		return fields.find(name) != fields.end();
+	}
 	string & HttpHeader::getHeaderField(const string & name) {
 		return fields[name];
 	}
@@ -85,6 +87,14 @@ namespace HTTP {
         }
         return "";
     }
+	bool HttpHeader::hasHeaderFieldIgnoreCase(const std::string & name) const {
+		for (map<string, string>::const_iterator iter = fields.begin(); iter != fields.end(); iter++) {
+			if (Text::equalsIgnoreCase(iter->first, name)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	string & HttpHeader::getHeaderFieldIgnoreCase(const string & name) {
 		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
 			if (Text::equalsIgnoreCase(iter->first, name)) {
@@ -309,7 +319,7 @@ namespace HTTP {
 		vector<string> queries = Text::split(query, "&");
 		for (size_t i = 0; i < queries.size(); i++) {
 			NameValue nv = parseNameValue(queries[i]);
-			setParameter(nv.name(), nv.value());
+			setParameter(nv.name(), HttpDecoder::decode(HttpDecoder::decode_plus(nv.value())));
 		}
 	}
     vector<string> HttpRequestHeader::getParameterNames() {
