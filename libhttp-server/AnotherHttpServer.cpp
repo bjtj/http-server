@@ -22,6 +22,9 @@ namespace HTTP {
 	HttpRequestHandler::~HttpRequestHandler() {
 	}
 
+	void HttpRequestHandler::onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+	}
+
 	void HttpRequestHandler::onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
 	}
 	void HttpRequestHandler::onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
@@ -29,8 +32,8 @@ namespace HTTP {
     
 	void HttpRequestHandler::setFixedTransfer(HttpResponse & response, const string & content) {
 
-		FixedTransfer * transfer = new FixedTransfer(content.length());
-        ChunkedBuffer & cb = transfer->getChunkedBuffer();
+		AutoRef<DataTransfer> transfer(new FixedTransfer(content.length()));
+        ChunkedBuffer & cb = ((FixedTransfer*)&transfer)->getChunkedBuffer();
         cb.write(content.c_str(), content.length());
         cb.resetPosition();
 
@@ -47,9 +50,7 @@ namespace HTTP {
 
 	void HttpRequestHandler::setFileTransfer(HttpResponse & response, OS::File & file) {
 
-		FileReader * reader = new FileReader(file);
-
-		FileTransfer * transfer = new FileTransfer(reader, file.getSize());
+		AutoRef<DataTransfer> transfer(new FileTransfer(new FileReader(file), file.getSize()));
 
 		response.clearTransfer();
 		response.setTransfer(transfer);
@@ -66,7 +67,7 @@ namespace HTTP {
 	SimpleHttpRequestHandlerDispatcher::~SimpleHttpRequestHandlerDispatcher() {
 	}
 
-	void SimpleHttpRequestHandlerDispatcher::registerRequestHandler(const string & pattern, HttpRequestHandler * handler) {
+	void SimpleHttpRequestHandlerDispatcher::registerRequestHandler(const string & pattern, AutoRef<HttpRequestHandler> handler) {
 		handlers.push_back(RequestHandlerNode(pattern, handler));
 	}
 
@@ -81,7 +82,7 @@ namespace HTTP {
 		}
 	}
 
-	HttpRequestHandler * SimpleHttpRequestHandlerDispatcher::getRequestHandler(const string & path) {
+	AutoRef<HttpRequestHandler> SimpleHttpRequestHandlerDispatcher::getRequestHandler(const string & path) {
 		for (vector<RequestHandlerNode>::iterator iter = handlers.begin(); iter != handlers.end(); iter++) {
 			RequestHandlerNode & node = *iter;
 			if (node.patternMatch(path)) {
@@ -152,8 +153,8 @@ namespace HTTP {
 	}
     
     void HttpCommunication::readRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
-		HttpRequestHandler * handler = dispatcher->getRequestHandler(request.getPath());
-		if (handler) {
+		AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
+		if (!handler.nil()) {
 			handler->onHttpRequestContent(request, response, packet);
 		}
     }
@@ -162,8 +163,8 @@ namespace HTTP {
         
         prepareRequestContentTransfer(request);
         
-		HttpRequestHandler * handler = dispatcher->getRequestHandler(request.getPath());
-		if (handler) {
+		AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
+		if (!handler.nil()) {
 			handler->onHttpRequestHeaderCompleted(request, response);
 		}
 
@@ -178,8 +179,8 @@ namespace HTTP {
 
 	void HttpCommunication::onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
 
-		HttpRequestHandler * handler = dispatcher->getRequestHandler(request.getPath());
-        if (handler) {
+		AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
+        if (!handler.nil()) {
             handler->onHttpRequestContentCompleted(request, response);
         } else {
 			handleError(request, response, 404);
@@ -312,7 +313,7 @@ namespace HTTP {
 	AnotherHttpServer::~AnotherHttpServer() {
 	}
 
-	void AnotherHttpServer::registerRequestHandler(const string & pattern, HttpRequestHandler * handler) {
+	void AnotherHttpServer::registerRequestHandler(const string & pattern, AutoRef<HttpRequestHandler> handler) {
 		dispatcher.registerRequestHandler(pattern, handler);
 	}
     

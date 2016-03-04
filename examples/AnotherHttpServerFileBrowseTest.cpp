@@ -459,15 +459,16 @@ int main(int argc, char * args[]) {
         server = new AnotherHttpServer(config);
     }
 
-	FileBrowseHttpRequestHandler browse(config.getDefaultBrowsePath(), config.getBrowseIndexPath());
-	server->registerRequestHandler("/browse", &browse);
-	FileDownloadHttpRequestHandler file;
-	server->registerRequestHandler("/file", &file);
-	LoginHttpRequestHandler login;
-	server->registerRequestHandler("/login", &login);
-	SinglePageHttpRequestHandler single(config["default.page"]);
-	server->registerRequestHandler("/", &single);
-	server->registerRequestHandler("/index.htm", &single);
+	AutoRef<HttpRequestHandler> browse(new FileBrowseHttpRequestHandler(config.getDefaultBrowsePath(),
+																		config.getBrowseIndexPath()));
+	server->registerRequestHandler("/browse", browse);
+	AutoRef<HttpRequestHandler> file(new FileDownloadHttpRequestHandler);
+	server->registerRequestHandler("/file", file);
+	AutoRef<HttpRequestHandler> login(new LoginHttpRequestHandler);
+	server->registerRequestHandler("/login", login);
+	AutoRef<HttpRequestHandler> single(new SinglePageHttpRequestHandler(config["default.page"]));
+	server->registerRequestHandler("/", single);
+	server->registerRequestHandler("/index.htm", single);
 
     printf("Listening... %d\n", config.getPort());
     

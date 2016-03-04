@@ -13,6 +13,7 @@
 #include "HttpServerConfig.hpp"
 
 #include <liboslayer/os.hpp>
+#include <liboslayer/AutoRef.hpp>
 #include <liboslayer/Text.hpp>
 
 namespace HTTP {
@@ -27,7 +28,7 @@ namespace HTTP {
 		HttpRequestHandler();
 		virtual ~HttpRequestHandler();
     
-		virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) = 0;
+		virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response);
 		virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet);
         virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response);
 
@@ -45,9 +46,9 @@ namespace HTTP {
 
 		HttpRequestHandlerDispatcher() {}
 		virtual ~HttpRequestHandlerDispatcher() {}
-		virtual void registerRequestHandler(const std::string & pattern, HttpRequestHandler * handler) = 0;
+		virtual void registerRequestHandler(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler) = 0;
 		virtual void unregisterRequestHandler(const std::string & pattern) = 0;
-		virtual HttpRequestHandler * getRequestHandler(const std::string & query) = 0;
+		virtual UTIL::AutoRef<HttpRequestHandler> getRequestHandler(const std::string & query) = 0;
 	};
 
 	/**
@@ -63,10 +64,10 @@ namespace HTTP {
 		class RequestHandlerNode {
 		private:
 			std::string pattern;
-			HttpRequestHandler * handler;
+			UTIL::AutoRef<HttpRequestHandler> handler;
 
 		public:
-			RequestHandlerNode(const std::string & pattern, HttpRequestHandler * handler) : pattern(pattern), handler(handler) {
+			RequestHandlerNode(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler) : pattern(pattern), handler(handler) {
 			}
 			virtual ~RequestHandlerNode() {
 			}
@@ -79,7 +80,7 @@ namespace HTTP {
 				return (!pattern.compare(pattern) ? true : false);
 			}
 
-			HttpRequestHandler * getHandler() {
+			UTIL::AutoRef<HttpRequestHandler> getHandler() {
 				return handler;
 			}
 		};
@@ -90,9 +91,9 @@ namespace HTTP {
 
 		SimpleHttpRequestHandlerDispatcher();
 		virtual ~SimpleHttpRequestHandlerDispatcher();
-		virtual void registerRequestHandler(const std::string & pattern, HttpRequestHandler * handler);
+		virtual void registerRequestHandler(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler);
 		virtual void unregisterRequestHandler(const std::string & pattern);
-		virtual HttpRequestHandler * getRequestHandler(const std::string & path);
+		virtual UTIL::AutoRef<HttpRequestHandler> getRequestHandler(const std::string & path);
 	};
 
 	/**
@@ -171,7 +172,7 @@ namespace HTTP {
         AnotherHttpServer(HttpServerConfig config, ServerSocketMaker * serverSocketMaker);
 		virtual ~AnotherHttpServer();
 
-		void registerRequestHandler(const std::string & pattern, HttpRequestHandler * handler);
+		void registerRequestHandler(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler);
 		void unregisterRequestHandler(const std::string & pattern);
 
 		int getPort();

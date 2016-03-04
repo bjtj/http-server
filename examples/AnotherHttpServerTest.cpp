@@ -109,11 +109,11 @@ void old() {
 
 	SimpleHttpRequestHandlerDispatcher dispatcher;
 
-	SampleHttpRequestHandler hello("Hello");
-	dispatcher.registerRequestHandler("/hello", &hello);
+	AutoRef<HttpRequestHandler> hello(new SampleHttpRequestHandler("Hello"));
+	dispatcher.registerRequestHandler("/hello", hello);
 
-	SampleHttpRequestHandler byebye("Byebye!");
-	dispatcher.registerRequestHandler("/byebye", &byebye);
+	AutoRef<HttpRequestHandler> byebye(new SampleHttpRequestHandler("Byebye!"));
+	dispatcher.registerRequestHandler("/byebye", byebye);
 
     HttpCommunicationMaker hcm(&dispatcher);
 	ConnectionManager cm(hcm, 20);
@@ -275,14 +275,14 @@ void recent() {
 	bool done = false;
 	AnotherHttpServer server(8083);
 
-	SampleHttpRequestHandler hello("Hello");
-	server.registerRequestHandler("/hello", &hello);
+	AutoRef<HttpRequestHandler> hello(new SampleHttpRequestHandler("Hello"));
+	server.registerRequestHandler("/hello", hello);
 
-	SampleHttpRequestHandler byebye("Byebye!");
-	server.registerRequestHandler("/byebye", &byebye);
+	AutoRef<HttpRequestHandler> byebye(new SampleHttpRequestHandler("Byebye!"));
+	server.registerRequestHandler("/byebye", byebye);
     
-    RfcHttpRequestHandler rfc;
-    server.registerRequestHandler("/rfc", &rfc);
+	AutoRef<HttpRequestHandler> rfc(new RfcHttpRequestHandler);
+    server.registerRequestHandler("/rfc", rfc);
 
 	server.startAsync();
 
