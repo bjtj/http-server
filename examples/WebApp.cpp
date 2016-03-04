@@ -88,21 +88,18 @@ public:
 	}
 };
 
-size_t readline(char * buffer, size_t max) {
-	if (fgets(buffer, (int)max - 1, stdin)) {
+string readline() {
+	char buffer[1024] = {0,};
+	if (fgets(buffer, sizeof(buffer) - 1, stdin)) {
 		buffer[strlen(buffer) - 1] = 0;
-		return strlen(buffer);
+		return string(buffer);
 	}
-	return 0;
+	return "";
 }
 
 string prompt(const char * msg) {
-    char buffer[1024] = {0,};
     printf("%s", msg);
-    if (readline(buffer, sizeof(buffer)) > 0) {
-        return string(buffer);
-    }
-    return "";
+	return readline();
 }
 int promptInteger(const char * msg) {
     string ret = prompt(msg);
@@ -122,10 +119,8 @@ int main(int argc, char * args[]) {
 	if (argc > 1) {
 		config.load(args[1]);
     } else {
-        char buffer[1024] = {0,};
-        printf("Configuration file path: ");
-        readline(buffer, sizeof(buffer));
-        config.load(buffer);
+        printf("** Configuration file path: ");
+        config.load(readline());
     }
     
 	System::getInstance()->ignoreSigpipe();
@@ -135,33 +130,41 @@ int main(int argc, char * args[]) {
 	config.setProperty("thread.count", 20);
 	server = new AnotherHttpServer(config);
 
-	SinglePageHttpRequestHandler single(config["default.page"]);
-	server->registerRequestHandler("/", &single);
-	server->registerRequestHandler("/index.htm", &single);
+	AutoRef<HttpRequestHandler> single(new SinglePageHttpRequestHandler(config["default.page"]));
+	server->registerRequestHandler("/", single);
+	server->registerRequestHandler("/index.htm", single);
 
-    printf("Listening... %d\n", config.getPort());
+    printf("** Listening... %d\n", config.getPort());
     
 	server->startAsync();
 
 	while (1) {
-		char buffer[1024] = {0,};
-		if (readline(buffer, sizeof(buffer)) > 0) {
-			if (!strcmp(buffer, "q")) {
+		string line;
+		if (!(line = readline()).empty()) {
+			if (line == "q") {
 				break;
-			} else if (!strcmp(buffer, "s")) {
-				printf("Listen port: %d\n", config.getPort());
-			} else if (!strcmp(buffer, "apps")) {
+			} else if (line == "s") {
+				printf("** Listen port: %d\n", config.getPort());
+			} else if (line == "apps") {
 				// TODO: app list
-			} else if (!strcmp(buffer, "load")) {
+			} else if (line == "load") {
 				// TODO: load app -> url -> path
-			} else if (!strcmp(buffer, "unload")) {
+				string uri = prompt("** Mapping uri: ");
+				HttpServerConfig config;
+				config.loadFromFile(prompt("** Properties file: "));
+
+				server->registerRequestHandler(uri, AutoRef<HttpRequestHandler>(new SinglePageHttpRequestHandler(config["default.page"])));
+			} else if (line == "unload") {
 				// TODO: unload app -> url
+				string name = prompt("** Name: ");
 			}
 		}
 	}
 
+	printf("** Stopping\n");
 	server->stop();
     delete server;
+	printf("** Done\n");
     
     return 0;
 }
