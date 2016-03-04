@@ -133,7 +133,11 @@ public:
 	FileBrowseHttpRequestHandler(const string & defaultPath, const string & browseIndexPath) : defaultPath(defaultPath), browseIndexPath(browseIndexPath) {}
 	virtual ~FileBrowseHttpRequestHandler() {}
     
-    virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+    virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+
+		if (request.isWwwFormUrlEncoded()) {
+			request.parseWwwFormUrlencoded();
+		}
 
 		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
 		session.updateLastAccessTime();
@@ -358,8 +362,12 @@ public:
 	SinglePageHttpRequestHandler(const string & path) : path(path) {}
 	virtual ~SinglePageHttpRequestHandler() {}
 
-	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+	virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
 
+		if (request.isWwwFormUrlEncoded()) {
+			request.parseWwwFormUrlencoded();
+		}
+		
 		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
 		session.updateLastAccessTime();
 		
