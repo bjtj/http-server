@@ -474,10 +474,10 @@ int main(int argc, char * args[]) {
 	server->registerRequestHandler("/", single);
 	server->registerRequestHandler("/index.htm", single);
 
-    printf("Listening... %d\n", config.getPort());
-    
 	server->startAsync();
 
+	printf("Listening... %d\n", config.getPort());
+	
 	while (1) {
 		char buffer[1024] = {0,};
 		if (readline(buffer, sizeof(buffer)) > 0) {
@@ -489,8 +489,10 @@ int main(int argc, char * args[]) {
 		}
 	}
 
+	printf("** stopping\n");
 	server->stop();
     delete server;
+	printf("** done\n");
     
     return 0;
 }

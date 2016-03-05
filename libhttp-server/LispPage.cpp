@@ -201,12 +201,17 @@ namespace HTTP {
 				compile(line, env);
 			} else {
 				vector<string> lines = Text::split(code, "\n");
-				for (vector<string>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
-					string & line = *iter;
-					if (!line.empty()) {
-						if (!compile(line, env)) {
-							break;
+				LISP::BufferedCommandReader reader;
+				for (vector<string>::iterator iter = lines.begin(); !env.quit() && iter != lines.end(); iter++) {
+					string line = *iter;
+					if (!line.empty() && reader.read(line + " ") > 0) {
+						vector<string> commands = reader.getCommands();
+						for (vector<string>::iterator cmd = commands.begin(); !env.quit() && cmd != commands.end(); cmd++) {
+							if (!compile(*cmd, env)) {
+								break;
+							}
 						}
+						reader.clearCommands();
 					}
 				}
 			}
