@@ -15,6 +15,8 @@ namespace HTTP {
      */
 	class Url {
 	private:
+		std::string username;
+		std::string password;
 		std::string scheme;
 		std::string host;
 		std::string port;
@@ -27,6 +29,8 @@ namespace HTTP {
 		Url(const std::string & urlStr);
 		virtual ~Url();
 
+		std::string getUsername() const;
+		std::string getPassword() const;
 		std::string getScheme() const;
 		std::string getProtocol() const;
 		std::string getHost() const;
@@ -36,6 +40,8 @@ namespace HTTP {
         std::string getPathAndQuery() const;
         std::string getPathWithoutPrefix(const std::string & prefix);
         std::string getQueryString() const;
+		void getUsername(const std::string & username);
+		void getPassword(const std::string & password);
 		void setScheme(const std::string & scheme);
 		void setProtocol(const std::string & scheme);
 		void setHost(const std::string & host);
@@ -49,13 +55,13 @@ namespace HTTP {
 
         void setUrl(const std::string & urlStr);
 		void parseUrlString(std::string urlStr);
-		std::vector<std::string> parseAddress(const std::string & address);
-		void setAddress(std::vector<std::string> & addr);
+		void parseAddress(const std::string & address);
 		void parsePath(const std::string & resource);
         void parseQuery(const std::string & query);
 
 		std::string getAddress() const;
 
+		int getKnownPort(const std::string & scheme);
         
 		virtual std::string toString();
 

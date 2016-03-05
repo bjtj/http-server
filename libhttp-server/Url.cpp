@@ -23,6 +23,12 @@ namespace HTTP {
 	Url::~Url() {
 	}
 
+	string Url::getUsername() const {
+		return username;
+	}
+	string Url::getPassword() const {
+		return password;
+	}
 	string Url::getScheme() const {
 		return scheme;
 	}
@@ -57,6 +63,12 @@ namespace HTTP {
     string Url::getQueryString() const {
         return Text::toString(parameters.toNameValueList(), "=", "&");
     }
+	void Url::getUsername(const string & username) {
+		this->username = username;
+	}
+	void Url::getPassword(const string & password) {
+		this->password = password;
+	}
 	void Url::setScheme(const string & scheme) {
 		this->scheme = scheme;
 	}
@@ -123,34 +135,41 @@ namespace HTTP {
 		urlStr = urlStr.substr(f + 3);
 		f = urlStr.find("/");
 		if (f != string::npos) {
-			vector<string> addr = parseAddress(urlStr.substr(0, f));
-			setAddress(addr);
+			parseAddress(urlStr.substr(0, f));
 			parsePath(urlStr.substr(f));
 		} else {
-			vector<string> addr = parseAddress(urlStr);
-			setAddress(addr);
+			parseAddress(urlStr);
 			path = "/";
 		}
-	}
-
-	vector<string> Url::parseAddress(const string & address) {
-		vector<string> ret;
-		size_t f = address.find(":");
-		if (f != string::npos) {
-			ret.push_back(address.substr(0, f));
-			ret.push_back(address.substr(f + 1));
-		} else {
-			ret.push_back(address);
+		if (port.empty()) {
+			port = Text::toString(getKnownPort(scheme));
 		}
-		return ret;
 	}
 
-	void Url::setAddress(vector<string> & addr) {
-		host = addr[0];
-		if (addr.size() > 1) {
-			port = addr[1];
+	void Url::parseAddress(const string & address) {
+
+		string temp = address;
+		
+		size_t at = temp.find("@");
+		if (at != string::npos) {
+			string auth = temp.substr(0, at);
+			size_t s = auth.find(":");
+			if (s != string::npos) {
+				username = auth.substr(0, s);
+				password = auth.substr(s + 1);
+			} else {
+				username = auth;
+			}
+			temp = temp.substr(at + 1);
+		}
+		
+		size_t f = temp.find(":");
+		if (f != string::npos) {
+			host = temp.substr(0, f);
+			port = temp.substr(f + 1);
 		} else {
-			port = "80";
+			host = temp;
+			port = "";
 		}
 	}
 
@@ -194,15 +213,43 @@ namespace HTTP {
 	string Url::getAddress() const {
 		return host + (port.empty() ? "" : ":" + port);
 	}
+
+	int Url::getKnownPort(const std::string & scheme) {
+		if (scheme == "http") {
+			return 80;
+		} else if (scheme == "https") {
+			return 443;
+		}
+		return 0;
+	}
     
 	string Url::toString() {
+
+		string ret;
+
+		ret.append(scheme);
+		ret.append("://");
+
+		if (!username.empty()) {
+			ret.append(username);
+			ret.append(":");
+			ret.append(password);
+			ret.append("@");
+		}
+		
+		ret.append(host);
+		ret.append(":");
+		ret.append(port);
         
         string p = getPathAndQuery();
         if (Text::startsWith(p, "/")) {
             p = p.substr(1);
         }
 
-		return scheme + "://" + host + ":" + port + "/" + p;
+		ret.append("/");
+		ret.append(p);
+
+		return ret;
 	}
 
 	Url& Url::operator=(const char * urlStr) {
