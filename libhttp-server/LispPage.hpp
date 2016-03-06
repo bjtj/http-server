@@ -16,6 +16,8 @@ namespace HTTP {
 		LispPage();
 		virtual ~LispPage();
 		LISP::Env & env();
+		std::string toLispySymbolName(const std::string & name);
+		void applyProperties(const std::map<std::string, std::string> & props);
 		void applyWeb();
 		void applySession(HttpSession & session);
 		void applyRequest(HttpRequest & request);

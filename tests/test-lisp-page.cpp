@@ -18,9 +18,20 @@ static void test_lisp_page() {
 	ASSERT(content, ==, "hello worldhello world");
 }
 
+static void test_apply_properties() {
+	LispPage page;
+	map<string, string> props;
+	props["base.path"] = "/home/user/steve/";
+	props["date_and_path.of.the.record"] = "2016-03-05 /home/user/";
+	page.applyProperties(props);
+	ASSERT(page.env()["*base-path*"].toString(), ==, "/home/user/steve/");
+	ASSERT(page.env()["*date-and-path-of-the-record*"].toString(), ==, "2016-03-05 /home/user/");
+}
+
 int main(int argc, char *args[]) {
 
 	test_lisp_page();
+	test_apply_properties();
     
     return 0;
 }

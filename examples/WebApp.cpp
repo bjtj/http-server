@@ -60,9 +60,14 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
         
 class SinglePageHttpRequestHandler : public HttpRequestHandler {
 private:
-	string path;
+	HttpServerConfig config;
+	string basePath;
+	string indexPath;
 public:
-	SinglePageHttpRequestHandler(const string & path) : path(path) {}
+	SinglePageHttpRequestHandler(HttpServerConfig & config) : config(config) {
+		basePath = config["base.path"];
+		indexPath = config["default.page"];
+	}
 	virtual ~SinglePageHttpRequestHandler() {}
 
 	virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
@@ -74,13 +79,14 @@ public:
 		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
 		session.updateLastAccessTime();
 		
-		File file(path);
+		File file(indexPath);
 		FileReader reader(file);
 
 		response.setStatusCode(200);
 		response.setContentType("text/html");
             
 		LispPage page;
+		page.applyProperties(config.toStandardMap());
 		page.applyWeb();
 		page.applySession(session);
 		page.applyRequest(request);
@@ -134,7 +140,7 @@ int main(int argc, char * args[]) {
 	config.setProperty("thread.count", 20);
 	server = new AnotherHttpServer(config);
 
-	AutoRef<HttpRequestHandler> single(new SinglePageHttpRequestHandler(config["default.page"]));
+	AutoRef<HttpRequestHandler> single(new SinglePageHttpRequestHandler(config));
 	server->registerRequestHandler("/", single);
 	server->registerRequestHandler("/index.htm", single);
 
@@ -157,7 +163,7 @@ int main(int argc, char * args[]) {
 				HttpServerConfig config;
 				config.loadFromFile(prompt("** Properties file: "));
 
-				server->registerRequestHandler(uri, AutoRef<HttpRequestHandler>(new SinglePageHttpRequestHandler(config["default.page"])));
+				server->registerRequestHandler(uri, AutoRef<HttpRequestHandler>(new SinglePageHttpRequestHandler(config)));
 			} else if (line == "unload") {
 				// TODO: unload app -> url
 				string name = prompt("** Name: ");

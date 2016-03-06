@@ -19,6 +19,17 @@ namespace HTTP {
 	LISP::Env & LispPage::env() {
 		return global_env;
 	}
+
+	string LispPage::toLispySymbolName(const string & name) {
+		string n = Text::replaceAll(Text::replaceAll(name, ".", "-"), "_", "-");
+		return "*" + n + "*";
+	}
+
+	void LispPage::applyProperties(const map<string, string> & props) {
+		for (map<string, string>::const_iterator iter = props.begin(); iter != props.end(); iter++) {
+			env()[toLispySymbolName(iter->first)] = LISP::text(iter->second);
+		}
+	}
 	
 	void LispPage::applyWeb() {
 		applyWeb(global_env);
@@ -197,7 +208,7 @@ namespace HTTP {
             
 			if (*code.begin() == '=') {
 				string line = Text::trim(code.substr(1));
-				line = "(string-append *content* " + line + ")";
+				line = "(setq *content* (string-append *content* " + line + "))";
 				compile(line, env);
 			} else {
 				vector<string> lines = Text::split(code, "\n");

@@ -11,7 +11,7 @@
 </head>
 <body>
 <%
-(defun write (content) (string-append *content* content))
+(defun write (content) (setq *content* (string-append *content* content)))
 %>
 <h1><%=*title*%></h1>
 <p>Welcome and enjoy~</p>
