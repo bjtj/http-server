@@ -109,12 +109,16 @@ namespace HTTP {
 				string paramName = LISP::eval(args[0], env).toString();
 				if (name.getSymbol() == "get-request-param") {
 					return LISP::text(request.getParameter(paramName));
+				} else if (name.getSymbol() == "get-request-header-field") {
+					return LISP::text(request.getHeaderFieldIgnoreCase(paramName));
 				}
 				
 				return "nil";
 			}
 		};
-		env["get-request-param"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new LispRequest("request*", request)));
+		UTIL::AutoRef<LISP::Procedure> proc(new LispRequest("request*", request));
+		env["get-request-param"] = LISP::Var(proc);
+		env["get-request-header-field"] = LISP::Var(proc);
 	}
 
 	void LispPage::applyResponse(HttpResponse & response) {
