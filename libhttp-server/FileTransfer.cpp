@@ -7,19 +7,13 @@ namespace HTTP {
 	using namespace UTIL;
 
 
-	FileTransfer::FileTransfer(FileReader * reader, unsigned long long size) : reader(reader), writer(NULL), readCounter(size) {
+	FileTransfer::FileTransfer(AutoRef<FileReader> reader, unsigned long long size) : reader(reader), writer(NULL), readCounter(size) {
 	}
 
-	FileTransfer::FileTransfer(FileWriter * writer, unsigned long long size) : reader(NULL), writer(writer), readCounter(size) {
+	FileTransfer::FileTransfer(AutoRef<FileWriter> writer, unsigned long long size) : reader(NULL), writer(writer), readCounter(size) {
 	}
 
 	FileTransfer::~FileTransfer() {
-		if (reader) {
-			delete reader;
-		}
-		if (writer) {
-			delete writer;
-		}
 	}
 
     void FileTransfer::reset() {
@@ -31,7 +25,7 @@ namespace HTTP {
 		Packet & packet = connection.read();
 		readCounter.read(packet.getLength());
 
-		if (writer) {
+		if (!writer.nil()) {
 			writer->write(packet.getData(), packet.getLength());
 		}
         
@@ -41,16 +35,14 @@ namespace HTTP {
 	}
 	void FileTransfer::send(Connection & connection) {
 
-		if (!reader) {
+		if (reader.nil()) {
 			throw IOException("FileReader required", -1, 0);
 		}
 		
-		if (reader) {
-			char buffer[4096] = {0,};
-			size_t len = reader->read(buffer, sizeof(buffer));
-			connection.send(buffer, len);
-			readCounter.read(len);
-		}
+		char buffer[4096] = {0,};
+		size_t len = reader->read(buffer, sizeof(buffer));
+		connection.send(buffer, len);
+		readCounter.read(len);
         
 		if (readCounter.complete()) {
             setCompleted();

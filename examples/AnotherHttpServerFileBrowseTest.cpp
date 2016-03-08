@@ -265,8 +265,17 @@ public:
 
 class FileDownloadHttpRequestHandler : public HttpRequestHandler {
 private:
+	map<string, string> types;
 public:
-	FileDownloadHttpRequestHandler() {}
+	FileDownloadHttpRequestHandler() {
+		types["txt"] = "text/plain";
+		types["htm"] = "text/html";
+		types["html"] = "text/html";
+		types["css"] = "text/css";
+		types["js"] = "text/javascript";
+		types["xml"] = "text/xml";
+		types["lsp"] = "Application/x-lisp";
+	}
 	virtual ~FileDownloadHttpRequestHandler() {}
 
 	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
@@ -283,7 +292,6 @@ public:
 		bool login = !session["login"].compare("yes");
 
 		if (!login) {
-            
             redirect(config, request, response, session, "login");
             return;
         }
@@ -295,7 +303,7 @@ public:
 			return;
 		}
 
-        logger.logd(Text::format("** Path: %s [%s:%d]", path.c_str(), request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort()));
+        logger.logd(Text::format("** Download: %s [%s:%d]", path.c_str(), request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort()));
 
 		File file(path);
 		if (!file.isFile()) {
@@ -304,7 +312,13 @@ public:
 			return;
 		}
 
-		string type = guessContentType(path);
+		map<string, string> types = this->types;
+
+		if (request.getParameter("mode") == "streaming") {
+			types["mp4"] = "video/mp4";
+		}
+
+		string type = guessContentType(path, types);
 		if (!type.empty()) {
 			response.setContentType(type);
 		} else {
@@ -327,23 +341,33 @@ public:
 			return;
 		}
 
+		string range = request.getHeaderField("Range");
+		if (!range.empty()) {
+			size_t f = range.find("=");
+			if (f != string::npos) {
+				range = range.substr(f + 1);
+				f = range.find("-");
+				if (f != string::npos) {
+					string start = range.substr(0, f);
+					string end = range.substr(f + 1);
+					setPartialFileTransfer(response, file, (size_t)Text::toLong(start), (size_t)Text::toLong(end));
+					return;
+				}
+			}
+		}
+
 		setFileTransfer(response, file);
     }
 
 	string guessContentType(const string & path) {
+		return guessContentType(path, types);
+	}
+
+	string guessContentType(const string & path, map<string, string> & types) {
 		string ext = File::getExtension(path);
 		if (ext.empty()) {
 			return "";
 		}
-
-		map<string, string> types;
-		types["txt"] = "text/plain";
-		types["htm"] = "text/html";
-		types["html"] = "text/html";
-		types["css"] = "text/css";
-		types["js"] = "text/javascript";
-		types["xml"] = "text/xml";
-		types["lsp"] = "Application/x-lisp";
 
 		for (map<string, string>::iterator iter = types.begin(); iter != types.end(); iter++) {
 			if (Text::equalsIgnoreCase(ext, iter->first)) {

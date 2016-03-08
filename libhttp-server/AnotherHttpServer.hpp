@@ -35,6 +35,7 @@ namespace HTTP {
 		void setFixedTransfer(HttpResponse & response, const std::string & content);
 		void setFileTransfer(HttpResponse & response, const std::string & filepath);
 		void setFileTransfer(HttpResponse & response, OS::File & file);
+		void setPartialFileTransfer(HttpResponse & response, OS::File & file, size_t start, size_t end);
 	};
 
 	/**

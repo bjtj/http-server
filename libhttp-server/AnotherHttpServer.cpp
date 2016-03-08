@@ -55,6 +55,34 @@ namespace HTTP {
 		response.setTransfer(transfer);
 		response.setContentLength((unsigned long long)file.getSize());
 	}
+
+	void HttpRequestHandler::setPartialFileTransfer(HttpResponse & response, OS::File & file, size_t start, size_t end) {
+
+		if (end == 0 || end >= file.getSize()) {
+			end = file.getSize() - 1;
+		}
+
+		if (start >= end) {
+			throw Exception("wrong range start error", -1, 0);
+		}
+
+		size_t size = (end - start + 1);
+
+		AutoRef<FileReader> reader(new FileReader(file));
+		reader->seek(start);
+		AutoRef<DataTransfer> transfer(new FileTransfer(reader, size));
+
+		response.setStatusCode(206);
+		response.setContentLength(size);
+		string bytes = "bytes=";
+		bytes.append(Text::toString(start));
+		bytes.append("-");
+		bytes.append(Text::toString(end));
+		bytes.append("/");
+		bytes.append(Text::toString(file.getSize()));
+		response.getHeader().setHeaderField("Content-Range", bytes);
+		response.setTransfer(transfer);
+	}
 	
 	/**
 	 * @brief SimpleHttpRequestHandlerDispatcher
