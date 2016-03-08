@@ -175,22 +175,17 @@ namespace HTTP {
 		env["load-page"] = LISP::Var(proc);
 	}
     
-	bool LispPage::eval(LISP::Var & var, LISP::Env & env) {
+	bool LispPage::compile(const string & line, LISP::Env & env) {
 		try {
-			LISP::eval(var, env);
+			LISP::compile(line, env);
 			return !env.quit();
 		} catch (const char * e) {
 			cout << "ERROR: " << e << endl;
 			return false;
-		} catch (string & e) {
+		} catch (const string & e) {
 			cout << "ERROR: " << e << endl;
 			return false;
 		}
-	}
-    
-	bool LispPage::compile(const string & line, LISP::Env & env) {
-		LISP::Var var = LISP::parse(line);
-		return eval(var, env);
 	}
 	string LispPage::parseLispPage(const string & src) {
 		return parseLispPage(global_env, src);
