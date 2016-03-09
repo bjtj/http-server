@@ -7,10 +7,10 @@ namespace HTTP {
 	using namespace UTIL;
 
 
-	FileTransfer::FileTransfer(AutoRef<FileReader> reader, unsigned long long size) : reader(reader), writer(NULL), readCounter(size) {
+	FileTransfer::FileTransfer(AutoRef<FileReader> reader, unsigned long long size) : reader(reader), readCounter(size) {
 	}
 
-	FileTransfer::FileTransfer(AutoRef<FileWriter> writer, unsigned long long size) : reader(NULL), writer(writer), readCounter(size) {
+	FileTransfer::FileTransfer(AutoRef<FileWriter> writer, unsigned long long size) : writer(writer), readCounter(size) {
 	}
 
 	FileTransfer::~FileTransfer() {
@@ -43,7 +43,7 @@ namespace HTTP {
 		size_t len = reader->read(buffer, sizeof(buffer));
 		connection.send(buffer, len);
 		readCounter.read(len);
-        
+
 		if (readCounter.complete()) {
             setCompleted();
         }

@@ -81,7 +81,7 @@ namespace HTTP {
         }
 
 		connection->unregisterSelector(selector);
-        
+
         connection->close();
         
         // notify disconnection to connection manager

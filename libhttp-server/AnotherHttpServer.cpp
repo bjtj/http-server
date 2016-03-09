@@ -49,7 +49,8 @@ namespace HTTP {
 
 	void HttpRequestHandler::setFileTransfer(HttpResponse & response, OS::File & file) {
 
-		AutoRef<DataTransfer> transfer(new FileTransfer(new FileReader(file), file.getSize()));
+		AutoRef<FileReader> reader(new FileReader(file));
+		AutoRef<DataTransfer> transfer(new FileTransfer(reader, file.getSize()));
 
 		response.clearTransfer();
 		response.setTransfer(transfer);
@@ -136,6 +137,10 @@ namespace HTTP {
 
 	void HttpCommunication::onReceivable(Connection & connection) {
 
+		if (writeable) {
+			return;
+		}
+
 		readRequestHeaderIfNeed(connection);
 		if (requestHeaderReader.complete()) {
             
@@ -147,7 +152,7 @@ namespace HTTP {
             } else {
                 
                 AutoRef<DataTransfer> transfer = request.getTransfer();
-				if (!transfer.empty()) {
+				if (!transfer.nil()) {
 					transfer->recv(connection);
 					readRequestContent(request, response, connection.getPacket());
 					if (transfer->isCompleted()) {
@@ -217,10 +222,10 @@ namespace HTTP {
 	void HttpCommunication::prepareRequestContentTransfer(HttpRequest & request) {
 
 		if (request.getHeader().isChunkedTransfer()) {
-			request.setTransfer(new ChunkedTransfer);
+			request.setTransfer(AutoRef<DataTransfer>(new ChunkedTransfer));
         } else {
             if (request.getContentLength() > 0) {
-                FixedTransfer * transfer = new FixedTransfer(request.getContentLength());
+                AutoRef<DataTransfer> transfer(new FixedTransfer(request.getContentLength()));
 				request.setTransfer(transfer);
             }
         }
