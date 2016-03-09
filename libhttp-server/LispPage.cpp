@@ -147,6 +147,10 @@ namespace HTTP {
 					string location = LISP::eval(args[0], env).toString();
 					response.setRedirect(location);
 					return LISP::text(location);
+				} else if (name.getSymbol() == "set-file-transfer") {
+					string path = LISP::eval(args[0], env).toString();
+					response["set-file-transfer"] = path;
+					return LISP::text(path);
 				}
 				
 				return "nil";
@@ -156,6 +160,8 @@ namespace HTTP {
 		env["set-status-code"] = LISP::Var(proc);
 		env["set-response-header-field"] = LISP::Var(proc);
 		env["set-redirect"] = LISP::Var(proc);
+		env["set-file-transfer"] = LISP::Var(proc);
+		
 	}
 	void LispPage::applyLoadPage() {
 		applyLoadPage(global_env);

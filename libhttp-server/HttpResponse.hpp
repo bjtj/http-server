@@ -22,6 +22,7 @@ namespace HTTP {
         UTIL::AutoRef<DataTransfer> transfer;
 		bool _needRedirect;
 		std::string redirectLocation;
+		std::map<std::string, std::string> props;
 		
 	public:
 		HttpResponse();
@@ -48,6 +49,8 @@ namespace HTTP {
 		void setRedirect(const std::string & location);
 		std::string getRedirectLocation();
 		bool needRedirect();
+
+		std::string & operator[] (const std::string & name);
 	};
 }
 

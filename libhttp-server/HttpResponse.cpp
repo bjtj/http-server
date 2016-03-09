@@ -74,4 +74,8 @@ namespace HTTP {
 	bool HttpResponse::needRedirect() {
 		return _needRedirect;
 	}
+
+	string & HttpResponse::operator[] (const string & name) {
+		return props[name];
+	}
 }

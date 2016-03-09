@@ -75,62 +75,23 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
 }
 
 
-
-class LoginHttpRequestHandler : public HttpRequestHandler {
-private:
-public:
-	LoginHttpRequestHandler() {}
-	virtual ~LoginHttpRequestHandler() {}
-
-	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
-		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
-		session.updateLastAccessTime();
-
-		bool login = !session["login"].compare("yes");
-
-		if (!login) {
-			if (!request.getParameter("pass").compare("secret")) {
-				login = true;
-				session["login"] = "yes";
-			}
-		}
-
-		string content;
-
-		if (!login) {
-			HttpResponseHeader & responseHeader = response.getHeader();
-			response.setStatusCode(200, "OK");
-			response.setContentType("text/html");
-			responseHeader.setConnection("close");
-			
-            content.append("<!DOCTYPE html>");
-            content.append("<html>");
-            content.append("<head>");
-            content.append("<title>browse</title>");
-            content.append("<style type=\"text/css\">body {font-family: arial; font-size: 10pt;}</style>");
-            content.append("<meta charset=\"UTF-8\">");
-            content.append("</head>");
-            content.append("<body>");
-            content.append("<form method=\"GET\" action=\"" + HttpSessionTool::urlMan("login", session) + "\">" +
-						   "Password: <input type=\"password\" name=\"pass\"/></form>");
-            content.append("</body>");
-            content.append("</html>");
-        } else {
-            
-            redirect(config, request, response, session, "browse");
-            return;
-        }
-
-		setFixedTransfer(response, content);
-	}
-};
-
 class FileBrowseHttpRequestHandler : public HttpRequestHandler {
 private:
 	string defaultPath;
     string browseIndexPath;
+	string indexFile;
+	map<string, string> mimeTypes;
+	
 public:
-	FileBrowseHttpRequestHandler(const string & defaultPath, const string & browseIndexPath) : defaultPath(defaultPath), browseIndexPath(browseIndexPath) {}
+	FileBrowseHttpRequestHandler(const string & defaultPath, const string & browseIndexPath) : defaultPath(defaultPath), browseIndexPath(browseIndexPath) {
+		mimeTypes["txt"] = "text/plain";
+		mimeTypes["htm"] = "text/html";
+		mimeTypes["html"] = "text/html";
+		mimeTypes["css"] = "text/css";
+		mimeTypes["js"] = "text/javascript";
+		mimeTypes["xml"] = "text/xml";
+		mimeTypes["lsp"] = "Application/x-lisp";
+	}
 	virtual ~FileBrowseHttpRequestHandler() {}
     
     virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
@@ -154,16 +115,14 @@ public:
 		}
         
         logger.logd(Text::format("** Path: %s [%s:%d]", path.c_str(),
-                                 request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort()));
+                                 request.getRemoteAddress().getHost().c_str(),
+								 request.getRemoteAddress().getPort()));
         
         if (!Text::startsWith(path, defaultPath) || path.find("..") != string::npos) {
             response.setStatusCode(403);
             setFixedTransfer(response, "Not permitted");
             return;
         }
-
-		bool debug = !request.getParameter("debug").empty();
-        bool login = !session["login"].compare("yes");
 
 		string content;
 
@@ -177,19 +136,6 @@ public:
 			page.applyResponse(response);
 			page.env()["*path*"] = LISP::text(path);
 			content = page.parseLispPage(reader.dumpAsString());
-		} else {
-			if (!login) {
-				redirect(config, request, response, session, "login");
-				return;
-			} else {
-				vector<File> files = File::list(path);
-				for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
-					if (iter->getName() == "index.lsp") {
-						redirect(config, request, response, session, "file?path=" + File::mergePaths(path, iter->getName()));
-					}
-				}
-				content = renderDir(path, debug, session);
-			}
 		}
 
 		if (response.needRedirect()) {
@@ -197,186 +143,55 @@ public:
 			return;
 		}
 
-        setFixedTransfer(response, content);
-    }
-    
-    string renderDir(const string & path, bool debug, HttpSession & session) {
-        
-        string content;
-        
-        try {
-            
-            vector<File> files = File::list(path);
-            
-            content.append("<!DOCTYPE html>");
-            content.append("<html>");
-            content.append("<head>");
-            content.append("<title>browse</title>");
-            content.append("<style type=\"text/css\">body {font-family: arial; font-size: 10pt;}</style>");
-            content.append("<meta charset=\"UTF-8\">");
-            content.append("</head>");
-            content.append("<body>");
-            if (debug) {
-                content.append("<form>Path: <input type=\"text\" name=\"path\"/></form>");
-            }
-            content.append("<h1>TJ Entertainment</h1>");
-            content.append("<p><a href=\"" + HttpSessionTool::urlMan("browse", session) + "\">home</a></p>");
-            content.append("<ul>");
-            for (vector<File>::iterator iter = files.begin(); iter != files.end(); iter++) {
-                
-                if (!filter(*iter)) {
-                    continue;
-                }
-                
-                content.append("<li>");
-                if (iter->isDirectory()) {
-                    content.append("<span style=\"display:inline-block;width:15px;\">D</span>");
-                    content.append("<a href=\"" + HttpSessionTool::urlMan("browse", session) + "?path=" +
-								   File::mergePaths(path, iter->getName()) + "\">");
-                    content.append(iter->getName());
-                    content.append("</a>");
-                } else {
-                    content.append("<span style=\"display:inline-block;width:15px;\">&nbsp;</span>");
-                    content.append("<a href=\"" + HttpSessionTool::urlMan("file", session) + "?path=" +
-								   File::mergePaths(path, iter->getName()) + "\">");
-                    content.append(iter->getName());
-                    content.append("</a>");
-                }
-                content.append("</li>");
-            }
-            content.append("</ul>");
-            content.append("</body>");
-            content.append("</html>");
-            
-        } catch (IOException e) {
-            content = "Access failed : " + path;
-        }
-        
-        return content;
-    }
+		if (response["set-file-transfer"].empty() == false) {
 
-	bool filter(File & file) {
-        if (Text::startsWith(file.getName(), ".")) {
-			return false;
-		}
-		return true;
-	}
-};
+			logger.logd(Text::format("** File transfer / %s", response["set-file-transfer"].c_str()));
+			
+			File file(response["set-file-transfer"]);
+			if (!file.exists() || !file.isFile()) {
+				response.setStatusCode(404);
+				setFixedTransfer(response, "Not Found");
+				return;
+			}
 
-class FileDownloadHttpRequestHandler : public HttpRequestHandler {
-private:
-	map<string, string> types;
-public:
-	FileDownloadHttpRequestHandler() {
-		types["txt"] = "text/plain";
-		types["htm"] = "text/html";
-		types["html"] = "text/html";
-		types["css"] = "text/css";
-		types["js"] = "text/javascript";
-		types["xml"] = "text/xml";
-		types["lsp"] = "Application/x-lisp";
-	}
-	virtual ~FileDownloadHttpRequestHandler() {}
+			map<string, string> types = mimeTypes;
 
-	virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+			if (request.getParameter("mode") == "streaming") {
+				types["mp4"] = "video/mp4";
+			}
+			
+			if (types.find(file.getExtension()) != types.end()) {
+				response.setContentType(types[file.getExtension()]);
+			} else {
+				response.setContentType("Application/octet-stream");
+				response.getHeader().setHeaderField("Content-Disposition",
+													"attachment; filename=\"" + file.getName() + "\"");
+			}
 
-		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
-		session.updateLastAccessTime();
-        
-        HttpResponseHeader & responseHeader = response.getHeader();
-
-        response.setStatusCode(200, "OK");
-        response.setContentType("text/plain");
-		responseHeader.setConnection("close");
-
-		bool login = !session["login"].compare("yes");
-
-		if (!login) {
-            redirect(config, request, response, session, "login");
-            return;
-        }
-
-		string path = request.getParameter("path");
-		if (path.empty()) {
-			response.setStatusCode(404);
-			setFixedTransfer(response, "File not found / path: " + path);
-			return;
-		}
-
-        logger.logd(Text::format("** Download: %s [%s:%d]", path.c_str(), request.getRemoteAddress().getHost().c_str(), request.getRemoteAddress().getPort()));
-
-		File file(path);
-		if (!file.isFile()) {
-			response.setStatusCode(400);
-			setFixedTransfer(response, "Not a file / path: " + path);
-			return;
-		}
-
-		map<string, string> types = this->types;
-
-		if (request.getParameter("mode") == "streaming") {
-			types["mp4"] = "video/mp4";
-		}
-
-		string type = guessContentType(path, types);
-		if (!type.empty()) {
-			response.setContentType(type);
-		} else {
-			response.setContentType("Application/octet-stream");
-			response.getHeader().setHeaderField("Content-Disposition",
-												"attachment; filename=\"" + file.getName() + "\"");
-		}
-
-		if (type == "Application/x-lisp") {
-			FileReader reader(file);
-            
-            LispPage page;
-            page.applyWeb();
-			page.applySession(session);
-            page.env()["*path*"] = LISP::text(path);
-            string content = page.parseLispPage(reader.dumpAsString());
-            
-			response.setContentType("text/html");
-			setFixedTransfer(response, content);
-			return;
-		}
-
-		string range = request.getHeaderField("Range");
-		if (!range.empty()) {
-			size_t f = range.find("=");
-			if (f != string::npos) {
-				range = range.substr(f + 1);
-				f = range.find("-");
+			string range = request.getHeaderFieldIgnoreCase("Range");
+			if (!range.empty()) {
+				size_t f = range.find("=");
 				if (f != string::npos) {
-					string start = range.substr(0, f);
-					string end = range.substr(f + 1);
-					setPartialFileTransfer(response, file, (size_t)Text::toLong(start), (size_t)Text::toLong(end));
-					return;
+					range = range.substr(f + 1);
+					f = range.find("-");
+					if (f != string::npos) {
+						string start = range.substr(0, f);
+						string end = range.substr(f + 1);
+						setPartialFileTransfer(response,
+											   file,
+											   (size_t)Text::toLong(start),
+											   (size_t)Text::toLong(end));
+						return;
+					}
 				}
 			}
+
+			setFileTransfer(response, file);
+			return;
 		}
 
-		setFileTransfer(response, file);
+        setFixedTransfer(response, content);
     }
-
-	string guessContentType(const string & path) {
-		return guessContentType(path, types);
-	}
-
-	string guessContentType(const string & path, map<string, string> & types) {
-		string ext = File::getExtension(path);
-		if (ext.empty()) {
-			return "";
-		}
-
-		for (map<string, string>::iterator iter = types.begin(); iter != types.end(); iter++) {
-			if (Text::equalsIgnoreCase(ext, iter->first)) {
-				return iter->second;
-			}
-		}
-
-		return "";
-	}
 };
 
 class SinglePageHttpRequestHandler : public HttpRequestHandler {
@@ -456,7 +271,7 @@ int main(int argc, char * args[]) {
 
     AnotherHttpServer * server = NULL;
 
-	config.setProperty("thread.count", 20);
+	config.setProperty("thread.count", 50);
     if (config.isSecure()) {
         
 #if defined(USE_OPENSSL)
@@ -490,10 +305,7 @@ int main(int argc, char * args[]) {
 	AutoRef<HttpRequestHandler> browse(new FileBrowseHttpRequestHandler(config.getDefaultBrowsePath(),
 																		config.getBrowseIndexPath()));
 	server->registerRequestHandler("/browse", browse);
-	AutoRef<HttpRequestHandler> file(new FileDownloadHttpRequestHandler);
-	server->registerRequestHandler("/file", file);
-	AutoRef<HttpRequestHandler> login(new LoginHttpRequestHandler);
-	server->registerRequestHandler("/login", login);
+	
 	AutoRef<HttpRequestHandler> single(new SinglePageHttpRequestHandler(config["default.page"]));
 	server->registerRequestHandler("/", single);
 	server->registerRequestHandler("/index.htm", single);
