@@ -177,11 +177,18 @@ public:
 					if (f != string::npos) {
 						string start = range.substr(0, f);
 						string end = range.substr(f + 1);
-						setPartialFileTransfer(response,
-											   file,
-											   (size_t)Text::toLong(start),
-											   (size_t)Text::toLong(end));
-						return;
+                        try {
+                            setPartialFileTransfer(response,
+                                                   file,
+                                                   (size_t)Text::toLong(start),
+                                                   (size_t)Text::toLong(end));
+                            return;
+                        } catch (Exception e) {
+                            logger.loge(e.getMessage());
+                            response.setStatusCode(500);
+                            setFixedTransfer(response, e.getMessage());
+                            return;
+                        }
 					}
 				}
 			}
