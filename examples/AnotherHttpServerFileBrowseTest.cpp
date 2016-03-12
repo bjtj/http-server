@@ -95,6 +95,24 @@ public:
 	virtual ~FileBrowseHttpRequestHandler() {}
     
     virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+		try {
+			doHandle(request, response);
+		} catch (const char * e) {
+			response.setStatusCode(500);
+			response.setContentType("text/html");
+			setFixedTransfer(response, "Server Error/" + string(e));
+		} catch (const string & e) {
+			response.setStatusCode(500);
+			response.setContentType("text/html");
+			setFixedTransfer(response, "Server Error/" + e);
+		} catch (Exception & e) {
+			response.setStatusCode(500);
+			response.setContentType("text/html");
+			setFixedTransfer(response, "Server Error/" + e.getMessage());
+		}
+	}
+
+	virtual void doHandle(HttpRequest & request, HttpResponse & response) {
 
 		if (request.isWwwFormUrlEncoded()) {
 			request.parseWwwFormUrlencoded();
