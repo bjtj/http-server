@@ -1,6 +1,6 @@
 TESTS=$(check_PROGRAMS)
 
-check_PROGRAMS=test-http-header test-url test-lisp-page test-http-server
+check_PROGRAMS=test-http-header test-url test-lisp-page test-http-server test-http-client
 
 test_http_header_SOURCES = test-http-header.cpp
 test_http_header_CPPFLAGS = -I$(top_srcdir)
@@ -25,3 +25,9 @@ test_http_server_CPPFLAGS = -I$(top_srcdir)
 test_http_server_header_CXXFLAGS=$(PTHREAD_CXXFLAGS)
 test_http_server_LDFLAGS=$(PTHREAD_CFLAGS)
 test_http_server_LDADD = ../libhttp-server/libhttp-server.la
+
+test_http_client_SOURCES = test-http-client.cpp
+test_http_client_CPPFLAGS = -I$(top_srcdir)
+test_http_client_header_CXXFLAGS=$(PTHREAD_CXXFLAGS)
+test_http_client_LDFLAGS=$(PTHREAD_CFLAGS)
+test_http_client_LDADD = ../libhttp-server/libhttp-server.la
