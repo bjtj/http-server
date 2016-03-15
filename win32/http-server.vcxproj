@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -32,8 +32,13 @@
     <ClInclude Include="..\libhttp-server\HttpParameter.hpp" />
     <ClInclude Include="..\libhttp-server\HttpRequest.hpp" />
     <ClInclude Include="..\libhttp-server\HttpResponse.hpp" />
+    <ClInclude Include="..\libhttp-server\HttpServerConfig.hpp" />
+    <ClInclude Include="..\libhttp-server\HttpSession.hpp" />
+    <ClInclude Include="..\libhttp-server\HttpSessionManager.hpp" />
+    <ClInclude Include="..\libhttp-server\HttpSessionTool.hpp" />
     <ClInclude Include="..\libhttp-server\HttpStatusCodes.hpp" />
     <ClInclude Include="..\libhttp-server\InetAddress.hpp" />
+    <ClInclude Include="..\libhttp-server\LispPage.hpp" />
     <ClInclude Include="..\libhttp-server\Packet.hpp" />
     <ClInclude Include="..\libhttp-server\Url.hpp" />
   </ItemGroup>
@@ -58,7 +63,10 @@
     <ClCompile Include="..\libhttp-server\HttpParameter.cpp" />
     <ClCompile Include="..\libhttp-server\HttpRequest.cpp" />
     <ClCompile Include="..\libhttp-server\HttpResponse.cpp" />
+    <ClCompile Include="..\libhttp-server\HttpSession.cpp" />
+    <ClCompile Include="..\libhttp-server\HttpSessionManager.cpp" />
     <ClCompile Include="..\libhttp-server\HttpStatusCodes.cpp" />
+    <ClCompile Include="..\libhttp-server\LispPage.cpp" />
     <ClCompile Include="..\libhttp-server\Packet.cpp" />
     <ClCompile Include="..\libhttp-server\Url.cpp" />
   </ItemGroup>
@@ -79,7 +87,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
