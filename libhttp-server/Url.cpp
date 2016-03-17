@@ -111,10 +111,10 @@ namespace HTTP {
 	}
 
 	void Url::setParameter(const string & name, const string & value) {
-        parameters.append(name, value);
+        parameters[name] = value;
 	}
 	
-	StringListMap & Url::getParameters() {
+	LinkedStringMap & Url::getParameters() {
 		return parameters;
 	}
     
