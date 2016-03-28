@@ -109,7 +109,7 @@ namespace HTTP {
 
         for (size_t i = 0; i < additionalHeaderFields.size(); i++) {
             const NameValue & nv = additionalHeaderFields.const_getByIndex(i);
-            header[nv.getName()] = nv.getValue();
+            header[nv.name_const()] = nv.value_const();
         }
         
         header.setHost(url.getAddress());
@@ -125,7 +125,7 @@ namespace HTTP {
         
         for (size_t i = 0; i < additionalHeaderFields.size(); i++) {
             const NameValue & nv = additionalHeaderFields.const_getByIndex(i);
-            header[nv.getName()] = nv.getValue();
+            header[nv.name_const()] = nv.value_const();
         }
         
         header.setHost(url.getAddress());
