@@ -8,6 +8,8 @@ using namespace HTTP;
 using namespace OS;
 using namespace UTIL;
 
+static string s_last_msg;
+
 class MyHttpRequestHandler : public HttpRequestHandler {
 private:
 	HttpServerConfig config;
@@ -50,6 +52,10 @@ public:
 		response.setStatusCode(200);
 		response.setContentType("text/plain");
 		setFileTransfer(response, file);
+	}
+	virtual void onHttpResponseTransferCompleted(HttpRequest & request, HttpResponse & response) {
+		cout << "done" << endl;
+		s_last_msg = "done";
 	}
 };
 
@@ -147,6 +153,8 @@ int main(int argc, char *args[]) {
 	} catch (Exception & e) {
 		cout << e.getMessage() << endl;
 	}
+
+	ASSERT(s_last_msg, ==, "done");
     
     return 0;
 }

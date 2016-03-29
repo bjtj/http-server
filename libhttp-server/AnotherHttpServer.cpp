@@ -23,10 +23,19 @@ namespace HTTP {
 	}
 
 	void HttpRequestHandler::onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+		// request header transfer done
 	}
 	void HttpRequestHandler::onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
+		// request content partial packet received
 	}
 	void HttpRequestHandler::onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+		// request content transfer done
+	}
+	void HttpRequestHandler::onHttpResponseHeaderCompleted(HttpRequest & request, HttpResponse & response) {
+		// response header transfer done
+	}
+	void HttpRequestHandler::onHttpResponseTransferCompleted(HttpRequest & request, HttpResponse & response) {
+		// response content transfer done
 	}
     
 	void HttpRequestHandler::setFixedTransfer(HttpResponse & response, const string & content) {
@@ -248,6 +257,10 @@ namespace HTTP {
 
 		if (responseContentTransferDone) {
 			communicationCompleted = true;
+			AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
+			if (!handler.nil()) {
+				handler->onHttpResponseTransferCompleted(request, response);
+			}
 		}
 	}
 
@@ -259,6 +272,11 @@ namespace HTTP {
         connection.send(headerString.c_str(), (int)headerString.length());
 		// TODO: check write length and compare the header string length
 		responseHeaderTransferDone = true;
+
+		AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
+		if (!handler.nil()) {
+			handler->onHttpResponseHeaderCompleted(request, response);
+		}
             
         if (!header.isChunkedTransfer() && header.getContentLength() == 0) {
             responseContentTransferDone = true;

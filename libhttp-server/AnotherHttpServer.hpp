@@ -32,6 +32,9 @@ namespace HTTP {
 		virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet);
         virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response);
 
+		virtual void onHttpResponseHeaderCompleted(HttpRequest & request, HttpResponse & response);
+		virtual void onHttpResponseTransferCompleted(HttpRequest & request, HttpResponse & response);
+
 		void setFixedTransfer(HttpResponse & response, const std::string & content);
 		void setFileTransfer(HttpResponse & response, const std::string & filepath);
 		void setFileTransfer(HttpResponse & response, OS::File & file);
