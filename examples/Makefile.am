@@ -1,11 +1,4 @@
-noinst_PROGRAMS=AnotherHttpClientTest AnotherHttpServerTest HttpClientTest FileBrowseHttpServerTest urlTest sessionTest httpEncoderDecoderTest WebApp
-
-AnotherHttpClientTest_SOURCES = AnotherHttpClientTest.cpp
-AnotherHttpClientTest_CPPFLAGS = -I$(top_srcdir)
-AnotherHttpClientTest_CXXFLAGS=$(PTHREAD_CXXFLAGS)
-AnotherHttpClientTest_LDFLAGS=$(PTHREAD_CFLAGS)
-AnotherHttpClientTest_LDADD = ../libhttp-server/libhttp-server.la
-
+noinst_PROGRAMS=AnotherHttpServerTest HttpClientTest FileBrowseHttpServerTest urlTest sessionTest httpEncoderDecoderTest WebApp
 
 AnotherHttpServerTest_SOURCES = AnotherHttpServerTest.cpp
 AnotherHttpServerTest_CPPFLAGS = -I$(top_srcdir)

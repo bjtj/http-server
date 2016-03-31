@@ -13,25 +13,29 @@ namespace HTTP {
 	/**
 	 * @brief OnResponseHeaderListener
 	 */
-	OnResponseListener::OnResponseListener() {
+	OnResponseListener::OnResponseListener(AutoRef<DataSink> sink) : _sink(sink) {
 	}
 
 	OnResponseListener::~OnResponseListener() {
 	}
 
-	DataTransfer * OnResponseListener::createDataTransfer(HttpHeader & header) {
+	DataTransfer * OnResponseListener::createDataTransfer(HttpHeader & header, AutoRef<DataSink> sink) {
 		if (header.isChunkedTransfer()) {
-			return new ChunkedTransfer;
+			return new ChunkedTransfer(sink);
 		}
 		else if (header.getContentLength() > 0) {
-			FixedTransfer * transfer = new FixedTransfer(header.getContentLength());
+			FixedTransfer * transfer = new FixedTransfer(sink, header.getContentLength());
 			return transfer;
 		}
 		return NULL;
 	}
 	void OnResponseListener::onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData) {
-		response.setTransfer(createDataTransfer(response.getHeader()));
+		response.setTransfer(AutoRef<DataTransfer>(createDataTransfer(response.getHeader(), _sink)));
 	}
+
+	AutoRef<DataSink> & OnResponseListener::sink() {
+		return _sink;
+ 	}
 
 	/**
 	 * @brief AnotherHttpClient
@@ -100,9 +104,9 @@ namespace HTTP {
     void AnotherHttpClient::setUrl(const Url & url) {
         this->url = url;
     }
-    
-    void AnotherHttpClient::setRequest(const string & method, const LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer) {
-        HttpRequestHeader & header = request.getHeader();
+
+	void AnotherHttpClient::setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields) {
+		HttpRequestHeader & header = request.getHeader();
         header.setMethod(method);
         header.setPath(url.getPathAndQuery());
         header.setProtocol("HTTP/1.1");
@@ -113,41 +117,35 @@ namespace HTTP {
         }
         
         header.setHost(url.getAddress());
+	}
+    void AnotherHttpClient::setRequestWithFixedTransfer(const string & method, const LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer, size_t size) {
+
+		setRequest(method, additionalHeaderFields);
         
-        setDataTransfer(transfer);
+        setFixedTransfer(transfer, size);
     }
 
-	void AnotherHttpClient::setChunkedRequest(const string & method, const LinkedStringMap & additionalHeaderFields, ChunkedTransfer * transfer) {
-		HttpRequestHeader & header = request.getHeader();
-        header.setMethod(method);
-        header.setPath(url.getPath());
-        header.setProtocol("HTTP/1.1");
-        
-        for (size_t i = 0; i < additionalHeaderFields.size(); i++) {
-            const NameValue & nv = additionalHeaderFields.const_getByIndex(i);
-            header[nv.name_const()] = nv.value_const();
-        }
-        
-        header.setHost(url.getAddress());
-        
+	void AnotherHttpClient::setRequestWithChunkedTransfer(const string & method, const LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer) {
+
+		setRequest(method, additionalHeaderFields);
+		
         setChunkedTransfer(transfer);
 	}
     
-    void AnotherHttpClient::setDataTransfer(AutoRef<DataTransfer> transfer) {
+    void AnotherHttpClient::setFixedTransfer(AutoRef<DataTransfer> transfer, size_t size) {
         HttpRequestHeader & header = request.getHeader();
-        if (transfer.empty()) {
+        if (transfer.nil()) {
             header.setContentLength(0);
         } else {
-			request.getHeader().setContentLength(transfer->getSize());
+			request.getHeader().setContentLength(size);
             request.setTransfer(transfer);
         }
     }
 
-	void AnotherHttpClient::setChunkedTransfer(ChunkedTransfer * transfer) {
+	void AnotherHttpClient::setChunkedTransfer(AutoRef<DataTransfer> transfer) {
         HttpRequestHeader & header = request.getHeader();
 		header.setChunkedTransfer(true);
 		request.setTransfer(transfer);
-        
     }
     
 	void AnotherHttpClient::execute() {
@@ -162,11 +160,6 @@ namespace HTTP {
 				} else {
 					connect();
 				}
-                
-                AutoRef<DataTransfer> transfer = request.getTransfer();
-                if (!transfer.empty()) {
-                    transfer->reset();
-                }
                 
                 response.clear();
                 responseHeaderReader.clear();
@@ -262,7 +255,7 @@ namespace HTTP {
 
 		transfer->send(*connection);
 
-		if (transfer->isCompleted()) {
+		if (transfer->completed()) {
 			readable = true;
 		}
 	}
@@ -298,7 +291,7 @@ namespace HTTP {
 			}
 
 			transfer->recv(*connection);
-			if (transfer->isCompleted()) {
+			if (transfer->completed()) {
                 onResponseTransferDone();
 			}
 		}
@@ -311,7 +304,8 @@ namespace HTTP {
     void AnotherHttpClient::setComplete() {
         if (responseListener) {
             AutoRef<DataTransfer> transfer = response.getTransfer();
-            responseListener->onTransferDone(response, &transfer, userData);
+			AutoRef<DataSink> sink = (transfer.nil() ? NULL : transfer->sink());
+            responseListener->onTransferDone(response, sink, userData);
         }
         complete = true;
     }

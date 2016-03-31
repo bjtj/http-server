@@ -1,15 +1,19 @@
 libhttp_serverincdir=${includedir}/libhttp-server
-libhttp_serverinc_HEADERS = AnotherHttpClient.hpp \
+libhttp_serverinc_HEADERS = \
+	AnotherHttpClient.hpp \
 	AnotherHttpClientThreadPool.hpp \
 	AnotherHttpServer.hpp \
+	BufferIndicator.hpp \
 	ChunkedReader.hpp \
 	ChunkedTransfer.hpp \
 	Communication.hpp \
 	Connection.hpp \
 	ConnectionManager.hpp \
 	ConnectionThreadPool.hpp \
+	DataSink.hpp \
+	DataSource.hpp \
 	DataTransfer.hpp \
-	FileTransfer.hpp \
+	FileDataSource.hpp \
 	FixedTransfer.hpp \
 	HttpClient.hpp \
 	HttpClientThreadPool.hpp \
@@ -28,15 +32,20 @@ libhttp_serverinc_HEADERS = AnotherHttpClient.hpp \
 	InetAddress.hpp \
 	LispPage.hpp \
 	Packet.hpp \
+	StringDataSink.hpp \
+	StringDataSource.hpp \
 	Url.hpp
 
 lib_LTLIBRARIES = libhttp-server.la
-libhttp_server_la_SOURCES = AnotherHttpClient.cpp \
+libhttp_server_la_SOURCES = \
+	AnotherHttpClient.cpp \
 	AnotherHttpClient.hpp \
 	AnotherHttpClientThreadPool.cpp \
 	AnotherHttpClientThreadPool.hpp \
 	AnotherHttpServer.cpp \
 	AnotherHttpServer.hpp \
+	BufferIndicator.cpp \
+	BufferIndicator.hpp \
 	ChunkedReader.cpp \
 	ChunkedReader.hpp \
 	ChunkedTransfer.cpp \
@@ -49,10 +58,11 @@ libhttp_server_la_SOURCES = AnotherHttpClient.cpp \
 	ConnectionManager.hpp \
 	ConnectionThreadPool.cpp \
 	ConnectionThreadPool.hpp \
+	DataSink.hpp \
+	DataSource.hpp \
 	DataTransfer.cpp \
 	DataTransfer.hpp \
-	FileTransfer.cpp \
-	FileTransfer.hpp \
+	FileDataSource.hpp \
 	FixedTransfer.cpp \
 	FixedTransfer.hpp \
 	HttpClient.cpp \
@@ -85,8 +95,11 @@ libhttp_server_la_SOURCES = AnotherHttpClient.cpp \
 	LispPage.hpp \
 	Packet.cpp \
 	Packet.hpp \
+	StringDataSink.hpp \
+	StringDataSource.hpp \
 	Url.cpp \
 	Url.hpp
+
 
 libhttp_server_la_CXXFLAGS = $(PTHREAD_CXXFLAGS) $(LIBOSLAYER_CFLAGS)
 libhttp_server_la_LIBADD = $(LIBOSLAYER_LIBS)

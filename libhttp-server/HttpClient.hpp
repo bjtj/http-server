@@ -423,7 +423,7 @@ namespace HTTP {
                     pollListener->onResponseDataChunk(*this, responseHeader, buffer, len, userData);
                 }
                 
-                if (contentBuffer.complete()) {
+                if (contentBuffer.completed()) {
                     if (followRedirect && checkIfRedirect(responseHeader)) {
                         processRedirect();
                         status = HttpRequestStatus::CONNECTING_STATUS;
@@ -481,7 +481,7 @@ namespace HTTP {
                     break;
                 }
 				consumeBuffer.read(len);
-				if (consumeBuffer.complete()) {
+				if (consumeBuffer.completed()) {
 					if (chunkedBuffer.getChunkSize() == 0) {
                         if (followRedirect && checkIfRedirect(responseHeader)) {
                             processRedirect();

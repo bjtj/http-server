@@ -1,6 +1,6 @@
 #include <liboslayer/Text.hpp>
-
 #include "HttpRequest.hpp"
+#include "StringDataSink.hpp"
 
 namespace HTTP {
 
@@ -76,7 +76,8 @@ namespace HTTP {
 		if (transfer.nil()) {
 			return;
 		}
-		header.parseQuery(transfer->getString());
+		string data = ((StringDataSink*)&transfer->sink())->data();
+		header.parseQuery(data);
 	}
     UTIL::AutoRef<DataTransfer> HttpRequest::getTransfer() {
         return transfer;

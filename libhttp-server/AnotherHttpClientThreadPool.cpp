@@ -2,6 +2,7 @@
 
 #include "ChunkedTransfer.hpp"
 #include "FixedTransfer.hpp"
+#include "StringDataSink.hpp"
 
 namespace HTTP {
 
@@ -13,7 +14,7 @@ namespace HTTP {
      * @brief
      */
     
-    AnotherHttpClientThread::AnotherHttpClientThread() : FlaggableThread(false), listener(NULL) {
+    AnotherHttpClientThread::AnotherHttpClientThread() : OnResponseListener(AutoRef<DataSink>(new StringDataSink)), FlaggableThread(false), listener(NULL) {
         httpClient.setOnResponseListener(this);
     }
     AnotherHttpClientThread::~AnotherHttpClientThread() {
@@ -21,12 +22,22 @@ namespace HTTP {
     void AnotherHttpClientThread::setUserData(UTIL::AutoRef<UserData> userData) {
         this->userData = userData;
     }
-    void AnotherHttpClientThread::setRequest(const Url & url, const string & method, const LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer) {
+    void AnotherHttpClientThread::setRequestWithFixedTransfer(const Url & url, const string & method, const LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer, size_t size) {
         httpClient.setUrl(url);
-        httpClient.setRequest(method, additionalHeaderFields, transfer);
+        httpClient.setRequestWithFixedTransfer(method, additionalHeaderFields, transfer, size);
         httpClient.setFollowRedirect(true);
         httpClient.setUserData(userData);
         userData = NULL;
+		sink() = AutoRef<DataSink>(new StringDataSink);
+        setFlag(true);
+    }
+	void AnotherHttpClientThread::setRequestWithChunkedTransfer(const Url & url, const string & method, const LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer) {
+        httpClient.setUrl(url);
+        httpClient.setRequestWithChunkedTransfer(method, additionalHeaderFields, transfer);
+        httpClient.setFollowRedirect(true);
+        httpClient.setUserData(userData);
+        userData = NULL;
+		sink() = AutoRef<DataSink>(new StringDataSink);
         setFlag(true);
     }
     void AnotherHttpClientThread::run() {
@@ -43,20 +54,10 @@ namespace HTTP {
             setFlag(false);
         }
     }
-    void AnotherHttpClientThread::onResponseHeader(HttpResponse & response, AutoRef<UserData> userData) {
-       
-        if (response.getHeader().isChunkedTransfer()) {
-            response.setTransfer(AutoRef<DataTransfer>(new ChunkedTransfer));
-        } else if (response.getHeader().getContentLength() > 0) {
-            response.setTransfer(AutoRef<DataTransfer>(new FixedTransfer(response.getHeader().getContentLength())));
-        } else {
-            // do nothing
-        }
-    }
-    void AnotherHttpClientThread::onTransferDone(HttpResponse & response, DataTransfer * transfer, AutoRef<UserData> userData) {
+    void AnotherHttpClientThread::onTransferDone(HttpResponse & response, AutoRef<DataSink> sink, AutoRef<UserData> userData) {
         string content;
-        if (transfer) {
-            content = transfer->getString();
+        if (!sink.nil()) {
+            content = ((StringDataSink*)&sink)->data();
         }
         
         if (listener) {
@@ -102,27 +103,52 @@ namespace HTTP {
     AnotherHttpClientThreadPool::~AnotherHttpClientThreadPool() {
     }
     
-    void AnotherHttpClientThreadPool::setRequest(const Url & url, const std::string & method, UTIL::AutoRef<DataTransfer> transfer, UTIL::AutoRef<UserData> userData) {
+    void AnotherHttpClientThreadPool::setRequestWithFixedTransfer(const Url & url, const std::string & method, UTIL::AutoRef<DataTransfer> transfer, size_t size, UTIL::AutoRef<UserData> userData) {
         
-        setRequest(url, method, LinkedStringMap(), transfer, userData);
+        setRequestWithFixedTransfer(url, method, LinkedStringMap(), transfer, size, userData);
     }
 
-	void AnotherHttpClientThreadPool::setRequest(const Url & url, const string & method, const map<string, string> & additionalHeaderFields, AutoRef<DataTransfer> transfer, AutoRef<UserData> userData) {
+	void AnotherHttpClientThreadPool::setRequestWithChunkedTransfer(const Url & url, const std::string & method, UTIL::AutoRef<DataTransfer> transfer, UTIL::AutoRef<UserData> userData) {
+        
+        setRequestWithChunkedTransfer(url, method, LinkedStringMap(), transfer, userData);
+    }
+
+	void AnotherHttpClientThreadPool::setRequestWithFixedTransfer(const Url & url, const string & method, const map<string, string> & additionalHeaderFields, AutoRef<DataTransfer> transfer, size_t size, AutoRef<UserData> userData) {
 
 		LinkedStringMap lst;
 		for (map<string, string>::const_iterator iter = additionalHeaderFields.begin(); iter != additionalHeaderFields.end(); iter++) {
 			lst[iter->first] = iter->second;
 		}
 
-		setRequest(url, method, lst, transfer, userData);
+		setRequestWithFixedTransfer(url, method, lst, transfer, size, userData);
+	}
+
+	void AnotherHttpClientThreadPool::setRequestWithChunkedTransfer(const Url & url, const string & method, const map<string, string> & additionalHeaderFields, AutoRef<DataTransfer> transfer, AutoRef<UserData> userData) {
+
+		LinkedStringMap lst;
+		for (map<string, string>::const_iterator iter = additionalHeaderFields.begin(); iter != additionalHeaderFields.end(); iter++) {
+			lst[iter->first] = iter->second;
+		}
+
+		setRequestWithChunkedTransfer(url, method, lst, transfer, userData);
 	}
     
-    void AnotherHttpClientThreadPool::setRequest(const Url & url, const string & method, const UTIL::LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer, AutoRef<UserData> userData) {
+    void AnotherHttpClientThreadPool::setRequestWithFixedTransfer(const Url & url, const string & method, const UTIL::LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer, size_t size, AutoRef<UserData> userData) {
         AnotherHttpClientThread * thread = (AnotherHttpClientThread *)acquire();
         if (thread) {
             thread->setOnRequestCompleteListener(listener);
             thread->setUserData(userData);
-            thread->setRequest(url, method, additionalHeaderFields, transfer);
+            thread->setRequestWithFixedTransfer(url, method, additionalHeaderFields, transfer, size);
+            enqueue(thread);
+        }
+    }
+
+	void AnotherHttpClientThreadPool::setRequestWithChunkedTransfer(const Url & url, const string & method, const UTIL::LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer, AutoRef<UserData> userData) {
+        AnotherHttpClientThread * thread = (AnotherHttpClientThread *)acquire();
+        if (thread) {
+            thread->setOnRequestCompleteListener(listener);
+            thread->setUserData(userData);
+            thread->setRequestWithChunkedTransfer(url, method, additionalHeaderFields, transfer);
             enqueue(thread);
         }
     }

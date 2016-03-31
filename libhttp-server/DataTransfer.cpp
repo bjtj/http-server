@@ -1,22 +1,32 @@
 #include "DataTransfer.hpp"
 
 namespace HTTP {
+
+	using namespace OS;
+	using namespace UTIL;
     
-    DataTransfer::DataTransfer() : completed(false) {
+    DataTransfer::DataTransfer() : _completed(false) {
     }
-    
+	DataTransfer::DataTransfer(AutoRef<DataSource> source) : _completed(false), _source(source) {
+	}
+	DataTransfer::DataTransfer(AutoRef<DataSink> sink) : _completed(false), _sink(sink) {
+	}
     DataTransfer::~DataTransfer() {
     }
 
-	unsigned long long DataTransfer::getSize() {
-		throw OS::NotImplementedException("Not implememented", -1, 0);
+	unsigned long long DataTransfer::size() {
+		throw NotImplementedException("Not implememented", -1, 0);
 	}
-    
-    void DataTransfer::setCompleted() {
-        completed = true;
+    void DataTransfer::complete() {
+        _completed = true;
     }
-    bool DataTransfer::isCompleted() {
-        return completed;
+    bool DataTransfer::completed() {
+        return _completed;
     }
-    
+	AutoRef<DataSource> & DataTransfer::source() {
+		return _source;
+	}
+	AutoRef<DataSink> & DataTransfer::sink() {
+		return _sink;
+	}
 }

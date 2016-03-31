@@ -14,23 +14,27 @@ namespace HTTP {
 	 * @brief ChunkedTransfer
 	 */
 	
-	ChunkedTransfer::ChunkedTransfer() {
+	ChunkedTransfer::ChunkedTransfer(AutoRef<DataSource> source) : DataTransfer(source) {
+		trailingCounter.setContentSize(2);
+    }
+
+	ChunkedTransfer::ChunkedTransfer(AutoRef<DataSink> sink) : DataTransfer(sink) {
 		trailingCounter.setContentSize(2);
     }
 
     ChunkedTransfer::~ChunkedTransfer() {
     }
-
-    void ChunkedTransfer::reset() {
-        stringBuffer.clear();
-        readerBuffer.clear();
-        trailingCounter.resetPosition();
-    }
+	
 	void ChunkedTransfer::recv(Connection & connection) {
+
+		if (sink().nil()) {
+			throw Exception("sink required");
+		}
 
 		Packet & packet = connection.read();
         char * p = packet.getData();
 		size_t packetLength = packet.getLength();
+		
         for (size_t i = 0; i < packetLength; i++, p++) {
 
             char ch = *p;
@@ -44,19 +48,18 @@ namespace HTTP {
 					if (readerBuffer.completeData()) {
 						trailingCounter.resetPosition();
 					}
-				} else if (!trailingCounter.complete()) {
+				} else if (!trailingCounter.completed()) {
 					trailingCounter.read(1);
 				}
 
-				if (trailingCounter.complete()) {
+				if (trailingCounter.completed()) {
 
 					string chunk(readerBuffer.getChunkData(), readerBuffer.getChunkSize());
-					// logger.logv(" > " + chunk);
-
-					stringBuffer.append(readerBuffer.getChunkData(), readerBuffer.getChunkSize());
+					
+					sink()->write(readerBuffer.getChunkData(), readerBuffer.getChunkSize());
 
 					if (readerBuffer.getChunkSize() == 0) {
-						setCompleted();
+						complete();
 					}
 
 					trailingCounter.resetPosition();
@@ -68,13 +71,13 @@ namespace HTTP {
 
 	void ChunkedTransfer::send(Connection & connection) {
 		// TODO: need chunk generator
+
+		if (source().nil()) {
+			throw Exception("source required");
+		}
 	}
 
-	unsigned long long ChunkedTransfer::getSize() {
-		throw Exception("unpredictable", -1, 0);
-	}
-
-	string ChunkedTransfer::getString() {
-		return stringBuffer;
+	unsigned long long ChunkedTransfer::size() {
+		throw Exception("not available");
 	}
 }

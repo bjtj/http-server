@@ -1,66 +1,56 @@
 #include "FixedTransfer.hpp"
 
-#include <liboslayer/Logger.hpp>
-
 namespace HTTP {
     
     using namespace std;
+	using namespace OS;
     using namespace UTIL;
-    
-    static const Logger & logger = LoggerFactory::getDefaultLogger();
     
     /**
      * @brief FixedTransfer
      */
     
-    FixedTransfer::FixedTransfer(size_t size) {
-        chunkedBuffer.setChunkSize(size);
-    }
-	FixedTransfer::FixedTransfer(const char * content, size_t size) {
-		chunkedBuffer.setChunkSize(size);
-		chunkedBuffer.write(content, size);
-		chunkedBuffer.resetPosition();
+	FixedTransfer::FixedTransfer(AutoRef<DataSource> source, size_t size) : DataTransfer(source), indicator(size) {
 	}
-	FixedTransfer::FixedTransfer(const string & content) {
-		size_t size = content.length();
-		chunkedBuffer.setChunkSize(size);
-		chunkedBuffer.write(content.c_str(), size);
-		chunkedBuffer.resetPosition();
-
+	FixedTransfer::FixedTransfer(AutoRef<DataSink> sink, size_t size) : DataTransfer(sink), indicator(size) {
 	}
     FixedTransfer::~FixedTransfer() {
     }
-    ChunkedBuffer & FixedTransfer::getChunkedBuffer() {
-        return chunkedBuffer;
-    }
-    void FixedTransfer::reset() {
-        chunkedBuffer.resetPosition();
-    }
 	void FixedTransfer::recv(Connection & connection) {
-		connection.setReadSize(chunkedBuffer.getReadableSize(connection.getLimit()));
+
+		if (sink().nil()) {
+			throw Exception("sink required");
+		}
+
+		connection.setReadSize(indicator.adjustReadSize(connection.getLimit()));
 		Packet & packet = connection.read();
-        chunkedBuffer.write(packet.getData(), packet.getLength());
-        
-        if (!chunkedBuffer.remain()) {
-            setCompleted();
-        }
+		sink()->write(packet.getData(), packet.getLength());
+
+		if (indicator.completed()) {
+			complete();
+		}
     }
     void FixedTransfer::send(Connection & connection) {
-        if (chunkedBuffer.remain()) {
-			int len = connection.send(chunkedBuffer.getChunkData(), chunkedBuffer.remainingDataBuffer());
-			chunkedBuffer.setPosition(len);
-        }
-        
-        if (!chunkedBuffer.remain()) {
-            setCompleted();
+
+		if (source().nil()) {
+			throw Exception("source required");
+		}
+
+		if (indicator.remain()) {
+			size_t size = indicator.adjustReadSize(1024);
+			char * buffer = new char[size];
+			size_t readlen = source()->read(buffer, size);
+			size_t sendlen = connection.send(buffer, readlen);
+			indicator.offset(sendlen);
+			delete [] buffer;
+		}
+
+        if (!indicator.completed()) {
+			complete();
         }
     }
 
-	unsigned long long FixedTransfer::getSize() {
-		return chunkedBuffer.getChunkSize();
+	unsigned long long FixedTransfer::size() {
+		return indicator.size();
 	}
-    
-    string FixedTransfer::getString() {
-        return string(chunkedBuffer.getChunkData(), chunkedBuffer.getChunkSize());
-    }
 }

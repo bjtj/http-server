@@ -2,7 +2,7 @@
 #define __FIXED_TRANSFER_HPP__
 
 #include "DataTransfer.hpp"
-#include "ChunkedReader.hpp"
+#include "BufferIndicator.hpp"
 
 namespace HTTP {
     
@@ -11,23 +11,16 @@ namespace HTTP {
      */
     class FixedTransfer : public DataTransfer {
     private:
-        
-        ChunkedBuffer chunkedBuffer;
+
+		BufferIndicator indicator;
         
     public:
-        
-        FixedTransfer(size_t size);
-		FixedTransfer(const char * content, size_t size);
-		FixedTransfer(const std::string & content);
+		FixedTransfer(UTIL::AutoRef<DataSource> source, size_t size);
+		FixedTransfer(UTIL::AutoRef<DataSink> sink, size_t size);
         virtual ~FixedTransfer();
-        ChunkedBuffer & getChunkedBuffer();
-        
-        virtual void reset();
 		virtual void recv(Connection & connection);
         virtual void send(Connection & connection);
-		virtual unsigned long long getSize();
-        
-        virtual std::string getString();
+		virtual unsigned long long size();
     };
 }
 

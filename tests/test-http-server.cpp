@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
+#include <libhttp-server/StringDataSink.hpp>
 
 using namespace std;
 using namespace HTTP;
@@ -65,13 +66,13 @@ private:
 	string dump;
 	File file;
 public:
-    DumpResponseHandler() {}
+    DumpResponseHandler() : OnResponseListener(AutoRef<DataSink>(new StringDataSink)) {}
     virtual ~DumpResponseHandler() {}
-    virtual void onTransferDone(HttpResponse & response, DataTransfer * transfer, AutoRef<UserData> userData) {
+    virtual void onTransferDone(HttpResponse & response, AutoRef<DataSink> sink, AutoRef<UserData> userData) {
 		responseHeader = response.getHeader();
-        if (transfer) {
+        if (!sink.nil()) {
 			try {
-				dump = transfer->getString();
+				dump = ((StringDataSink*)&sink)->data();
 			} catch (Exception e) {
 				cout << "transfer->getString()" << endl;
 			}
@@ -132,7 +133,7 @@ public:
     
 		client.setFollowRedirect(true);
 		client.setUrl(url);
-		client.setRequest("GET", fields, NULL);
+		client.setRequest("GET", fields);
 		client.execute();
 	}
 };

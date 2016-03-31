@@ -157,7 +157,7 @@ namespace HTTP {
 	size_t ReadCounter::remaining() const {
 		return (pos < contentSize ? contentSize - pos : 0);
 	}
-	bool ReadCounter::complete() const {
+	bool ReadCounter::completed() const {
 		return remaining() == 0;
 	}
 
@@ -197,7 +197,7 @@ namespace HTTP {
 	unsigned long long LargeReadCounter::remaining() const {
 		return (pos < contentSize ? contentSize - pos : 0);
 	}
-	bool LargeReadCounter::complete() const {
+	bool LargeReadCounter::completed() const {
 		return remaining() == 0;
 	}
 
@@ -253,7 +253,7 @@ namespace HTTP {
 		// read trailing \r\n
 		ReadCounter consume(2);
 		char ch;
-		while (!consume.complete() && (len = socket.recv(&ch, 1)) > 0) {
+		while (!consume.completed() && (len = socket.recv(&ch, 1)) > 0) {
 			consume.read(len);
 		}
 

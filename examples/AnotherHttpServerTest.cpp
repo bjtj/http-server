@@ -3,10 +3,8 @@
 #include <liboslayer/FileReaderWriter.hpp>
 #include <liboslayer/Text.hpp>
 #include <liboslayer/Logger.hpp>
-
 #include <vector>
 #include <map>
-
 #include <libhttp-server/Packet.hpp>
 #include <libhttp-server/HttpRequest.hpp>
 #include <libhttp-server/HttpHeaderReader.hpp>
@@ -15,6 +13,7 @@
 #include <libhttp-server/ConnectionManager.hpp>
 #include <libhttp-server/DataTransfer.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
+#include <libhttp-server/StringDataSink.hpp>
 
 using namespace std;
 using namespace OS;
@@ -55,7 +54,8 @@ public:
         
         AutoRef<DataTransfer> transfer = request.getTransfer();
         if (!transfer.empty()) {
-            logger.logv(transfer->getString());
+			string data = ((StringDataSink*)&transfer->sink())->data();
+            logger.logv(data);
         }
     }
 };

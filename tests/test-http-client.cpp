@@ -1,6 +1,7 @@
 #include <iostream>
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
+#include <libhttp-server/StringDataSink.hpp>
 #include "utils.hpp"
 
 using namespace std;
@@ -27,7 +28,8 @@ public:
 		
 		AutoRef<DataTransfer> transfer = request.getTransfer();
 		if (!transfer.nil()) {
-			ret.append(transfer->getString());
+			string data = ((StringDataSink*)&transfer->sink())->data();
+			ret.append(data);
 		}
 
 		setFixedTransfer(response, ret);
@@ -40,16 +42,12 @@ private:
 	HttpResponseHeader responseHeader;
 	string dump;
 public:
-    DumpResponseHandler() {}
+    DumpResponseHandler() : OnResponseListener(AutoRef<DataSink>(new StringDataSink)) {}
     virtual ~DumpResponseHandler() {}
-	virtual void onTransferDone(HttpResponse & response, DataTransfer * transfer, AutoRef<UserData> userData) {
+	virtual void onTransferDone(HttpResponse & response, AutoRef<DataSink> sink, AutoRef<UserData> userData) {
 		responseHeader = response.getHeader();
-        if (transfer) {
-			try {
-				dump = transfer->getString();
-			} catch (Exception e) {
-				cout << "transfer->getString()" << endl;
-			}
+        if (!sink.nil()) {
+			dump = ((StringDataSink*)&sink)->data();
         }
     }
     virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
@@ -73,7 +71,7 @@ static DumpResponseHandler httpRequest(const Url & url, const string & method, c
     
 	client.setFollowRedirect(true);
 	client.setUrl(url);
-	client.setRequest(method, headers, NULL);
+	client.setRequest(method, headers);
 	client.execute();
 	
 	return handler;

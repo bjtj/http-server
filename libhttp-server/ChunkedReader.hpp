@@ -68,7 +68,7 @@ namespace HTTP {
 		void resetPosition();
 		void read(size_t len);
 		size_t remaining() const;
-		bool complete() const;
+		bool completed() const;
 
 		void setContentSize(size_t contentSize);
 		size_t getContentSize();
@@ -92,7 +92,7 @@ namespace HTTP {
 		void resetPosition();
 		void read(unsigned long long len);
 		unsigned long long remaining() const;
-		bool complete() const;
+		bool completed() const;
 
 		void setContentSize(unsigned long long contentSize);
 		unsigned long long getContentSize();

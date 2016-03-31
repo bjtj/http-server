@@ -37,11 +37,10 @@ namespace HTTP {
         AnotherHttpClientThread();
         virtual ~AnotherHttpClientThread();
         void setUserData(UTIL::AutoRef<UserData> userData);
-        void setRequest(const Url & url, const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer);
+        void setRequestWithFixedTransfer(const Url & url, const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, size_t size);
+		void setRequestWithChunkedTransfer(const Url & url, const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer);
         virtual void run();
-        
-        virtual void onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData);
-        virtual void onTransferDone(HttpResponse & response, DataTransfer * transfer, UTIL::AutoRef<UserData> userData);
+        virtual void onTransferDone(HttpResponse & response, UTIL::AutoRef<DataSink> sink, UTIL::AutoRef<UserData> userData);
         virtual void onError(OS::Exception & e, UTIL::AutoRef<UserData> userData);
         
         void setOnRequestCompleteListener(OnRequestCompleteListener * listener);
@@ -59,9 +58,13 @@ namespace HTTP {
         AnotherHttpClientThreadPool(size_t maxThreads);
         virtual ~AnotherHttpClientThreadPool();
         
-        void setRequest(const Url & url, const std::string & method, UTIL::AutoRef<DataTransfer> transfer, UTIL::AutoRef<UserData> userData);
-		void setRequest(const Url & url, const std::string & method, const std::map<std::string, std::string> & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, UTIL::AutoRef<UserData> userData);
-        void setRequest(const Url & url, const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, UTIL::AutoRef<UserData> userData);
+        void setRequestWithFixedTransfer(const Url & url, const std::string & method, UTIL::AutoRef<DataTransfer> transfer, size_t size, UTIL::AutoRef<UserData> userData);
+		void setRequestWithChunkedTransfer(const Url & url, const std::string & method, UTIL::AutoRef<DataTransfer> transfer, UTIL::AutoRef<UserData> userData);
+		void setRequestWithFixedTransfer(const Url & url, const std::string & method, const std::map<std::string, std::string> & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, size_t size, UTIL::AutoRef<UserData> userData);
+		void setRequestWithChunkedTransfer(const Url & url, const std::string & method, const std::map<std::string, std::string> & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, UTIL::AutoRef<UserData> userData);
+        void setRequestWithFixedTransfer(const Url & url, const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, size_t size, UTIL::AutoRef<UserData> userData);
+
+		void setRequestWithChunkedTransfer(const Url & url, const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, UTIL::AutoRef<UserData> userData);
         
         void setOnRequestCompleteListener(OnRequestCompleteListener * listener);
     };

@@ -29,13 +29,15 @@ namespace HTTP {
 	 */
 	class OnResponseListener {
 	private:
+		UTIL::AutoRef<DataSink> _sink;
 	public:
-		OnResponseListener();
+		OnResponseListener(UTIL::AutoRef<DataSink> sink);
 		virtual ~OnResponseListener();
-		virtual DataTransfer * createDataTransfer(HttpHeader & header);
+		virtual DataTransfer * createDataTransfer(HttpHeader & header, UTIL::AutoRef<DataSink> sink);
 		virtual void onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData);
-        virtual void onTransferDone(HttpResponse & response, DataTransfer * transfer, UTIL::AutoRef<UserData> userData) = 0;
+        virtual void onTransferDone(HttpResponse & response, UTIL::AutoRef<DataSink> sink, UTIL::AutoRef<UserData> userData) = 0;
         virtual void onError(OS::Exception & e, UTIL::AutoRef<UserData> userData) = 0;
+		UTIL::AutoRef<DataSink> & sink();
 	};
 
 	/**
@@ -80,10 +82,11 @@ namespace HTTP {
 		void connect(unsigned long timeout);
         void closeConnection();
         void setUrl(const Url & url);
-        void setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer);
-		void setChunkedRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, ChunkedTransfer * transfer);
-        void setDataTransfer(UTIL::AutoRef<DataTransfer> transfer);
-		void setChunkedTransfer(ChunkedTransfer * chunkedTransfer);
+		void setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields);
+        void setRequestWithFixedTransfer(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, size_t size);
+		void setRequestWithChunkedTransfer(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer);
+        void setFixedTransfer(UTIL::AutoRef<DataTransfer> transfer, size_t size);
+		void setChunkedTransfer(UTIL::AutoRef<DataTransfer> transfer);
 		void execute();
         void communicate();
 		void interrupt();

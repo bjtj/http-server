@@ -2,8 +2,9 @@
 
 #include "ChunkedTransfer.hpp"
 #include "FixedTransfer.hpp"
-#include "FileTransfer.hpp"
-
+#include "StringDataSource.hpp"
+#include "FileDataSource.hpp"
+#include "StringDataSink.hpp"
 #include <liboslayer/FileReaderWriter.hpp>
 #include <liboslayer/Logger.hpp>
 
@@ -40,10 +41,7 @@ namespace HTTP {
     
 	void HttpRequestHandler::setFixedTransfer(HttpResponse & response, const string & content) {
 
-		AutoRef<DataTransfer> transfer(new FixedTransfer(content.length()));
-        ChunkedBuffer & cb = ((FixedTransfer*)&transfer)->getChunkedBuffer();
-        cb.write(content.c_str(), content.length());
-        cb.resetPosition();
+		AutoRef<DataTransfer> transfer(new FixedTransfer(AutoRef<DataSource>(new StringDataSource(content)), content.size()));
 
         response.clearTransfer();
         response.setTransfer(transfer);
@@ -58,8 +56,8 @@ namespace HTTP {
 
 	void HttpRequestHandler::setFileTransfer(HttpResponse & response, OS::File & file) {
 
-		AutoRef<FileReader> reader(new FileReader(file));
-		AutoRef<DataTransfer> transfer(new FileTransfer(reader, file.getSize()));
+		AutoRef<DataSource> source(new FileDataSource(FileStream(file, "rb")));
+		AutoRef<DataTransfer> transfer(new FixedTransfer(source, file.getSize()));
 
 		response.clearTransfer();
 		response.setTransfer(transfer);
@@ -78,9 +76,10 @@ namespace HTTP {
 
 		size_t size = (end - start + 1);
 
-		AutoRef<FileReader> reader(new FileReader(file));
-		reader->seek(start);
-		AutoRef<DataTransfer> transfer(new FileTransfer(reader, size));
+		FileStream stream(file, "rb");
+		stream.seek(start);
+		AutoRef<DataSource> source(new FileDataSource(stream));
+		AutoRef<DataTransfer> transfer(new FixedTransfer(source, size));
 
 		response.setStatusCode(206);
 		response.setContentLength(size);
@@ -164,7 +163,7 @@ namespace HTTP {
 				if (!transfer.nil()) {
 					transfer->recv(connection);
 					readRequestContent(request, response, connection.getPacket());
-					if (transfer->isCompleted()) {
+					if (transfer->completed()) {
 						onHttpRequestContentCompleted(request, response);
 						writeable = true;
 					}
@@ -231,10 +230,10 @@ namespace HTTP {
 	void HttpCommunication::prepareRequestContentTransfer(HttpRequest & request) {
 
 		if (request.getHeader().isChunkedTransfer()) {
-			request.setTransfer(AutoRef<DataTransfer>(new ChunkedTransfer));
+			request.setTransfer(AutoRef<DataTransfer>(new ChunkedTransfer(AutoRef<DataSink>(new StringDataSink))));
         } else {
             if (request.getContentLength() > 0) {
-                AutoRef<DataTransfer> transfer(new FixedTransfer(request.getContentLength()));
+                AutoRef<DataTransfer> transfer(new FixedTransfer(AutoRef<DataSink>(new StringDataSink), request.getContentLength()));
 				request.setTransfer(transfer);
             }
         }
@@ -289,7 +288,7 @@ namespace HTTP {
 
 		if (!responseTransfer.empty()) {
 			responseTransfer->send(connection);
-			if (responseTransfer->isCompleted()) {
+			if (responseTransfer->completed()) {
 				responseContentTransferDone = true;
 			}
 		} else {
@@ -314,7 +313,7 @@ namespace HTTP {
 			response.setContentType("text/html");
 			string content = "<html><head><title>404 not found</title></head><body><h1>404 not found</h1><p>Sorry, page not found.</p></body></html>";
 			response.setContentLength(content.length());
-			response.setTransfer(new FixedTransfer(content));
+			response.setTransfer(AutoRef<DataTransfer>(new FixedTransfer(AutoRef<DataSource>(new StringDataSource(content)), content.size())));
 			break;
 		}
 	}
