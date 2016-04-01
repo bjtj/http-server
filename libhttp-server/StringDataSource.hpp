@@ -4,6 +4,7 @@
 #include "DataSource.hpp"
 #include "BufferIndicator.hpp"
 #include <string>
+#include <cstring>
 
 namespace HTTP {
 	

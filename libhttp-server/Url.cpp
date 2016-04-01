@@ -223,7 +223,7 @@ namespace HTTP {
 		return 0;
 	}
     
-	string Url::toString() {
+	string Url::toString() const {
 
 		string ret;
 

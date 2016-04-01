@@ -29,15 +29,14 @@ namespace HTTP {
 	 */
 	class OnResponseListener {
 	private:
-		UTIL::AutoRef<DataSink> _sink;
 	public:
-		OnResponseListener(UTIL::AutoRef<DataSink> sink);
+		OnResponseListener();
 		virtual ~OnResponseListener();
+		virtual UTIL::AutoRef<DataSink> getDataSink() = 0;
 		virtual DataTransfer * createDataTransfer(HttpHeader & header, UTIL::AutoRef<DataSink> sink);
 		virtual void onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData);
         virtual void onTransferDone(HttpResponse & response, UTIL::AutoRef<DataSink> sink, UTIL::AutoRef<UserData> userData) = 0;
         virtual void onError(OS::Exception & e, UTIL::AutoRef<UserData> userData) = 0;
-		UTIL::AutoRef<DataSink> & sink();
 	};
 
 	/**
@@ -45,29 +44,23 @@ namespace HTTP {
 	 */
 	class AnotherHttpClient {
 	private:
-
 		bool debug;
 		Url url;
 		HttpRequest request;
 		HttpResponse response;
-
 		Connection * connection;
 		OS::Socket * socket;
 		OS::Selector selector;
-
 		bool requestHeaderSent;
 		bool responseHeaderReceived;
 		bool readable;
 		bool interrupted;
 		bool complete;
-
 		HttpHeaderReader responseHeaderReader;
-        
         OnResponseListener * responseListener;
-        
 		unsigned long connectionTimeout;
+		unsigned long recvTimeout;
         bool followRedirect;
-
 		UTIL::AutoRef<UserData> userData;
 
 	public:
@@ -76,10 +69,10 @@ namespace HTTP {
 		AnotherHttpClient(const Url & url);
 		virtual ~AnotherHttpClient();
 
+		void logd(const std::string & msg);
 		void setDebug(bool debug);
         void reconnect();
 		void connect();
-		void connect(unsigned long timeout);
         void closeConnection();
         void setUrl(const Url & url);
 		void setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields);
@@ -92,24 +85,19 @@ namespace HTTP {
 		void interrupt();
 		void clear();
         void clearStates();
-        
 		void sendRequestHeader();
 		void sendRequestContent();
 		void recvResponseHeader();
 		void recvResponseContent();
-        
         void onResponseTransferDone();
         void setComplete();
-        
 		void setConnectionTimeout(unsigned long timeout);
+		void setRecvTimeout(unsigned long timeout);
         bool needRedirect();
         void handleRedirect();
         void setFollowRedirect(bool followRedirect);
-                
         void setOnResponseListener(OnResponseListener * responseListener);
-
 		void setUserData(UTIL::AutoRef<UserData> userData);
-        
         Url & getUrl();
         HttpResponse & getResponse();
         

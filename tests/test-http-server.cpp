@@ -66,8 +66,11 @@ private:
 	string dump;
 	File file;
 public:
-    DumpResponseHandler() : OnResponseListener(AutoRef<DataSink>(new StringDataSink)) {}
+    DumpResponseHandler() {}
     virtual ~DumpResponseHandler() {}
+	virtual AutoRef<DataSink> getDataSink() {
+		return AutoRef<DataSink>(new StringDataSink);
+	}
     virtual void onTransferDone(HttpResponse & response, AutoRef<DataSink> sink, AutoRef<UserData> userData) {
 		responseHeader = response.getHeader();
         if (!sink.nil()) {

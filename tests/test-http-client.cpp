@@ -9,6 +9,10 @@ using namespace OS;
 using namespace UTIL;
 using namespace HTTP;
 
+static string packetVisible(const string pack) {
+	return Text::replaceAll(Text::replaceAll(pack, "\n", "\\n"), "\r", "\\r");
+}
+
 class RequestEchoHandler : public HttpRequestHandler {
 private:
 public:
@@ -16,6 +20,9 @@ public:
     virtual ~RequestEchoHandler() {}
 
 	virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+
+		cout << "** request : " << request.getPath() << endl;
+		
 		string ret;
 		response.setStatusCode(200);
 		response.setContentType("text/plain");
@@ -32,6 +39,8 @@ public:
 			ret.append(data);
 		}
 
+		cout << "** response / content : " << packetVisible(ret) << endl;
+
 		setFixedTransfer(response, ret);
 	}
 };
@@ -42,13 +51,18 @@ private:
 	HttpResponseHeader responseHeader;
 	string dump;
 public:
-    DumpResponseHandler() : OnResponseListener(AutoRef<DataSink>(new StringDataSink)) {}
+    DumpResponseHandler() {}
     virtual ~DumpResponseHandler() {}
+	virtual AutoRef<DataSink> getDataSink() {
+		return AutoRef<DataSink>(new StringDataSink);
+	}
 	virtual void onTransferDone(HttpResponse & response, AutoRef<DataSink> sink, AutoRef<UserData> userData) {
 		responseHeader = response.getHeader();
         if (!sink.nil()) {
 			dump = ((StringDataSink*)&sink)->data();
-        }
+        } else {
+			throw Exception("what the f!!!!");
+		}
     }
     virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
         cout << "Error/e: " << e.getMessage() << endl;
@@ -62,10 +76,16 @@ public:
 };
 
 static DumpResponseHandler httpRequest(const Url & url, const string & method, const LinkedStringMap & headers) {
+
+	cout << " ** url : " << url.toString() << endl;
+	cout << " ** method : " << method << endl;
 	
 	DumpResponseHandler handler;
 	AnotherHttpClient client;
 	client.setDebug(true);
+
+	client.setConnectionTimeout(5000);
+	client.setRecvTimeout(5000);
     
 	client.setOnResponseListener(&handler);
     
@@ -110,7 +130,6 @@ int main(int argc, char *args[]) {
 	server.startAsync();
 
 	test_http_client();
-
 
 	server.stop();
 	

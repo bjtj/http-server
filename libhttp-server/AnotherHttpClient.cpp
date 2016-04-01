@@ -13,7 +13,7 @@ namespace HTTP {
 	/**
 	 * @brief OnResponseHeaderListener
 	 */
-	OnResponseListener::OnResponseListener(AutoRef<DataSink> sink) : _sink(sink) {
+	OnResponseListener::OnResponseListener() {
 	}
 
 	OnResponseListener::~OnResponseListener() {
@@ -30,25 +30,28 @@ namespace HTTP {
 		return NULL;
 	}
 	void OnResponseListener::onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData) {
-		response.setTransfer(AutoRef<DataTransfer>(createDataTransfer(response.getHeader(), _sink)));
+		response.setTransfer(AutoRef<DataTransfer>(createDataTransfer(response.getHeader(), getDataSink())));
 	}
-
-	AutoRef<DataSink> & OnResponseListener::sink() {
-		return _sink;
- 	}
 
 	/**
 	 * @brief AnotherHttpClient
 	 */
     
-    AnotherHttpClient::AnotherHttpClient() : debug(false), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), followRedirect(false) {
+    AnotherHttpClient::AnotherHttpClient() : debug(false), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), recvTimeout(0), followRedirect(false) {
         
     }
     
-	AnotherHttpClient::AnotherHttpClient(const Url & url) : debug(false), url(url), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), followRedirect(false) {
+	AnotherHttpClient::AnotherHttpClient(const Url & url) : debug(false), url(url), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), recvTimeout(0), followRedirect(false) {
 	}
     
 	AnotherHttpClient::~AnotherHttpClient() {
+	}
+
+	void AnotherHttpClient::logd(const string & msg) {
+		if (debug) {
+			Logger logger = LoggerFactory::getDefaultLogger();
+			logger.logd(msg);
+		}
 	}
 
 	void AnotherHttpClient::setDebug(bool debug) {
@@ -66,26 +69,20 @@ namespace HTTP {
 			int remotePort = url.getIntegerPort();
 
 			socket = new Socket(OS::InetAddress(remoteHost, remotePort));
-            socket->connect();
+			if (connectionTimeout > 0) {
+				socket->connect(connectionTimeout);
+			} else {
+				socket->connect();
+			}
+
+			if (recvTimeout > 0) {
+				socket->setRecvTimeout(recvTimeout);
+			}
 
 			connection = new Connection(*socket);
             connection->registerSelector(selector);
 		}
 	}
-	void AnotherHttpClient::connect(unsigned long timeout) {
-
-		if (!connection) {
-			string remoteHost = url.getHost();
-			int remotePort = url.getIntegerPort();
-
-			socket = new Socket(OS::InetAddress(remoteHost, remotePort));
-			socket->connect(timeout);
-
-			connection = new Connection(*socket);
-			connection->registerSelector(selector);
-		}
-	}
-    
     void AnotherHttpClient::closeConnection() {
         
         if (connection) {
@@ -155,11 +152,7 @@ namespace HTTP {
             while (!interrupted) {
                 
                 clearStates();
-				if (connectionTimeout > 0) {
-					connect(connectionTimeout);
-				} else {
-					connect();
-				}
+				connect();
                 
                 response.clear();
                 responseHeaderReader.clear();
@@ -233,10 +226,6 @@ namespace HTTP {
 
 		if (!requestHeaderSent) {
 			string header = request.getHeader().toString();
-			if (debug) {
-				Logger logger = LoggerFactory::getDefaultLogger();
-				logger.logd(header);
-			}
 			connection->send(header.c_str(), header.length());
 			requestHeaderSent = true;
 		}
@@ -311,6 +300,10 @@ namespace HTTP {
     }
 	void AnotherHttpClient::setConnectionTimeout(unsigned long timeout) {
 		this->connectionTimeout = timeout;
+	}
+
+	void AnotherHttpClient::setRecvTimeout(unsigned long timeout) {
+		this->recvTimeout = timeout;
 	}
     
     bool AnotherHttpClient::needRedirect() {

@@ -178,9 +178,7 @@ namespace HTTP {
 
 		void registerRequestHandler(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler);
 		void unregisterRequestHandler(const std::string & pattern);
-
 		int getPort();
-
 		void start();
 		void startAsync();
 		void poll(unsigned long timeout);

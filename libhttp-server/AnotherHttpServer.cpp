@@ -1,5 +1,4 @@
 #include "AnotherHttpServer.hpp"
-
 #include "ChunkedTransfer.hpp"
 #include "FixedTransfer.hpp"
 #include "StringDataSource.hpp"
@@ -41,11 +40,12 @@ namespace HTTP {
     
 	void HttpRequestHandler::setFixedTransfer(HttpResponse & response, const string & content) {
 
-		AutoRef<DataTransfer> transfer(new FixedTransfer(AutoRef<DataSource>(new StringDataSource(content)), content.size()));
+		AutoRef<DataSource> source(new StringDataSource(content));
+		AutoRef<DataTransfer> transfer(new FixedTransfer(source, content.size()));
 
         response.clearTransfer();
         response.setTransfer(transfer);
-		response.setContentLength(content.length());
+		response.setContentLength(content.size());
 	}
 
 	void HttpRequestHandler::setFileTransfer(HttpResponse & response, const string & filepath) {

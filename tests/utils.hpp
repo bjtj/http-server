@@ -1,6 +1,8 @@
 #ifndef __TEST_UTIL_HPP__
 #define __TEST_UTIL_HPP__
 
+#include <cstdlib>
+#include <cstdio>
 #include <iostream>
 
 #define ASSERT(A,CMP,B)													\

@@ -14,11 +14,14 @@ namespace HTTP {
      * @brief
      */
     
-    AnotherHttpClientThread::AnotherHttpClientThread() : OnResponseListener(AutoRef<DataSink>(new StringDataSink)), FlaggableThread(false), listener(NULL) {
+    AnotherHttpClientThread::AnotherHttpClientThread() : FlaggableThread(false), listener(NULL) {
         httpClient.setOnResponseListener(this);
     }
     AnotherHttpClientThread::~AnotherHttpClientThread() {
     }
+	AutoRef<DataSink> AnotherHttpClientThread::getDataSink() {
+		return AutoRef<DataSink>(new StringDataSink);
+	}
     void AnotherHttpClientThread::setUserData(UTIL::AutoRef<UserData> userData) {
         this->userData = userData;
     }
@@ -28,7 +31,6 @@ namespace HTTP {
         httpClient.setFollowRedirect(true);
         httpClient.setUserData(userData);
         userData = NULL;
-		sink() = AutoRef<DataSink>(new StringDataSink);
         setFlag(true);
     }
 	void AnotherHttpClientThread::setRequestWithChunkedTransfer(const Url & url, const string & method, const LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer) {
@@ -37,7 +39,6 @@ namespace HTTP {
         httpClient.setFollowRedirect(true);
         httpClient.setUserData(userData);
         userData = NULL;
-		sink() = AutoRef<DataSink>(new StringDataSink);
         setFlag(true);
     }
     void AnotherHttpClientThread::run() {

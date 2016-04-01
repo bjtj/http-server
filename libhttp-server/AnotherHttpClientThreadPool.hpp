@@ -36,6 +36,7 @@ namespace HTTP {
     public:
         AnotherHttpClientThread();
         virtual ~AnotherHttpClientThread();
+		UTIL::AutoRef<DataSink> getDataSink();
         void setUserData(UTIL::AutoRef<UserData> userData);
         void setRequestWithFixedTransfer(const Url & url, const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, size_t size);
 		void setRequestWithChunkedTransfer(const Url & url, const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer);

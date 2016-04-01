@@ -24,7 +24,7 @@ namespace HTTP {
 
 		connection.setReadSize(indicator.adjustReadSize(connection.getLimit()));
 		Packet & packet = connection.read();
-		sink()->write(packet.getData(), packet.getLength());
+		indicator.offset(sink()->write(packet.getData(), packet.getLength()));
 
 		if (indicator.completed()) {
 			complete();
@@ -45,7 +45,7 @@ namespace HTTP {
 			delete [] buffer;
 		}
 
-        if (!indicator.completed()) {
+        if (indicator.completed()) {
 			complete();
         }
     }

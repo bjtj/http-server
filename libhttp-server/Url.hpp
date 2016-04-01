@@ -63,7 +63,7 @@ namespace HTTP {
 
 		int getKnownPort(const std::string & scheme);
         
-		virtual std::string toString();
+		virtual std::string toString() const;
 
 		Url& operator=(const std::string & urlStr);
 		Url& operator=(const char * urlStr);
