@@ -11,16 +11,26 @@ namespace HTTP {
 	static const Logger & logger = LoggerFactory::getDefaultLogger();
 
     Url::Url() {
+		initKnownSchemes();
     }
     
 	Url::Url(const char * urlStr) {
+		initKnownSchemes();
 		parseUrlString(urlStr);
 	}
 	Url::Url(const string & urlStr) {
+		initKnownSchemes();
 		parseUrlString(urlStr);
 	}
 	
 	Url::~Url() {
+	}
+
+	void Url::initKnownSchemes() {
+		knownSchemes.clear();
+		knownSchemes.push_back("http");
+		knownSchemes.push_back("https");
+		knownSchemes.push_back("file");
 	}
 
 	string Url::getUsername() const {
@@ -122,23 +132,29 @@ namespace HTTP {
         parseUrlString(urlStr);
     }
 
-	void Url::parseUrlString(string urlStr) {
+	void Url::parseUrlString(const string & urlStr) {
 
+		string u = urlStr;
 		clear();
 		
 		size_t f = urlStr.find("://");
 		if (f == string::npos) {
-			throw UrlParseException("no protocol found", -1, 0);
+			throw UrlParseException("no protocol found");
+		}
+
+		scheme = u.substr(0, f);
+
+		if (!isKnownScheme(scheme)) {
+			throw UrlParseException("unknown scheme / " + scheme);
 		}
 		
-		scheme = urlStr.substr(0, f);
-		urlStr = urlStr.substr(f + 3);
-		f = urlStr.find("/");
+		u = u.substr(f + 3);
+		f = u.find("/");
 		if (f != string::npos) {
-			parseAddress(urlStr.substr(0, f));
-			parsePath(urlStr.substr(f));
+			parseAddress(u.substr(0, f));
+			parsePath(u.substr(f));
 		} else {
-			parseAddress(urlStr);
+			parseAddress(u);
 			path = "/";
 		}
 		if (port.empty()) {
@@ -221,6 +237,15 @@ namespace HTTP {
 			return 443;
 		}
 		return 0;
+	}
+
+	bool Url::isKnownScheme(const string & scheme) {
+		for (vector<string>::iterator iter = knownSchemes.begin(); iter != knownSchemes.end(); iter++) {
+			if (*iter == scheme) {
+				return true;
+			}
+		}
+		return false;
 	}
     
 	string Url::toString() const {

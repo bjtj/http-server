@@ -1,13 +1,14 @@
-#include <iostream>
+// #include <iostream>
+#include "utils.hpp"
 #include <libhttp-server/Url.hpp>
 
 using namespace std;
 using namespace HTTP;
 
-#define ASSERT(A,CMP,B) if (!(A CMP B)) {								\
-		cerr << #A <<  " should be " << #CMP << " " <<  B << " but " << A << endl; \
-		exit(1);														\
-	}
+// #define ASSERT(A,CMP,B) if (!(A CMP B)) {								\
+// 		cerr << #A <<  " should be " << #CMP << " " <<  B << " but " << A << endl; \
+// 		exit(1);														\
+// 	}
 
 static void test_url() {
 
@@ -44,9 +45,15 @@ static void test_url() {
 	ASSERT(url.toString(), ==, "http://username:password@localhost:80/");
 }
 
+static void test_file_url() {
+	Url url("file:///test.txt");
+	ASSERT(url.getPath(), ==, "/test.txt");
+}
+
 int main(int argc, char *args[]) {
 
 	test_url();
+	test_file_url();
     
     return 0;
 }
