@@ -1,7 +1,6 @@
 libhttp_serverincdir=${includedir}/libhttp-server
 libhttp_serverinc_HEADERS = \
 	AnotherHttpClient.hpp \
-	AnotherHttpClientThreadPool.hpp \
 	AnotherHttpServer.hpp \
 	BufferIndicator.hpp \
 	ChunkedReader.hpp \
@@ -16,7 +15,6 @@ libhttp_serverinc_HEADERS = \
 	FileDataSource.hpp \
 	FixedTransfer.hpp \
 	HttpClient.hpp \
-	HttpClientThreadPool.hpp \
 	HttpEncoderDecoder.hpp \
 	HttpHeader.hpp \
 	HttpHeaderParser.hpp \
@@ -40,8 +38,6 @@ lib_LTLIBRARIES = libhttp-server.la
 libhttp_server_la_SOURCES = \
 	AnotherHttpClient.cpp \
 	AnotherHttpClient.hpp \
-	AnotherHttpClientThreadPool.cpp \
-	AnotherHttpClientThreadPool.hpp \
 	AnotherHttpServer.cpp \
 	AnotherHttpServer.hpp \
 	BufferIndicator.cpp \
@@ -67,7 +63,6 @@ libhttp_server_la_SOURCES = \
 	FixedTransfer.hpp \
 	HttpClient.cpp \
 	HttpClient.hpp \
-	HttpClientThreadPool.hpp \
 	HttpEncoderDecoder.cpp \
 	HttpEncoderDecoder.hpp \
 	HttpHeader.cpp \
