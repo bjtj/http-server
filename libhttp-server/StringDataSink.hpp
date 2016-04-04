@@ -13,6 +13,7 @@ namespace HTTP {
 		virtual ~StringDataSink() {}
 		virtual size_t write(const char * data, size_t size) {
 			_data.append(data, size);
+			return size;
 		}
 		std::string & data() {
 			return _data;
