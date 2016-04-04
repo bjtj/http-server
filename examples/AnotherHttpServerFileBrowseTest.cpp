@@ -8,6 +8,7 @@
 #include <libhttp-server/HttpSessionTool.hpp>
 #include <libhttp-server/LispPage.hpp>
 #include <libhttp-server/Url.hpp>
+#include <libhttp-server/StringDataSink.hpp>
 #include <liboslayer/Lisp.hpp>
 
 using namespace std;
@@ -93,19 +94,16 @@ public:
 		mimeTypes["lsp"] = "Application/x-lisp";
 	}
 	virtual ~FileBrowseHttpRequestHandler() {}
+
+	virtual AutoRef<DataSink> getDataSink() {
+		return AutoRef<DataSink>(new StringDataSink);
+	}
     
-    virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+    virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 		try {
 			doHandle(request, response);
-		} catch (const char * e) {
-			response.setStatusCode(500);
-			response.setContentType("text/html");
-			setFixedTransfer(response, "Server Error/" + string(e));
-		} catch (const string & e) {
-			response.setStatusCode(500);
-			response.setContentType("text/html");
-			setFixedTransfer(response, "Server Error/" + e);
 		} catch (Exception & e) {
+			cout << " ** error" << endl;
 			response.setStatusCode(500);
 			response.setContentType("text/html");
 			setFixedTransfer(response, "Server Error/" + e.getMessage());
@@ -226,7 +224,11 @@ public:
 	SinglePageHttpRequestHandler(const string & path) : path(path) {}
 	virtual ~SinglePageHttpRequestHandler() {}
 
-	virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+	virtual AutoRef<DataSink> getDataSink() {
+		return AutoRef<DataSink>(new StringDataSink);
+	}
+
+	virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
 		if (request.isWwwFormUrlEncoded()) {
 			request.parseWwwFormUrlencoded();

@@ -27,10 +27,11 @@ namespace HTTP {
 
 		HttpRequestHandler();
 		virtual ~HttpRequestHandler();
+
+		virtual UTIL::AutoRef<DataSink> getDataSink() = 0;
     
 		virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response);
-		virtual void onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet);
-        virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response);
+        virtual void onHttpRequestContentCompleted(HttpRequest & request, UTIL::AutoRef<DataSink> sink, HttpResponse & response);
 
 		virtual void onHttpResponseHeaderCompleted(HttpRequest & request, HttpResponse & response);
 		virtual void onHttpResponseTransferCompleted(HttpRequest & request, HttpResponse & response);
@@ -129,8 +130,8 @@ namespace HTTP {
 		void readRequestHeaderIfNeed(Connection & connection);
 		void readRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet);
 		void onRequestHeader(HttpRequest & request, HttpResponse & response);
-		void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response);
-		void prepareRequestContentTransfer(HttpRequest & request);
+		void onHttpRequestContentCompleted(HttpRequest & request, UTIL::AutoRef<DataSink> sink, HttpResponse & response);
+		void prepareRequestContentTransfer(HttpRequest & request, UTIL::AutoRef<DataSink> sink);
 		virtual void onWriteable(Connection & connection);
 		void sendResponseHeader(Connection & connection);
 		void sendResponseContent(Connection & connection);

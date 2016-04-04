@@ -25,10 +25,7 @@ namespace HTTP {
 	void HttpRequestHandler::onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
 		// request header transfer done
 	}
-	void HttpRequestHandler::onHttpRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
-		// request content partial packet received
-	}
-	void HttpRequestHandler::onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+	void HttpRequestHandler::onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 		// request content transfer done
 	}
 	void HttpRequestHandler::onHttpResponseHeaderCompleted(HttpRequest & request, HttpResponse & response) {
@@ -164,11 +161,12 @@ namespace HTTP {
 					transfer->recv(connection);
 					readRequestContent(request, response, connection.getPacket());
 					if (transfer->completed()) {
-						onHttpRequestContentCompleted(request, response);
+						AutoRef<DataSink> sink = transfer->sink();
+						onHttpRequestContentCompleted(request, sink, response);
 						writeable = true;
 					}
 				} else {
-					onHttpRequestContentCompleted(request, response);
+					onHttpRequestContentCompleted(request, AutoRef<DataSink>(), response);
                     writeable = true;
 				}
             }
@@ -193,47 +191,53 @@ namespace HTTP {
 	}
     
     void HttpCommunication::readRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
-		AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
-		if (!handler.nil()) {
-			handler->onHttpRequestContent(request, response, packet);
-		}
     }
 
 	void HttpCommunication::onRequestHeader(HttpRequest & request, HttpResponse & response) {
-        
-        prepareRequestContentTransfer(request);
-        
+
+		AutoRef<DataSink> sink;
+
 		AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
+		if (!handler.nil()) {
+			sink = handler->getDataSink();
+		}
+
+		if (sink.nil()) {
+			sink = AutoRef<DataSink>(new StringDataSink);
+		}
+        
+        prepareRequestContentTransfer(request, sink);
+        
 		if (!handler.nil()) {
 			handler->onHttpRequestHeaderCompleted(request, response);
 		}
 
         AutoRef<DataTransfer> transfer = request.getTransfer();
         if (transfer.empty()) {
-            onHttpRequestContentCompleted(request, response);
+            onHttpRequestContentCompleted(request, AutoRef<DataSink>(), response);
 			writeable = true;
 		}
         
         requestHeaderHandled = true;
 	}
 
-	void HttpCommunication::onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+	void HttpCommunication::onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
 		AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
         if (!handler.nil()) {
-            handler->onHttpRequestContentCompleted(request, response);
+            handler->onHttpRequestContentCompleted(request, sink, response);
         } else {
 			handleError(request, response, 404);
 		}
 	}
 
-	void HttpCommunication::prepareRequestContentTransfer(HttpRequest & request) {
+	void HttpCommunication::prepareRequestContentTransfer(HttpRequest & request, AutoRef<DataSink> sink) {
 
 		if (request.getHeader().isChunkedTransfer()) {
-			request.setTransfer(AutoRef<DataTransfer>(new ChunkedTransfer(AutoRef<DataSink>(new StringDataSink))));
+			request.setTransfer(AutoRef<DataTransfer>(new ChunkedTransfer(sink)));
         } else {
             if (request.getContentLength() > 0) {
-                AutoRef<DataTransfer> transfer(new FixedTransfer(AutoRef<DataSink>(new StringDataSink), request.getContentLength()));
+                AutoRef<DataTransfer> transfer(new FixedTransfer(sink, request.getContentLength()));
 				request.setTransfer(transfer);
             }
         }
