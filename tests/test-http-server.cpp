@@ -21,7 +21,11 @@ public:
 	}
     virtual ~MyHttpRequestHandler() {}
 
-	virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+	virtual AutoRef<DataSink> getDataSink() {
+		return AutoRef<DataSink>(new StringDataSink);
+	}
+
+	virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
 		string basePath = config["base.path"];
 		string path = request.getPath();

@@ -42,8 +42,11 @@ namespace HTTP {
 	string HttpRequest::getHeaderFieldIgnoreCase(const string & name) const {
 		return header.getHeaderFieldIgnoreCase(name);
 	}
-	map<string, string> & HttpRequest::getHeaderFields() {
+	LinkedStringMap & HttpRequest::getHeaderFields() {
 		return header.getHeaderFields();
+	}
+	map<string, string> HttpRequest::getHeaderFieldsStdMap() {
+		return header.getHeaderFieldsStdMap();
 	}
     vector<string> HttpRequest::getParameterNames() {
         return header.getParameterNames();

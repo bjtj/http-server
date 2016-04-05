@@ -29,9 +29,8 @@ namespace HTTP {
         HttpRequest();
 		HttpRequest(HttpHeader & header);
 		virtual ~HttpRequest();
-        
+		
         void clear();
-
         void setHeader(HttpHeader & header);
 		std::string getMethod() const;
 		std::string getPath() const;
@@ -39,24 +38,21 @@ namespace HTTP {
 		std::string getHeaderField(const std::string & name) const;
 		std::string & getHeaderFieldIgnoreCase(const std::string & name);
 		std::string getHeaderFieldIgnoreCase(const std::string & name) const;
-		std::map<std::string, std::string> & getHeaderFields();
+		UTIL::LinkedStringMap & getHeaderFields();
+		std::map<std::string, std::string> getHeaderFieldsStdMap();
         std::vector<std::string> getParameterNames();
 		std::string getParameter(const std::string & name);
 		std::string getParameter(const char * name);
 		std::vector<std::string> getParameters(std::string & name);
-
 		HttpRequestHeader & getHeader();
 		const HttpRequestHeader & getHeader() const;
-       
 		int getContentLength();
 		std::string getContentType();
-
 		bool isWwwFormUrlEncoded();
 		void parseWwwFormUrlencoded();
         UTIL::AutoRef<DataTransfer> getTransfer();
         void setTransfer(UTIL::AutoRef<DataTransfer> transfer);
         void clearTransfer();
-        
         void setRemoteAddress(const OS::InetAddress & remoteAddress);
         OS::InetAddress & getRemoteAddress();
 		void setLocalAddress(const OS::InetAddress & localAddress);

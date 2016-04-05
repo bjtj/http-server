@@ -74,39 +74,39 @@ namespace HTTP {
 		return (part1 + " " + part2 + " " + part3);
 	}
 	bool HttpHeader::hasHeaderField(const std::string & name) const {
-		return fields.find(name) != fields.end();
+		return fields.has(name);
 	}
 	string & HttpHeader::getHeaderField(const string & name) {
 		return fields[name];
 	}
     string HttpHeader::getHeaderField(const std::string & name) const {
-        for (map<string, string>::const_iterator iter = fields.begin(); iter != fields.end(); iter++) {
-            if (!iter->first.compare(name)) {
-                return iter->second;
-            }
-        }
-        return "";
+		for (size_t i = 0; i < fields.size(); i++) {
+			if (fields[i].name() == name) {
+				return fields[i].value();
+			}
+		}
+		return "";
     }
 	bool HttpHeader::hasHeaderFieldIgnoreCase(const std::string & name) const {
-		for (map<string, string>::const_iterator iter = fields.begin(); iter != fields.end(); iter++) {
-			if (Text::equalsIgnoreCase(iter->first, name)) {
+		for (size_t i = 0; i < fields.size(); i++) {
+			if (Text::equalsIgnoreCase(fields[i].name(), name)) {
 				return true;
 			}
 		}
 		return false;
 	}
 	string & HttpHeader::getHeaderFieldIgnoreCase(const string & name) {
-		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
-			if (Text::equalsIgnoreCase(iter->first, name)) {
-				return iter->second;
+		for (size_t i = 0; i < fields.size(); i++) {
+			if (Text::equalsIgnoreCase(fields[i].name(), name)) {
+				return fields[i].value();
 			}
 		}
 		return fields[name];
 	}
 	string HttpHeader::getHeaderFieldIgnoreCase(const string & name) const {
-		for (map<string, string>::const_iterator iter = fields.begin(); iter != fields.end(); iter++) {
-			if (Text::equalsIgnoreCase(iter->first, name)) {
-				return iter->second;
+		for (size_t i = 0; i < fields.size(); i++) {
+			if (Text::equalsIgnoreCase(fields[i].name_const(), name)) {
+				return fields[i].value_const();
 			}
 		}
 		return "";
@@ -123,20 +123,26 @@ namespace HTTP {
 	void HttpHeader::setHeaderFields(map<string, string> & fields) {
 		this->fields = fields;
 	}
-	void HttpHeader::appendHeaderFields(const map<string, string> & fields) {
-		this->fields.insert(fields.begin(), fields.end());
+	void HttpHeader::appendHeaderFields(const LinkedStringMap & fields) {
+		this->fields.append(fields);
 	}
-	map<string, string> & HttpHeader::getHeaderFields() {
+	void HttpHeader::appendHeaderFields(const map<string, string> & fields) {
+		this->fields.append(fields);
+	}
+	LinkedStringMap & HttpHeader::getHeaderFields() {
 		return fields;
 	}
-	void HttpHeader::removeHeaderField(string name) {
+	map<string, string> HttpHeader::getHeaderFieldsStdMap() {
+		return fields.toStdMap();
+	}
+	void HttpHeader::removeHeaderField(const string & name) {
 		fields.erase(name);
 	}
-	void HttpHeader::removeHeaderFieldIgnoreCase(string name) {
-		for (map<string, string>::iterator iter = fields.begin(); iter != fields.end(); iter++) {
-			if (Text::equalsIgnoreCase(iter->first, name)) {
-				fields.erase(iter);
-				break;
+	void HttpHeader::removeHeaderFieldIgnoreCase(const string & name) {
+		for (size_t i = 0; i < fields.size(); i++) {
+			if (Text::equalsIgnoreCase(fields[i].name(), name)) {
+				fields.erase(fields[i].name());
+				return;
 			}
 		}
 	}
@@ -178,8 +184,8 @@ namespace HTTP {
 	
 	string HttpHeader::toString() const {
 		string ret = makeFirstLine() + "\r\n";
-		for (map<string, string>::const_iterator iter = fields.begin(); iter != fields.end(); iter++) {
-			ret += (iter->first + ": " + iter->second + "\r\n");
+		for (size_t i = 0; i < fields.size(); i++) {
+			ret += (fields[i].name() + ": " + fields[i].value() + "\r\n");
 		}
 		ret += "\r\n";
 		return ret;

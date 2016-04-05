@@ -108,10 +108,12 @@ namespace HTTP {
         header.setPath(url.getPathAndQuery());
         header.setProtocol("HTTP/1.1");
 
-        for (size_t i = 0; i < additionalHeaderFields.size(); i++) {
-            const NameValue & nv = additionalHeaderFields.const_getByIndex(i);
-            header[nv.name_const()] = nv.value_const();
-        }
+		header.appendHeaderFields(additionalHeaderFields);
+
+        // for (size_t i = 0; i < additionalHeaderFields.size(); i++) {
+        //     const NameValue & nv = additionalHeaderFields.const_getByIndex(i);
+        //     header[nv.name_const()] = nv.value_const();
+        // }
         
         header.setHost(url.getAddress());
 	}

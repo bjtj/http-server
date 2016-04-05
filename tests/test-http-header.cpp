@@ -1,14 +1,10 @@
+#include "utils.hpp"
 #include <iostream>
 #include <libhttp-server/HttpHeader.hpp>
 
 using namespace std;
 using namespace HTTP;
 using namespace UTIL;
-
-#define ASSERT(A,CMP,B) if (!(A CMP B)) {								\
-		cerr << #A <<  " should be " << #CMP << " " <<  B << " but " << A << endl; \
-		exit(1);														\
-	}
 
 static void test_http_request_header() {
 
@@ -22,9 +18,27 @@ static void test_http_request_header() {
 	ASSERT(header.getParameter("b"), ==, "c");
 }
 
+static void test_http_header_to_string() {
+	HttpHeader header;
+	header.setPart1("GET");
+	header.setPart2("/");
+	header.setPart3("HTTP/1.1");
+	ASSERT(header.toString(), ==, "GET / HTTP/1.1\r\n\r\n");
+
+	header.setHeaderField("HOST", "239.255.255.250");
+	ASSERT(header.toString(), ==, "GET / HTTP/1.1\r\nHOST: 239.255.255.250\r\n\r\n");
+	
+	header.setHeaderField("SERVER", "TestServer/1.0");
+	ASSERT(header.toString(), ==, "GET / HTTP/1.1\r\nHOST: 239.255.255.250\r\nSERVER: TestServer/1.0\r\n\r\n");
+
+	header.setHeaderField("Ext", "");
+	ASSERT(header.toString(), ==, "GET / HTTP/1.1\r\nHOST: 239.255.255.250\r\nSERVER: TestServer/1.0\r\nExt: \r\n\r\n");
+}
+
 int main(int argc, char *args[]) {
 
 	test_http_request_header();
+	test_http_header_to_string();
     
     return 0;
 }

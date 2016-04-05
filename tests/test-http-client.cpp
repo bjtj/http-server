@@ -19,7 +19,11 @@ public:
     RequestEchoHandler() {}
     virtual ~RequestEchoHandler() {}
 
-	virtual void onHttpRequestContentCompleted(HttpRequest & request, HttpResponse & response) {
+	virtual AutoRef<DataSink> getDataSink() {
+		return AutoRef<DataSink>(new StringDataSink);
+	}
+
+	virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
 		cout << "** request : " << request.getPath() << endl;
 		

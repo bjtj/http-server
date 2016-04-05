@@ -22,7 +22,7 @@ namespace HTTP {
 		std::string part1;
 		std::string part2;
 		std::string part3;
-		std::map<std::string, std::string> fields;
+		UTIL::LinkedStringMap fields;
 		
 	public:
 		HttpHeader();
@@ -30,10 +30,8 @@ namespace HTTP {
 		virtual ~HttpHeader();
 
 		virtual bool isValid();
-
 		virtual void clear();
 		virtual void setHeader(const HttpHeader & other);
-		
 		virtual void setFirstLine(std::string & firstline);
 		virtual void setParts(std::vector<std::string> & parts);
 		virtual void setParts(std::string par1, std::string part2, std::string part3);
@@ -43,9 +41,7 @@ namespace HTTP {
 		virtual void setPart1(const std::string & part);
 		virtual void setPart2(const std::string & part);
 		virtual void setPart3(const std::string & part);
-
 		std::string makeFirstLine() const;
-
 		bool hasHeaderField(const std::string & name) const;
 		std::string & getHeaderField(const std::string & name);
 		std::string getHeaderField(const std::string & name) const;
@@ -56,10 +52,12 @@ namespace HTTP {
 		int getHeaderFieldIgnoreCaseAsInteger(std::string name) const;
 		void setHeaderField(std::string name, std::string value);
 		void setHeaderFields(std::map<std::string, std::string> & fields);
+		void appendHeaderFields(const UTIL::LinkedStringMap & fields);
 		void appendHeaderFields(const std::map<std::string, std::string> & fields);
-		std::map<std::string, std::string> & getHeaderFields();
-		void removeHeaderField(std::string name);
-		void removeHeaderFieldIgnoreCase(std::string name);
+		UTIL::LinkedStringMap & getHeaderFields();
+		std::map<std::string, std::string> getHeaderFieldsStdMap();
+		void removeHeaderField(const std::string & name);
+		void removeHeaderFieldIgnoreCase(const std::string & name);
 
         /* HTTP */
         
@@ -73,9 +71,7 @@ namespace HTTP {
 		void setChunkedTransfer(bool chunked);
         void setConnection(const std::string & connection);
         bool keepConnection();
-
 		virtual std::string toString() const;
-
 		std::string & operator[] (const std::string & headerFieldName);
 	};
 
