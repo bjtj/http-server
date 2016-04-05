@@ -110,11 +110,6 @@ namespace HTTP {
 
 		header.appendHeaderFields(additionalHeaderFields);
 
-        // for (size_t i = 0; i < additionalHeaderFields.size(); i++) {
-        //     const NameValue & nv = additionalHeaderFields.const_getByIndex(i);
-        //     header[nv.name_const()] = nv.value_const();
-        // }
-        
         header.setHost(url.getAddress());
 	}
     void AnotherHttpClient::setRequestWithFixedTransfer(const string & method, const LinkedStringMap & additionalHeaderFields, AutoRef<DataTransfer> transfer, size_t size) {

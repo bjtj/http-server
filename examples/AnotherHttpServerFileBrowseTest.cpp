@@ -3,7 +3,6 @@
 #include <liboslayer/Utils.hpp>
 #include <liboslayer/Properties.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
-#include <libhttp-server/FileTransfer.hpp>
 #include <libhttp-server/HttpSessionManager.hpp>
 #include <libhttp-server/HttpSessionTool.hpp>
 #include <libhttp-server/LispPage.hpp>
