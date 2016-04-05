@@ -73,23 +73,10 @@
 
 /* Begin PBXFileReference section */
 		6C4A9F511C0BEEA500A45604 /* AnotherHttpServerFileBrowseTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AnotherHttpServerFileBrowseTest.cpp; path = ../../../examples/AnotherHttpServerFileBrowseTest.cpp; sourceTree = "<group>"; };
-		6C59ABEF1C7AC66400F814A4 /* AnotherHttpServerDump.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AnotherHttpServerDump.cpp; path = ../../../examples/AnotherHttpServerDump.cpp; sourceTree = "<group>"; };
-		E8075A1E1C03658C00EBE4B8 /* AnotherHttpClientTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AnotherHttpClientTest.cpp; path = ../../../examples/AnotherHttpClientTest.cpp; sourceTree = "<group>"; };
 		E827891E1BDCED880009E46A /* http-server-console */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "http-server-console"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E82789211BDCED880009E46A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E82789281BDCED9C0009E46A /* http-server.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "http-server.xcodeproj"; path = "../http-server/http-server.xcodeproj"; sourceTree = "<group>"; };
 		E82789351BDCEE050009E46A /* oslayer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oslayer.xcodeproj; path = ../../../oslayer/xcode/oslayer/oslayer.xcodeproj; sourceTree = "<group>"; };
-		E8447C6C1BF2A5F3000E2903 /* HttpHeaderTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpHeaderTest.cpp; path = ../../../examples/HttpHeaderTest.cpp; sourceTree = "<group>"; };
-		E8447C791BF2ABC6000E2903 /* PostTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PostTest.cpp; path = ../../../examples/PostTest.cpp; sourceTree = "<group>"; };
-		E85184901C01CBE3001DD69A /* ParseUrlTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseUrlTest.cpp; path = ../../../examples/ParseUrlTest.cpp; sourceTree = "<group>"; };
-		E857BAEE1BE246E600D2022F /* HttpServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpServer.cpp; path = ../../../examples/HttpServer.cpp; sourceTree = "<group>"; };
-		E857BB511BEB9C2C00D2022F /* HttpClientPoll.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpClientPoll.cpp; path = ../../../examples/HttpClientPoll.cpp; sourceTree = "<group>"; };
-		E857BB521BEB9C2C00D2022F /* HttpClientTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpClientTest.cpp; path = ../../../examples/HttpClientTest.cpp; sourceTree = "<group>"; };
-		E857BB531BEB9C2C00D2022F /* HttpServerPoll.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpServerPoll.cpp; path = ../../../examples/HttpServerPoll.cpp; sourceTree = "<group>"; };
-		E857BB631BEC0BB600D2022F /* RESTServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RESTServer.cpp; path = ../../../examples/RESTServer.cpp; sourceTree = "<group>"; };
-		E857BB741BECF8D900D2022F /* HttpClientPoolTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpClientPoolTest.cpp; path = ../../../examples/HttpClientPoolTest.cpp; sourceTree = "<group>"; };
-		E87E25391C0200E0007C3B99 /* AnotherHttpClientThreadPoolTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AnotherHttpClientThreadPoolTest.cpp; path = ../../../examples/AnotherHttpClientThreadPoolTest.cpp; sourceTree = "<group>"; };
-		E8B160F51BFB4DB8002D68C7 /* AnotherHttpServerTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AnotherHttpServerTest.cpp; path = ../../../examples/AnotherHttpServerTest.cpp; sourceTree = "<group>"; };
 		E8B1611E1BFB6314002D68C7 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; name = res; path = ../../examples/res; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -129,20 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				6C4A9F511C0BEEA500A45604 /* AnotherHttpServerFileBrowseTest.cpp */,
-				E8075A1E1C03658C00EBE4B8 /* AnotherHttpClientTest.cpp */,
-				E87E25391C0200E0007C3B99 /* AnotherHttpClientThreadPoolTest.cpp */,
-				E8B160F51BFB4DB8002D68C7 /* AnotherHttpServerTest.cpp */,
-				6C59ABEF1C7AC66400F814A4 /* AnotherHttpServerDump.cpp */,
-				E8447C6C1BF2A5F3000E2903 /* HttpHeaderTest.cpp */,
-				E857BB511BEB9C2C00D2022F /* HttpClientPoll.cpp */,
-				E857BB521BEB9C2C00D2022F /* HttpClientTest.cpp */,
-				E857BB531BEB9C2C00D2022F /* HttpServerPoll.cpp */,
 				E82789211BDCED880009E46A /* main.cpp */,
-				E857BAEE1BE246E600D2022F /* HttpServer.cpp */,
-				E857BB631BEC0BB600D2022F /* RESTServer.cpp */,
-				E857BB741BECF8D900D2022F /* HttpClientPoolTest.cpp */,
-				E8447C791BF2ABC6000E2903 /* PostTest.cpp */,
-				E85184901C01CBE3001DD69A /* ParseUrlTest.cpp */,
 			);
 			path = "http-server-console";
 			sourceTree = "<group>";
