@@ -49,7 +49,7 @@ namespace HTTP {
 
 	void ConnectionThread::connectionTask() {
 
-		connection->registerSelector(selector);
+		connection->registerSelector(selector, Selector::READ | Selector::WRITE);
 
 		try {
             communication->onConnected(*connection);
@@ -80,7 +80,7 @@ namespace HTTP {
             logger.loge(e.getMessage());
         }
 
-		connection->unregisterSelector(selector);
+		connection->unregisterSelector(selector, Selector::READ | Selector::WRITE);
 
         connection->close();
         

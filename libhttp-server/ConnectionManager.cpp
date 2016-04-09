@@ -81,7 +81,7 @@ namespace HTTP {
         serverSocket->setReuseAddr(true);
         serverSocket->bind();
         serverSocket->listen(5);
-        serverSocket->registerSelector(selector);
+        serverSocket->registerSelector(selector, Selector::READ);
 		threadPool.start();
     }
 
@@ -92,7 +92,7 @@ namespace HTTP {
         
         clearConnections();
         stopAllThreads();
-        serverSocket->unregisterSelector(selector);
+        serverSocket->unregisterSelector(selector, Selector::READ);
         serverSocket->close();
 		serverSocketMaker->releaseSocket(serverSocket);
         serverSocket = NULL;

@@ -18,12 +18,12 @@ namespace HTTP {
         return socket.isSelectable();
     }
     
-    void Connection::registerSelector(Selector & selector) {
-        socket.registerSelector(selector);
+    void Connection::registerSelector(Selector & selector, unsigned long flags) {
+        socket.registerSelector(selector, flags);
     }
 
-	void Connection::unregisterSelector(Selector & selector) {
-        socket.unregisterSelector(selector);
+	void Connection::unregisterSelector(Selector & selector, unsigned long flags) {
+        socket.unregisterSelector(selector, flags);
     }
     
     bool Connection::isReadableSelected(Selector & selector) {
@@ -31,7 +31,7 @@ namespace HTTP {
     }
     
     bool Connection::isWritableSelected(Selector & selector) {
-        return selector.isWriteableSelected(socket);
+        return selector.isWritableSelected(socket);
     }
     
     int Connection::recv(char * buffer, size_t size) {

@@ -18,8 +18,8 @@ namespace HTTP {
         virtual ~Connection();
         int getId();
         bool isSelectable();
-        void registerSelector(OS::Selector & selector);
-		void unregisterSelector(OS::Selector & selector);
+        void registerSelector(OS::Selector & selector, unsigned long flags);
+		void unregisterSelector(OS::Selector & selector, unsigned long flags);
         bool isReadableSelected(OS::Selector & selector);
         bool isWritableSelected(OS::Selector & selector);
         int recv(char * buffer, size_t size);

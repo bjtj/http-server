@@ -1,6 +1,7 @@
 #include "AnotherHttpClient.hpp"
 #include "FixedTransfer.hpp"
 #include <liboslayer/Text.hpp>
+#include <liboslayer/Timer.hpp>
 #include <liboslayer/Logger.hpp>
 #include <string>
 
@@ -80,14 +81,14 @@ namespace HTTP {
 			}
 
 			connection = new Connection(*socket);
-            connection->registerSelector(selector);
+            connection->registerSelector(selector, Selector::READ | Selector::WRITE);
 		}
 	}
     void AnotherHttpClient::closeConnection() {
         
         if (connection) {
             
-            connection->unregisterSelector(selector);
+            connection->unregisterSelector(selector, Selector::READ | Selector::WRITE);
             
             delete connection;
             connection = NULL;
@@ -174,6 +175,8 @@ namespace HTTP {
 	}
     
     void AnotherHttpClient::communicate() {
+
+		TimeoutChecker readTimeoutChecker(recvTimeout);
         
         while (!interrupted) {
             
@@ -187,12 +190,18 @@ namespace HTTP {
                 if (connection->isReadableSelected(selector)) {
                     recvResponseHeader();
                     recvResponseContent();
+					
+					readTimeoutChecker.reset();
                 }
                 
                 if (complete) {
                     break;
                 }
             }
+
+			if (readTimeoutChecker.timeout() > 0 && readTimeoutChecker.trigger()) {
+				throw Exception("recv timeout - " + Text::toString(recvTimeout) + " ms.");
+			}
         }
     }
 

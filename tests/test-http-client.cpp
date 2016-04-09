@@ -26,6 +26,16 @@ public:
 	virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
 		cout << "** request : " << request.getPath() << endl;
+
+		if (request.getPath() == "/delay") {
+			unsigned long tick = tick_milli();
+			unsigned long delay = (unsigned long)Text::toLong(request.getParameter("timeout"));
+			idle(delay);
+			response.setStatusCode(200);
+			response.setContentType("text/plain");
+			setFixedTransfer(response, ("Duration - " + Text::toString(tick_milli() - tick) + " ms."));
+			return;
+		}
 		
 		string ret;
 		response.setStatusCode(200);
@@ -124,6 +134,34 @@ static void test_http_client() {
 	ASSERT(handler.getDump(), ==, "method: UNSUBSCRIBE\npath: /\n - a : A\n - b : B\n");
 }
 
+static void test_recv_timeout() {
+	DumpResponseHandler handler = httpRequest("http://127.0.0.1:9999/delay?timeout=1000", "GET", LinkedStringMap());
+	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
+	cout << handler.getDump() << endl;
+
+	string err;
+	try {
+		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=6000", "GET", LinkedStringMap());
+		ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
+		cout << handler.getDump() << endl;
+	} catch (Exception & e) {
+		err = e.what();
+		cerr << e.what() << endl;
+	}
+	ASSERT(err, >, "recv timeout");
+
+	err = "";
+	try {
+		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=10000", "GET", LinkedStringMap());
+		ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
+		cout << handler.getDump() << endl;
+	} catch (Exception & e) {
+		err = e.what();
+		cerr << e.what() << endl;
+	}
+	ASSERT(err, >, "recv timeout");
+}
+
 int main(int argc, char *args[]) {
 
 	HttpServerConfig config;
@@ -134,6 +172,7 @@ int main(int argc, char *args[]) {
 	server.startAsync();
 
 	test_http_client();
+	test_recv_timeout();
 
 	server.stop();
 	

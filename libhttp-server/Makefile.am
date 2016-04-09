@@ -14,7 +14,6 @@ libhttp_serverinc_HEADERS = \
 	DataTransfer.hpp \
 	FileDataSource.hpp \
 	FixedTransfer.hpp \
-	HttpClient.hpp \
 	HttpEncoderDecoder.hpp \
 	HttpHeader.hpp \
 	HttpHeaderParser.hpp \
@@ -61,8 +60,6 @@ libhttp_server_la_SOURCES = \
 	FileDataSource.hpp \
 	FixedTransfer.cpp \
 	FixedTransfer.hpp \
-	HttpClient.cpp \
-	HttpClient.hpp \
 	HttpEncoderDecoder.cpp \
 	HttpEncoderDecoder.hpp \
 	HttpHeader.cpp \
