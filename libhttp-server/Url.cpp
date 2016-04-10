@@ -144,10 +144,6 @@ namespace HTTP {
 
 		scheme = u.substr(0, f);
 
-		if (!isKnownScheme(scheme)) {
-			throw UrlParseException("unknown scheme / " + scheme);
-		}
-		
 		u = u.substr(f + 3);
 		f = u.find("/");
 		if (f != string::npos) {
