@@ -56,6 +56,13 @@
 			remoteGlobalIDString = E8FAB2111BD7C36200E89DC5;
 			remoteInfo = "oslayer-cocoa";
 		};
+		E89386911CBF044200D45426 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E82789281BDCED9C0009E46A /* http-server.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E89386171CBE690800D45426;
+			remoteInfo = HttpServerTests;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -126,6 +133,7 @@
 			children = (
 				E827892F1BDCED9C0009E46A /* libhttp-server.a */,
 				E82789311BDCED9C0009E46A /* libhttp-server-cocoa.a */,
+				E89386921CBF044200D45426 /* HttpServerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -229,6 +237,13 @@
 			fileType = archive.ar;
 			path = "liboslayer-cocoa.a";
 			remoteRef = E827893C1BDCEE050009E46A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E89386921CBF044200D45426 /* HttpServerTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = HttpServerTests.xctest;
+			remoteRef = E89386911CBF044200D45426 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -340,10 +355,7 @@
 		E82789261BDCED880009E46A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				HEADER_SEARCH_PATHS = (
 					../../,
 					../../../oslayer,
