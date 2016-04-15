@@ -366,8 +366,6 @@ namespace HTTP {
 	
 	HttpResponseHeader::HttpResponseHeader() {
 		setProtocol("HTTP/1.1");
-		setStatusCode(200);
-		setMessage("OK");
 	}
 	HttpResponseHeader::HttpResponseHeader(const HttpHeader & other) {
 		setHeader(other);
