@@ -253,6 +253,32 @@ public:
 	}
 };
 
+class FaviconHttpRequestHandler : public HttpRequestHandler {
+private:
+    string path;
+public:
+    FaviconHttpRequestHandler(const string & path) : path(path) {}
+    virtual ~FaviconHttpRequestHandler() {}
+    
+    virtual AutoRef<DataSink> getDataSink() {
+        return AutoRef<DataSink>(new StringDataSink);
+    }
+    
+    virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink,HttpResponse & response) {
+        
+        cout << " ** favico / path : " << request.getPath() << endl;
+        
+        File file(path);
+        if (!file.exists() || !file.isFile()) {
+            response.setStatusCode(404);
+            return;
+        }
+        
+        response.setStatusCode(200);
+        setFileTransfer(response, file);
+    }
+};
+
 size_t readline(char * buffer, size_t max) {
 	if (fgets(buffer, (int)max - 1, stdin)) {
 		buffer[strlen(buffer) - 1] = 0;
@@ -339,6 +365,9 @@ int main(int argc, char * args[]) {
 	AutoRef<HttpRequestHandler> single(new SinglePageHttpRequestHandler(config["default.page"]));
 	server->registerRequestHandler("/", single);
 	server->registerRequestHandler("/index.htm", single);
+    
+    AutoRef<HttpRequestHandler> favico(new FaviconHttpRequestHandler(config["favicon.path"]));
+    server->registerRequestHandler("/favicon.ico", favico);
 
 	server->startAsync();
 
