@@ -118,11 +118,11 @@ namespace HTTP {
 		bool responseContentTransferDone;
 		bool communicationCompleted;
     
-		HttpRequestHandlerDispatcher * dispatcher;
+		UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
 
 	public:
 
-		HttpCommunication(HttpRequestHandlerDispatcher * dispatcher);
+		HttpCommunication(UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher);
 		virtual ~HttpCommunication();
 
 		virtual void onConnected(Connection & connection);
@@ -147,14 +147,14 @@ namespace HTTP {
 
 	private:
 
-		HttpRequestHandlerDispatcher * dispatcher;
+		UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
 
 	public:
 
-		HttpCommunicationMaker(HttpRequestHandlerDispatcher * dispatcher);
+		HttpCommunicationMaker(UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher);
 		virtual ~HttpCommunicationMaker();
     
-		virtual Communication * makeCommunication();
+		virtual UTIL::AutoRef<Communication> makeCommunication();
 	};
 
 	/**
@@ -165,16 +165,14 @@ namespace HTTP {
 
 		HttpServerConfig config;
 		int port;
-
-		SimpleHttpRequestHandlerDispatcher dispatcher;
-		HttpCommunicationMaker httpCommunicationMaker;
+		UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
 		ConnectionManager connectionManager;
 		OS::Thread * thread;
 
 	public:
 
 		AnotherHttpServer(HttpServerConfig config);
-        AnotherHttpServer(HttpServerConfig config, ServerSocketMaker * serverSocketMaker);
+        AnotherHttpServer(HttpServerConfig config, UTIL::AutoRef<ServerSocketMaker> serverSocketMaker);
 		virtual ~AnotherHttpServer();
 
 		void registerRequestHandler(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler);

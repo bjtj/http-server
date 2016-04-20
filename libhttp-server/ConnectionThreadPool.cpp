@@ -17,12 +17,12 @@ namespace HTTP {
 	 */
 
 
-	ConnectionThread::ConnectionThread() : FlaggableThread(false), connection(NULL), communication(NULL) {
+	ConnectionThread::ConnectionThread() : FlaggableThread(false) {
 	}
 	ConnectionThread::~ConnectionThread() {
 	}
 
-	void ConnectionThread::setConnection(Connection * connection, Communication * communication) {
+	void ConnectionThread::setConnection(AutoRef<Connection> connection, AutoRef<Communication> communication) {
 		this->connection = connection;
 		this->communication = communication;
 	}
@@ -44,6 +44,10 @@ namespace HTTP {
 
 			setFlag(false);
 		}
+	}
+
+	AutoRef<Connection> ConnectionThread::getConnection() {
+		return connection;
 	}
 
 
@@ -79,20 +83,17 @@ namespace HTTP {
         } catch (IOException e) {
             logger.loge(e.getMessage());
         }
-
-		connection->unregisterSelector(selector, Selector::READ | Selector::WRITE);
-
-        connection->close();
         
         // notify disconnection to connection manager
         communication->onDisconnected(*connection);
+
+		connection->unregisterSelector(selector, Selector::READ | Selector::WRITE);
+        connection->close();
         connection->setCompleted();
         
-        delete communication;
+        // delete communication;
 		communication = NULL;
 	}
-
-
 
 	/**
 	 * @brief ConnectionThreadInstanceCreator
@@ -128,12 +129,12 @@ namespace HTTP {
 	ConnectionThreadPool::~ConnectionThreadPool() {
 	}
 
-	void ConnectionThreadPool::createConnection(Communication * communication, Connection * connection) {
+	void ConnectionThreadPool::createConnection(AutoRef<Communication> communication, AutoRef<Connection> connection) {
 		ConnectionThread * thread = (ConnectionThread *)acquire();
-		if (thread) {
-			thread->setConnection(connection, communication);
-			enqueue(thread);
+		if (!thread) {
+			throw Exception("ConnectionThreadPool error - no thread available");
 		}
+		thread->setConnection(connection, communication);
+		enqueue(thread);
 	}
-
 }

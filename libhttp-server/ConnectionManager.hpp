@@ -2,6 +2,7 @@
 #define __CONNECTION_MANAGER_HPP__
 
 #include <liboslayer/os.hpp>
+#include <liboslayer/AutoRef.hpp>
 #include "Connection.hpp"
 #include "Communication.hpp"
 #include "ConnectionThreadPool.hpp"
@@ -64,41 +65,39 @@ namespace HTTP {
         CommunicationMaker() {}
         virtual ~CommunicationMaker() {}
         
-        virtual Communication * makeCommunication() = 0;
+        virtual UTIL::AutoRef<Communication> makeCommunication() = 0;
     };
     
 	/**
 	 * @brief ConnectionManager
 	 */
 
-    class ConnectionManager {
+    class ConnectionManager : public UTIL::Observer {
     private:
-        ServerSocketMaker * serverSocketMaker;
+		UTIL::AutoRef<ServerSocketMaker> serverSocketMaker;
         OS::ServerSocket * serverSocket;
         OS::Selector selector;
-        std::map<int, Connection*> connectionTable;
+        std::map<int, UTIL::AutoRef<Connection> > connectionTable;
         OS::Semaphore connectionsLock;
-        CommunicationMaker & communicationMaker;
-
+		UTIL::AutoRef<CommunicationMaker> communicationMaker;
 		ConnectionThreadPool threadPool;
         
     public:
-        ConnectionManager(CommunicationMaker & communicationMaker, size_t threadCount);
-        ConnectionManager(CommunicationMaker & communicationMaker, size_t threadCount, ServerSocketMaker * serverSocketMaker);
+        ConnectionManager(UTIL::AutoRef<CommunicationMaker> communicationMaker, size_t threadCount);
+        ConnectionManager(UTIL::AutoRef<CommunicationMaker> communicationMaker, size_t threadCount, UTIL::AutoRef<ServerSocketMaker> serverSocketMaker);
         virtual ~ConnectionManager();
-        virtual Connection * makeConnection(OS::Socket & client);
-        virtual void removeConnection(Connection * connection);
+        virtual UTIL::AutoRef<Connection> makeConnection(OS::Socket & client);
         void onConnect(OS::Socket & client);
-        void onDisconnect(Connection * connection);
+        void onDisconnect(UTIL::AutoRef<Connection> connection);
         void clearConnections();
         void start(int port);
         void poll(unsigned long timeout);
 		void removeCompletedConnections();
-        void removeCompletedThreads();
         void stop();
         void stopAllThreads();
-
-		void startCommunication(Communication * communication, Connection * connection);
+		void startCommunication(UTIL::AutoRef<Communication> communication, UTIL::AutoRef<Connection> connection);
+		size_t getConnectionCount();
+		virtual void update(UTIL::Observable * target);
     };
 }
 

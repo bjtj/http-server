@@ -1,5 +1,4 @@
 #include "ConnectionManager.hpp"
-
 #include <liboslayer/Logger.hpp>
 
 namespace HTTP {
@@ -14,45 +13,56 @@ namespace HTTP {
 	 * @brief ConnectionManager
 	 */
 
-    ConnectionManager::ConnectionManager(CommunicationMaker & communicationMaker, size_t threadCount)
-		: serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker), threadPool(threadCount) {
-            serverSocketMaker = new DefaultServerSocketMaker;
+    ConnectionManager::ConnectionManager(AutoRef<CommunicationMaker> communicationMaker, size_t threadCount) :
+		serverSocket(NULL),
+		connectionsLock(1),
+		communicationMaker(communicationMaker),
+		threadPool(threadCount) {
+		
+		serverSocketMaker = AutoRef<ServerSocketMaker>(new DefaultServerSocketMaker);
+
+		threadPool.addObserver(AutoRef<Observer>(new ObserverWrapper(this)));
     }
     
-    ConnectionManager::ConnectionManager(CommunicationMaker & communicationMaker, size_t threadCount, ServerSocketMaker * serverSocketMaker)
-    : serverSocket(NULL), connectionsLock(1), communicationMaker(communicationMaker), threadPool(threadCount), serverSocketMaker(serverSocketMaker) {
+    ConnectionManager::ConnectionManager(AutoRef<CommunicationMaker> communicationMaker, size_t threadCount, AutoRef<ServerSocketMaker> serverSocketMaker) :
+		serverSocket(NULL),
+		connectionsLock(1),
+		communicationMaker(communicationMaker),
+		threadPool(threadCount),
+		serverSocketMaker(serverSocketMaker) {
+
+		threadPool.addObserver(AutoRef<Observer>(new ObserverWrapper(this)));
     }
 
     ConnectionManager::~ConnectionManager() {
         stop();
-		if (serverSocketMaker) {
-			delete serverSocketMaker;
-		}
     }
     
-    Connection * ConnectionManager::makeConnection(Socket & client) {
-        return new Connection(client);
-    }
-    
-    void ConnectionManager::removeConnection(Connection * connection) {
-        delete connection;
+    AutoRef<Connection> ConnectionManager::makeConnection(Socket & client) {
+        return AutoRef<Connection>(new Connection(client));
     }
     
     void ConnectionManager::onConnect(Socket & client) {
-        Connection * connection = makeConnection(client);
-        Communication * communication = communicationMaker.makeCommunication();
+        AutoRef<Connection> connection = makeConnection(client);
+        AutoRef<Communication> communication = communicationMaker->makeCommunication();
 
         connectionsLock.wait();
         connectionTable[connection->getId()] = connection;
         connectionsLock.post();
-		startCommunication(communication, connection);
+
+		try {
+			startCommunication(communication, connection);
+		} catch (Exception e) {
+			logger.loge(e.getMessage());
+			connection->close(); // TODO: is it okay?
+			onDisconnect(connection);
+		}
     }
     
-    void ConnectionManager::onDisconnect(Connection * connection) {
+    void ConnectionManager::onDisconnect(AutoRef<Connection> connection) {
         connectionsLock.wait();
         int id = connection->getId();
         if (connectionTable.find(id) != connectionTable.end()) {
-            removeConnection(connection);
             connectionTable.erase(id);
         }
         connectionsLock.post();
@@ -60,13 +70,12 @@ namespace HTTP {
     
     void ConnectionManager::clearConnections() {
         connectionsLock.wait();
-        for (map<int, Connection*>::const_iterator iter = connectionTable.begin(); iter != connectionTable.end(); iter++) {
-            Connection * connection = iter->second;
+        for (map<int, AutoRef<Connection> >::const_iterator iter = connectionTable.begin(); iter != connectionTable.end(); iter++) {
+            AutoRef<Connection> connection = iter->second;
             connection->signalTerminate();
             while (!connection->isCompleted()) {
                 idle(10);
             }
-            removeConnection(connection);
         }
         connectionTable.clear();
         connectionsLock.post();
@@ -89,7 +98,7 @@ namespace HTTP {
         if (!serverSocket) {
             return;
         }
-        
+
         clearConnections();
         stopAllThreads();
         serverSocket->unregisterSelector(selector, Selector::READ);
@@ -107,17 +116,14 @@ namespace HTTP {
                 }
             }
         }
-        removeCompletedConnections();
-        removeCompletedThreads();
     }
 
 	void ConnectionManager::removeCompletedConnections() {
         connectionsLock.wait();
-        for (map<int, Connection*>::iterator iter = connectionTable.begin(); iter != connectionTable.end();) {
-            Connection * connection = iter->second;
+        for (map<int, AutoRef<Connection> >::iterator iter = connectionTable.begin(); iter != connectionTable.end();) {
+            AutoRef<Connection> connection = iter->second;
             if (connection->isCompleted()) {
-                removeConnection(connection);
-                connectionTable.erase(iter++);
+				connectionTable.erase(iter++);
             } else {
                 iter++;
             }
@@ -125,15 +131,23 @@ namespace HTTP {
         connectionsLock.post();
     }
     
-    void ConnectionManager::removeCompletedThreads() {
-		threadPool.collectUnflaggedThreads();
-    }
-   
     void ConnectionManager::stopAllThreads() {
 		threadPool.stop();
     }
 
-	void ConnectionManager::startCommunication(Communication * communication, Connection * connection) {
+	void ConnectionManager::startCommunication(AutoRef<Communication> communication, AutoRef<Connection> connection) {
 		threadPool.createConnection(communication, connection);
+	}
+
+	size_t ConnectionManager::getConnectionCount() {
+		connectionsLock.wait();
+		size_t cnt = connectionTable.size();
+		connectionsLock.post();
+		return cnt;
+	}
+
+	void ConnectionManager::update(Observable * target) {
+		ConnectionThread * t = (ConnectionThread*)target;
+		onDisconnect(t->getConnection());
 	}
 }

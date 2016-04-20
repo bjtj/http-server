@@ -12,6 +12,7 @@ namespace HTTP {
         bool terminateSignal;
         bool completed;
         Packet packet;
+		int id;
         
     public:
         Connection(OS::Socket & socket);

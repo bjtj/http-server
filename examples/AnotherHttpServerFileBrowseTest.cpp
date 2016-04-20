@@ -283,15 +283,19 @@ bool promptBoolean(const char * msg) {
 
 
 int main(int argc, char * args[]) {
+
+	string configPath;
 	
 	if (argc > 1) {
-		config.load(args[1]);
+		configPath = args[1];
     } else {
         char buffer[1024] = {0,};
         printf("Configuration file path: ");
         readline(buffer, sizeof(buffer));
-        config.load(buffer);
+		configPath = buffer;
     }
+
+	config.load(configPath);
     
 	System::getInstance()->ignoreSigpipe();
 
@@ -319,10 +323,10 @@ int main(int argc, char * args[]) {
 				delete sock;
 			}
         };
-        server = new AnotherHttpServer(config, new SecureServerSocketMaker(config.getCertPath(),
-																		   config.getKeyPath()));
+		AutoRef<ServerSocketMaker> maker(new SecureServerSocketMaker(config.getCertPath(), config.getKeyPath()));
+        server = new AnotherHttpServer(config, maker);
 #else
-        throw "SSL not supported";
+        throw Exception("SSL not supported");
 #endif
     } else {
         server = new AnotherHttpServer(config);

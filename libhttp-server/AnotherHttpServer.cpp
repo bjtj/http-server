@@ -129,7 +129,7 @@ namespace HTTP {
 	 * @brief HttpCommunication
 	 */
 
-	HttpCommunication::HttpCommunication(HttpRequestHandlerDispatcher * dispatcher) : requestHeaderHandled(false), writeable(false), responseHeaderTransferDone(false), responseContentTransferDone(false), communicationCompleted(false), dispatcher(dispatcher) {
+	HttpCommunication::HttpCommunication(AutoRef<HttpRequestHandlerDispatcher> dispatcher) : requestHeaderHandled(false), writeable(false), responseHeaderTransferDone(false), responseContentTransferDone(false), communicationCompleted(false), dispatcher(dispatcher) {
 	}
 
 	HttpCommunication::~HttpCommunication() {
@@ -326,14 +326,14 @@ namespace HTTP {
 	 * @brief HttpCommunicationMaker
 	 */
 	
-    HttpCommunicationMaker::HttpCommunicationMaker(HttpRequestHandlerDispatcher * dispatcher) : dispatcher(dispatcher) {
+    HttpCommunicationMaker::HttpCommunicationMaker(AutoRef<HttpRequestHandlerDispatcher> dispatcher) : dispatcher(dispatcher) {
     }
 
     HttpCommunicationMaker::~HttpCommunicationMaker() {
     }
     
-    Communication * HttpCommunicationMaker::makeCommunication() {
-        return new HttpCommunication(dispatcher);
+    AutoRef<Communication> HttpCommunicationMaker::makeCommunication() {
+        return AutoRef<Communication>(new HttpCommunication(dispatcher));
     }
 
 
@@ -357,21 +357,29 @@ namespace HTTP {
 		}
 	};
 
-	AnotherHttpServer::AnotherHttpServer(HttpServerConfig config) : port(config.getIntegerProperty("listen.port")), httpCommunicationMaker(&dispatcher), connectionManager(httpCommunicationMaker, config.getIntegerProperty("thread.count", 20)), thread(NULL) {
+	AnotherHttpServer::AnotherHttpServer(HttpServerConfig config) :
+		port(config.getIntegerProperty("listen.port")),
+		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
+		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)), config.getIntegerProperty("thread.count", 20)),
+		thread(NULL) {
 	}
     
-    AnotherHttpServer::AnotherHttpServer(HttpServerConfig config, ServerSocketMaker * serverSocketMaker) : port(config.getIntegerProperty("listen.port")), httpCommunicationMaker(&dispatcher), connectionManager(httpCommunicationMaker, config.getIntegerProperty("thread.count", 20), serverSocketMaker), thread(NULL) {
+    AnotherHttpServer::AnotherHttpServer(HttpServerConfig config, AutoRef<ServerSocketMaker> serverSocketMaker) :
+		port(config.getIntegerProperty("listen.port")),
+		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
+		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)), config.getIntegerProperty("thread.count", 20), serverSocketMaker),
+		thread(NULL) {
     }
     
 	AnotherHttpServer::~AnotherHttpServer() {
 	}
 
 	void AnotherHttpServer::registerRequestHandler(const string & pattern, AutoRef<HttpRequestHandler> handler) {
-		dispatcher.registerRequestHandler(pattern, handler);
+		dispatcher->registerRequestHandler(pattern, handler);
 	}
     
 	void AnotherHttpServer::unregisterRequestHandler(const string & pattern) {
-		dispatcher.unregisterRequestHandler(pattern);
+		dispatcher->unregisterRequestHandler(pattern);
 	}
 
 	int AnotherHttpServer::getPort() {

@@ -5,13 +5,13 @@ namespace HTTP {
     using namespace std;
     using namespace OS;
 
-    Connection::Connection(Socket & socket) : socket(socket), terminateSignal(false), completed(false), packet(4096) {
+    Connection::Connection(Socket & socket) : socket(socket), terminateSignal(false), completed(false), packet(4096), id(socket.getFd()) {
     }
     Connection::~Connection() {
     }
     
     int Connection::getId() {
-        return socket.getFd();
+		return id;
     }
     
     bool Connection::isSelectable() {
@@ -35,7 +35,11 @@ namespace HTTP {
     }
     
     int Connection::recv(char * buffer, size_t size) {
-        return socket.recv(buffer, size);
+		int ret = socket.recv(buffer, size);
+		// if (ret == 0) {
+		// 	throw IOException("connection closed - normal");
+		// }
+        return ret;
     }
     
     int Connection::send(const char * data, size_t len) {

@@ -1,6 +1,7 @@
 #ifndef __CONNECTION_THREAD_POOL_HPP__
 #define __CONNECTION_THREAD_POOL_HPP__
 
+#include <liboslayer/AutoRef.hpp>
 #include <liboslayer/ThreadPool.hpp>
 
 #include "Connection.hpp"
@@ -13,17 +14,15 @@ namespace HTTP {
 	 */
 	class ConnectionThread : public UTIL::FlaggableThread {
 	private:
-
-		Connection * connection;
-        Communication * communication;
+		UTIL::AutoRef<Connection> connection;
+		UTIL::AutoRef<Communication> communication;
         OS::Selector selector;
 
 	public:
-
 		ConnectionThread();
 		virtual ~ConnectionThread();
-
-		void setConnection(Connection * connection, Communication * communication);
+		void setConnection(UTIL::AutoRef<Connection> connection, UTIL::AutoRef<Communication> communication);
+		UTIL::AutoRef<Connection> getConnection();
 		virtual void run();
 		void connectionTask();
 	};
@@ -37,11 +36,8 @@ namespace HTTP {
 	public:
 		ConnectionThreadPool(size_t maxThreads);
 		virtual ~ConnectionThreadPool();
-
-		void createConnection(Communication * communication, Connection * connection);
-
+		void createConnection(UTIL::AutoRef<Communication> communication, UTIL::AutoRef<Connection> connection);
 	};
-
 }
 
 #endif
