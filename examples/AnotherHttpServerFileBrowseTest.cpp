@@ -315,6 +315,10 @@ public:
 
 	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
+		logger.logd(Text::format("** Path: %s [%s:%d]", request.getPath().c_str(),
+                                 request.getRemoteAddress().getHost().c_str(),
+								 request.getRemoteAddress().getPort()));
+
 		if (request.isWwwFormUrlEncoded()) {
 			request.parseWwwFormUrlencoded();
 		}
