@@ -205,7 +205,7 @@ namespace HTTP {
 			if (f - s > 0) {
 				string txt = src.substr(s, f - s);
 				LISP::Var & content = env["*content*"];
-				env["*content*"] = LISP::text(content.nil() ? txt : content.toString() + txt);
+				env["*content*"] = LISP::text(content.isNil() ? txt : content.toString() + txt);
 			}
             
 			size_t e = src.find("%>", f);
@@ -237,7 +237,7 @@ namespace HTTP {
 		if (!env.quit() && s < src.length()) {
 			string txt = src.substr(s);
 			LISP::Var & content = env["*content*"];
-			env["*content*"] = LISP::text(content.nil() ? txt : content.toString() + txt);
+			env["*content*"] = LISP::text(content.isNil() ? txt : content.toString() + txt);
 		}
         
 		return env["*content*"].toString();

@@ -279,6 +279,159 @@ public:
     }
 };
 
+class StaticHttpRequestHandler : public HttpRequestHandler {
+private:
+    string basePath;
+	string prefix;
+	string indexName;
+	map<string, string> mimeTypes;
+public:
+	StaticHttpRequestHandler(const string & basePath, const string & prefix, const string & indexName) : basePath(basePath), prefix(prefix), indexName(indexName) {
+		mimeTypes["txt"] = "text/plain";
+		mimeTypes["htm"] = "text/html";
+		mimeTypes["html"] = "text/html";
+		mimeTypes["css"] = "text/css";
+		mimeTypes["js"] = "text/javascript";
+		mimeTypes["xml"] = "text/xml";
+		mimeTypes["lsp"] = "Application/x-lisp";
+	}
+    virtual ~StaticHttpRequestHandler() {}
+    
+    virtual AutoRef<DataSink> getDataSink() {
+        return AutoRef<DataSink>(new StringDataSink);
+    }
+    
+    virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
+
+		try {
+			doHandle(request, sink, response);
+		} catch (Exception & e) {
+			cout << " ** error" << endl;
+			response.setStatusCode(500);
+			response.setContentType("text/html");
+			setFixedTransfer(response, "Server Error/" + e.getMessage());
+		}
+	}
+
+	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
+
+		if (request.isWwwFormUrlEncoded()) {
+			request.parseWwwFormUrlencoded();
+		}
+
+		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
+		session.updateLastAccessTime();
+
+		string path = request.getPath();
+		path = path.substr(prefix.size());
+        
+        cout << " ** static / path : " << path;
+
+        File file(File::mergePaths(basePath, path));
+        if (!file.exists() || !file.isFile()) {
+
+			if (path == "/") {
+				file = File(File::mergePaths(basePath, indexName));
+				if (!file.exists()) {
+					cout << " := 404 no index, " << File::mergePaths(basePath, indexName) << endl;
+					response.setStatusCode(404);
+					return;
+				}
+			} else {
+				cout << " := 404 not found" << endl;
+				response.setStatusCode(404);
+				return;
+			}
+        }
+
+		if (file.getExtension() == "lsp") {
+
+			FileReader reader(file);
+			
+			LispPage page;
+			page.applyWeb();
+			page.applySession(session);
+			page.applyRequest(request);
+			page.applyResponse(response);
+			string content = page.parseLispPage(reader.dumpAsString());
+
+			if (response.needRedirect()) {
+				cout << " := 302 redirect" << endl;
+				redirect(config, request, response, session, response.getRedirectLocation());
+				return;
+			}
+
+
+			if (response["set-file-transfer"].empty() == false) {
+
+				File file(response["set-file-transfer"]);
+				if (!file.exists() || !file.isFile()) {
+					cout << " := 404" << endl;
+					response.setStatusCode(404);
+					setFixedTransfer(response, "Not Found");
+					return;
+				}
+
+				map<string, string> types = mimeTypes;
+
+				if (request.getParameter("mode") == "streaming") {
+					types["mp4"] = "video/mp4";
+				}
+			
+				if (types.find(file.getExtension()) != types.end()) {
+					response.setContentType(types[file.getExtension()]);
+				} else {
+					response.setContentType("Application/octet-stream");
+					response.getHeader().setHeaderField("Content-Disposition",
+														"attachment; filename=\"" + file.getName() + "\"");
+				}
+
+				string range = request.getHeaderFieldIgnoreCase("Range");
+				if (!range.empty()) {
+					size_t f = range.find("=");
+					if (f != string::npos) {
+						range = range.substr(f + 1);
+						f = range.find("-");
+						if (f != string::npos) {
+							string start = range.substr(0, f);
+							string end = range.substr(f + 1);
+							try {
+								cout << " := 206 partial transfer" << endl;
+								// TODO: implicitly handling the response code
+								setPartialFileTransfer(response,
+													   file,
+													   (size_t)Text::toLong(start),
+													   (size_t)Text::toLong(end));
+								return;
+							} catch (Exception e) {
+								cout << " := 500 " << e.getMessage() << endl;
+								response.setStatusCode(500);
+								setFixedTransfer(response, e.getMessage());
+								return;
+							}
+						}
+					}
+				}
+
+				cout << " := 200 fixed transfer" << endl;
+				response.setStatusCode(200);
+				setFileTransfer(response, file);
+				return;
+			}
+			
+
+			cout << " := 200 lisp page" << endl;
+			response.setStatusCode(200);
+			setFixedTransfer(response, content);
+			return;
+		}
+
+		cout << " := 200 static" << endl;
+        response.setStatusCode(200);
+        setFileTransfer(response, file);
+    }
+};
+
 size_t readline(char * buffer, size_t max) {
 	if (fgets(buffer, (int)max - 1, stdin)) {
 		buffer[strlen(buffer) - 1] = 0;
@@ -368,6 +521,9 @@ int main(int argc, char * args[]) {
     
     AutoRef<HttpRequestHandler> favico(new FaviconHttpRequestHandler(config["favicon.path"]));
     server->registerRequestHandler("/favicon.ico", favico);
+
+	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config["static.base.path"], "/static", config["index.name"]));
+    server->registerRequestHandler("/static/*", staticHandler);
 
 	server->startAsync();
 
