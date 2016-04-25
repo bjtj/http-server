@@ -1,14 +1,10 @@
-#include <liboslayer/Text.hpp>
-#include <liboslayer/Logger.hpp>
-
 #include "Url.hpp"
+#include <liboslayer/Text.hpp>
 
 namespace HTTP {
 
 	using namespace std;
     using namespace UTIL;
-
-	static const Logger & logger = LoggerFactory::getDefaultLogger();
 
     Url::Url() {
 		initKnownSchemes();

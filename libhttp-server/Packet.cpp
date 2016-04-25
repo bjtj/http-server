@@ -4,13 +4,14 @@ namespace HTTP {
     
     using namespace OS;
 
-    Packet::Packet(size_t size) : buffer(NULL), size(size), limit(size) {
+    Packet::Packet(size_t size) : buffer(NULL), size(size), pos(0), limit(size) {
         if (size > 0) {
             buffer = new char[size];
-            memset(buffer, 0, size);
+			clear();
         }
     }
-    Packet::Packet(char * buffer, size_t size) : buffer(buffer), size(size), limit(size){
+    Packet::Packet(char * buffer, size_t size) : buffer(buffer), size(size), pos(0), limit(size){
+		clear();
     }
     Packet::Packet(const Packet & other) {
         size = other.size;

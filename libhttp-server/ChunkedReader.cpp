@@ -1,11 +1,8 @@
 #include "ChunkedReader.hpp"
-
 #include <liboslayer/os.hpp>
 #include <liboslayer/Socket.hpp>
 #include <liboslayer/Text.hpp>
 #include <string>
-
-#include <liboslayer/Logger.hpp>
 
 namespace HTTP {
 
@@ -13,8 +10,6 @@ namespace HTTP {
     using namespace OS;
 	using namespace UTIL;
 
-	static const Logger & logger = LoggerFactory::getDefaultLogger();
-    
     ChunkedBuffer::ChunkedBuffer() : chunkDataBuffer(NULL) {
         clear();
     }

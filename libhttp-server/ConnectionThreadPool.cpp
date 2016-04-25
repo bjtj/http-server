@@ -1,5 +1,4 @@
 #include "ConnectionThreadPool.hpp"
-
 #include <liboslayer/os.hpp>
 #include <liboslayer/Logger.hpp>
 
@@ -9,7 +8,7 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-	static const Logger & logger = LoggerFactory::getDefaultLogger();
+	static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
 
 
 	/**
@@ -39,7 +38,7 @@ namespace HTTP {
 			try {
 				connectionTask();
 			} catch (NullException e) {
-				logger.loge(e.getMessage());
+				logger->loge(e.getMessage());
 			}
 
 			setFlag(false);
@@ -81,7 +80,7 @@ namespace HTTP {
             }
             
         } catch (IOException e) {
-            logger.loge(e.getMessage());
+            logger->loge(e.getMessage());
         }
         
         // notify disconnection to connection manager

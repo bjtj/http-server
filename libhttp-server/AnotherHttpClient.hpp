@@ -49,7 +49,7 @@ namespace HTTP {
 		HttpRequest request;
 		HttpResponse response;
 		Connection * connection;
-		OS::Socket * socket;
+		UTIL::AutoRef<OS::Socket> socket;
 		OS::Selector selector;
 		bool requestHeaderSent;
 		bool responseHeaderReceived;

@@ -4,8 +4,9 @@ namespace HTTP {
     
     using namespace std;
     using namespace OS;
+	using namespace UTIL;
 
-    Connection::Connection(Socket & socket) : socket(socket), terminateSignal(false), completed(false), packet(4096), id(socket.getFd()) {
+    Connection::Connection(AutoRef<Socket> socket) : socket(socket), terminateSignal(false), completed(false), packet(4096), id(socket->getFd()) {
     }
     Connection::~Connection() {
     }
@@ -15,42 +16,39 @@ namespace HTTP {
     }
     
     bool Connection::isSelectable() {
-        return socket.isSelectable();
+        return socket->isSelectable();
     }
     
     void Connection::registerSelector(Selector & selector, unsigned long flags) {
-        socket.registerSelector(selector, flags);
+        socket->registerSelector(selector, flags);
     }
 
 	void Connection::unregisterSelector(Selector & selector, unsigned long flags) {
-        socket.unregisterSelector(selector, flags);
+        socket->unregisterSelector(selector, flags);
     }
     
     bool Connection::isReadableSelected(Selector & selector) {
-        return selector.isReadableSelected(socket);
+        return selector.isReadableSelected(*socket);
     }
     
     bool Connection::isWritableSelected(Selector & selector) {
-        return selector.isWritableSelected(socket);
+        return selector.isWritableSelected(*socket);
     }
     
     int Connection::recv(char * buffer, size_t size) {
-		int ret = socket.recv(buffer, size);
-		// if (ret == 0) {
-		// 	throw IOException("connection closed - normal");
-		// }
+		int ret = socket->recv(buffer, size);
         return ret;
     }
     
     int Connection::send(const char * data, size_t len) {
-        return socket.send(data, len);
+        return socket->send(data, len);
     }
     
     void Connection::close() {
-        socket.close();
+        socket->close();
     }
     bool Connection::isClosed() {
-        return socket.isClosed();
+        return socket->isClosed();
     }
     
     void Connection::signalTerminate() {
@@ -93,10 +91,10 @@ namespace HTTP {
 	}
     
     InetAddress Connection::getRemoteAddress() {
-        return socket.getRemoteInetAddress();
+        return socket->getRemoteInetAddress();
     }
 
 	InetAddress Connection::getLocalAddress() {
-        return socket.getLocalInetAddress();
+        return socket->getLocalInetAddress();
     }
 }

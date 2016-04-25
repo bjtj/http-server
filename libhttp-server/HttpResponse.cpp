@@ -1,6 +1,4 @@
 #include <liboslayer/Text.hpp>
-#include <liboslayer/Logger.hpp>
-
 #include "HttpResponse.hpp"
 #include "HttpStatusCodes.hpp"
 
@@ -9,8 +7,6 @@ namespace HTTP {
 	using namespace std;
 	using namespace OS;
 	using namespace UTIL;
-
-	const static Logger & logger = LoggerFactory::getDefaultLogger();
 
 	/**
 	 * @brief http response constructor

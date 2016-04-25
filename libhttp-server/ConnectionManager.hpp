@@ -86,8 +86,8 @@ namespace HTTP {
         ConnectionManager(UTIL::AutoRef<CommunicationMaker> communicationMaker, size_t threadCount);
         ConnectionManager(UTIL::AutoRef<CommunicationMaker> communicationMaker, size_t threadCount, UTIL::AutoRef<ServerSocketMaker> serverSocketMaker);
         virtual ~ConnectionManager();
-        virtual UTIL::AutoRef<Connection> makeConnection(OS::Socket & client);
-        void onConnect(OS::Socket & client);
+        virtual UTIL::AutoRef<Connection> makeConnection(UTIL::AutoRef<OS::Socket> client);
+        void onConnect(UTIL::AutoRef<OS::Socket> client);
         void onDisconnect(UTIL::AutoRef<Connection> connection);
         void clearConnections();
         void start(int port);

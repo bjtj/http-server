@@ -1,14 +1,10 @@
 #include "ChunkedTransfer.hpp"
 
-#include <liboslayer/Logger.hpp>
-
 namespace HTTP {
 
 	using namespace std;
 	using namespace OS;
 	using namespace UTIL;
-
-	static const Logger & logger = LoggerFactory::getDefaultLogger();
 
 	/**
 	 * @brief ChunkedTransfer

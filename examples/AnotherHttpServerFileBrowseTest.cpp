@@ -15,7 +15,7 @@ using namespace OS;
 using namespace UTIL;
 using namespace HTTP;
 
-const Logger & logger = LoggerFactory::getDefaultLogger();
+static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
 HttpSessionManager sessionManager(30 * 60 * 1000);
 
 class ServerConfig : public HttpServerConfig {
@@ -129,7 +129,7 @@ public:
 			path = defaultPath;
 		}
         
-        logger.logd(Text::format("** Path: %s [%s:%d]", path.c_str(),
+        logger->logd(Text::format("** Path: %s [%s:%d]", path.c_str(),
                                  request.getRemoteAddress().getHost().c_str(),
 								 request.getRemoteAddress().getPort()));
         
@@ -160,7 +160,7 @@ public:
 
 		if (response["set-file-transfer"].empty() == false) {
 
-			logger.logd(Text::format("** File transfer / %s", response["set-file-transfer"].c_str()));
+			logger->logd(Text::format("** File transfer / %s", response["set-file-transfer"].c_str()));
 			
 			File file(response["set-file-transfer"]);
 			if (!file.exists() || !file.isFile()) {
@@ -199,7 +199,7 @@ public:
                                                    (size_t)Text::toLong(end));
                             return;
                         } catch (Exception e) {
-                            logger.loge(e.getMessage());
+                            logger->loge(e.getMessage());
                             response.setStatusCode(500);
                             setFixedTransfer(response, e.getMessage());
                             return;
@@ -315,7 +315,7 @@ public:
 
 	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
-		logger.logd(Text::format("** Path: %s [%s:%d]", request.getPath().c_str(),
+		logger->logd(Text::format("** Path: %s [%s:%d]", request.getPath().c_str(),
                                  request.getRemoteAddress().getHost().c_str(),
 								 request.getRemoteAddress().getPort()));
 
@@ -466,6 +466,8 @@ bool promptBoolean(const char * msg) {
 
 
 int main(int argc, char * args[]) {
+
+	LoggerFactory::getInstance().setLoggerDescriptorSimple("*", "basic", "console");
 
 	string configPath;
 	

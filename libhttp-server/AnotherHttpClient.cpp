@@ -11,6 +11,8 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
+	static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
+
 	/**
 	 * @brief OnResponseHeaderListener
 	 */
@@ -50,8 +52,7 @@ namespace HTTP {
 
 	void AnotherHttpClient::logd(const string & msg) {
 		if (debug) {
-			Logger logger = LoggerFactory::getDefaultLogger();
-			logger.logd(msg);
+			logger->logd(msg);
 		}
 	}
 
@@ -69,7 +70,7 @@ namespace HTTP {
 			string remoteHost = url.getHost();
 			int remotePort = url.getIntegerPort();
 
-			socket = new Socket(OS::InetAddress(remoteHost, remotePort));
+			socket = AutoRef<Socket>(new Socket(OS::InetAddress(remoteHost, remotePort)));
 			if (connectionTimeout > 0) {
 				socket->connect(connectionTimeout);
 			} else {
@@ -80,7 +81,7 @@ namespace HTTP {
 				socket->setRecvTimeout(recvTimeout);
 			}
 
-			connection = new Connection(*socket);
+			connection = new Connection(socket);
             connection->registerSelector(selector, Selector::READ | Selector::WRITE);
 		}
 	}
@@ -94,7 +95,6 @@ namespace HTTP {
             connection = NULL;
             
             socket->close();
-            delete socket;
             socket = NULL;
         }
     }
@@ -299,7 +299,7 @@ namespace HTTP {
     void AnotherHttpClient::setComplete() {
         if (responseListener) {
             AutoRef<DataTransfer> transfer = response.getTransfer();
-			AutoRef<DataSink> sink = (transfer.nil() ? NULL : transfer->sink());
+			AutoRef<DataSink> sink = (transfer.nil() ? AutoRef<DataSink>() : transfer->sink());
             responseListener->onTransferDone(response, sink, userData);
         }
         complete = true;

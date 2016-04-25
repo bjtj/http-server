@@ -122,7 +122,7 @@ namespace HTTP {
 				return node.getHandler();
 			}
 		}
-		return NULL;
+		return AutoRef<HttpRequestHandler>();
 	}
 	
 	/**

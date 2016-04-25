@@ -7,7 +7,7 @@ namespace HTTP {
     using namespace OS;
     using namespace UTIL;
     
-    static const Logger & logger = LoggerFactory::getDefaultLogger();
+    static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
     
 	/**
 	 * @brief ConnectionManager
@@ -21,7 +21,7 @@ namespace HTTP {
 		
 		serverSocketMaker = AutoRef<ServerSocketMaker>(new DefaultServerSocketMaker);
 
-		threadPool.addObserver(AutoRef<Observer>(new ObserverWrapper(this)));
+		threadPool.addObserver(this);
     }
     
     ConnectionManager::ConnectionManager(AutoRef<CommunicationMaker> communicationMaker, size_t threadCount, AutoRef<ServerSocketMaker> serverSocketMaker) :
@@ -31,18 +31,18 @@ namespace HTTP {
 		threadPool(threadCount),
 		serverSocketMaker(serverSocketMaker) {
 
-		threadPool.addObserver(AutoRef<Observer>(new ObserverWrapper(this)));
+		threadPool.addObserver(this);
     }
 
     ConnectionManager::~ConnectionManager() {
         stop();
     }
     
-    AutoRef<Connection> ConnectionManager::makeConnection(Socket & client) {
+    AutoRef<Connection> ConnectionManager::makeConnection(AutoRef<Socket> client) {
         return AutoRef<Connection>(new Connection(client));
     }
     
-    void ConnectionManager::onConnect(Socket & client) {
+    void ConnectionManager::onConnect(AutoRef<Socket> client) {
         AutoRef<Connection> connection = makeConnection(client);
         AutoRef<Communication> communication = communicationMaker->makeCommunication();
 
@@ -53,7 +53,7 @@ namespace HTTP {
 		try {
 			startCommunication(communication, connection);
 		} catch (Exception e) {
-			logger.loge(e.getMessage());
+			logger->loge(e.getMessage());
 			connection->close(); // TODO: is it okay?
 			onDisconnect(connection);
 		}
@@ -110,9 +110,9 @@ namespace HTTP {
     void ConnectionManager::poll(unsigned long timeout) {
         if (selector.select(timeout) > 0) {
             if (selector.isReadableSelected(*serverSocket)) {
-                Socket * client = serverSocket->accept();
-                if (client) {
-                    onConnect(*client);
+                AutoRef<Socket> client(serverSocket->accept());
+                if (!client.nil()) {
+                    onConnect(client);
                 }
             }
         }

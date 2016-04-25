@@ -3,19 +3,20 @@
 
 #include "Packet.hpp"
 #include <liboslayer/os.hpp>
+#include <liboslayer/AutoRef.hpp>
 #include <liboslayer/Socket.hpp>
 
 namespace HTTP {
     class Connection {
     private:
-        OS::Socket & socket;
+		UTIL::AutoRef<OS::Socket> socket;
         bool terminateSignal;
         bool completed;
         Packet packet;
 		int id;
         
     public:
-        Connection(OS::Socket & socket);
+        Connection(UTIL::AutoRef<OS::Socket> socket);
         virtual ~Connection();
         int getId();
         bool isSelectable();

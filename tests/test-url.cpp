@@ -1,14 +1,10 @@
-// #include <iostream>
 #include "utils.hpp"
 #include <libhttp-server/Url.hpp>
+#include <liboslayer/Logger.hpp>
 
 using namespace std;
 using namespace HTTP;
-
-// #define ASSERT(A,CMP,B) if (!(A CMP B)) {								\
-// 		cerr << #A <<  " should be " << #CMP << " " <<  B << " but " << A << endl; \
-// 		exit(1);														\
-// 	}
+using namespace UTIL;
 
 static void test_url() {
 
@@ -51,6 +47,13 @@ static void test_file_url() {
 }
 
 int main(int argc, char *args[]) {
+
+	LoggerDescriptor descriptor("*");
+	descriptor.setAllFormatter("basic");
+	descriptor.setAllPrinter("console");
+	LoggerFactory::getInstance().setLoggerDescriptor(descriptor);
+
+	Url url;
 
 	test_url();
 	test_file_url();
