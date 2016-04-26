@@ -247,7 +247,7 @@ public:
 		size_t cnt = 100;
 		CountDownLatch doneSignal(cnt);
 		for (size_t i = 0; i < cnt; i++) {
-			pool.setTask(AutoRef<Task>(new EchoVisitorTask((int)i, doneSignal, InetAddress("127.0.0.1", port))));
+			pool.setTaskWaitIfFull(AutoRef<Task>(new EchoVisitorTask((int)i, doneSignal, InetAddress("127.0.0.1", port))));
 		}
 
 		doneSignal.await();
