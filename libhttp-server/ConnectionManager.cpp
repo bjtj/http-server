@@ -14,7 +14,6 @@ namespace HTTP {
 	 */
 
     ConnectionManager::ConnectionManager(AutoRef<CommunicationMaker> communicationMaker, size_t threadCount) :
-		serverSocket(NULL),
 		connectionsLock(1),
 		communicationMaker(communicationMaker),
 		threadPool(threadCount) {
@@ -25,11 +24,10 @@ namespace HTTP {
     }
     
     ConnectionManager::ConnectionManager(AutoRef<CommunicationMaker> communicationMaker, size_t threadCount, AutoRef<ServerSocketMaker> serverSocketMaker) :
-		serverSocket(NULL),
+		serverSocketMaker(serverSocketMaker),
 		connectionsLock(1),
 		communicationMaker(communicationMaker),
-		threadPool(threadCount),
-		serverSocketMaker(serverSocketMaker) {
+		threadPool(threadCount) {
 
 		threadPool.addObserver(this);
     }
@@ -82,7 +80,7 @@ namespace HTTP {
     }
     
     void ConnectionManager::start(int port) {
-        if (serverSocket) {
+        if (!serverSocket.nil()) {
             return;
         }
         
@@ -95,7 +93,7 @@ namespace HTTP {
     }
 
 	void ConnectionManager::stop() {
-        if (!serverSocket) {
+        if (serverSocket.nil()) {
             return;
         }
 
@@ -103,7 +101,6 @@ namespace HTTP {
         stopAllThreads();
         serverSocket->unregisterSelector(selector, Selector::READ);
         serverSocket->close();
-		serverSocketMaker->releaseSocket(serverSocket);
         serverSocket = NULL;
     }
     

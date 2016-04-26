@@ -28,7 +28,7 @@ build() {
 	mkdir -p $DIR_BUILD
 	mkdir -p $DIR_WORLD
 	cd $DIR_BUILD
-	$BASE/configure --prefix "$DIR_WORLD" && make && make install
+	$BASE/configure --prefix "$DIR_WORLD" --enable-debug && make && make install
 }
 
 install() {

@@ -499,14 +499,11 @@ int main(int argc, char * args[]) {
             SecureServerSocketMaker(string certPath, string keyPath) :
 				certPath(certPath), keyPath(keyPath) {}
             virtual ~SecureServerSocketMaker() {}
-            virtual ServerSocket * makeServerSocket(int port) {
-                SecureServerSocket * ret = new SecureServerSocket(port);
-                ret->loadCert(certPath, keyPath);
+            virtual AutoRef<ServerSocket> makeServerSocket(int port) {
+                AutoRef<ServerSocket> ret(new SecureServerSocket(port));
+                ((SecureServerSocket*)&ret)->loadCert(certPath, keyPath);
                 return ret;
             }
-			virtual void releaseSocket(ServerSocket * sock) {
-				delete sock;
-			}
         };
 		AutoRef<ServerSocketMaker> maker(new SecureServerSocketMaker(config.getCertPath(), config.getKeyPath()));
         server = new AnotherHttpServer(config, maker);

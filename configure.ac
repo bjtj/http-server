@@ -26,11 +26,19 @@ AC_PROG_MKDIR_P
 
 # Checks for libraries.
 ACX_PTHREAD
-# AC_SEARCH_LIBS([OS::idle], [oslayer], [], [AC_MSG_ERROR([oslayer not found!!!])])
 PKG_CHECK_MODULES([LIBOSLAYER], [oslayer])
 
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h sys/time.h unistd.h])
+
+# Debugging
+AC_ARG_ENABLE(debug,
+        AS_HELP_STRING([--enable-debug], [enable debugging]),,
+        enable_debug=no)
+if test "x$enable_debug" = "xyes"; then
+        CFLAGS="$CFLAGS -g -Wall"
+		CXXFLAGS="$CXXFLAGS -g -Wall"
+fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 #AC_CHECK_HEADER_STDBOOL

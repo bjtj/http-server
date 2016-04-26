@@ -20,8 +20,7 @@ namespace HTTP {
     public:
         ServerSocketMaker() {}
         virtual ~ServerSocketMaker() {}
-        virtual OS::ServerSocket * makeServerSocket(int port) = 0;
-		virtual void releaseSocket(OS::ServerSocket * sock) = 0;
+        virtual UTIL::AutoRef<OS::ServerSocket> makeServerSocket(int port) = 0;
     };
 
 	/**
@@ -32,12 +31,9 @@ namespace HTTP {
     public:
         DefaultServerSocketMaker() {}
         virtual ~DefaultServerSocketMaker() {}
-        virtual OS::ServerSocket * makeServerSocket(int port) {
-            return new OS::ServerSocket(port);
+        virtual UTIL::AutoRef<OS::ServerSocket> makeServerSocket(int port) {
+            return UTIL::AutoRef<OS::ServerSocket>(new OS::ServerSocket(port));
         }
-		virtual void releaseSocket(OS::ServerSocket * sock) {
-			delete sock;
-		}
     };
     
 	/**
@@ -75,7 +71,7 @@ namespace HTTP {
     class ConnectionManager : public UTIL::Observer {
     private:
 		UTIL::AutoRef<ServerSocketMaker> serverSocketMaker;
-        OS::ServerSocket * serverSocket;
+		UTIL::AutoRef<OS::ServerSocket> serverSocket;
         OS::Selector selector;
         std::map<int, UTIL::AutoRef<Connection> > connectionTable;
         OS::Semaphore connectionsLock;

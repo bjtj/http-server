@@ -63,12 +63,16 @@ namespace HTTP {
 
 	void HttpRequestHandler::setPartialFileTransfer(HttpResponse & response, OS::File & file, size_t start, size_t end) {
 
-		if (end == 0 || end >= file.getSize()) {
-			end = file.getSize() - 1;
+		if (file.getSize() < 1) {
+			throw Exception("empty file");
+		}
+
+		if (end == 0 || end >= (size_t)file.getSize()) {
+			end = (size_t)file.getSize() - 1;
 		}
 
 		if (start >= end) {
-			throw Exception("wrong range start error", -1, 0);
+			throw Exception("wrong range start error");
 		}
 
 		size_t size = (end - start + 1);
