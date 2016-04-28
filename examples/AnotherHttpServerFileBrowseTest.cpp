@@ -294,6 +294,7 @@ public:
 		mimeTypes["js"] = "text/javascript";
 		mimeTypes["xml"] = "text/xml";
 		mimeTypes["lsp"] = "Application/x-lisp";
+		mimeTypes["woff"] = "application/x-font-woff";
 	}
     virtual ~StaticHttpRequestHandler() {}
     
@@ -376,19 +377,7 @@ public:
 					return;
 				}
 
-				map<string, string> types = mimeTypes;
-
-				if (request.getParameter("mode") == "streaming") {
-					types["mp4"] = "video/mp4";
-				}
-			
-				if (types.find(file.getExtension()) != types.end()) {
-					response.setContentType(types[file.getExtension()]);
-				} else {
-					response.setContentType("Application/octet-stream");
-					response.getHeader().setHeaderField("Content-Disposition",
-														"attachment; filename=\"" + file.getName() + "\"");
-				}
+				setContentTypeWithFile(request, response, file);
 
 				string range = request.getHeaderFieldIgnoreCase("Range");
 				if (!range.empty()) {
@@ -409,6 +398,7 @@ public:
 								return;
 							} catch (Exception e) {
 								cout << " := 500 " << e.getMessage() << endl;
+								response.setContentType("text/html");
 								response.setStatusCode(500);
 								setFixedTransfer(response, e.getMessage());
 								return;
@@ -423,17 +413,34 @@ public:
 				return;
 			}
 			
-
 			cout << " := 200 lisp page" << endl;
 			response.setStatusCode(200);
+			response.setContentType("text/html");
 			setFixedTransfer(response, content);
 			return;
 		}
 
 		cout << " := 200 static" << endl;
         response.setStatusCode(200);
+		setContentTypeWithFile(request, response, file);
         setFileTransfer(response, file);
     }
+
+	void setContentTypeWithFile(HttpRequest & request, HttpResponse & response, File & file) {
+		map<string, string> types = mimeTypes;
+
+		if (request.getParameter("mode") == "streaming") {
+			types["mp4"] = "video/mp4";
+		}
+			
+		if (types.find(file.getExtension()) != types.end()) {
+			response.setContentType(types[file.getExtension()]);
+		} else {
+			response.setContentType("Application/octet-stream");
+			response.getHeader().setHeaderField("Content-Disposition",
+												"attachment; filename=\"" + file.getName() + "\"");
+		}
+	}
 };
 
 size_t readline(char * buffer, size_t max) {

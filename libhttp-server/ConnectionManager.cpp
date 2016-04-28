@@ -52,7 +52,10 @@ namespace HTTP {
 			startCommunication(communication, connection);
 		} catch (Exception e) {
 			logger->loge(e.getMessage());
-			connection->close(); // TODO: is it okay?
+
+			// TODO: handle thread pool full e.g. 500 not available
+			
+			connection->close();
 			onDisconnect(connection);
 		}
     }
