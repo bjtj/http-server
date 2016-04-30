@@ -1,5 +1,6 @@
 #include "ConnectionManager.hpp"
 #include <liboslayer/Logger.hpp>
+#include <liboslayer/Text.hpp>
 
 namespace HTTP {
     
@@ -50,10 +51,12 @@ namespace HTTP {
 
 		try {
 			startCommunication(communication, connection);
-		} catch (Exception e) {
+		} catch (Exception & e) {
 			logger->loge(e.getMessage());
 
-			// TODO: handle thread pool full e.g. 500 not available
+			if (!onMaxCapacity.nil()) {
+				onMaxCapacity->onMaxCapacity(*this, connection);
+			}
 			
 			connection->close();
 			onDisconnect(connection);
@@ -110,10 +113,14 @@ namespace HTTP {
     void ConnectionManager::poll(unsigned long timeout) {
         if (selector.select(timeout) > 0) {
             if (selector.isReadableSelected(*serverSocket)) {
-                AutoRef<Socket> client(serverSocket->accept());
-                if (!client.nil()) {
-                    onConnect(client);
-                }
+				try {
+					AutoRef<Socket> client(serverSocket->accept());
+					if (!client.nil()) {
+						onConnect(client);
+					}
+				} catch (IOException & e) {
+					logger->loge("client connection handling failed with '" + e.getMessage() + "'");
+				}
             }
         }
     }
@@ -149,5 +156,15 @@ namespace HTTP {
 	void ConnectionManager::update(Observable * target) {
 		ConnectionThread * t = (ConnectionThread*)target;
 		onDisconnect(t->getConnection());
+	}
+
+	void ConnectionManager::setOnMaxCapacity(AutoRef<OnMaxCapacity> onMaxCapacity) {
+		this->onMaxCapacity = onMaxCapacity;
+	}
+
+	string ConnectionManager::getStatus() {
+		string status;
+		status = "free: " + Text::toString(threadPool.freeCount()) + ",working:" + Text::toString(threadPool.workingCount());
+		return status;
 	}
 }

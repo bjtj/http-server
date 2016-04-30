@@ -91,15 +91,15 @@ public:
 
 static DumpResponseHandler httpRequest(const Url & url, const string & method, const LinkedStringMap & headers) {
 
-	cout << " ** url : " << url.toString() << endl;
-	cout << " ** method : " << method << endl;
+	cout << " ** Request/url : " << url.toString() << endl;
+	cout << " ** Request/method : " << method << endl;
 	
 	DumpResponseHandler handler;
 	AnotherHttpClient client;
 	client.setDebug(true);
 
-	client.setConnectionTimeout(5000);
-	client.setRecvTimeout(5000);
+	client.setConnectionTimeout(1000);
+	client.setRecvTimeout(1000);
     
 	client.setOnResponseListener(&handler);
     
@@ -135,15 +135,13 @@ static void test_http_client() {
 }
 
 static void test_recv_timeout() {
-	DumpResponseHandler handler = httpRequest("http://127.0.0.1:9999/delay?timeout=1000", "GET", LinkedStringMap());
+	DumpResponseHandler handler = httpRequest("http://127.0.0.1:9999/delay?timeout=500", "GET", LinkedStringMap());
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	cout << handler.getDump() << endl;
 
 	string err;
 	try {
-		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=6000", "GET", LinkedStringMap());
-		ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
-		cout << handler.getDump() << endl;
+		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=2000", "GET", LinkedStringMap());
 	} catch (Exception & e) {
 		err = e.what();
 		cerr << e.what() << endl;
@@ -152,9 +150,7 @@ static void test_recv_timeout() {
 
 	err = "";
 	try {
-		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=10000", "GET", LinkedStringMap());
-		ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
-		cout << handler.getDump() << endl;
+		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=3000", "GET", LinkedStringMap());
 	} catch (Exception & e) {
 		err = e.what();
 		cerr << e.what() << endl;

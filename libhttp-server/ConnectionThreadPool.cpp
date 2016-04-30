@@ -10,11 +10,9 @@ namespace HTTP {
 
 	static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
 
-
 	/**
 	 * @brief ConnectionThread
 	 */
-
 
 	ConnectionThread::ConnectionThread() : FlaggableThread(false) {
 	}
@@ -37,7 +35,7 @@ namespace HTTP {
 
 			try {
 				connectionTask();
-			} catch (NullException e) {
+			} catch (NullException & e) {
 				logger->loge(e.getMessage());
 			}
 
@@ -79,7 +77,7 @@ namespace HTTP {
                 }
             }
             
-        } catch (IOException e) {
+        } catch (IOException & e) {
             logger->loge(e.getMessage());
         }
         
@@ -130,7 +128,7 @@ namespace HTTP {
 
 	void ConnectionThreadPool::createConnection(AutoRef<Communication> communication, AutoRef<Connection> connection) {
 		ConnectionThread * thread = (ConnectionThread *)acquire();
-		if (!thread) {
+		if (thread == NULL) {
 			throw Exception("ConnectionThreadPool error - no thread available");
 		}
 		thread->setConnection(connection, communication);

@@ -165,7 +165,7 @@ namespace HTTP {
                 }
             }
 
-		} catch (IOException e) {
+		} catch (IOException & e) {
             if (responseListener) {
                 responseListener->onError(e, userData);
             }

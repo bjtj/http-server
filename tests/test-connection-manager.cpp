@@ -232,7 +232,7 @@ public:
 						ASSERT(say, ==, buffer);
 					}
 					cout << " ** [" << id << "]EchoVisitorTask/complete" << endl;
-				} catch (Exception e) {
+				} catch (Exception & e) {
 					cout << " ** [" << id << "]EchoVisitorTask/error: " << e.getMessage() << endl;
 				}
 				
@@ -263,7 +263,7 @@ int main(int argc, char *args[]) {
 	ts.addTestCase(AutoRef<TestCase>(new BasicConnectionManagerTestCase));
 	ts.addTestCase(AutoRef<TestCase>(new ConnectionManagerTestCase));
 	ts.addTestCase(AutoRef<TestCase>(new ConnectionManagerMultiConnTestCase));
-	TestReporter report(ts.testAll());
+	TestReport report(ts.testAll());
 	ASSERT(report.failed(), ==, 0);
 	return 0;
 }

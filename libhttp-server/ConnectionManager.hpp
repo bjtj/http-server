@@ -12,6 +12,8 @@
 
 namespace HTTP {
 
+	class ConnectionManager;
+
 	/**
 	 * @brief server socket maker
 	 */
@@ -63,6 +65,17 @@ namespace HTTP {
         
         virtual UTIL::AutoRef<Communication> makeCommunication() = 0;
     };
+
+	/**
+	 *
+	 */
+	class OnMaxCapacity {
+	public:
+		OnMaxCapacity() {}
+		virtual ~OnMaxCapacity() {}
+		virtual void onMaxCapacity(ConnectionManager & cm, UTIL::AutoRef<Connection> connection) = 0;
+	};
+
     
 	/**
 	 * @brief ConnectionManager
@@ -77,6 +90,7 @@ namespace HTTP {
         OS::Semaphore connectionsLock;
 		UTIL::AutoRef<CommunicationMaker> communicationMaker;
 		ConnectionThreadPool threadPool;
+		UTIL::AutoRef<OnMaxCapacity> onMaxCapacity;
         
     public:
         ConnectionManager(UTIL::AutoRef<CommunicationMaker> communicationMaker, size_t threadCount);
@@ -94,6 +108,8 @@ namespace HTTP {
 		void startCommunication(UTIL::AutoRef<Communication> communication, UTIL::AutoRef<Connection> connection);
 		size_t getConnectionCount();
 		virtual void update(UTIL::Observable * target);
+		void setOnMaxCapacity(UTIL::AutoRef<OnMaxCapacity> onMaxCapacity);
+		std::string getStatus();
     };
 }
 

@@ -185,11 +185,8 @@ namespace HTTP {
 		try {
 			LISP::compile(line, env);
 			return !env.quit();
-		} catch (const char * e) {
-			cout << "ERROR: " << e << endl;
-			return false;
-		} catch (const string & e) {
-			cout << "ERROR: " << e << endl;
+		} catch (OS::Exception & e) {
+			cout << "ERROR: " << e.getMessage() << endl;
 			return false;
 		}
 	}

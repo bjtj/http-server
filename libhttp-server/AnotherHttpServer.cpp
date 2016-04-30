@@ -13,6 +13,8 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
+	static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
+
 	/**
 	 * @brief HttpRequestHandler
 	 */
@@ -361,11 +363,34 @@ namespace HTTP {
 		}
 	};
 
+	/**
+	 *
+	 */
+	class MaxClientHandler : public OnMaxCapacity {
+	public:
+		MaxClientHandler() {}
+		virtual ~MaxClientHandler() {}
+		virtual void onMaxCapacity(ConnectionManager & cm, AutoRef<Connection> connection) {
+
+			logger->loge("ConnectinoManager / status : " + cm.getStatus());
+			
+			string content = "<html><head><title>Not available</title></head><body><h1>Too much connection</h1><p>Try again</p></body></html>";
+			string header = "HTTP/1.1 503 Service Not Available\r\nContent-Length: " + Text::toString(content.size()) + "\r\nContent-Type: text/html\r\n\r\n";
+			connection->send(header.c_str(), header.size());
+			connection->send(content.c_str(), content.size());
+		}
+	};
+
+	/**
+	 *
+	 */
 	AnotherHttpServer::AnotherHttpServer(HttpServerConfig config) :
 		port(config.getIntegerProperty("listen.port")),
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
 		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)), config.getIntegerProperty("thread.count", 20)),
 		thread(NULL) {
+
+		connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
 	}
     
     AnotherHttpServer::AnotherHttpServer(HttpServerConfig config, AutoRef<ServerSocketMaker> serverSocketMaker) :
@@ -373,6 +398,8 @@ namespace HTTP {
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
 		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)), config.getIntegerProperty("thread.count", 20), serverSocketMaker),
 		thread(NULL) {
+
+		connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
     }
     
 	AnotherHttpServer::~AnotherHttpServer() {
