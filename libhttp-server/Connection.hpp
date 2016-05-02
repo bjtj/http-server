@@ -24,6 +24,7 @@ namespace HTTP {
 		void unregisterSelector(OS::Selector & selector, unsigned long flags);
         bool isReadableSelected(OS::Selector & selector);
         bool isWritableSelected(OS::Selector & selector);
+		void negotiate();
         int recv(char * buffer, size_t size);
         int send(const char * data, size_t len);
         void close();

@@ -53,6 +53,9 @@ namespace HTTP {
 		connection->registerSelector(selector, Selector::READ | Selector::WRITE);
 
 		try {
+
+			connection->negotiate();
+			
             communication->onConnected(*connection);
             while (!interrupted() && !connection->isTerminateSignaled()) {
                 

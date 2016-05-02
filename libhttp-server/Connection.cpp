@@ -34,6 +34,10 @@ namespace HTTP {
     bool Connection::isWritableSelected(Selector & selector) {
         return selector.isWritableSelected(*socket);
     }
+
+	void Connection::negotiate() {
+		socket->negotiate();
+	}
     
     int Connection::recv(char * buffer, size_t size) {
 		int ret = socket->recv(buffer, size);

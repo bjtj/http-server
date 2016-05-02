@@ -28,6 +28,7 @@ libhttp_serverinc_HEADERS = \
 	HttpStatusCodes.hpp \
 	InetAddress.hpp \
 	LispPage.hpp \
+	MimeTypes.hpp \
 	Packet.hpp \
 	StringDataSink.hpp \
 	StringDataSource.hpp \
@@ -85,13 +86,14 @@ libhttp_server_la_SOURCES = \
 	InetAddress.hpp \
 	LispPage.cpp \
 	LispPage.hpp \
+	MimeTypes.cpp \
+	MimeTypes.hpp \
 	Packet.cpp \
 	Packet.hpp \
 	StringDataSink.hpp \
 	StringDataSource.hpp \
 	Url.cpp \
 	Url.hpp
-
 
 libhttp_server_la_CXXFLAGS = $(PTHREAD_CXXFLAGS) $(LIBOSLAYER_CFLAGS)
 libhttp_server_la_LIBADD = $(LIBOSLAYER_LIBS)

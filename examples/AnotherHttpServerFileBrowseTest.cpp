@@ -7,6 +7,7 @@
 #include <libhttp-server/HttpSessionTool.hpp>
 #include <libhttp-server/LispPage.hpp>
 #include <libhttp-server/Url.hpp>
+#include <libhttp-server/MimeTypes.hpp>
 #include <libhttp-server/StringDataSink.hpp>
 #include <liboslayer/Lisp.hpp>
 
@@ -74,185 +75,6 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
     header.setConnection("close");
 }
 
-
-class FileBrowseHttpRequestHandler : public HttpRequestHandler {
-private:
-	string defaultPath;
-    string browseIndexPath;
-	string indexFile;
-	map<string, string> mimeTypes;
-	
-public:
-	FileBrowseHttpRequestHandler(const string & defaultPath, const string & browseIndexPath) : defaultPath(defaultPath), browseIndexPath(browseIndexPath) {
-		mimeTypes["txt"] = "text/plain";
-		mimeTypes["htm"] = "text/html";
-		mimeTypes["html"] = "text/html";
-		mimeTypes["css"] = "text/css";
-		mimeTypes["js"] = "text/javascript";
-		mimeTypes["xml"] = "text/xml";
-		mimeTypes["lsp"] = "Application/x-lisp";
-	}
-	virtual ~FileBrowseHttpRequestHandler() {}
-
-	virtual AutoRef<DataSink> getDataSink() {
-		return AutoRef<DataSink>(new StringDataSink);
-	}
-    
-    virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
-		try {
-			doHandle(request, response);
-		} catch (Exception & e) {
-			cout << " ** error" << endl;
-			response.setStatusCode(500);
-			response.setContentType("text/html");
-			setFixedTransfer(response, "Server Error/" + e.getMessage());
-		}
-	}
-
-	virtual void doHandle(HttpRequest & request, HttpResponse & response) {
-
-		if (request.isWwwFormUrlEncoded()) {
-			request.parseWwwFormUrlencoded();
-		}
-
-		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
-		session.updateLastAccessTime();
-        
-        HttpResponseHeader & responseHeader = response.getHeader();
-        
-        response.setStatusCode(200, "OK");
-        response.setContentType("text/html");
-		responseHeader.setConnection("close");
-
-		string path = request.getParameter("path");
-        if (path.empty()) {
-			path = defaultPath;
-		}
-        
-        logger->logd(Text::format("** Path: %s [%s:%d]", path.c_str(),
-                                 request.getRemoteAddress().getHost().c_str(),
-								 request.getRemoteAddress().getPort()));
-        
-        if (!Text::startsWith(path, defaultPath) || path.find("..") != string::npos) {
-            response.setStatusCode(403);
-            setFixedTransfer(response, "Not permitted");
-            return;
-        }
-
-		string content;
-
-		if (!browseIndexPath.empty()) {
-			File file(browseIndexPath);
-			FileReader reader(file);
-			LispPage page;
-			page.applyWeb();
-			page.applySession(session);
-			page.applyRequest(request);
-			page.applyResponse(response);
-			page.env()["*path*"] = LISP::text(path);
-			content = page.parseLispPage(reader.dumpAsString());
-		}
-
-		if (response.needRedirect()) {
-			redirect(config, request, response, session, response.getRedirectLocation());
-			return;
-		}
-
-		if (response["set-file-transfer"].empty() == false) {
-
-			logger->logd(Text::format("** File transfer / %s", response["set-file-transfer"].c_str()));
-			
-			File file(response["set-file-transfer"]);
-			if (!file.exists() || !file.isFile()) {
-				response.setStatusCode(404);
-				setFixedTransfer(response, "Not Found");
-				return;
-			}
-
-			map<string, string> types = mimeTypes;
-
-			if (request.getParameter("mode") == "streaming") {
-				types["mp4"] = "video/mp4";
-			}
-			
-			if (types.find(file.getExtension()) != types.end()) {
-				response.setContentType(types[file.getExtension()]);
-			} else {
-				response.setContentType("Application/octet-stream");
-				response.getHeader().setHeaderField("Content-Disposition",
-													"attachment; filename=\"" + file.getName() + "\"");
-			}
-
-			string range = request.getHeaderFieldIgnoreCase("Range");
-			if (!range.empty()) {
-				size_t f = range.find("=");
-				if (f != string::npos) {
-					range = range.substr(f + 1);
-					f = range.find("-");
-					if (f != string::npos) {
-						string start = range.substr(0, f);
-						string end = range.substr(f + 1);
-                        try {
-                            setPartialFileTransfer(response,
-                                                   file,
-                                                   (size_t)Text::toLong(start),
-                                                   (size_t)Text::toLong(end));
-                            return;
-                        } catch (Exception e) {
-                            logger->loge(e.getMessage());
-                            response.setStatusCode(500);
-                            setFixedTransfer(response, e.getMessage());
-                            return;
-                        }
-					}
-				}
-			}
-
-			setFileTransfer(response, file);
-			return;
-		}
-
-        setFixedTransfer(response, content);
-    }
-};
-
-class SinglePageHttpRequestHandler : public HttpRequestHandler {
-private:
-	string path;
-public:
-	SinglePageHttpRequestHandler(const string & path) : path(path) {}
-	virtual ~SinglePageHttpRequestHandler() {}
-
-	virtual AutoRef<DataSink> getDataSink() {
-		return AutoRef<DataSink>(new StringDataSink);
-	}
-
-	virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
-
-		if (request.isWwwFormUrlEncoded()) {
-			request.parseWwwFormUrlencoded();
-		}
-		
-		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
-		session.updateLastAccessTime();
-		
-		File file(path);
-		FileReader reader(file);
-
-		response.setStatusCode(200);
-		response.setContentType("text/html");
-            
-		LispPage page;
-		page.applyWeb();
-		page.applySession(session);
-		page.applyRequest(request);
-		page.applyResponse(response);
-		string content = page.parseLispPage(reader.dumpAsString());
-		
-		setFixedTransfer(response, content);
-	}
-};
-
 class FaviconHttpRequestHandler : public HttpRequestHandler {
 private:
     string path;
@@ -287,14 +109,7 @@ private:
 	map<string, string> mimeTypes;
 public:
 	StaticHttpRequestHandler(const string & basePath, const string & prefix, const string & indexName) : basePath(basePath), prefix(prefix), indexName(indexName) {
-		mimeTypes["txt"] = "text/plain";
-		mimeTypes["htm"] = "text/html";
-		mimeTypes["html"] = "text/html";
-		mimeTypes["css"] = "text/css";
-		mimeTypes["js"] = "text/javascript";
-		mimeTypes["xml"] = "text/xml";
-		mimeTypes["lsp"] = "Application/x-lisp";
-		mimeTypes["woff"] = "application/x-font-woff";
+		mimeTypes = MimeTypes::getMimeTypes();
 	}
     virtual ~StaticHttpRequestHandler() {}
     
@@ -316,7 +131,7 @@ public:
 
 	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
-		logger->logd(Text::format("** Path: %s [%s:%d]", request.getPath().c_str(),
+		logger->logd(Text::format("** Part2: %s [%s:%d]", request.getHeader().getPart2().c_str(),
                                  request.getRemoteAddress().getHost().c_str(),
 								 request.getRemoteAddress().getPort()));
 
@@ -330,7 +145,7 @@ public:
 		string path = request.getPath();
 		path = path.substr(prefix.size());
         
-        cout << " ** static / path : " << path;
+        cout << " ** static / prefix : '" << prefix << "' / path : '" << path << "'";
 
         File file(File::mergePaths(basePath, path));
         if (!file.exists() || !file.isFile()) {
@@ -343,7 +158,7 @@ public:
 					return;
 				}
 			} else {
-				cout << " := 404 not found" << endl;
+				cout << " := 404 not found (" << file.getPath() << ")" << endl;
 				response.setStatusCode(404);
 				return;
 			}
@@ -429,10 +244,6 @@ public:
 	void setContentTypeWithFile(HttpRequest & request, HttpResponse & response, File & file) {
 		map<string, string> types = mimeTypes;
 
-		if (request.getParameter("mode") == "streaming") {
-			types["mp4"] = "video/mp4";
-		}
-			
 		if (types.find(file.getExtension()) != types.end()) {
 			response.setContentType(types[file.getExtension()]);
 		} else {
@@ -521,13 +332,13 @@ int main(int argc, char * args[]) {
         server = new AnotherHttpServer(config);
     }
 
-	AutoRef<HttpRequestHandler> browse(new FileBrowseHttpRequestHandler(config.getDefaultBrowsePath(),
-																		config.getBrowseIndexPath()));
-	server->registerRequestHandler("/browse", browse);
+	// AutoRef<HttpRequestHandler> browse(new FileBrowseHttpRequestHandler(config.getDefaultBrowsePath(),
+	// 																	config.getBrowseIndexPath()));
+	// server->registerRequestHandler("/browse", browse);
 	
-	AutoRef<HttpRequestHandler> single(new SinglePageHttpRequestHandler(config["default.page"]));
-	server->registerRequestHandler("/", single);
-	server->registerRequestHandler("/index.htm", single);
+	// AutoRef<HttpRequestHandler> single(new SinglePageHttpRequestHandler(config["default.page"]));
+	// server->registerRequestHandler("/", single);
+	// server->registerRequestHandler("/index.htm", single);
     
     AutoRef<HttpRequestHandler> favico(new FaviconHttpRequestHandler(config["favicon.path"]));
     server->registerRequestHandler("/favicon.ico", favico);
