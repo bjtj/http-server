@@ -44,7 +44,7 @@ namespace HTTP {
 				size_t sendlen = connection.send(buffer, readlen);
 				indicator.offset(sendlen);
 				delete [] buffer;
-			} catch (Exception & e) {
+			} catch (IOException & e) {
 				delete [] buffer;
 				throw e;
 			}
