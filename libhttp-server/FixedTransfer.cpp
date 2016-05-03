@@ -40,9 +40,14 @@ namespace HTTP {
 			size_t size = indicator.adjustReadSize(1024);
 			char * buffer = new char[size];
 			size_t readlen = source()->read(buffer, size);
-			size_t sendlen = connection.send(buffer, readlen);
-			indicator.offset(sendlen);
-			delete [] buffer;
+			try {
+				size_t sendlen = connection.send(buffer, readlen);
+				indicator.offset(sendlen);
+				delete [] buffer;
+			} catch (Exception & e) {
+				delete [] buffer;
+				throw e;
+			}
 		}
 
         if (indicator.completed()) {
