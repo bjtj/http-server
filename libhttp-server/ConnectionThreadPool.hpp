@@ -12,7 +12,7 @@ namespace HTTP {
 	/**
 	 * @brief ConnectionThread
 	 */
-	class ConnectionThread : public UTIL::FlaggableThread {
+	class ConnectionThread : public UTIL::StatefulThread {
 	private:
 		UTIL::AutoRef<Connection> connection;
 		UTIL::AutoRef<Communication> communication;
@@ -23,7 +23,7 @@ namespace HTTP {
 		virtual ~ConnectionThread();
 		void setConnection(UTIL::AutoRef<Connection> connection, UTIL::AutoRef<Communication> communication);
 		UTIL::AutoRef<Connection> getConnection();
-		virtual void run();
+		virtual void onTask();
 		void connectionTask();
 	};
 

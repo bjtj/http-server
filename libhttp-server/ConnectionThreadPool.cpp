@@ -14,7 +14,7 @@ namespace HTTP {
 	 * @brief ConnectionThread
 	 */
 
-	ConnectionThread::ConnectionThread() : FlaggableThread(false) {
+	ConnectionThread::ConnectionThread() {
 	}
 	ConnectionThread::~ConnectionThread() {
 	}
@@ -24,22 +24,11 @@ namespace HTTP {
 		this->communication = communication;
 	}
 
-	void ConnectionThread::run() {
-
-		while (!interrupted()) {
-
-			if (!flagged()) {
-				idle(10);
-				continue;
-			}
-
-			try {
-				connectionTask();
-			} catch (NullException & e) {
-				logger->loge(e.getMessage());
-			}
-
-			setFlag(false);
+	void ConnectionThread::onTask() {
+		try {
+			connectionTask();
+		} catch (NullException & e) {
+			logger->loge(e.getMessage());
 		}
 	}
 
@@ -99,18 +88,18 @@ namespace HTTP {
 	 * @brief ConnectionThreadInstanceCreator
 	 */
 
-	class ConnectionThreadInstanceCreator : public UTIL::InstanceCreator<UTIL::FlaggableThread*> {
+	class ConnectionThreadInstanceCreator : public UTIL::InstanceCreator<UTIL::StatefulThread*> {
 	private:
 	public:
 		ConnectionThreadInstanceCreator() {
 		}
 		virtual ~ConnectionThreadInstanceCreator() {
 		}
-		virtual UTIL::FlaggableThread * createInstance() {
+		virtual UTIL::StatefulThread * createInstance() {
 			return new ConnectionThread;
 		}
 
-		virtual void releaseInstance(UTIL::FlaggableThread * inst) {
+		virtual void releaseInstance(UTIL::StatefulThread * inst) {
 			delete inst;
 		}
 	};
