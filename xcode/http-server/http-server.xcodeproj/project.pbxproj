@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E822FD151CD772E300C02F43 /* MimeTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E822FD131CD772E300C02F43 /* MimeTypes.cpp */; };
+		E822FD161CD772E300C02F43 /* MimeTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E822FD131CD772E300C02F43 /* MimeTypes.cpp */; };
 		E827894D1BDD19920009E46A /* ChunkedReader.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB2461BD7D2CE00E89DC5 /* ChunkedReader.hpp */; };
 		E82789501BDD19920009E46A /* HttpHeader.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB24D1BD7D2CE00E89DC5 /* HttpHeader.hpp */; };
 		E82789511BDD19920009E46A /* HttpHeaderParser.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB24F1BD7D2CE00E89DC5 /* HttpHeaderParser.hpp */; };
@@ -138,6 +140,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E822FD131CD772E300C02F43 /* MimeTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MimeTypes.cpp; path = "../../libhttp-server/MimeTypes.cpp"; sourceTree = "<group>"; };
+		E822FD141CD772E300C02F43 /* MimeTypes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MimeTypes.hpp; path = "../../libhttp-server/MimeTypes.hpp"; sourceTree = "<group>"; };
 		E87F36681C51067A00970869 /* HttpSession.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpSession.cpp; path = "../../libhttp-server/HttpSession.cpp"; sourceTree = "<group>"; };
 		E87F36691C51067A00970869 /* HttpSession.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpSession.hpp; path = "../../libhttp-server/HttpSession.hpp"; sourceTree = "<group>"; };
 		E87F366A1C51067A00970869 /* HttpSessionManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpSessionManager.cpp; path = "../../libhttp-server/HttpSessionManager.cpp"; sourceTree = "<group>"; };
@@ -252,6 +256,8 @@
 		E8FAB2441BD7D2A500E89DC5 /* http-server-c++ */ = {
 			isa = PBXGroup;
 			children = (
+				E822FD131CD772E300C02F43 /* MimeTypes.cpp */,
+				E822FD141CD772E300C02F43 /* MimeTypes.hpp */,
 				E88A800D1CB446FB00241D44 /* BufferIndicator.cpp */,
 				E88A800E1CB446FB00241D44 /* BufferIndicator.hpp */,
 				E88A800F1CB446FB00241D44 /* DataSink.hpp */,
@@ -433,6 +439,7 @@
 				E8E0FEAB1BD848EB00292C54 /* HttpHeaderReader.cpp in Sources */,
 				E8E0FEAD1BD848EB00292C54 /* ChunkedReader.cpp in Sources */,
 				E8B160E31BFA9333002D68C7 /* ConnectionManager.cpp in Sources */,
+				E822FD161CD772E300C02F43 /* MimeTypes.cpp in Sources */,
 				E8E0FEAE1BD848EB00292C54 /* HttpParameter.cpp in Sources */,
 				E8E0FEAF1BD848EB00292C54 /* HttpResponse.cpp in Sources */,
 				E87F366D1C51067A00970869 /* HttpSession.cpp in Sources */,
@@ -465,6 +472,7 @@
 				E8FAB2661BD7D2CE00E89DC5 /* ChunkedReader.cpp in Sources */,
 				E8FAB26C1BD7D2CE00E89DC5 /* HttpParameter.cpp in Sources */,
 				E8B160E21BFA9333002D68C7 /* ConnectionManager.cpp in Sources */,
+				E822FD151CD772E300C02F43 /* MimeTypes.cpp in Sources */,
 				E8FAB26F1BD7D2CE00E89DC5 /* HttpResponse.cpp in Sources */,
 				E87F366C1C51067A00970869 /* HttpSession.cpp in Sources */,
 				E8B160E61BFA93CB002D68C7 /* Connection.cpp in Sources */,
