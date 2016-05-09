@@ -8,3 +8,4 @@ Description: HTTP Server C++ Library
 Version: @VERSION@
 Libs: -L${libdir} -lhttp-server
 Cflags: -I${includedir}/libhttp-server
+Requires.private: oslayer
