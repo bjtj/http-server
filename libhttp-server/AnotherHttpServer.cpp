@@ -445,5 +445,8 @@ namespace HTTP {
 
 		connectionManager.stop();
 	}
-
+	
+	string AnotherHttpServer::getStatus() {
+		return connectionManager.getStatus();
+	}
 }
