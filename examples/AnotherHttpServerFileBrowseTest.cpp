@@ -75,32 +75,6 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
     header.setConnection("close");
 }
 
-class FaviconHttpRequestHandler : public HttpRequestHandler {
-private:
-    string path;
-public:
-    FaviconHttpRequestHandler(const string & path) : path(path) {}
-    virtual ~FaviconHttpRequestHandler() {}
-    
-    virtual AutoRef<DataSink> getDataSink() {
-        return AutoRef<DataSink>(new StringDataSink);
-    }
-    
-    virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink,HttpResponse & response) {
-        
-        cout << " ** favico / path : " << request.getPath() << endl;
-        
-        File file(path);
-        if (!file.exists() || !file.isFile()) {
-            response.setStatusCode(404);
-            return;
-        }
-        
-        response.setStatusCode(200);
-        setFileTransfer(response, file);
-    }
-};
-
 class StaticHttpRequestHandler : public HttpRequestHandler {
 private:
     string basePath;
@@ -331,17 +305,6 @@ int main(int argc, char * args[]) {
     } else {
         server = new AnotherHttpServer(config);
     }
-
-	// AutoRef<HttpRequestHandler> browse(new FileBrowseHttpRequestHandler(config.getDefaultBrowsePath(),
-	// 																	config.getBrowseIndexPath()));
-	// server->registerRequestHandler("/browse", browse);
-	
-	// AutoRef<HttpRequestHandler> single(new SinglePageHttpRequestHandler(config["default.page"]));
-	// server->registerRequestHandler("/", single);
-	// server->registerRequestHandler("/index.htm", single);
-    
-    AutoRef<HttpRequestHandler> favico(new FaviconHttpRequestHandler(config["favicon.path"]));
-    server->registerRequestHandler("/favicon.ico", favico);
 
 	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config["static.base.path"], "/static", config["index.name"]));
     server->registerRequestHandler("/static/*", staticHandler);
