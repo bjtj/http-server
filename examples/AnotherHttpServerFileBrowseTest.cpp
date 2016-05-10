@@ -283,6 +283,8 @@ int main(int argc, char * args[]) {
         
 #if defined(USE_OPENSSL)
         
+        cout << " ** OpenSSL version: " << SecureContext::getOpenSSLVersion() << endl;
+        
         class SecureServerSocketMaker : public ServerSocketMaker {
         private:
             string certPath;
