@@ -2,6 +2,7 @@
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/StringDataSink.hpp>
+#include <liboslayer/SecureSocket.hpp>
 #include "utils.hpp"
 
 using namespace std;
@@ -12,6 +13,30 @@ using namespace HTTP;
 static string packetVisible(const string pack) {
 	return Text::replaceAll(Text::replaceAll(pack, "\n", "\\n"), "\r", "\\r");
 }
+
+class MySocketMaker : public SocketMaker {
+public:
+	MySocketMaker() {}
+	virtual ~MySocketMaker() {}
+	virtual AutoRef<Socket> make(const string & protocol, const InetAddress & addr) {
+
+		if (protocol == "https") {
+			class MyVerifier : public CertificateVerifier {
+			public:
+				MyVerifier() {}
+				virtual ~MyVerifier() {}
+				virtual bool onVerify(const VerifyError & err, const Certificate & cert) {
+					return true;
+				}
+			};
+			SecureSocket * sock = new SecureSocket(addr);
+			sock->setVerifier(AutoRef<CertificateVerifier>(new MyVerifier));
+			return AutoRef<Socket>(sock);
+		}
+		return AutoRef<Socket>(new Socket(addr));
+	}
+};
+
 
 class RequestEchoHandler : public HttpRequestHandler {
 private:
@@ -111,6 +136,28 @@ static DumpResponseHandler httpRequest(const Url & url, const string & method, c
 	return handler;
 }
 
+static DumpResponseHandler httpsRequest(const Url & url, const string & method, const LinkedStringMap & headers) {
+
+	cout << " ** Request/url : " << url.toString() << endl;
+	cout << " ** Request/method : " << method << endl;
+
+	DumpResponseHandler handler;
+	AnotherHttpClient client(AutoRef<SocketMaker>(new MySocketMaker));
+	client.setDebug(true);
+
+	client.setConnectionTimeout(1000);
+	client.setRecvTimeout(1000);
+    
+	client.setOnResponseListener(&handler);
+    
+	client.setFollowRedirect(true);
+	client.setUrl(url);
+	client.setRequest(method, headers);
+	client.execute();
+	
+	return handler;
+}
+
 
 static void test_http_client() {
 	DumpResponseHandler handler = httpRequest("http://127.0.0.1:9999", "GET", LinkedStringMap());
@@ -158,6 +205,12 @@ static void test_recv_timeout() {
 	ASSERT(err, >, "recv timeout");
 }
 
+static void test_https_client() {
+	DumpResponseHandler handler = httpsRequest("https://google.com", "GET", LinkedStringMap());
+	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
+	cout << handler.getDump() << endl;
+}
+
 int main(int argc, char *args[]) {
 
 	HttpServerConfig config;
@@ -169,6 +222,7 @@ int main(int argc, char *args[]) {
 
 	test_http_client();
 	test_recv_timeout();
+	test_https_client();
 
 	server.stop();
 	

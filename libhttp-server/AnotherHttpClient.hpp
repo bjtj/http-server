@@ -14,6 +14,14 @@
 
 namespace HTTP {
 
+	class SocketMaker {
+	public:
+		SocketMaker() {}
+		virtual ~SocketMaker() {}
+		virtual UTIL::AutoRef<OS::Socket> make(const std::string & protocol, const OS::InetAddress & addr) = 0;
+	};
+
+
 	/**
 	 * @brief UserData
 	 */
@@ -49,6 +57,7 @@ namespace HTTP {
 		HttpRequest request;
 		HttpResponse response;
 		Connection * connection;
+		UTIL::AutoRef<SocketMaker> socketMaker;
 		UTIL::AutoRef<OS::Socket> socket;
 		OS::Selector selector;
 		bool requestHeaderSent;
@@ -66,6 +75,7 @@ namespace HTTP {
 	public:
 
         AnotherHttpClient();
+		AnotherHttpClient(UTIL::AutoRef<SocketMaker> socketMaker);
 		AnotherHttpClient(const Url & url);
 		virtual ~AnotherHttpClient();
 

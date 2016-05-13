@@ -10,11 +10,41 @@
 #include <libhttp-server/MimeTypes.hpp>
 #include <libhttp-server/StringDataSink.hpp>
 #include <liboslayer/Lisp.hpp>
+#include <libhttp-server/AnotherHttpClient.hpp>
 
 using namespace std;
 using namespace OS;
 using namespace UTIL;
 using namespace HTTP;
+
+class DumpResponseHandler : public OnResponseListener {
+private:
+	HttpResponseHeader responseHeader;
+	string dump;
+public:
+    DumpResponseHandler() {}
+    virtual ~DumpResponseHandler() {}
+	virtual AutoRef<DataSink> getDataSink() {
+		return AutoRef<DataSink>(new StringDataSink);
+	}
+	virtual void onTransferDone(HttpResponse & response, AutoRef<DataSink> sink, AutoRef<UserData> userData) {
+		responseHeader = response.getHeader();
+        if (!sink.nil()) {
+			dump = ((StringDataSink*)&sink)->data();
+        } else {
+			throw Exception("what the f!!!!");
+		}
+    }
+    virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
+        cout << "Error/e: " << e.getMessage() << endl;
+    }
+	HttpResponseHeader & getResponseHeader() {
+		return responseHeader;
+	}
+	string & getDump() {
+		return dump;
+	}
+};
 
 static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
 HttpSessionManager sessionManager(30 * 60 * 1000);
@@ -228,6 +258,67 @@ public:
 	}
 };
 
+class CorsResolver : public HttpRequestHandler {
+public:
+	CorsResolver() {}
+    virtual ~CorsResolver() {}
+    
+    virtual AutoRef<DataSink> getDataSink() {
+        return AutoRef<DataSink>(new StringDataSink);
+    }
+    
+    virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
+
+		class Maker : public SocketMaker {
+		public:
+			Maker() {}
+			virtual ~Maker() {}
+			virtual AutoRef<Socket> make(const string & protocol, const InetAddress & addr) {
+				if (protocol == "https") {
+
+					class MyVerifier : public CertificateVerifier {
+					public:
+						MyVerifier() {}
+						virtual ~MyVerifier() {}
+						virtual bool onVerify(const VerifyError & err, const Certificate & cert) {
+							return true;
+						}
+					};
+
+					SecureSocket * sock = new SecureSocket(addr);
+					sock->setVerifier(AutoRef<CertificateVerifier>(new MyVerifier));
+					return AutoRef<Socket>(sock);
+				}
+				return AutoRef<Socket>(new Socket(addr));
+			}
+		};
+
+
+		string url = request.getParameter("u");
+
+		logger->logd(" ** cors resolver url : " + url);
+
+		DumpResponseHandler handler;
+		AnotherHttpClient client(AutoRef<SocketMaker>(new Maker));
+		client.setOnResponseListener(&handler);
+		client.setConnectionTimeout(3000);
+		client.setRecvTimeout(3000);
+		client.setFollowRedirect(true);
+		client.setUrl(url);
+		client.setRequest("GET", LinkedStringMap());
+		try {
+			client.execute();
+			logger->logd("** dump: " + handler.getDump());
+			response.setStatusCode(200);
+			response.setContentType(handler.getResponseHeader()["content-type"]);
+			setFixedTransfer(response, handler.getDump());
+		} catch (Exception & e) {
+			logger->loge(e.getMessage());
+			response.setStatusCode(500);
+		}
+	}
+};
+
 size_t readline(char * buffer, size_t max) {
 	if (fgets(buffer, (int)max - 1, stdin)) {
 		buffer[strlen(buffer) - 1] = 0;
@@ -310,6 +401,8 @@ int main(int argc, char * args[]) {
 
 	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config["static.base.path"], "/static", config["index.name"]));
     server->registerRequestHandler("/static/*", staticHandler);
+	AutoRef<HttpRequestHandler> corsResolver(new CorsResolver);
+	server->registerRequestHandler("/proxy", corsResolver);
 
 	server->startAsync();
 

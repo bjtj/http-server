@@ -43,6 +43,10 @@ namespace HTTP {
     AnotherHttpClient::AnotherHttpClient() : debug(false), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), recvTimeout(0), followRedirect(false) {
         
     }
+
+	AnotherHttpClient::AnotherHttpClient(AutoRef<SocketMaker> socketMaker) : debug(false), connection(NULL), socketMaker(socketMaker), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), recvTimeout(0), followRedirect(false) {
+        
+    }
     
 	AnotherHttpClient::AnotherHttpClient(const Url & url) : debug(false), url(url), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), recvTimeout(0), followRedirect(false) {
 	}
@@ -70,7 +74,12 @@ namespace HTTP {
 			string remoteHost = url.getHost();
 			int remotePort = url.getIntegerPort();
 
-			socket = AutoRef<Socket>(new Socket(OS::InetAddress(remoteHost, remotePort)));
+			if (!socketMaker.nil()) {
+				socket = socketMaker->make(url.getProtocol(), OS::InetAddress(remoteHost, remotePort));
+			} else {
+				socket = AutoRef<Socket>(new Socket(OS::InetAddress(remoteHost, remotePort)));
+			}
+			
 			if (connectionTimeout > 0) {
 				socket->connect(connectionTimeout);
 			} else {
@@ -179,25 +188,38 @@ namespace HTTP {
 		TimeoutChecker readTimeoutChecker(recvTimeout);
         
         while (!interrupted) {
-            
-            if (selector.select(100) > 0) {
+
+			if (connection->isSelectable()) {
+				if (selector.select(100) > 0) {
                 
-                if (connection->isWritableSelected(selector)) {
-                    sendRequestHeader();
-                    sendRequestContent();
-                }
+					if (connection->isWritableSelected(selector)) {
+						sendRequestHeader();
+						sendRequestContent();
+					}
                 
-                if (connection->isReadableSelected(selector)) {
-                    recvResponseHeader();
-                    recvResponseContent();
+					if (connection->isReadableSelected(selector)) {
+						recvResponseHeader();
+						recvResponseContent();
 					
-					readTimeoutChecker.reset();
-                }
+						readTimeoutChecker.reset();
+					}
                 
-                if (complete) {
-                    break;
-                }
-            }
+					if (complete) {
+						break;
+					}
+				}
+			} else {
+
+				// TODO: test this
+				sendRequestHeader();
+				sendRequestContent();
+				recvResponseHeader();
+				recvResponseContent();
+				readTimeoutChecker.reset();
+				if (complete) {
+					break;
+				}
+			}
 
 			if (readTimeoutChecker.timeout() > 0 && readTimeoutChecker.trigger()) {
 				throw Exception("recv timeout - " + Text::toString(recvTimeout) + " ms.");
