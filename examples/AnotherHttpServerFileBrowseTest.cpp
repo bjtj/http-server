@@ -308,7 +308,6 @@ public:
 		client.setRequest("GET", LinkedStringMap());
 		try {
 			client.execute();
-			logger->logd("** dump: " + handler.getDump());
 			response.setStatusCode(200);
 			response.setContentType(handler.getResponseHeader()["content-type"]);
 			setFixedTransfer(response, handler.getDump());
