@@ -125,6 +125,11 @@ public:
 
 		try {
 			doHandle(request, sink, response);
+
+			if (request.getMethod() == "HEAD") {
+				response.setTransfer(AutoRef<DataTransfer>(NULL));
+			}
+			
 		} catch (Exception & e) {
 			cout << " ** error" << endl;
 			response.setStatusCode(500);
