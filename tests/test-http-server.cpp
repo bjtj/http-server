@@ -56,6 +56,14 @@ public:
 			return;
 		}
 
+		if (path == "/taketime") {
+			response.setStatusCode(200);
+			response.setContentType("text/plain");
+			idle(1000);
+			setFixedTransfer(response, "taketime!");
+			return;
+		}
+
 		if (!file.exists() || !file.isFile()) {
 			response.setStatusCode(404);
 			response.setContentType("text/plain");
@@ -171,9 +179,8 @@ public:
 		latch.await();
 		
 		DumpResponseHandler handler;
+		cout << "[" << id << "] http get" << endl;
 		httpGet(url, LinkedStringMap(), &handler);
-		// ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
-		// ASSERT(handler.getDump(), ==, "Hello World");
 		cout << "[" << id << "] " << handler.getResponseHeader().getStatusCode() << endl;
 
 		doneLatch.countDown();
@@ -215,19 +222,37 @@ public:
 };
 
 /**
- *
+ * @brief 
  */
-int main(int argc, char *args[]) {
-
-	LoggerFactory::getInstance().setLoggerDescriptorSimple("*", "basic", "console");
+class HttpServerBlockingTestCase : public HttpServerTestCase {
+private:
 	
-	TestSuite ts;
-	ts.addTestCase(AutoRef<TestCase>(new HttpServerTestCase));
-	ts.addTestCase(AutoRef<TestCase>(new HttpServerMaxConnectionTestCase));
-	TestReport report(ts.testAll());
-    ASSERT(report.failed(), ==, 0);
-    return 0;
-}
+public:
+	HttpServerBlockingTestCase() : HttpServerTestCase("HttpServerMaxConnectionTestCase") {}
+	virtual ~HttpServerBlockingTestCase() {}
+	virtual void test() {
+		size_t cnt = 3;
+		TaskThreadPool pool(cnt);
+		pool.start();
+
+		CountDownLatch latch(1);
+		CountDownLatch doneLatch(cnt);
+		
+		for (size_t i = 0; i < cnt; i++) {
+			pool.setTask(AutoRef<Task>(new SynchrosizedHttpClientTask(latch, doneLatch, "http://localhost:9000/taketime")));
+		}
+		
+		idle(100);
+		latch.countDown();
+
+		unsigned long tick = tick_milli();
+		doneLatch.await();
+
+		cout << " ** stop / dur : " << (tick_milli() - tick) << " ms." << endl;
+
+		pool.stop();
+	}
+};
 
 /**
  *
@@ -242,4 +267,20 @@ static void httpGet(const string & url, const LinkedStringMap & fields, OnRespon
 	client.setUrl(url);
 	client.setRequest("GET", fields);
 	client.execute();
+}
+
+/**
+ *
+ */
+int main(int argc, char *args[]) {
+
+	LoggerFactory::getInstance().setLoggerDescriptorSimple("*", "basic", "console");
+	
+	TestSuite ts;
+	ts.addTestCase(AutoRef<TestCase>(new HttpServerTestCase));
+	ts.addTestCase(AutoRef<TestCase>(new HttpServerMaxConnectionTestCase));
+	ts.addTestCase(AutoRef<TestCase>(new HttpServerBlockingTestCase));
+	TestReport report(ts.testAll());
+    ASSERT(report.failed(), ==, 0);
+    return 0;
 }

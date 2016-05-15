@@ -197,6 +197,7 @@ public:
 				}
 
 				setContentTypeWithFile(request, response, file);
+				setContentDispositionWithFile(request, response, file);
 
 				string range = request.getHeaderFieldIgnoreCase("Range");
 				if (!range.empty()) {
@@ -208,7 +209,7 @@ public:
 							string start = range.substr(0, f);
 							string end = range.substr(f + 1);
 							try {
-								cout << " := 206 partial transfer" << endl;
+								cout << " := 206 partial transfer(" << start << "~" << end << ")" << endl;
 								// TODO: implicitly handling the response code
 								setPartialFileTransfer(response,
 													   file,
@@ -242,6 +243,7 @@ public:
 		cout << " := 200 static" << endl;
         response.setStatusCode(200);
 		setContentTypeWithFile(request, response, file);
+		setContentDispositionWithFile(request, response, file);
         setFileTransfer(response, file);
     }
 
@@ -252,9 +254,12 @@ public:
 			response.setContentType(types[file.getExtension()]);
 		} else {
 			response.setContentType("Application/octet-stream");
-			response.getHeader().setHeaderField("Content-Disposition",
-												"attachment; filename=\"" + file.getName() + "\"");
 		}
+	}
+
+	void setContentDispositionWithFile(HttpRequest & request, HttpResponse & response, File & file) {
+		response.getHeader().setHeaderField("Content-Disposition",
+											"attachment; filename=\"" + file.getName() + "\"");
 	}
 };
 
