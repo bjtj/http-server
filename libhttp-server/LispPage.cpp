@@ -3,11 +3,14 @@
 #include "HttpEncoderDecoder.hpp"
 #include "HttpSessionTool.hpp"
 #include <liboslayer/FileReaderWriter.hpp>
+#include <liboslayer/Logger.hpp>
 
 namespace HTTP {
 
 	using namespace std;
 	using namespace UTIL;
+
+	static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
 	
 	LispPage::LispPage() {
 		LISP::native(global_env);
@@ -186,7 +189,7 @@ namespace HTTP {
 			LISP::compile(line, env);
 			return !env.quit();
 		} catch (OS::Exception & e) {
-			cout << "ERROR: " << e.getMessage() << endl;
+			logger->loge("ERROR: " + e.getMessage());
 			return false;
 		}
 	}

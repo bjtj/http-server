@@ -17,6 +17,9 @@ using namespace OS;
 using namespace UTIL;
 using namespace HTTP;
 
+static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
+
+
 class DumpResponseHandler : public OnResponseListener {
 private:
 	HttpResponseHeader responseHeader;
@@ -36,7 +39,7 @@ public:
 		}
     }
     virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
-        cout << "Error/e: " << e.getMessage() << endl;
+		logger->loge("Error/e: " + e.getMessage());
     }
 	HttpResponseHeader & getResponseHeader() {
 		return responseHeader;
@@ -46,7 +49,7 @@ public:
 	}
 };
 
-static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
+
 HttpSessionManager sessionManager(30 * 60 * 1000);
 
 class ServerConfig : public HttpServerConfig {
@@ -131,7 +134,7 @@ public:
 			}
 			
 		} catch (Exception & e) {
-			cout << " ** error" << endl;
+			logger->loge(" ** error");
 			response.setStatusCode(500);
 			response.setContentType("text/html");
 			setFixedTransfer(response, "Server Error/" + e.getMessage());
@@ -139,6 +142,8 @@ public:
 	}
 
 	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
+
+		string log;
 
 		logger->logd(Text::format("** Part2: %s [%s:%d]", request.getHeader().getPart2().c_str(),
                                  request.getRemoteAddress().getHost().c_str(),
@@ -153,8 +158,8 @@ public:
 
 		string path = request.getPath();
 		path = path.substr(prefix.size());
-        
-        cout << " ** static / prefix : '" << prefix << "' / path : '" << path << "'";
+
+		log = " ** static :: prefix : '" + prefix + "' / path : '" + path + "'";
 
         File file(File::mergePaths(basePath, path));
         if (!file.exists() || !file.isFile()) {
@@ -162,12 +167,12 @@ public:
 			if (path == "/") {
 				file = File(File::mergePaths(basePath, indexName));
 				if (!file.exists()) {
-					cout << " := 404 no index, " << File::mergePaths(basePath, indexName) << endl;
+					logger->logd(log + " := 404 no index, " + File::mergePaths(basePath, indexName));
 					response.setStatusCode(404);
 					return;
 				}
 			} else {
-				cout << " := 404 not found (" << file.getPath() << ")" << endl;
+				logger->logd(log + " := 404 not found (" + file.getPath() + ")");
 				response.setStatusCode(404);
 				return;
 			}
@@ -185,7 +190,7 @@ public:
 			string content = page.parseLispPage(reader.dumpAsString());
 
 			if (response.needRedirect()) {
-				cout << " := 302 redirect" << endl;
+				logger->logd(log + " := 302 redirect");
 				redirect(config, request, response, session, response.getRedirectLocation());
 				return;
 			}
@@ -195,7 +200,7 @@ public:
 
 				File file(response["set-file-transfer"]);
 				if (!file.exists() || !file.isFile()) {
-					cout << " := 404" << endl;
+					logger->logd(log + " := 404");
 					response.setStatusCode(404);
 					setFixedTransfer(response, "Not Found");
 					return;
@@ -214,7 +219,7 @@ public:
 							string start = range.substr(0, f);
 							string end = range.substr(f + 1);
 							try {
-								cout << " := 206 partial transfer(" << start << "~" << end << ")" << endl;
+								logger->logd(log + " := 206 partial transfer(" + start + "~" + end + ")");
 								// TODO: implicitly handling the response code
 								setPartialFileTransfer(response,
 													   file,
@@ -222,7 +227,7 @@ public:
 													   (size_t)Text::toLong(end));
 								return;
 							} catch (Exception e) {
-								cout << " := 500 " << e.getMessage() << endl;
+								logger->logd(log + " := 500 " + e.getMessage());
 								response.setContentType("text/html");
 								response.setStatusCode(500);
 								setFixedTransfer(response, e.getMessage());
@@ -232,20 +237,20 @@ public:
 					}
 				}
 
-				cout << " := 200 fixed transfer" << endl;
+				logger->logd(log + " := 200 fixed transfer");
 				response.setStatusCode(200);
 				setFileTransfer(response, file);
 				return;
 			}
 			
-			cout << " := 200 lisp page" << endl;
+			logger->logd(log + " := 200 lisp page");
 			response.setStatusCode(200);
 			response.setContentType("text/html");
 			setFixedTransfer(response, content);
 			return;
 		}
 
-		cout << " := 200 static" << endl;
+		logger->logd(log + " := 200 static");
         response.setStatusCode(200);
 		setContentTypeWithFile(request, response, file);
 		setContentDispositionWithFile(request, response, file);
@@ -306,7 +311,8 @@ public:
 
 		string url = request.getParameter("u");
 
-		logger->logd(" ** cors resolver url : " + url);
+		string log = " ** cors resolver url : " + url +
+			"[" + request.getRemoteAddress().getHost() + ":" + Text::toString(request.getRemoteAddress().getPort()) + "]";
 
 		DumpResponseHandler handler;
 		AnotherHttpClient client(AutoRef<SocketMaker>(new Maker));
@@ -325,6 +331,8 @@ public:
 			logger->loge(e.getMessage());
 			response.setStatusCode(500);
 		}
+
+		logger->logd(log + " := done");
 	}
 };
 
@@ -383,7 +391,7 @@ int main(int argc, char * args[]) {
         
 #if defined(USE_OPENSSL)
         
-        cout << " ** OpenSSL version: " << SecureContext::getOpenSSLVersion() << endl;
+        logger->logd(" ** OpenSSL version: " + SecureContext::getOpenSSLVersion());
         
         class SecureServerSocketMaker : public ServerSocketMaker {
         private:
