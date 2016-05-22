@@ -18,6 +18,9 @@ namespace HTTP {
 		std::string & data() {
 			return _data;
 		}
+		static std::string & data(DataSink * sink) {
+			return ((StringDataSink*)sink)->data();
+		}
 	};
 }
 

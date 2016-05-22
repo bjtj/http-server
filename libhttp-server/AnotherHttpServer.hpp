@@ -28,11 +28,10 @@ namespace HTTP {
 		HttpRequestHandler();
 		virtual ~HttpRequestHandler();
 
-		virtual UTIL::AutoRef<DataSink> getDataSink() = 0;
+		virtual UTIL::AutoRef<DataSink> getDataSink();
     
 		virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response);
         virtual void onHttpRequestContentCompleted(HttpRequest & request, UTIL::AutoRef<DataSink> sink, HttpResponse & response);
-
 		virtual void onHttpResponseHeaderCompleted(HttpRequest & request, HttpResponse & response);
 		virtual void onHttpResponseTransferCompleted(HttpRequest & request, HttpResponse & response);
 

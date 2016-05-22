@@ -24,6 +24,10 @@ namespace HTTP {
 	HttpRequestHandler::~HttpRequestHandler() {
 	}
 
+	AutoRef<DataSink> HttpRequestHandler::getDataSink() {
+		return AutoRef<DataSink>(new StringDataSink);
+	}
+
 	void HttpRequestHandler::onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response) {
 		// request header transfer done
 	}
