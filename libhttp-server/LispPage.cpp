@@ -44,7 +44,7 @@ namespace HTTP {
 			Enc(const string & name) : LISP::Procedure(name) {}
 			virtual ~Enc() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator iter(args);
+				LISP::Iterator<LISP::Var> iter(args);
 				return LISP::text(HttpEncoder::encode(LISP::eval(iter.next(), env).toString()));
 			}
 		};
@@ -55,7 +55,7 @@ namespace HTTP {
 			Dec(const string & name) : LISP::Procedure(name) {}
 			virtual ~Dec() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator iter(args);
+				LISP::Iterator<LISP::Var> iter(args);
 				return LISP::text(HttpDecoder::decode(LISP::eval(iter.next(), env).toString()));
 			}
 		};
@@ -76,7 +76,7 @@ namespace HTTP {
 				LISP::Procedure(name), session(session) {}
 			virtual ~LispSession() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator iter(args);
+				LISP::Iterator<LISP::Var> iter(args);
 				if (name.getSymbol() == "url") {
 					string url = iter.next().toString();
 					return LISP::text(HttpSessionTool::urlMan(url, session));
@@ -111,7 +111,7 @@ namespace HTTP {
 				LISP::Procedure(name), request(request) {}
 			virtual ~LispRequest() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator iter(args);
+				LISP::Iterator<LISP::Var> iter(args);
 				string paramName = LISP::eval(iter.next(), env).toString();
 				if (name.getSymbol() == "get-request-path") {
 					return LISP::text(request.getPath());
@@ -142,7 +142,7 @@ namespace HTTP {
 				LISP::Procedure(name), response(response) {}
 			virtual ~LispResponse() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator iter(args);
+				LISP::Iterator<LISP::Var> iter(args);
 				if (name.getSymbol() == "set-status-code") {
 					int status = (int)LISP::eval(iter.next(), env).getInteger().getInteger();
 					response.setStatusCode(status);
@@ -182,7 +182,7 @@ namespace HTTP {
 			LispLoadPage(const string & name) : LISP::Procedure(name) {}
 			virtual ~LispLoadPage() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator iter(args);
+				LISP::Iterator<LISP::Var> iter(args);
 				FileReader reader(LISP::pathname(LISP::eval(iter.next(), env)).getFile());
 				return LISP::text(LispPage::parseLispPage(env, reader.dumpAsString()));
 			}
