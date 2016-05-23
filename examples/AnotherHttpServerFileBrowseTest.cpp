@@ -269,7 +269,7 @@ public:
 
 	void setContentDispositionWithFile(HttpRequest & request, HttpResponse & response, File & file) {
 		response.getHeader().setHeaderField("Content-Disposition",
-											"attachment; filename=\"" + file.getName() + "\"");
+											"attachment; filename=\"" + file.getFileName() + "\"");
 	}
 };
 
