@@ -51,7 +51,7 @@ namespace HTTP {
 		void setPort(const std::string & port);
 		void setPath(const std::string & path);
         void setRelativePath(const std::string & relativePath);
-		Url relativePath(const std::string & relativePath);
+		Url relativePath(const std::string & relativePath) const;
 
 		void setParameter(const std::string & name, const std::string & value);
         UTIL::LinkedStringMap & getParameters();

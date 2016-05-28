@@ -110,7 +110,7 @@ namespace HTTP {
         }
     }
 
-	Url Url::relativePath(const string & relativePath) {
+	Url Url::relativePath(const string & relativePath) const {
 		Url u = *this;
 		u.setRelativePath(relativePath);
 		return u;
