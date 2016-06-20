@@ -2,7 +2,7 @@
 #define __HTTP_SESSION_HPP__
 
 #include <liboslayer/os.hpp>
-#include <liboslayer/StringElement.hpp>
+#include <liboslayer/StringElements.hpp>
 
 namespace HTTP {
 

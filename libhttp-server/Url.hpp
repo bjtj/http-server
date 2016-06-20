@@ -2,7 +2,7 @@
 #define __URL_HPP__
 
 #include <liboslayer/os.hpp>
-#include <liboslayer/StringElement.hpp>
+#include <liboslayer/StringElements.hpp>
 #include <vector>
 #include <string>
 

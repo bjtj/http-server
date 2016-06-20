@@ -30,19 +30,13 @@ namespace HTTP {
 	string HttpRequest::getPath() const {
 		return header.getPath();
 	}
-	string & HttpRequest::getHeaderField(const string & name) {
-		return header.getHeaderField(name);
-	}
 	string HttpRequest::getHeaderField(const string & name) const {
 		return header.getHeaderField(name);
-	}
-	string & HttpRequest::getHeaderFieldIgnoreCase(const string & name) {
-		return header.getHeaderFieldIgnoreCase(name);
 	}
 	string HttpRequest::getHeaderFieldIgnoreCase(const string & name) const {
 		return header.getHeaderFieldIgnoreCase(name);
 	}
-	LinkedStringMap & HttpRequest::getHeaderFields() {
+	LinkedStringListMap & HttpRequest::getHeaderFields() {
 		return header.getHeaderFields();
 	}
 	map<string, string> HttpRequest::getHeaderFieldsStdMap() {

@@ -7,7 +7,7 @@
 #include <map>
 #include <cstdlib>
 
-#include <liboslayer/StringElement.hpp>
+#include <liboslayer/StringElements.hpp>
 #include "HttpParameter.hpp"
 
 namespace HTTP {
@@ -22,7 +22,7 @@ namespace HTTP {
 		std::string part1;
 		std::string part2;
 		std::string part3;
-		UTIL::LinkedStringMap fields;
+		UTIL::LinkedStringListMap fields;
 		
 	public:
 		HttpHeader();
@@ -43,10 +43,8 @@ namespace HTTP {
 		virtual void setPart3(const std::string & part);
 		std::string makeFirstLine() const;
 		bool hasHeaderField(const std::string & name) const;
-		std::string & getHeaderField(const std::string & name);
 		std::string getHeaderField(const std::string & name) const;
 		bool hasHeaderFieldIgnoreCase(const std::string & name) const;
-		std::string & getHeaderFieldIgnoreCase(const std::string & name);
 		std::string getHeaderFieldIgnoreCase(const std::string & name) const;
 		int getHeaderFieldAsInteger(std::string name) const;
 		int getHeaderFieldIgnoreCaseAsInteger(std::string name) const;
@@ -54,7 +52,7 @@ namespace HTTP {
 		void setHeaderFields(std::map<std::string, std::string> & fields);
 		void appendHeaderFields(const UTIL::LinkedStringMap & fields);
 		void appendHeaderFields(const std::map<std::string, std::string> & fields);
-		UTIL::LinkedStringMap & getHeaderFields();
+		UTIL::LinkedStringListMap & getHeaderFields();
 		std::map<std::string, std::string> getHeaderFieldsStdMap();
 		void removeHeaderField(const std::string & name);
 		void removeHeaderFieldIgnoreCase(const std::string & name);
@@ -72,7 +70,7 @@ namespace HTTP {
         void setConnection(const std::string & connection);
         bool keepConnection();
 		virtual std::string toString() const;
-		std::string & operator[] (const std::string & headerFieldName);
+		std::string & operator[] (const std::string & fieldName);
 	};
 
 

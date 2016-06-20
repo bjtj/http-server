@@ -34,11 +34,9 @@ namespace HTTP {
         void setHeader(HttpHeader & header);
 		std::string getMethod() const;
 		std::string getPath() const;
-		std::string & getHeaderField(const std::string & name);
 		std::string getHeaderField(const std::string & name) const;
-		std::string & getHeaderFieldIgnoreCase(const std::string & name);
 		std::string getHeaderFieldIgnoreCase(const std::string & name) const;
-		UTIL::LinkedStringMap & getHeaderFields();
+		UTIL::LinkedStringListMap & getHeaderFields();
 		std::map<std::string, std::string> getHeaderFieldsStdMap();
         std::vector<std::string> getParameterNames();
 		std::string getParameter(const std::string & name);

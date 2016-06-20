@@ -10,6 +10,7 @@
 #include <libhttp-server/MimeTypes.hpp>
 #include <libhttp-server/StringDataSink.hpp>
 #include <liboslayer/Lisp.hpp>
+#include <liboslayer/Base64.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
 
 using namespace std;
@@ -61,6 +62,8 @@ private:
     string keyPath;
     string defaultBrowsePath;
     string browseIndexPath;
+	string username;
+	string password;
     
 public:
     
@@ -76,6 +79,8 @@ public:
         keyPath = getProperty("key.path");
         defaultBrowsePath = getProperty("default.browse.path");
         browseIndexPath = getProperty("browse.index");
+		username = getProperty("auth.username");
+		password = getProperty("auth.password");
     }
     string getHost() { return host; }
     int getPort() { return port; }
@@ -84,6 +89,8 @@ public:
     string getKeyPath() { return keyPath; }
     string getDefaultBrowsePath() { return defaultBrowsePath; }
     string getBrowseIndexPath() { return browseIndexPath; }
+	string getUsername() {return username;}
+	string getPassword() {return password;}
 };
 
 ServerConfig config;
@@ -108,6 +115,9 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
     header.setConnection("close");
 }
 
+/**
+ * @brief 
+ */
 class StaticHttpRequestHandler : public HttpRequestHandler {
 private:
     string basePath;
@@ -273,6 +283,9 @@ public:
 	}
 };
 
+/**
+ * @brief 
+ */
 class CorsResolver : public HttpRequestHandler {
 public:
 	CorsResolver() {}
@@ -336,6 +349,62 @@ public:
 	}
 };
 
+class AuthHttpRequestHandler : public HttpRequestHandler {
+private:
+	string username;
+	string password;
+public:
+	AuthHttpRequestHandler(const string & username, const string & password) : username(username), password(password) {
+	}
+    virtual ~AuthHttpRequestHandler() {}
+    
+    virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
+
+		try {
+
+			string base64 = Base64::encode(username + ":" + password);
+
+			if (request.getHeaderField("Authorization") != "Basic " + base64) {
+				logger->loge(request.getHeader().toString());
+				logger->loge(base64);
+				response.setStatusCode(401);
+				response.getHeader().setHeaderField("WWW-Authenticate", "Basic realm=\"Basic Auth Test\"");
+				response.setContentType("text/plain");
+				setFixedTransfer(response, "Authentication required");
+				return;
+			}
+			
+			doHandle(request, sink, response);
+
+			if (request.getMethod() == "HEAD") {
+				response.setTransfer(AutoRef<DataTransfer>(NULL));
+			}
+			
+		} catch (Exception & e) {
+			logger->loge(" ** error");
+			response.setStatusCode(500);
+			response.setContentType("text/html");
+			setFixedTransfer(response, "Server Error/" + e.getMessage());
+		}
+	}
+
+	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
+
+		string log;
+
+		logger->logd(Text::format("** Part2: %s [%s:%d]", request.getHeader().getPart2().c_str(),
+                                 request.getRemoteAddress().getHost().c_str(),
+								 request.getRemoteAddress().getPort()));
+
+		if (request.isWwwFormUrlEncoded()) {
+			request.parseWwwFormUrlencoded();
+		}
+
+		response.setStatusCode(200);
+		setFixedTransfer(response, "hello");
+    }
+};
+
 size_t readline(char * buffer, size_t max) {
 	if (fgets(buffer, (int)max - 1, stdin)) {
 		buffer[strlen(buffer) - 1] = 0;
@@ -365,6 +434,9 @@ bool promptBoolean(const char * msg) {
 }
 
 
+/**
+ * @brief 
+ */
 int main(int argc, char * args[]) {
 
 	LoggerFactory::getInstance().setLoggerDescriptorSimple("*", "basic", "console");
@@ -418,6 +490,10 @@ int main(int argc, char * args[]) {
 
 	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config["static.base.path"], "/static", config["index.name"]));
     server->registerRequestHandler("/static/*", staticHandler);
+	
+	AutoRef<HttpRequestHandler> authHandler(new AuthHttpRequestHandler(config["auth.username"], config["auth.password"]));
+	server->registerRequestHandler("/auth*", authHandler);
+	
 	AutoRef<HttpRequestHandler> corsResolver(new CorsResolver);
 	server->registerRequestHandler("/proxy", corsResolver);
 

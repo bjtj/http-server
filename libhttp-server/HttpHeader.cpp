@@ -74,15 +74,12 @@ namespace HTTP {
 		return (part1 + " " + part2 + " " + part3);
 	}
 	bool HttpHeader::hasHeaderField(const std::string & name) const {
-		return fields.has(name);
-	}
-	string & HttpHeader::getHeaderField(const string & name) {
-		return fields[name];
+		return fields.contains(name);
 	}
     string HttpHeader::getHeaderField(const std::string & name) const {
 		for (size_t i = 0; i < fields.size(); i++) {
 			if (fields[i].name() == name) {
-				return fields[i].value();
+				return fields[i].first_safe("");
 			}
 		}
 		return "";
@@ -95,18 +92,10 @@ namespace HTTP {
 		}
 		return false;
 	}
-	string & HttpHeader::getHeaderFieldIgnoreCase(const string & name) {
-		for (size_t i = 0; i < fields.size(); i++) {
-			if (Text::equalsIgnoreCase(fields[i].name(), name)) {
-				return fields[i].value();
-			}
-		}
-		return fields[name];
-	}
 	string HttpHeader::getHeaderFieldIgnoreCase(const string & name) const {
 		for (size_t i = 0; i < fields.size(); i++) {
-			if (Text::equalsIgnoreCase(fields[i].name_const(), name)) {
-				return fields[i].value_const();
+			if (Text::equalsIgnoreCase(fields[i].name(), name)) {
+				return fields[i].first_safe("");
 			}
 		}
 		return "";
@@ -129,7 +118,7 @@ namespace HTTP {
 	void HttpHeader::appendHeaderFields(const map<string, string> & fields) {
 		this->fields.append(fields);
 	}
-	LinkedStringMap & HttpHeader::getHeaderFields() {
+	LinkedStringListMap & HttpHeader::getHeaderFields() {
 		return fields;
 	}
 	map<string, string> HttpHeader::getHeaderFieldsStdMap() {
@@ -185,13 +174,19 @@ namespace HTTP {
 	string HttpHeader::toString() const {
 		string ret = makeFirstLine() + "\r\n";
 		for (size_t i = 0; i < fields.size(); i++) {
-			ret += (fields[i].name() + ": " + fields[i].value() + "\r\n");
+			ret += (fields[i].name() + ": " + fields[i].first_safe("") + "\r\n");
 		}
 		ret += "\r\n";
 		return ret;
 	}
-	string & HttpHeader::operator[] (const string & headerFieldName) {
-		return getHeaderFieldIgnoreCase(headerFieldName);
+	string & HttpHeader::operator[] (const string & fieldName) {
+		for (size_t i = 0; i < fields.size(); i++) {
+			if (Text::equalsIgnoreCase(fields[i].first_safe(""), fieldName)) {
+				return fields[i].first();
+			}
+		}
+		fields[fieldName] = "";
+		return fields[fieldName].first();
 	}
 
 	/**
