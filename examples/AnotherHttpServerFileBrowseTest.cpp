@@ -37,7 +37,7 @@ public:
         if (!sink.nil()) {
 			dump = ((StringDataSink*)&sink)->data();
         } else {
-			throw Exception("what the f!!!!");
+			throw Exception("error");
 		}
     }
     virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
