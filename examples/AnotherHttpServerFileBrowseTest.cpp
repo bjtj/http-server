@@ -22,6 +22,9 @@ using namespace HTTP;
 static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
 
 
+/**
+ * @brief 
+ */
 class DumpResponseHandler : public OnResponseListener {
 private:
 	HttpResponseHeader responseHeader;
@@ -54,6 +57,9 @@ public:
 
 HttpSessionManager sessionManager(30 * 60 * 1000);
 
+/**
+ * @brief 
+ */
 class ServerConfig : public HttpServerConfig {
 private:
     string host;
@@ -125,8 +131,9 @@ private:
 	string prefix;
 	string indexName;
 	map<string, string> mimeTypes;
+	BasicAuth auth;
 public:
-	StaticHttpRequestHandler(const string & basePath, const string & prefix, const string & indexName) : basePath(basePath), prefix(prefix), indexName(indexName) {
+	StaticHttpRequestHandler(const string & basePath, const string & prefix, const string & indexName, const BasicAuth & auth) : basePath(basePath), prefix(prefix), indexName(indexName), auth(auth) {
 		mimeTypes = MimeTypes::getMimeTypes();
 	}
     virtual ~StaticHttpRequestHandler() {}
@@ -134,6 +141,14 @@ public:
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
 		try {
+
+			if (!auth.empty() && !auth.validate(request)) {
+				auth.setAuthentication(response);
+				response.setContentType("text/plain");
+				setFixedTransfer(response, "Authentication require");
+				return;
+			}
+			
 			doHandle(request, sink, response);
 
 			if (request.getMethod() == "HEAD") {
@@ -346,6 +361,9 @@ public:
 	}
 };
 
+/**
+ * @brief 
+ */
 class AuthHttpRequestHandler : public HttpRequestHandler {
 private:
 	BasicAuth auth;
@@ -357,7 +375,7 @@ public:
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
 		try {
-			if (!auth.validate(request)) {
+			if (!auth.empty() && !auth.validate(request)) {
 				auth.setAuthentication(response);
 				response.setContentType("text/plain");
 				setFixedTransfer(response, "Authentication required");
@@ -478,10 +496,12 @@ int main(int argc, char * args[]) {
         server = new AnotherHttpServer(config);
     }
 
-	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config["static.base.path"], "/static", config["index.name"]));
+	BasicAuth auth(config["auth.username"], config["auth.password"]);
+
+	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config["static.base.path"], "/static", config["index.name"], auth));
     server->registerRequestHandler("/static/*", staticHandler);
 	
-	AutoRef<HttpRequestHandler> authHandler(new AuthHttpRequestHandler(BasicAuth(config["auth.username"], config["auth.password"])));
+	AutoRef<HttpRequestHandler> authHandler(new AuthHttpRequestHandler(auth));
 	server->registerRequestHandler("/auth*", authHandler);
 	
 	AutoRef<HttpRequestHandler> corsResolver(new CorsResolver);

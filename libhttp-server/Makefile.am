@@ -28,7 +28,6 @@ libhttp_serverinc_HEADERS = \
 	HttpSessionManager.hpp \
 	HttpSessionTool.hpp \
 	HttpStatusCodes.hpp \
-	InetAddress.hpp \
 	LispPage.hpp \
 	MimeTypes.hpp \
 	Packet.hpp \
@@ -89,7 +88,6 @@ libhttp_server_la_SOURCES = \
 	HttpSessionTool.hpp \
 	HttpStatusCodes.cpp \
 	HttpStatusCodes.hpp \
-	InetAddress.hpp \
 	LispPage.cpp \
 	LispPage.hpp \
 	MimeTypes.cpp \

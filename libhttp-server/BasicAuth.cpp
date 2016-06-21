@@ -25,5 +25,7 @@ namespace HTTP {
 	string & BasicAuth::password() {
 		return _password;
 	}
-	
+	bool BasicAuth::empty() {
+		return _username.empty() && _password.empty();
+	}
 }

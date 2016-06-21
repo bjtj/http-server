@@ -17,6 +17,7 @@ namespace HTTP {
 		virtual void setAuthentication(HttpResponse & response);
 		std::string & username();
 		std::string & password();
+		bool empty();
 	};
 }
 
