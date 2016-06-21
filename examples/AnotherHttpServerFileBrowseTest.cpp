@@ -12,6 +12,7 @@
 #include <liboslayer/Lisp.hpp>
 #include <liboslayer/Base64.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
+#include <libhttp-server/BasicAuth.hpp>
 
 using namespace std;
 using namespace OS;
@@ -129,10 +130,6 @@ public:
 		mimeTypes = MimeTypes::getMimeTypes();
 	}
     virtual ~StaticHttpRequestHandler() {}
-    
-    virtual AutoRef<DataSink> getDataSink() {
-        return AutoRef<DataSink>(new StringDataSink);
-    }
     
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
@@ -351,24 +348,17 @@ public:
 
 class AuthHttpRequestHandler : public HttpRequestHandler {
 private:
-	string username;
-	string password;
+	BasicAuth auth;
 public:
-	AuthHttpRequestHandler(const string & username, const string & password) : username(username), password(password) {
+	AuthHttpRequestHandler(const BasicAuth & auth) : auth(auth) {
 	}
     virtual ~AuthHttpRequestHandler() {}
     
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
 		try {
-
-			string base64 = Base64::encode(username + ":" + password);
-
-			if (request.getHeaderField("Authorization") != "Basic " + base64) {
-				logger->loge(request.getHeader().toString());
-				logger->loge(base64);
-				response.setStatusCode(401);
-				response.getHeader().setHeaderField("WWW-Authenticate", "Basic realm=\"Basic Auth Test\"");
+			if (!auth.validate(request)) {
+				auth.setAuthentication(response);
 				response.setContentType("text/plain");
 				setFixedTransfer(response, "Authentication required");
 				return;
@@ -491,7 +481,7 @@ int main(int argc, char * args[]) {
 	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config["static.base.path"], "/static", config["index.name"]));
     server->registerRequestHandler("/static/*", staticHandler);
 	
-	AutoRef<HttpRequestHandler> authHandler(new AuthHttpRequestHandler(config["auth.username"], config["auth.password"]));
+	AutoRef<HttpRequestHandler> authHandler(new AuthHttpRequestHandler(BasicAuth(config["auth.username"], config["auth.password"])));
 	server->registerRequestHandler("/auth*", authHandler);
 	
 	AutoRef<HttpRequestHandler> corsResolver(new CorsResolver);

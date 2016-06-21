@@ -2,6 +2,7 @@ libhttp_serverincdir=${includedir}/libhttp-server
 libhttp_serverinc_HEADERS = \
 	AnotherHttpClient.hpp \
 	AnotherHttpServer.hpp \
+	BasicAuth.hpp \
 	BufferIndicator.hpp \
 	ChunkedReader.hpp \
 	ChunkedTransfer.hpp \
@@ -14,6 +15,7 @@ libhttp_serverinc_HEADERS = \
 	DataTransfer.hpp \
 	FileDataSource.hpp \
 	FixedTransfer.hpp \
+	HttpAuth.hpp \
 	HttpEncoderDecoder.hpp \
 	HttpHeader.hpp \
 	HttpHeaderParser.hpp \
@@ -40,6 +42,8 @@ libhttp_server_la_SOURCES = \
 	AnotherHttpClient.hpp \
 	AnotherHttpServer.cpp \
 	AnotherHttpServer.hpp \
+	BasicAuth.cpp \
+	BasicAuth.hpp \
 	BufferIndicator.cpp \
 	BufferIndicator.hpp \
 	ChunkedReader.cpp \
@@ -61,6 +65,8 @@ libhttp_server_la_SOURCES = \
 	FileDataSource.hpp \
 	FixedTransfer.cpp \
 	FixedTransfer.hpp \
+	HttpAuth.cpp \
+	HttpAuth.hpp \
 	HttpEncoderDecoder.cpp \
 	HttpEncoderDecoder.hpp \
 	HttpHeader.cpp \
