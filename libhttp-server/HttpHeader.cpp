@@ -1,3 +1,4 @@
+#include <iostream>
 #include <liboslayer/Text.hpp>
 #include "HttpEncoderDecoder.hpp"
 #include "HttpHeader.hpp"
@@ -181,7 +182,7 @@ namespace HTTP {
 	}
 	string & HttpHeader::operator[] (const string & fieldName) {
 		for (size_t i = 0; i < fields.size(); i++) {
-			if (Text::equalsIgnoreCase(fields[i].first_safe(""), fieldName)) {
+			if (fields[i].size() > 0 && Text::equalsIgnoreCase(fields[i].name(), fieldName)) {
 				return fields[i].first();
 			}
 		}

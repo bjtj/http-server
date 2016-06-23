@@ -298,10 +298,10 @@ public:
 /**
  * @brief 
  */
-class CorsResolver : public HttpRequestHandler {
+class ProxyHandler : public HttpRequestHandler {
 public:
-	CorsResolver() {}
-    virtual ~CorsResolver() {}
+	ProxyHandler() {}
+    virtual ~ProxyHandler() {}
     
     virtual AutoRef<DataSink> getDataSink() {
         return AutoRef<DataSink>(new StringDataSink);
@@ -336,7 +336,7 @@ public:
 
 		string url = request.getParameter("u");
 
-		string log = " ** cors resolver url : " + url +
+		string log = " ** proxy url : " + url +
 			"[" + request.getRemoteAddress().getHost() + ":" + Text::toString(request.getRemoteAddress().getPort()) + "]";
 
 		DumpResponseHandler handler;
@@ -504,8 +504,8 @@ int main(int argc, char * args[]) {
 	AutoRef<HttpRequestHandler> authHandler(new AuthHttpRequestHandler(auth));
 	server->registerRequestHandler("/auth*", authHandler);
 	
-	AutoRef<HttpRequestHandler> corsResolver(new CorsResolver);
-	server->registerRequestHandler("/proxy", corsResolver);
+	AutoRef<HttpRequestHandler> proxyHandler(new ProxyHandler);
+	server->registerRequestHandler("/proxy", proxyHandler);
 
 	server->startAsync();
 
