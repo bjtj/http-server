@@ -17,8 +17,11 @@
 		E82789551BDD19920009E46A /* HttpRequest.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB2571BD7D2CE00E89DC5 /* HttpRequest.hpp */; };
 		E82789561BDD19920009E46A /* HttpResponse.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB2591BD7D2CE00E89DC5 /* HttpResponse.hpp */; };
 		E82789581BDD19920009E46A /* HttpStatusCodes.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB25D1BD7D2CE00E89DC5 /* HttpStatusCodes.hpp */; };
-		E82789591BDD19920009E46A /* InetAddress.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB25E1BD7D2CE00E89DC5 /* InetAddress.hpp */; };
 		E827895D1BDD19920009E46A /* Url.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB2651BD7D2CE00E89DC5 /* Url.hpp */; };
+		E869404D1D1C004900192CBB /* BasicAuth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E86940491D1C004900192CBB /* BasicAuth.cpp */; };
+		E869404E1D1C004900192CBB /* BasicAuth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E86940491D1C004900192CBB /* BasicAuth.cpp */; };
+		E869404F1D1C004900192CBB /* HttpAuth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E869404B1D1C004900192CBB /* HttpAuth.cpp */; };
+		E86940501D1C004900192CBB /* HttpAuth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E869404B1D1C004900192CBB /* HttpAuth.cpp */; };
 		E87F366C1C51067A00970869 /* HttpSession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E87F36681C51067A00970869 /* HttpSession.cpp */; };
 		E87F366D1C51067A00970869 /* HttpSession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E87F36681C51067A00970869 /* HttpSession.cpp */; };
 		E87F366E1C51067A00970869 /* HttpSessionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E87F366A1C51067A00970869 /* HttpSessionManager.cpp */; };
@@ -131,7 +134,6 @@
 				E82789551BDD19920009E46A /* HttpRequest.hpp in CopyFiles */,
 				E82789561BDD19920009E46A /* HttpResponse.hpp in CopyFiles */,
 				E82789581BDD19920009E46A /* HttpStatusCodes.hpp in CopyFiles */,
-				E82789591BDD19920009E46A /* InetAddress.hpp in CopyFiles */,
 				E827895D1BDD19920009E46A /* Url.hpp in CopyFiles */,
 				E8FAB23C1BD7D29800E89DC5 /* http_server.h in CopyFiles */,
 			);
@@ -142,6 +144,10 @@
 /* Begin PBXFileReference section */
 		E822FD131CD772E300C02F43 /* MimeTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MimeTypes.cpp; path = "../../libhttp-server/MimeTypes.cpp"; sourceTree = "<group>"; };
 		E822FD141CD772E300C02F43 /* MimeTypes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MimeTypes.hpp; path = "../../libhttp-server/MimeTypes.hpp"; sourceTree = "<group>"; };
+		E86940491D1C004900192CBB /* BasicAuth.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BasicAuth.cpp; path = "../../libhttp-server/BasicAuth.cpp"; sourceTree = "<group>"; };
+		E869404A1D1C004900192CBB /* BasicAuth.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BasicAuth.hpp; path = "../../libhttp-server/BasicAuth.hpp"; sourceTree = "<group>"; };
+		E869404B1D1C004900192CBB /* HttpAuth.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpAuth.cpp; path = "../../libhttp-server/HttpAuth.cpp"; sourceTree = "<group>"; };
+		E869404C1D1C004900192CBB /* HttpAuth.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpAuth.hpp; path = "../../libhttp-server/HttpAuth.hpp"; sourceTree = "<group>"; };
 		E87F36681C51067A00970869 /* HttpSession.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpSession.cpp; path = "../../libhttp-server/HttpSession.cpp"; sourceTree = "<group>"; };
 		E87F36691C51067A00970869 /* HttpSession.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpSession.hpp; path = "../../libhttp-server/HttpSession.hpp"; sourceTree = "<group>"; };
 		E87F366A1C51067A00970869 /* HttpSessionManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpSessionManager.cpp; path = "../../libhttp-server/HttpSessionManager.cpp"; sourceTree = "<group>"; };
@@ -199,7 +205,6 @@
 		E8FAB2591BD7D2CE00E89DC5 /* HttpResponse.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpResponse.hpp; path = "../../libhttp-server/HttpResponse.hpp"; sourceTree = "<group>"; };
 		E8FAB25C1BD7D2CE00E89DC5 /* HttpStatusCodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpStatusCodes.cpp; path = "../../libhttp-server/HttpStatusCodes.cpp"; sourceTree = "<group>"; };
 		E8FAB25D1BD7D2CE00E89DC5 /* HttpStatusCodes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpStatusCodes.hpp; path = "../../libhttp-server/HttpStatusCodes.hpp"; sourceTree = "<group>"; };
-		E8FAB25E1BD7D2CE00E89DC5 /* InetAddress.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = InetAddress.hpp; path = "../../libhttp-server/InetAddress.hpp"; sourceTree = "<group>"; };
 		E8FAB2641BD7D2CE00E89DC5 /* Url.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Url.cpp; path = "../../libhttp-server/Url.cpp"; sourceTree = "<group>"; };
 		E8FAB2651BD7D2CE00E89DC5 /* Url.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Url.hpp; path = "../../libhttp-server/Url.hpp"; sourceTree = "<group>"; };
 		E8FAB2901BD7D39000E89DC5 /* oslayer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oslayer.xcodeproj; path = ../../../oslayer/xcode/oslayer/oslayer.xcodeproj; sourceTree = "<group>"; };
@@ -256,6 +261,10 @@
 		E8FAB2441BD7D2A500E89DC5 /* http-server-c++ */ = {
 			isa = PBXGroup;
 			children = (
+				E86940491D1C004900192CBB /* BasicAuth.cpp */,
+				E869404A1D1C004900192CBB /* BasicAuth.hpp */,
+				E869404B1D1C004900192CBB /* HttpAuth.cpp */,
+				E869404C1D1C004900192CBB /* HttpAuth.hpp */,
 				E822FD131CD772E300C02F43 /* MimeTypes.cpp */,
 				E822FD141CD772E300C02F43 /* MimeTypes.hpp */,
 				E88A800D1CB446FB00241D44 /* BufferIndicator.cpp */,
@@ -309,7 +318,6 @@
 				E8FAB2591BD7D2CE00E89DC5 /* HttpResponse.hpp */,
 				E8FAB25C1BD7D2CE00E89DC5 /* HttpStatusCodes.cpp */,
 				E8FAB25D1BD7D2CE00E89DC5 /* HttpStatusCodes.hpp */,
-				E8FAB25E1BD7D2CE00E89DC5 /* InetAddress.hpp */,
 				E8B160DC1BF9E4FA002D68C7 /* Packet.cpp */,
 				E8B160DD1BF9E4FA002D68C7 /* Packet.hpp */,
 				E8FAB2641BD7D2CE00E89DC5 /* Url.cpp */,
@@ -437,6 +445,7 @@
 				E8B161141BFB6099002D68C7 /* FixedTransfer.cpp in Sources */,
 				E8B160FE1BFB4DE1002D68C7 /* ChunkedTransfer.cpp in Sources */,
 				E8E0FEAB1BD848EB00292C54 /* HttpHeaderReader.cpp in Sources */,
+				E869404E1D1C004900192CBB /* BasicAuth.cpp in Sources */,
 				E8E0FEAD1BD848EB00292C54 /* ChunkedReader.cpp in Sources */,
 				E8B160E31BFA9333002D68C7 /* ConnectionManager.cpp in Sources */,
 				E822FD161CD772E300C02F43 /* MimeTypes.cpp in Sources */,
@@ -452,6 +461,7 @@
 				E8B160FC1BFB4DE1002D68C7 /* AnotherHttpServer.cpp in Sources */,
 				E8E0FEB71BD848EB00292C54 /* HttpHeaderParser.cpp in Sources */,
 				E8E0FEB81BD848EB00292C54 /* HttpStatusCodes.cpp in Sources */,
+				E86940501D1C004900192CBB /* HttpAuth.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -470,6 +480,7 @@
 				E8B160DE1BF9E4FA002D68C7 /* Packet.cpp in Sources */,
 				E88A80141CB446FB00241D44 /* BufferIndicator.cpp in Sources */,
 				E8FAB2661BD7D2CE00E89DC5 /* ChunkedReader.cpp in Sources */,
+				E869404D1D1C004900192CBB /* BasicAuth.cpp in Sources */,
 				E8FAB26C1BD7D2CE00E89DC5 /* HttpParameter.cpp in Sources */,
 				E8B160E21BFA9333002D68C7 /* ConnectionManager.cpp in Sources */,
 				E822FD151CD772E300C02F43 /* MimeTypes.cpp in Sources */,
@@ -485,6 +496,7 @@
 				E8FAB26A1BD7D2CE00E89DC5 /* HttpHeaderParser.cpp in Sources */,
 				E8B161361BFDF2F0002D68C7 /* AnotherHttpClient.cpp in Sources */,
 				E8FAB2711BD7D2CE00E89DC5 /* HttpStatusCodes.cpp in Sources */,
+				E869404F1D1C004900192CBB /* HttpAuth.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
