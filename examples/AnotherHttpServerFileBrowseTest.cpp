@@ -145,7 +145,7 @@ public:
 			if (!auth.empty() && !auth.validate(request)) {
 				auth.setAuthentication(response);
 				response.setContentType("text/plain");
-				setFixedTransfer(response, "Authentication require");
+				setFixedTransfer(response, "Authentication required");
 				return;
 			}
 			
@@ -275,7 +275,9 @@ public:
 		logger->logd(log + " := 200 static");
         response.setStatusCode(200);
 		setContentTypeWithFile(request, response, file);
-		setContentDispositionWithFile(request, response, file);
+		if (request.getParameter("transfer") == "download") {
+			setContentDispositionWithFile(request, response, file);
+		}
         setFileTransfer(response, file);
     }
 

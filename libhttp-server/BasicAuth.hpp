@@ -12,6 +12,7 @@ namespace HTTP {
 		std::string _password;
 	public:
 		BasicAuth(const std::string & username, const std::string & password);
+		BasicAuth(const std::string & _realm, const std::string & username, const std::string & password);
 		virtual ~BasicAuth();
 		virtual bool validate(HttpRequest & request);
 		virtual void setAuthentication(HttpResponse & response);

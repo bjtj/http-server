@@ -9,6 +9,10 @@ namespace HTTP {
 	BasicAuth::BasicAuth(const string & username, const string & password)
 		: _username(username), _password(password) {
 	}
+	BasicAuth::BasicAuth(const string & _realm, const string & username, const string & password)
+		: _username(username), _password(password) {
+		realm() = _realm;
+	}
 	BasicAuth::~BasicAuth() {
 	}
 	bool BasicAuth::validate(HttpRequest & request) {
@@ -17,7 +21,7 @@ namespace HTTP {
 	}
 	void BasicAuth::setAuthentication(HttpResponse & response) {
 		response.setStatusCode(401);
-		response.getHeader().setHeaderField("WWW-Authenticate", "Basic realm=\"Basic Auth Test\"");
+		response.getHeader().setHeaderField("WWW-Authenticate", "Basic realm=\"" + realm() + "\"");
 	}
 	string & BasicAuth::username() {
 		return _username;
