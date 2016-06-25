@@ -112,12 +112,15 @@ namespace HTTP {
 			virtual ~LispRequest() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
 				LISP::Iterator<LISP::Var> iter(args);
-				string paramName = LISP::eval(iter.next(), env).toString();
-				if (name.getSymbol() == "get-request-path") {
+				if (name.getSymbol() == "get-request-method") {
+					return LISP::text(request.getMethod());
+				} else if (name.getSymbol() == "get-request-path") {
 					return LISP::text(request.getPath());
 				} else if (name.getSymbol() == "get-request-param") {
+					string paramName = LISP::eval(iter.next(), env).toString();
 					return LISP::text(request.getParameter(paramName));
 				} else if (name.getSymbol() == "get-request-header") {
+					string paramName = LISP::eval(iter.next(), env).toString();
 					return LISP::text(request.getHeaderFieldIgnoreCase(paramName));
 				}
 				
@@ -125,6 +128,7 @@ namespace HTTP {
 			}
 		};
 		UTIL::AutoRef<LISP::Procedure> proc(new LispRequest("request*", request));
+		env["get-request-method"] = LISP::Var(proc);
 		env["get-request-path"] = LISP::Var(proc);
 		env["get-request-param"] = LISP::Var(proc);
 		env["get-request-header"] = LISP::Var(proc);
