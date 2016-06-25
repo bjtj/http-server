@@ -4,6 +4,7 @@
 #include "HttpSessionTool.hpp"
 #include <liboslayer/FileReaderWriter.hpp>
 #include <liboslayer/Logger.hpp>
+#include "BasicAuth.hpp"
 
 namespace HTTP {
 
@@ -62,6 +63,37 @@ namespace HTTP {
         
 		env["url-encode"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Enc("url-encode")));
 		env["url-decode"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Dec("url-decode")));
+	}
+	void LispPage::applyAuth(HttpRequest & request, HttpResponse & response) {
+		applyAuth(global_env, request, response);
+	}
+	void LispPage::applyAuth(LISP::Env & env, HttpRequest & request, HttpResponse & response) {
+		class Auth : public LISP::Procedure {
+		private:
+			HttpRequest & request;
+			HttpResponse & response;
+		public:
+			Auth(const string & name, HttpRequest & request, HttpResponse & response) : LISP::Procedure(name), request(request), response(response) {}
+			virtual ~Auth() {}
+			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
+				LISP::Iterator<LISP::Var> iter(args);
+				if (name.getSymbol() == "proc-basic-auth") {
+					string realm = LISP::eval(iter.next(), env).toString();
+					string username = LISP::eval(iter.next(), env).toString();
+					string password = LISP::eval(iter.next(), env).toString();
+
+					BasicAuth auth(realm, username, password);
+					
+					if (!auth.empty() && !auth.validate(request)) {
+						auth.setAuthentication(response);
+						return "nil";
+					}
+					return "t";
+				}
+				return "nil";
+			}
+		};
+		env["proc-basic-auth"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Auth("auth", request, response)));
 	}
 	void LispPage::applySession(HttpSession & session) {
 		applySession(global_env, session);

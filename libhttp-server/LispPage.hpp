@@ -19,6 +19,7 @@ namespace HTTP {
 		std::string toLispySymbolName(const std::string & name);
 		void applyProperties(const std::map<std::string, std::string> & props);
 		void applyWeb();
+		void applyAuth(HttpRequest & request, HttpResponse & response);
 		void applySession(HttpSession & session);
 		void applyRequest(HttpRequest & request);
 		void applyResponse(HttpResponse & response);
@@ -26,6 +27,7 @@ namespace HTTP {
 		std::string parseLispPage(const std::string & src);
 		
 		static void applyWeb(LISP::Env & env);
+		static void applyAuth(LISP::Env & env, HttpRequest & request, HttpResponse & response);
 		static void applySession(LISP::Env & env, HttpSession & session);
 		static void applyRequest(LISP::Env & env, HttpRequest & request);
 		static void applyResponse(LISP::Env & env, HttpResponse & response);

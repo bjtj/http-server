@@ -67,14 +67,9 @@ private:
     bool secure;
     string certPath;
     string keyPath;
-    string defaultBrowsePath;
-    string browseIndexPath;
-	string username;
-	string password;
     
 public:
-    
-    ServerConfig() : port(0), secure(false), defaultBrowsePath(".") {}
+    ServerConfig() : port(0), secure(false) {}
     virtual ~ServerConfig() {}
     void load(const string & configPath) {
         loadFromFile(configPath);
@@ -84,20 +79,12 @@ public:
         secure = secureString.empty() == false && !secureString.compare("y");
         certPath = getProperty("cert.path");
         keyPath = getProperty("key.path");
-        defaultBrowsePath = getProperty("default.browse.path");
-        browseIndexPath = getProperty("browse.index");
-		username = getProperty("auth.username");
-		password = getProperty("auth.password");
     }
     string getHost() { return host; }
     int getPort() { return port; }
     bool isSecure() { return secure; }
     string getCertPath() { return certPath; }
     string getKeyPath() { return keyPath; }
-    string getDefaultBrowsePath() { return defaultBrowsePath; }
-    string getBrowseIndexPath() { return browseIndexPath; }
-	string getUsername() {return username;}
-	string getPassword() {return password;}
 };
 
 ServerConfig config;
@@ -131,9 +118,8 @@ private:
 	string prefix;
 	string indexName;
 	map<string, string> mimeTypes;
-	BasicAuth auth;
 public:
-	StaticHttpRequestHandler(const string & basePath, const string & prefix, const string & indexName, const BasicAuth & auth) : basePath(basePath), prefix(prefix), indexName(indexName), auth(auth) {
+	StaticHttpRequestHandler(const string & basePath, const string & prefix, const string & indexName) : basePath(basePath), prefix(prefix), indexName(indexName) {
 		mimeTypes = MimeTypes::getMimeTypes();
 	}
     virtual ~StaticHttpRequestHandler() {}
@@ -141,16 +127,9 @@ public:
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
 		try {
-
-			if (!auth.empty() && !auth.validate(request)) {
-				auth.setAuthentication(response);
-				response.setContentType("text/plain");
-				setFixedTransfer(response, "Authentication required");
-				return;
-			}
 			
 			doHandle(request, sink, response);
-
+			
 			if (request.getMethod() == "HEAD") {
 				response.setTransfer(AutoRef<DataTransfer>(NULL));
 			}
@@ -202,10 +181,14 @@ public:
 
 		if (file.getExtension() == "lsp") {
 
+			response.setStatusCode(200);
+			response.setContentType("text/html");
+
 			FileReader reader(file);
 			
 			LispPage page;
 			page.applyWeb();
+			page.applyAuth(request, response);
 			page.applySession(session);
 			page.applyRequest(request);
 			page.applyResponse(response);
@@ -265,9 +248,7 @@ public:
 				return;
 			}
 			
-			logger->logd(log + " := 200 lisp page");
-			response.setStatusCode(200);
-			response.setContentType("text/html");
+			logger->logd(log + " := 200 lisp page");;
 			setFixedTransfer(response, content);
 			return;
 		}
@@ -498,11 +479,10 @@ int main(int argc, char * args[]) {
         server = new AnotherHttpServer(config);
     }
 
-	BasicAuth auth(config["auth.username"], config["auth.password"]);
-
-	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config["static.base.path"], "/static", config["index.name"], auth));
+	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config["static.base.path"], "/static", config["index.name"]));
     server->registerRequestHandler("/static/*", staticHandler);
-	
+
+	BasicAuth auth(config["auth.username"], config["auth.password"]);
 	AutoRef<HttpRequestHandler> authHandler(new AuthHttpRequestHandler(auth));
 	server->registerRequestHandler("/auth*", authHandler);
 	
