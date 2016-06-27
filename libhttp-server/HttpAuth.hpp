@@ -12,6 +12,7 @@ namespace HTTP {
 		std::string _realm;
 	public:
 		HttpAuth();
+		HttpAuth(const std::string & realm);
 		virtual ~HttpAuth();
 		virtual bool validate(HttpRequest & request) = 0;
 		virtual void setAuthentication(HttpResponse & response) = 0;

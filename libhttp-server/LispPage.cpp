@@ -84,7 +84,7 @@ namespace HTTP {
 
 					BasicAuth auth(realm, username, password);
 					
-					if (!auth.empty() && !auth.validate(request)) {
+					if (!auth.validate(request)) {
 						auth.setAuthentication(response);
 						return "nil";
 					}

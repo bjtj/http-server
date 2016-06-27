@@ -349,17 +349,17 @@ public:
  */
 class AuthHttpRequestHandler : public HttpRequestHandler {
 private:
-	BasicAuth auth;
+	AutoRef<BasicAuth> auth;
 public:
-	AuthHttpRequestHandler(const BasicAuth & auth) : auth(auth) {
+	AuthHttpRequestHandler(AutoRef<BasicAuth> auth) : auth(auth) {
 	}
     virtual ~AuthHttpRequestHandler() {}
     
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
 		try {
-			if (!auth.empty() && !auth.validate(request)) {
-				auth.setAuthentication(response);
+			if (!auth.nil() && !auth->validate(request)) {
+				auth->setAuthentication(response);
 				response.setContentType("text/plain");
 				setFixedTransfer(response, "Authentication required");
 				return;
@@ -482,7 +482,7 @@ int main(int argc, char * args[]) {
 	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config["static.base.path"], "/static", config["index.name"]));
     server->registerRequestHandler("/static/*", staticHandler);
 
-	BasicAuth auth(config["auth.username"], config["auth.password"]);
+	AutoRef<BasicAuth> auth(new BasicAuth(config["auth.username"], config["auth.password"]));
 	AutoRef<HttpRequestHandler> authHandler(new AuthHttpRequestHandler(auth));
 	server->registerRequestHandler("/auth*", authHandler);
 	
