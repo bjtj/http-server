@@ -20,8 +20,8 @@ namespace HTTP {
         virtual ~Connection();
         int getId();
         bool isSelectable();
-        void registerSelector(OS::Selector & selector, unsigned long flags);
-		void unregisterSelector(OS::Selector & selector, unsigned long flags);
+        void registerSelector(OS::Selector & selector, unsigned char flags);
+		void unregisterSelector(OS::Selector & selector, unsigned char flags);
         bool isReadableSelected(OS::Selector & selector);
         bool isWritableSelected(OS::Selector & selector);
 		void negotiate();

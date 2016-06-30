@@ -36,9 +36,6 @@
     <ClInclude Include="..\libhttp-server\HttpStatusCodes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\libhttp-server\InetAddress.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\libhttp-server\Url.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -112,6 +109,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\libhttp-server\StringDataSource.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\BasicAuth.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\HttpAuth.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -189,6 +192,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\libhttp-server\MimeTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\BasicAuth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\HttpAuth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

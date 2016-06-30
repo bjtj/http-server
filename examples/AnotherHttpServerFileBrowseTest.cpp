@@ -298,7 +298,7 @@ public:
 			virtual ~Maker() {}
 			virtual AutoRef<Socket> make(const string & protocol, const InetAddress & addr) {
 				if (protocol == "https") {
-
+#if defined(USE_OPENSSL)
 					class MyVerifier : public CertificateVerifier {
 					public:
 						MyVerifier() {}
@@ -311,6 +311,8 @@ public:
 					SecureSocket * sock = new SecureSocket(addr);
 					sock->setVerifier(AutoRef<CertificateVerifier>(new MyVerifier));
 					return AutoRef<Socket>(sock);
+#endif
+					throw Exception("openssl not supported");
 				}
 				return AutoRef<Socket>(new Socket(addr));
 			}

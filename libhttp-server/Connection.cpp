@@ -19,11 +19,11 @@ namespace HTTP {
         return socket->isSelectable();
     }
     
-    void Connection::registerSelector(Selector & selector, unsigned long flags) {
+    void Connection::registerSelector(Selector & selector, unsigned char flags) {
         socket->registerSelector(selector, flags);
     }
 
-	void Connection::unregisterSelector(Selector & selector, unsigned long flags) {
+	void Connection::unregisterSelector(Selector & selector, unsigned char flags) {
         socket->unregisterSelector(selector, flags);
     }
     
