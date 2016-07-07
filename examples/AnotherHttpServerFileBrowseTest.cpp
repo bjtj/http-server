@@ -311,8 +311,9 @@ public:
 					SecureSocket * sock = new SecureSocket(addr);
 					sock->setVerifier(AutoRef<CertificateVerifier>(new MyVerifier));
 					return AutoRef<Socket>(sock);
-#endif
+#else
 					throw Exception("openssl not supported");
+#endif
 				}
 				return AutoRef<Socket>(new Socket(addr));
 			}
