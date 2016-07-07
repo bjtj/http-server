@@ -1,6 +1,7 @@
 #ifndef __STRING_DATA_SOURCE_HPP__
 #define __STRING_DATA_SOURCE_HPP__
 
+#include <liboslayer/os.hpp>
 #include "DataSource.hpp"
 #include "BufferIndicator.hpp"
 #include <string>

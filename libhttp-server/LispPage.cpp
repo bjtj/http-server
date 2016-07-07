@@ -2,6 +2,7 @@
 #include "LispPage.hpp"
 #include "HttpEncoderDecoder.hpp"
 #include "HttpSessionTool.hpp"
+#include <liboslayer/Iterator.hpp>
 #include <liboslayer/FileReaderWriter.hpp>
 #include <liboslayer/Logger.hpp>
 #include "BasicAuth.hpp"
@@ -31,7 +32,7 @@ namespace HTTP {
 
 	void LispPage::applyProperties(const map<string, string> & props) {
 		for (map<string, string>::const_iterator iter = props.begin(); iter != props.end(); iter++) {
-			env()[toLispySymbolName(iter->first)] = LISP::text(iter->second);
+			env()[toLispySymbolName(iter->first)] = LISP::Var(LISP::text(iter->second));
 		}
 	}
 	
@@ -45,8 +46,8 @@ namespace HTTP {
 			Enc(const string & name) : LISP::Procedure(name) {}
 			virtual ~Enc() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator<LISP::Var> iter(args);
-				return LISP::text(HttpEncoder::encode(LISP::eval(iter.next(), env).toString()));
+				Iterator<LISP::Var> iter(args);
+				return LISP::Var(LISP::text(HttpEncoder::encode(LISP::eval(iter.next(), env).toString())));
 			}
 		};
         
@@ -56,8 +57,8 @@ namespace HTTP {
 			Dec(const string & name) : LISP::Procedure(name) {}
 			virtual ~Dec() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator<LISP::Var> iter(args);
-				return LISP::text(HttpDecoder::decode(LISP::eval(iter.next(), env).toString()));
+				Iterator<LISP::Var> iter(args);
+				return LISP::Var(LISP::text(HttpDecoder::decode(LISP::eval(iter.next(), env).toString())));
 			}
 		};
         
@@ -76,7 +77,7 @@ namespace HTTP {
 			Auth(const string & name, HttpRequest & request, HttpResponse & response) : LISP::Procedure(name), request(request), response(response) {}
 			virtual ~Auth() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator<LISP::Var> iter(args);
+				Iterator<LISP::Var> iter(args);
 				if (name.getSymbol() == "proc-basic-auth") {
 					string realm = LISP::eval(iter.next(), env).toString();
 					string username = LISP::eval(iter.next(), env).toString();
@@ -86,11 +87,11 @@ namespace HTTP {
 					
 					if (!auth.validate(request)) {
 						auth.setAuthentication(response);
-						return "nil";
+						return LISP::Var("nil");
 					}
-					return "t";
+					return LISP::Var("t");
 				}
-				return "nil";
+				return LISP::Var("nil");
 			}
 		};
 		env["proc-basic-auth"] = LISP::Var(UTIL::AutoRef<LISP::Procedure>(new Auth("auth", request, response)));
@@ -108,21 +109,21 @@ namespace HTTP {
 				LISP::Procedure(name), session(session) {}
 			virtual ~LispSession() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator<LISP::Var> iter(args);
+				Iterator<LISP::Var> iter(args);
 				if (name.getSymbol() == "url") {
 					string url = iter.next().toString();
-					return LISP::text(HttpSessionTool::urlMan(url, session));
+					return LISP::Var(LISP::text(HttpSessionTool::urlMan(url, session)));
 				} else if (name.getSymbol() == "get-session-value") {
 					string name = LISP::eval(iter.next(), env).toString();
-					return LISP::text(session[name]);
+					return LISP::Var(LISP::text(session[name]));
 				} else if (name.getSymbol() == "set-session-value") {
 					string name = LISP::eval(iter.next(), env).toString();
 					string value = LISP::eval(iter.next(), env).toString();
 					session[name] = value;
-					return LISP::text(value);
+					return LISP::Var(LISP::text(value));
 				}
 
-				return "nil";
+				return LISP::Var("nil");
                 
 			}
 		};
@@ -143,20 +144,20 @@ namespace HTTP {
 				LISP::Procedure(name), request(request) {}
 			virtual ~LispRequest() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator<LISP::Var> iter(args);
+				Iterator<LISP::Var> iter(args);
 				if (name.getSymbol() == "get-request-method") {
-					return LISP::text(request.getMethod());
+					return LISP::Var(LISP::text(request.getMethod()));
 				} else if (name.getSymbol() == "get-request-path") {
-					return LISP::text(request.getPath());
+					return LISP::Var(LISP::text(request.getPath()));
 				} else if (name.getSymbol() == "get-request-param") {
 					string paramName = LISP::eval(iter.next(), env).toString();
-					return LISP::text(request.getParameter(paramName));
+					return LISP::Var(LISP::text(request.getParameter(paramName)));
 				} else if (name.getSymbol() == "get-request-header") {
 					string paramName = LISP::eval(iter.next(), env).toString();
-					return LISP::text(request.getHeaderFieldIgnoreCase(paramName));
+					return LISP::Var(LISP::text(request.getHeaderFieldIgnoreCase(paramName)));
 				}
 				
-				return "nil";
+				return LISP::Var("nil");
 			}
 		};
 		UTIL::AutoRef<LISP::Procedure> proc(new LispRequest("request*", request));
@@ -178,27 +179,27 @@ namespace HTTP {
 				LISP::Procedure(name), response(response) {}
 			virtual ~LispResponse() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator<LISP::Var> iter(args);
+				Iterator<LISP::Var> iter(args);
 				if (name.getSymbol() == "set-status-code") {
 					int status = (int)LISP::eval(iter.next(), env).getInteger().getInteger();
 					response.setStatusCode(status);
-					return LISP::Integer(status);
+					return LISP::Var(LISP::Integer(status));
 				} else if (name.getSymbol() == "set-response-header") {
 					string name = LISP::eval(iter.next(), env).toString();
 					string value = LISP::eval(iter.next(), env).toString();
 					response.getHeader().setHeaderField(name, value);
-					return LISP::text(value);
+					return LISP::Var(LISP::text(value));
 				} else if (name.getSymbol() == "set-redirect") {
 					string location = LISP::eval(iter.next(), env).toString();
 					response.setRedirect(location);
-					return LISP::text(location);
+					return LISP::Var(LISP::text(location));
 				} else if (name.getSymbol() == "set-file-transfer") {
 					string path = LISP::eval(iter.next(), env).toString();
 					response["set-file-transfer"] = path;
-					return LISP::text(path);
+					return LISP::Var(LISP::text(path));
 				}
 				
-				return "nil";
+				return LISP::Var("nil");
 			}
 		};
 		UTIL::AutoRef<LISP::Procedure> proc(new LispResponse("response*", response));
@@ -218,9 +219,9 @@ namespace HTTP {
 			LispLoadPage(const string & name) : LISP::Procedure(name) {}
 			virtual ~LispLoadPage() {}
 			virtual LISP::Var proc(LISP::Var name, vector<LISP::Var> & args, LISP::Env & env) {
-				LISP::Iterator<LISP::Var> iter(args);
+				Iterator<LISP::Var> iter(args);
 				FileReader reader(LISP::pathname(LISP::eval(iter.next(), env)).getFile());
-				return LISP::text(LispPage::parseLispPage(env, reader.dumpAsString()));
+				return LISP::Var(LISP::text(LispPage::parseLispPage(env, reader.dumpAsString())));
 			}
 		};
 		UTIL::AutoRef<LISP::Procedure> proc(new LispLoadPage("load-page"));
@@ -248,7 +249,7 @@ namespace HTTP {
 			if (f - s > 0) {
 				string txt = src.substr(s, f - s);
 				LISP::Var & content = env["*content*"];
-				env["*content*"] = LISP::text(content.isNil() ? txt : content.toString() + txt);
+				env["*content*"] = LISP::Var(LISP::text(content.isNil() ? txt : content.toString() + txt));
 			}
             
 			size_t e = src.find("%>", f);
@@ -282,7 +283,7 @@ namespace HTTP {
 		if (!env.quit() && s < src.length()) {
 			string txt = src.substr(s);
 			LISP::Var & content = env["*content*"];
-			env["*content*"] = LISP::text(content.isNil() ? txt : content.toString() + txt);
+			env["*content*"] = LISP::Var(LISP::text(content.isNil() ? txt : content.toString() + txt));
 		}
         
 		return env["*content*"].toString();
