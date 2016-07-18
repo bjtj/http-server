@@ -20,7 +20,7 @@ namespace HTTP {
 			size_t readSize = indicator.adjustReadSize(size);
 			if (readSize > 0) {
 				std::string chunk = _data.substr(indicator.position(), readSize);
-				osl_strncpy(buffer, chunk.c_str(), readSize);
+				memcpy(buffer, chunk.c_str(), readSize);
 				indicator.offset(readSize);
 			}
 			return readSize;

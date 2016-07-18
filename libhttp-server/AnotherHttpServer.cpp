@@ -60,11 +60,11 @@ namespace HTTP {
 	void HttpRequestHandler::setFileTransfer(HttpResponse & response, OS::File & file) {
 
 		AutoRef<DataSource> source(new FileDataSource(FileStream(file, "rb")));
-		AutoRef<DataTransfer> transfer(new FixedTransfer(source, file.getSize()));
+		AutoRef<DataTransfer> transfer(new FixedTransfer(source, (size_t)file.getSize()));
 
 		response.clearTransfer();
 		response.setTransfer(transfer);
-		response.setContentLength((unsigned long long)file.getSize());
+		response.setContentLength(file.getSize());
 	}
 
 	void HttpRequestHandler::setPartialFileTransfer(HttpResponse & response, OS::File & file, size_t start, size_t end) {
