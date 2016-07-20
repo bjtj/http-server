@@ -30,12 +30,6 @@ namespace HTTP {
 	void HttpResponse::setParts(vector<string> & parts) {
 		header.setParts(parts);
 	}
-	void HttpResponse::setContentLength(int length) {
-		header.setContentLength(length);
-	}
-	void HttpResponse::setContentLength(size_t length) {
-		header.setContentLength(length);
-	}
 	void HttpResponse::setContentLength(unsigned long long length) {
 		header.setContentLength(length);
 	}

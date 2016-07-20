@@ -33,8 +33,6 @@ namespace HTTP {
 		void setStatusCode(int code);
 		void setStatusCode(int code, std::string message);
 		void setParts(std::vector<std::string> &parts);
-		void setContentLength(int length);
-		void setContentLength(size_t length);
 		void setContentLength(unsigned long long length);
 		void setContentType(std::string type);
 
