@@ -84,8 +84,12 @@ namespace HTTP {
         connectionTable.clear();
         connectionsLock.post();
     }
+
+	void ConnectionManager::start(int port) {
+		start(port, 5);
+	}
     
-    void ConnectionManager::start(int port) {
+    void ConnectionManager::start(int port, int backlog) {
         if (!serverSocket.nil()) {
             return;
         }
@@ -93,7 +97,7 @@ namespace HTTP {
         serverSocket = serverSocketMaker->makeServerSocket(port);
         serverSocket->setReuseAddr(true);
         serverSocket->bind();
-        serverSocket->listen(5);
+        serverSocket->listen(backlog);
         serverSocket->registerSelector(selector, Selector::READ);
 		threadPool.start();
     }

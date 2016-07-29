@@ -100,7 +100,8 @@ namespace HTTP {
         void onConnect(UTIL::AutoRef<OS::Socket> client);
         void onDisconnect(UTIL::AutoRef<Connection> connection);
         void clearConnections();
-        void start(int port);
+		void start(int port);
+        void start(int port, int backlog);
         void poll(unsigned long timeout);
 		void removeCompletedConnections();
         void stop();

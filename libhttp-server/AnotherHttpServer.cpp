@@ -389,7 +389,7 @@ namespace HTTP {
 	 *
 	 */
 	AnotherHttpServer::AnotherHttpServer(HttpServerConfig config) :
-		port(config.getIntegerProperty("listen.port")),
+		config(config),
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
 		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)), config.getIntegerProperty("thread.count", 20)),
 		thread(NULL) {
@@ -398,7 +398,7 @@ namespace HTTP {
 	}
     
     AnotherHttpServer::AnotherHttpServer(HttpServerConfig config, AutoRef<ServerSocketMaker> serverSocketMaker) :
-		port(config.getIntegerProperty("listen.port")),
+		config(config),
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
 		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)), config.getIntegerProperty("thread.count", 20), serverSocketMaker),
 		thread(NULL) {
@@ -418,11 +418,11 @@ namespace HTTP {
 	}
 
 	int AnotherHttpServer::getPort() {
-		return port;
+		return config.getIntegerProperty("listen.port", 80);
 	}
 
 	void AnotherHttpServer::start() {
-		connectionManager.start(port);
+		connectionManager.start(getPort(), config.getIntegerProperty("backlog", 5));
 	}
 
 	void AnotherHttpServer::startAsync() {

@@ -163,7 +163,6 @@ namespace HTTP {
 	private:
 
 		HttpServerConfig config;
-		int port;
 		UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
 		ConnectionManager connectionManager;
 		OS::Thread * thread;
