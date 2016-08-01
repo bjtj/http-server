@@ -7,40 +7,41 @@
 #include <liboslayer/Socket.hpp>
 
 namespace HTTP {
-    class Connection {
-    private:
+	class Connection {
+	private:
 		UTIL::AutoRef<OS::Socket> socket;
-        bool terminateSignal;
-        bool completed;
-        Packet packet;
+		bool terminateSignal;
+		bool completed;
+		Packet packet;
 		int id;
-        
-    public:
-        Connection(UTIL::AutoRef<OS::Socket> socket);
-        virtual ~Connection();
-        int getId();
-        bool isSelectable();
-        void registerSelector(OS::Selector & selector, unsigned char flags);
+
+	public:
+		Connection(UTIL::AutoRef<OS::Socket> socket);
+		Connection(UTIL::AutoRef<OS::Socket> socket, size_t packetSize);
+		virtual ~Connection();
+		int getId();
+		bool isSelectable();
+		void registerSelector(OS::Selector & selector, unsigned char flags);
 		void unregisterSelector(OS::Selector & selector, unsigned char flags);
-        bool isReadableSelected(OS::Selector & selector);
-        bool isWritableSelected(OS::Selector & selector);
+		bool isReadableSelected(OS::Selector & selector);
+		bool isWritableSelected(OS::Selector & selector);
 		void negotiate();
-        int recv(char * buffer, size_t size);
-        int send(const char * data, size_t len);
-        void close();
-        bool isClosed();
-        void signalTerminate();
-        bool isTerminateSignaled();
-        void setCompleted();
-        bool isCompleted();
-        void setReadSize(size_t readSize);
+		int recv(char * buffer, size_t size);
+		int send(const char * data, size_t len);
+		void close();
+		bool isClosed();
+		void signalTerminate();
+		bool isTerminateSignaled();
+		void setCompleted();
+		bool isCompleted();
+		void setReadSize(size_t readSize);
 		size_t getLimit();
-        void resetReadLimit();
-        Packet & read();
+		void resetReadLimit();
+		Packet & read();
 		Packet & getPacket();
-        OS::InetAddress getRemoteAddress();
+		OS::InetAddress getRemoteAddress();
 		OS::InetAddress getLocalAddress();
-    };
+	};
 }
 
 #endif
