@@ -25,8 +25,8 @@ static void test_apply_properties() {
 	props["base.path"] = "/home/user/steve/";
 	props["date_and_path.of.the.record"] = "2016-03-05 /home/user/";
 	page.applyProperties(props);
-	ASSERT(page.env()["*base-path*"].toString(), ==, "/home/user/steve/");
-	ASSERT(page.env()["*date-and-path-of-the-record*"].toString(), ==, "2016-03-05 /home/user/");
+	ASSERT(page.env()["*base-path*"]->toString(), ==, "/home/user/steve/");
+	ASSERT(page.env()["*date-and-path-of-the-record*"]->toString(), ==, "2016-03-05 /home/user/");
 }
 
 int main(int argc, char *args[]) {

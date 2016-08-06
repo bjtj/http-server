@@ -54,7 +54,6 @@ public:
 	}
 };
 
-
 HttpSessionManager sessionManager(30 * 60 * 1000);
 
 /**
@@ -87,8 +86,9 @@ public:
     string getKeyPath() { return keyPath; }
 };
 
-ServerConfig config;
-
+/**
+ * @brief 
+ */
 static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse & response, HttpSession & session, const string & uri) {
     
     HttpResponseHeader & header = response.getHeader();
@@ -114,12 +114,13 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
  */
 class StaticHttpRequestHandler : public HttpRequestHandler {
 private:
+	ServerConfig & config;
     string basePath;
 	string prefix;
 	string indexName;
 	map<string, string> mimeTypes;
 public:
-	StaticHttpRequestHandler(const string & basePath, const string & prefix, const string & indexName) : basePath(basePath), prefix(prefix), indexName(indexName) {
+	StaticHttpRequestHandler(ServerConfig & config, const string & basePath, const string & prefix, const string & indexName) : config(config), basePath(basePath), prefix(prefix), indexName(indexName) {
 		mimeTypes = MimeTypes::getMimeTypes();
 	}
     virtual ~StaticHttpRequestHandler() {}
@@ -154,7 +155,7 @@ public:
 			request.parseWwwFormUrlencoded();
 		}
 
-		HttpSession & session = HttpSessionTool::getSession(sessionManager, request);
+		HttpSession & session = HttpSessionTool::getSession(request, sessionManager);
 		session.updateLastAccessTime();
 
 		string path = request.getPath();
@@ -332,10 +333,10 @@ public:
 		client.setRecvTimeout(3000);
 		client.setFollowRedirect(true);
 		client.setUrl(url);
-		client.setRequest("GET", LinkedStringMap());
+		client.setRequest(request.getMethod(), LinkedStringMap());
 		try {
 			client.execute();
-			response.setStatusCode(200);
+			response.setStatusCode(handler.getResponseHeader().getStatusCode());
 			response.setContentType(handler.getResponseHeader()["content-type"]);
 			setFixedTransfer(response, handler.getDump());
 		} catch (Exception & e) {
@@ -435,6 +436,8 @@ int main(int argc, char * args[]) {
 
 	LoggerFactory::getInstance().setLoggerDescriptorSimple("*", "basic", "console");
 
+	ServerConfig config;
+
 	string configPath;
 	
 	if (argc > 1) {
@@ -482,7 +485,7 @@ int main(int argc, char * args[]) {
         server = new AnotherHttpServer(config);
     }
 
-	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config["static.base.path"], "/static", config["index.name"]));
+	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config, config["static.base.path"], "/static", config["index.name"]));
     server->registerRequestHandler("/static/*", staticHandler);
 
 	AutoRef<BasicAuth> auth(new BasicAuth(config["auth.username"], config["auth.password"]));
@@ -504,6 +507,8 @@ int main(int argc, char * args[]) {
 			} else if (!strcmp(buffer, "s")) {
 				printf("Listen port: %d\n", config.getPort());
 				printf(" ** Detail: %s\n", server->getStatus().c_str());
+			} else if (!strcmp(buffer, "load")) {
+				// TODO: implement
 			}
 		}
 	}

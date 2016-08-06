@@ -17,7 +17,7 @@ namespace HTTP {
 			return request.getParameter("sessionId");
 		}
 
-		static HttpSession & getSession(HttpSessionManager & sessionManager, HttpRequest & request) {
+		static HttpSession & getSession(HttpRequest & request, HttpSessionManager & sessionManager) {
 			std::string sessionId = getSessionId(request);
 			HttpSession & session = (sessionId.empty() ||
 									 !sessionManager.hasSession(UTIL::Text::toInt(sessionId))) ?
