@@ -1,6 +1,8 @@
 #include <liboslayer/os.hpp>
 #include <liboslayer/SecureSocket.hpp>
-#include <liboslayer/Utils.hpp>
+#include <liboslayer/FileStream.hpp>
+#include <liboslayer/AutoRef.hpp>
+#include <liboslayer/Logger.hpp>
 #include <liboslayer/Properties.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/HttpSessionManager.hpp>
@@ -185,7 +187,7 @@ public:
 			response.setStatusCode(200);
 			response.setContentType("text/html");
 
-			FileReader reader(file);
+			FileStream reader(file, "rb");
 			
 			LispPage page;
 			page.applyWeb();
@@ -193,7 +195,7 @@ public:
 			page.applySession(session);
 			page.applyRequest(request);
 			page.applyResponse(response);
-			string content = page.parseLispPage(reader.dumpAsString());
+			string content = page.parseLispPage(reader.readFullAsString());
 
 			if (response.needRedirect()) {
 				logger->logd(log + " := 302 redirect");

@@ -4,7 +4,6 @@
 #include "StringDataSource.hpp"
 #include "FileDataSource.hpp"
 #include "StringDataSink.hpp"
-#include <liboslayer/FileReaderWriter.hpp>
 #include <liboslayer/Logger.hpp>
 
 namespace HTTP {

@@ -3,8 +3,8 @@
 #include "HttpEncoderDecoder.hpp"
 #include "HttpSessionTool.hpp"
 #include <liboslayer/Iterator.hpp>
-#include <liboslayer/FileReaderWriter.hpp>
 #include <liboslayer/Logger.hpp>
+#include <liboslayer/FileStream.hpp>
 #include "BasicAuth.hpp"
 
 #define _VAR OS::Obj<LISP::Var> 
@@ -224,8 +224,8 @@ namespace HTTP {
 			virtual ~LispLoadPage() {}
 			virtual DECL_PROC() {
 				Iterator<_VAR> iter(args);
-				FileReader reader(LISP::pathname(env, LISP::eval(iter.next(), env))->getFile());
-				return HEAP_ALLOC(env, LISP::text(LispPage::parseLispPage(env, reader.dumpAsString())));
+				FileStream reader(LISP::pathname(env, LISP::eval(iter.next(), env))->getFile(), "rb");
+				return HEAP_ALLOC(env, LISP::text(LispPage::parseLispPage(env, reader.readFullAsString())));
 			}
 		};
 		UTIL::AutoRef<LISP::Procedure> proc(new LispLoadPage("load-page"));
