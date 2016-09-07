@@ -34,6 +34,7 @@ namespace HTTP {
         virtual void onHttpRequestContentCompleted(HttpRequest & request, UTIL::AutoRef<DataSink> sink, HttpResponse & response);
 		virtual void onHttpResponseHeaderCompleted(HttpRequest & request, HttpResponse & response);
 		virtual void onHttpResponseTransferCompleted(HttpRequest & request, HttpResponse & response);
+		virtual bool onException(HttpRequest & request, HttpResponse & response, OS::Exception & ex);
 
 		void setFixedTransfer(HttpResponse & response, const std::string & content);
 		void setFileTransfer(HttpResponse & response, const std::string & filepath);

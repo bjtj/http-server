@@ -14,7 +14,7 @@ using namespace UTIL;
 
 static string s_last_msg;
 
-static void httpGet(const string & url, const LinkedStringMap & fields, OnResponseListener * handler);
+static void httpGet(const string & url, const LinkedStringMap & fields, OnHttpResponseListener * handler);
 
 
 /**
@@ -92,7 +92,7 @@ public:
 /**
  *
  */
-class DumpResponseHandler : public OnResponseListener {
+class DumpResponseHandler : public OnHttpResponseListener {
 private:
 	HttpResponseHeader responseHeader;
 	string dump;
@@ -257,11 +257,11 @@ public:
 /**
  *
  */
-static void httpGet(const string & url, const LinkedStringMap & fields, OnResponseListener * handler) {
+static void httpGet(const string & url, const LinkedStringMap & fields, OnHttpResponseListener * handler) {
 	AnotherHttpClient client;
 	client.setDebug(true);
     
-	client.setOnResponseListener(handler);
+	client.setOnHttpResponseListener(handler);
     
 	client.setFollowRedirect(true);
 	client.setUrl(url);

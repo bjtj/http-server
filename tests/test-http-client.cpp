@@ -85,7 +85,7 @@ public:
 };
 
 
-class DumpResponseHandler : public OnResponseListener {
+class DumpResponseHandler : public OnHttpResponseListener {
 private:
 	HttpResponseHeader responseHeader;
 	string dump;
@@ -126,7 +126,7 @@ static DumpResponseHandler httpRequest(const Url & url, const string & method, c
 	client.setConnectionTimeout(1000);
 	client.setRecvTimeout(1000);
     
-	client.setOnResponseListener(&handler);
+	client.setOnHttpResponseListener(&handler);
     
 	client.setFollowRedirect(true);
 	client.setUrl(url);
@@ -148,7 +148,7 @@ static DumpResponseHandler httpsRequest(const Url & url, const string & method, 
 	client.setConnectionTimeout(1000);
 	client.setRecvTimeout(1000);
     
-	client.setOnResponseListener(&handler);
+	client.setOnHttpResponseListener(&handler);
     
 	client.setFollowRedirect(true);
 	client.setUrl(url);

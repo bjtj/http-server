@@ -27,7 +27,7 @@ static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__)
 /**
  * @brief 
  */
-class DumpResponseHandler : public OnResponseListener {
+class DumpResponseHandler : public OnHttpResponseListener {
 private:
 	HttpResponseHeader responseHeader;
 	string dump;
@@ -330,7 +330,7 @@ public:
 
 		DumpResponseHandler handler;
 		AnotherHttpClient client(AutoRef<SocketMaker>(new Maker));
-		client.setOnResponseListener(&handler);
+		client.setOnHttpResponseListener(&handler);
 		client.setConnectionTimeout(3000);
 		client.setRecvTimeout(3000);
 		client.setFollowRedirect(true);

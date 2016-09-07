@@ -1,9 +1,11 @@
-#include "AnotherHttpClient.hpp"
-#include "FixedTransfer.hpp"
+#include <string>
 #include <liboslayer/Text.hpp>
 #include <liboslayer/Timer.hpp>
 #include <liboslayer/Logger.hpp>
-#include <string>
+#include "AnotherHttpClient.hpp"
+#include "FixedTransfer.hpp"
+#include "DataSink.hpp"
+#include "StringDataSink.hpp"
 
 namespace HTTP {
 
@@ -16,13 +18,17 @@ namespace HTTP {
 	/**
 	 * @brief OnResponseHeaderListener
 	 */
-	OnResponseListener::OnResponseListener() {
+	OnHttpResponseListener::OnHttpResponseListener() {
 	}
 
-	OnResponseListener::~OnResponseListener() {
+	OnHttpResponseListener::~OnHttpResponseListener() {
 	}
 
-	DataTransfer * OnResponseListener::createDataTransfer(HttpHeader & header, AutoRef<DataSink> sink) {
+	AutoRef<DataSink> OnHttpResponseListener::getDataSink() {
+		return AutoRef<DataSink>(new StringDataSink);
+	}
+
+	DataTransfer * OnHttpResponseListener::createDataTransfer(HttpHeader & header, AutoRef<DataSink> sink) {
 		if (header.isChunkedTransfer()) {
 			return new ChunkedTransfer(sink);
 		}
@@ -32,7 +38,7 @@ namespace HTTP {
 		}
 		return NULL;
 	}
-	void OnResponseListener::onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData) {
+	void OnHttpResponseListener::onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData) {
 		response.setTransfer(AutoRef<DataTransfer>(createDataTransfer(response.getHeader(), getDataSink())));
 	}
 
@@ -351,7 +357,7 @@ namespace HTTP {
         this->followRedirect = followRedirect;
     }
     
-    void AnotherHttpClient::setOnResponseListener(OnResponseListener * responseListener) {
+    void AnotherHttpClient::setOnHttpResponseListener(OnHttpResponseListener * responseListener) {
         this->responseListener = responseListener;
     }
 

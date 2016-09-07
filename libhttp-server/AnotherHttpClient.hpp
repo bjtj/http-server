@@ -35,12 +35,12 @@ namespace HTTP {
 	/**
 	 * @brief OnResponseHeaderListener
 	 */
-	class OnResponseListener {
+	class OnHttpResponseListener {
 	private:
 	public:
-		OnResponseListener();
-		virtual ~OnResponseListener();
-		virtual UTIL::AutoRef<DataSink> getDataSink() = 0;
+		OnHttpResponseListener();
+		virtual ~OnHttpResponseListener();
+		virtual UTIL::AutoRef<DataSink> getDataSink();
 		virtual DataTransfer * createDataTransfer(HttpHeader & header, UTIL::AutoRef<DataSink> sink);
 		virtual void onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData);
         virtual void onTransferDone(HttpResponse & response, UTIL::AutoRef<DataSink> sink, UTIL::AutoRef<UserData> userData) = 0;
@@ -66,7 +66,7 @@ namespace HTTP {
 		bool interrupted;
 		bool complete;
 		HttpHeaderReader responseHeaderReader;
-        OnResponseListener * responseListener;
+        OnHttpResponseListener * responseListener;
 		unsigned long connectionTimeout;
 		unsigned long recvTimeout;
         bool followRedirect;
@@ -106,7 +106,7 @@ namespace HTTP {
         bool needRedirect();
         void handleRedirect();
         void setFollowRedirect(bool followRedirect);
-        void setOnResponseListener(OnResponseListener * responseListener);
+        void setOnHttpResponseListener(OnHttpResponseListener * responseListener);
 		void setUserData(UTIL::AutoRef<UserData> userData);
         Url & getUrl();
         HttpResponse & getResponse();

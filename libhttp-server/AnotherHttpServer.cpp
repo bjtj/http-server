@@ -39,6 +39,9 @@ namespace HTTP {
 	void HttpRequestHandler::onHttpResponseTransferCompleted(HttpRequest & request, HttpResponse & response) {
 		// response content transfer done
 	}
+	bool HttpRequestHandler::onException(HttpRequest & request, HttpResponse & response, Exception & ex) {
+		return false;
+	}
     
 	void HttpRequestHandler::setFixedTransfer(HttpResponse & response, const string & content) {
 
@@ -218,7 +221,13 @@ namespace HTTP {
         prepareRequestContentTransfer(request, sink);
         
 		if (!handler.nil()) {
-			handler->onHttpRequestHeaderCompleted(request, response);
+			try {
+				handler->onHttpRequestHeaderCompleted(request, response);
+			} catch (Exception e) {
+				if (!handler->onException(request, response, e)) {
+					handleError(request, response, 500);
+				}
+			}
 		}
 
         AutoRef<DataTransfer> transfer = request.getTransfer();
@@ -234,7 +243,13 @@ namespace HTTP {
 
 		AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
         if (!handler.nil()) {
-            handler->onHttpRequestContentCompleted(request, sink, response);
+			try {
+				handler->onHttpRequestContentCompleted(request, sink, response);
+			} catch (Exception e) {
+				if (!handler->onException(request, response, e)) {
+					handleError(request, response, 500);
+				}
+			}
         } else {
 			handleError(request, response, 404);
 		}
