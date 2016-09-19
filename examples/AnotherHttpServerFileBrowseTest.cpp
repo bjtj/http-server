@@ -13,6 +13,7 @@
 #include <libhttp-server/StringDataSink.hpp>
 #include <liboslayer/Lisp.hpp>
 #include <liboslayer/Base64.hpp>
+#include <liboslayer/Hash.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/BasicAuth.hpp>
 
@@ -285,8 +286,65 @@ public:
  * @brief 
  */
 class ProxyHandler : public HttpRequestHandler {
+private:
+
+	/**
+	 * @brief 
+	 */
+	class DumpResult {
+	private:
+		int _statusCode;
+		string _contentType;
+		string _dump;
+	public:
+		DumpResult() : _statusCode(0) {}
+		virtual ~DumpResult() {}
+		int & statusCode() {
+			return _statusCode;
+		}
+		string & contentType() {
+			return _contentType;
+		}
+		string & dump() {
+			return _dump;
+		}
+	};
+
+	/**
+	 * @brief 
+	 */
+	class Maker : public SocketMaker {
+	public:
+		Maker() {}
+		virtual ~Maker() {}
+		virtual AutoRef<Socket> make(const string & protocol, const InetAddress & addr) {
+			if (protocol == "https") {
+#if defined(USE_OPENSSL)
+				class MyVerifier : public CertificateVerifier {
+				public:
+					MyVerifier() {}
+					virtual ~MyVerifier() {}
+					virtual bool onVerify(const VerifyError & err, const Certificate & cert) {
+						return true;
+					}
+				};
+
+				SecureSocket * sock = new SecureSocket(addr);
+				sock->setVerifier(AutoRef<CertificateVerifier>(new MyVerifier));
+				return AutoRef<Socket>(sock);
+#else
+				throw Exception("openssl not supported");
+#endif
+			}
+			return AutoRef<Socket>(new Socket(addr));
+		}
+	};
+
+	ServerConfig config;
+	SimpleHash hash;
+	
 public:
-	ProxyHandler() {}
+	ProxyHandler(const ServerConfig & config) : config(config) {}
     virtual ~ProxyHandler() {}
     
     virtual AutoRef<DataSink> getDataSink() {
@@ -295,39 +353,64 @@ public:
     
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
-		class Maker : public SocketMaker {
-		public:
-			Maker() {}
-			virtual ~Maker() {}
-			virtual AutoRef<Socket> make(const string & protocol, const InetAddress & addr) {
-				if (protocol == "https") {
-#if defined(USE_OPENSSL)
-					class MyVerifier : public CertificateVerifier {
-					public:
-						MyVerifier() {}
-						virtual ~MyVerifier() {}
-						virtual bool onVerify(const VerifyError & err, const Certificate & cert) {
-							return true;
-						}
-					};
-
-					SecureSocket * sock = new SecureSocket(addr);
-					sock->setVerifier(AutoRef<CertificateVerifier>(new MyVerifier));
-					return AutoRef<Socket>(sock);
-#else
-					throw Exception("openssl not supported");
-#endif
-				}
-				return AutoRef<Socket>(new Socket(addr));
-			}
-		};
-
-
 		string url = request.getParameter("u");
 
-		string log = " ** proxy url : " + url +
-			"[" + request.getRemoteAddress().getHost() + ":" + Text::toString(request.getRemoteAddress().getPort()) + "]";
+		if (config["proxy.cache"] == "y") {
+			
+			unsigned long h = hash.hash(url.c_str());
+			string path = config["proxy.cache.path"];
+			if (!path.empty()) {
+				File p(path);
+				p.mkdir();
+				path = File::mergePaths(path, Text::toString(h));
+			} else {
+				path = Text::toString(h);
+			}
 
+			File file(path);
+			if (file.exists()) {
+
+				FileStream in(file, "rb");
+				int statusCode = Text::toInt(in.readline());
+				string contentType = in.readline();
+				string dump = in.readFullAsString();
+				in.close();
+				
+				response.setStatusCode(statusCode);
+				response.setContentType(contentType);
+				setFixedTransfer(response, dump);
+				
+			} else {
+
+				DumpResult result = getHttpDump(request.getMethod(), url);
+				response.setStatusCode(result.statusCode());
+				if (result.statusCode() != 500) {
+
+					FileStream out(file, "wb");
+					out.writeline(Text::toString(result.statusCode()));
+					out.writeline(result.contentType());
+					out.write(result.dump());
+					out.close();
+					
+					response.setContentType(result.contentType());
+					setFixedTransfer(response, result.dump());
+				}
+			}
+			
+		} else {
+
+			DumpResult result = getHttpDump(request.getMethod(), url);
+			response.setStatusCode(result.statusCode());
+			if (result.statusCode() != 500) {
+				response.setContentType(result.contentType());
+				setFixedTransfer(response, result.dump());
+			}
+		}
+	}
+
+	DumpResult getHttpDump(const string & method, const string & url) {
+
+		DumpResult result;
 		DumpResponseHandler handler;
 		AnotherHttpClient client(AutoRef<SocketMaker>(new Maker));
 		client.setOnHttpResponseListener(&handler);
@@ -335,18 +418,17 @@ public:
 		client.setRecvTimeout(3000);
 		client.setFollowRedirect(true);
 		client.setUrl(url);
-		client.setRequest(request.getMethod(), LinkedStringMap());
+		client.setRequest(method, LinkedStringMap());
 		try {
 			client.execute();
-			response.setStatusCode(handler.getResponseHeader().getStatusCode());
-			response.setContentType(handler.getResponseHeader()["content-type"]);
-			setFixedTransfer(response, handler.getDump());
+			result.statusCode() = handler.getResponseHeader().getStatusCode();
+			result.contentType() = handler.getResponseHeader()["content-type"];
+			result.dump() = handler.getDump();
 		} catch (Exception & e) {
 			logger->loge(e.getMessage());
-			response.setStatusCode(500);
+			result.statusCode() = 500;
 		}
-
-		logger->logd(log + " := done");
+		return result;
 	}
 };
 
@@ -494,7 +576,7 @@ int main(int argc, char * args[]) {
 	AutoRef<HttpRequestHandler> authHandler(new AuthHttpRequestHandler(auth));
 	server->registerRequestHandler("/auth*", authHandler);
 	
-	AutoRef<HttpRequestHandler> proxyHandler(new ProxyHandler);
+	AutoRef<HttpRequestHandler> proxyHandler(new ProxyHandler(config));
 	server->registerRequestHandler("/proxy", proxyHandler);
 
 	server->startAsync();
