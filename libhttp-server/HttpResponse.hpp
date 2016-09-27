@@ -31,6 +31,7 @@ namespace HTTP {
         void clear();
 		void setStatusCode(int code);
 		void setStatusCode(int code, std::string message);
+		int getStatusCode();
 		void setParts(std::vector<std::string> &parts);
 		void setContentLength(unsigned long long length);
 		void setContentType(std::string type);

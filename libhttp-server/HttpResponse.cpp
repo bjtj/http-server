@@ -27,6 +27,9 @@ namespace HTTP {
 		header.setStatusCode(code);
 		header.setMessage(message);
 	}
+	int HttpResponse::getStatusCode() {
+		return header.getStatusCode();
+	}
 	void HttpResponse::setParts(vector<string> & parts) {
 		header.setParts(parts);
 	}

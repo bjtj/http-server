@@ -281,8 +281,9 @@ namespace HTTP {
 			if (!handler.nil()) {
 				handler->onHttpResponseTransferCompleted(request, response);
 			}
-			if (request.getHeaderFieldIgnoreCase("Connection") != "close" &&
-				response.getHeaderFieldIgnoreCase("Connection") != "close") {
+			if (request.getHeader().getProtocol() != "HTTP/1.0" &&
+				Text::equalsIgnoreCase(request.getHeaderFieldIgnoreCase("Connection"), "close") == false &&
+				Text::equalsIgnoreCase(response.getHeaderFieldIgnoreCase("Connection"), "close") == false) {
 				reset();
 			}
 		}
