@@ -141,10 +141,27 @@ namespace HTTP {
 	 * @brief HttpCommunication
 	 */
 
-	HttpCommunication::HttpCommunication(AutoRef<HttpRequestHandlerDispatcher> dispatcher) : requestHeaderHandled(false), writeable(false), responseHeaderTransferDone(false), responseContentTransferDone(false), communicationCompleted(false), dispatcher(dispatcher) {
+	HttpCommunication::HttpCommunication(AutoRef<HttpRequestHandlerDispatcher> dispatcher)
+		: requestHeaderHandled(false),
+		  writeable(false),
+		  responseHeaderTransferDone(false),
+		  responseContentTransferDone(false),
+		  communicationCompleted(false),
+		  dispatcher(dispatcher) {
 	}
 
 	HttpCommunication::~HttpCommunication() {
+	}
+
+	void HttpCommunication::reset() {
+		request.clear();
+		requestHeaderReader.clear();
+		response.clear();
+		requestHeaderHandled = false;
+		writeable = false;
+		responseHeaderTransferDone = false;
+		responseContentTransferDone = false;
+		communicationCompleted = false;
 	}
 
 	void HttpCommunication::onConnected(Connection & connection) {
@@ -153,21 +170,14 @@ namespace HTTP {
 	}
 
 	void HttpCommunication::onReceivable(Connection & connection) {
-
 		if (writeable) {
 			return;
 		}
-
 		readRequestHeaderIfNeed(connection);
 		if (requestHeaderReader.complete()) {
-            
             if (!requestHeaderHandled) {
-                
                 onRequestHeader(request, response);
-                requestContentReadCounter.setContentSize(request.getContentLength());
-                
             } else {
-                
                 AutoRef<DataTransfer> transfer = request.getTransfer();
 				if (!transfer.nil()) {
 					transfer->recv(connection);
@@ -186,15 +196,11 @@ namespace HTTP {
 	}
 
 	void HttpCommunication::readRequestHeaderIfNeed(Connection & connection) {
-
 		if (!requestHeaderReader.complete()) {
-           
 			connection.setReadSize(1);
 			Packet & packet = connection.read();
             requestHeaderReader.read(packet.getData(), (int)packet.getLength());
-
 			packet.clear();
-
 			if (requestHeaderReader.complete()) {
                 request.setHeader(requestHeaderReader.getHeader());
 				connection.resetReadLimit();
@@ -203,23 +209,19 @@ namespace HTTP {
 	}
     
     void HttpCommunication::readRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet) {
+		//
     }
 
 	void HttpCommunication::onRequestHeader(HttpRequest & request, HttpResponse & response) {
-
 		AutoRef<DataSink> sink;
-
 		AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
 		if (!handler.nil()) {
 			sink = handler->getDataSink();
 		}
-
 		if (sink.nil()) {
 			sink = AutoRef<DataSink>(new StringDataSink);
 		}
-        
         prepareRequestContentTransfer(request, sink);
-        
 		if (!handler.nil()) {
 			try {
 				handler->onHttpRequestHeaderCompleted(request, response);
@@ -229,18 +231,15 @@ namespace HTTP {
 				}
 			}
 		}
-
         AutoRef<DataTransfer> transfer = request.getTransfer();
         if (transfer.empty()) {
             onHttpRequestContentCompleted(request, AutoRef<DataSink>(), response);
 			writeable = true;
 		}
-        
         requestHeaderHandled = true;
 	}
 
 	void HttpCommunication::onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
-
 		AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
         if (!handler.nil()) {
 			try {
@@ -256,7 +255,6 @@ namespace HTTP {
 	}
 
 	void HttpCommunication::prepareRequestContentTransfer(HttpRequest & request, AutoRef<DataSink> sink) {
-
 		if (request.getHeader().isChunkedTransfer()) {
 			request.setTransfer(AutoRef<DataTransfer>(new ChunkedTransfer(sink)));
         } else {
@@ -265,28 +263,27 @@ namespace HTTP {
 				request.setTransfer(transfer);
             }
         }
-
 	}
 
 	void HttpCommunication::onWriteable(Connection & connection) {
-
 		if (!writeable) {
 			return;
 		}
-
 		if (!responseHeaderTransferDone) {
             sendResponseHeader(connection);
 		}
-
 		if (!responseContentTransferDone) {
 			sendResponseContent(connection);
 		}
-
 		if (responseContentTransferDone) {
 			communicationCompleted = true;
 			AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
 			if (!handler.nil()) {
 				handler->onHttpResponseTransferCompleted(request, response);
+			}
+			if (request.getHeaderFieldIgnoreCase("Connection") != "close" &&
+				response.getHeaderFieldIgnoreCase("Connection") != "close") {
+				reset();
 			}
 		}
 	}
@@ -405,7 +402,8 @@ namespace HTTP {
 	AnotherHttpServer::AnotherHttpServer(HttpServerConfig config) :
 		config(config),
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
-		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)), config.getIntegerProperty("thread.count", 20)),
+		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
+						  config.getIntegerProperty("thread.count", 20)),
 		thread(NULL) {
 
 		connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
@@ -414,7 +412,8 @@ namespace HTTP {
     AnotherHttpServer::AnotherHttpServer(HttpServerConfig config, AutoRef<ServerSocketMaker> serverSocketMaker) :
 		config(config),
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
-		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)), config.getIntegerProperty("thread.count", 20), serverSocketMaker),
+		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
+						  config.getIntegerProperty("thread.count", 20), serverSocketMaker),
 		thread(NULL) {
 
 		connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));

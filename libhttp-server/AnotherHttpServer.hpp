@@ -112,7 +112,6 @@ namespace HTTP {
 		HttpHeaderReader requestHeaderReader;
 		HttpResponse response;
 		bool requestHeaderHandled;
-		ReadCounter requestContentReadCounter;
 		bool writeable;
 		bool responseHeaderTransferDone;
 		bool responseContentTransferDone;
@@ -125,6 +124,7 @@ namespace HTTP {
 		HttpCommunication(UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher);
 		virtual ~HttpCommunication();
 
+		void reset();
 		virtual void onConnected(Connection & connection);
 		virtual void onReceivable(Connection & connection);
 		void readRequestHeaderIfNeed(Connection & connection);

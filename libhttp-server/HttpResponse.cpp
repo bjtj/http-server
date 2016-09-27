@@ -36,6 +36,12 @@ namespace HTTP {
 	void HttpResponse::setContentType(string type) {
 		header.setHeaderField("Content-Type", type);
 	}
+	string HttpResponse::getHeaderField(const string & name) const {
+		return header.getHeaderField(name);
+	}
+	string HttpResponse::getHeaderFieldIgnoreCase(const string & name) const {
+		return header.getHeaderFieldIgnoreCase(name);
+	}
 	HttpResponseHeader & HttpResponse::getHeader() {
 		return header;
 	}
