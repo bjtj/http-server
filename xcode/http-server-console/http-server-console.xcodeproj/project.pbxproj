@@ -10,7 +10,7 @@
 		6C59ABF31C7ACFE200F814A4 /* AnotherHttpServerFileBrowseTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6C4A9F511C0BEEA500A45604 /* AnotherHttpServerFileBrowseTest.cpp */; };
 		E82789341BDCEDB70009E46A /* libhttp-server-cocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E82789311BDCED9C0009E46A /* libhttp-server-cocoa.a */; };
 		E82789401BDCEE130009E46A /* liboslayer-cocoa.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E827893D1BDCEE050009E46A /* liboslayer-cocoa.a */; };
-		E8B1611F1BFB6314002D68C7 /* res in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8B1611E1BFB6314002D68C7 /* res */; };
+		E87A9D8E1D9C065100A35837 /* data in CopyFiles */ = {isa = PBXBuildFile; fileRef = E87A9D8D1D9C065100A35837 /* data */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,23 +56,16 @@
 			remoteGlobalIDString = E8FAB2111BD7C36200E89DC5;
 			remoteInfo = "oslayer-cocoa";
 		};
-		E89386911CBF044200D45426 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E82789281BDCED9C0009E46A /* http-server.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E89386171CBE690800D45426;
-			remoteInfo = HttpServerTests;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		E827891C1BDCED880009E46A /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 12;
-			dstPath = "";
-			dstSubfolderSpec = 7;
+			dstPath = .;
+			dstSubfolderSpec = 16;
 			files = (
-				E8B1611F1BFB6314002D68C7 /* res in CopyFiles */,
+				E87A9D8E1D9C065100A35837 /* data in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,7 +77,7 @@
 		E82789211BDCED880009E46A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E82789281BDCED9C0009E46A /* http-server.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "http-server.xcodeproj"; path = "../http-server/http-server.xcodeproj"; sourceTree = "<group>"; };
 		E82789351BDCEE050009E46A /* oslayer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oslayer.xcodeproj; path = ../../../oslayer/xcode/oslayer/oslayer.xcodeproj; sourceTree = "<group>"; };
-		E8B1611E1BFB6314002D68C7 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; name = res; path = ../../examples/res; sourceTree = "<group>"; };
+		E87A9D8D1D9C065100A35837 /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = data; path = ../../examples/data; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,7 +96,7 @@
 		E82789151BDCED880009E46A = {
 			isa = PBXGroup;
 			children = (
-				E8B1611E1BFB6314002D68C7 /* res */,
+				E87A9D8D1D9C065100A35837 /* data */,
 				E82789351BDCEE050009E46A /* oslayer.xcodeproj */,
 				E82789281BDCED9C0009E46A /* http-server.xcodeproj */,
 				E82789201BDCED880009E46A /* http-server-console */,
@@ -133,7 +126,6 @@
 			children = (
 				E827892F1BDCED9C0009E46A /* libhttp-server.a */,
 				E82789311BDCED9C0009E46A /* libhttp-server-cocoa.a */,
-				E89386921CBF044200D45426 /* HttpServerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -175,7 +167,7 @@
 		E82789161BDCED880009E46A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = TJ;
 				TargetAttributes = {
 					E827891D1BDCED880009E46A = {
@@ -239,13 +231,6 @@
 			remoteRef = E827893C1BDCEE050009E46A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		E89386921CBF044200D45426 /* HttpServerTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = HttpServerTests.xctest;
-			remoteRef = E89386911CBF044200D45426 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -286,8 +271,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
@@ -309,9 +296,15 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				LIBRARY_SEARCH_PATHS = /usr/local/ssl/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-I/usr/local/ssl/include",
+				);
+				OTHER_LIBTOOLFLAGS = "-lssl -lcrypto";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -329,8 +322,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
@@ -346,8 +341,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				LIBRARY_SEARCH_PATHS = /usr/local/ssl/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-I/usr/local/ssl/include",
+				);
+				OTHER_LIBTOOLFLAGS = "-lssl -lcrypto";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -355,19 +356,25 @@
 		E82789261BDCED880009E46A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DATA_PATH=\"\\\"./data\\\"\"",
+				);
 				HEADER_SEARCH_PATHS = (
 					../../,
 					../../../oslayer,
 				);
+				LIBRARY_SEARCH_PATHS = "";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
-					"-I/usr/local/ssl/openssl_x86_64/include",
+					"-I/usr/local/ssl/include",
 				);
 				OTHER_LDFLAGS = (
-					"-lssl",
-					"-lcrypto",
+					"-Wl,/usr/local/ssl/lib/libssl.1.0.0.dylib",
+					"-Wl,/usr/local/ssl/lib/libcrypto.1.0.0.dylib",
 				);
+				OTHER_LIBTOOLFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -375,19 +382,25 @@
 		E82789271BDCED880009E46A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = "HAVE_OPENSSL=1";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"HAVE_OPENSSL=1",
+					"DATA_PATH=\"\\\"./data\\\"\"",
+				);
 				HEADER_SEARCH_PATHS = (
 					../../,
 					../../../oslayer,
 				);
+				LIBRARY_SEARCH_PATHS = "";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
-					"-I/usr/local/ssl/openssl_x86_64/include",
+					"-I/usr/local/ssl/include",
 				);
 				OTHER_LDFLAGS = (
-					"-lssl",
-					"-lcrypto",
+					"-Wl,/usr/local/ssl/lib/libssl.1.0.0.dylib",
+					"-Wl,/usr/local/ssl/lib/libcrypto.1.0.0.dylib",
 				);
+				OTHER_LIBTOOLFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

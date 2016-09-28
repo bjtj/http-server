@@ -156,6 +156,8 @@ public:
 		if (request.isWwwFormUrlEncoded()) {
 			request.parseWwwFormUrlencoded();
 		}
+        
+        response.setContentLength(0);
 
 		HttpSession & session = HttpSessionTool::getSession(request, sessionManager);
 		session.updateLastAccessTime();
