@@ -18,6 +18,8 @@ namespace HTTP {
     void HttpResponse::clear() {
         header.clear();
         clearTransfer();
+		_needRedirect = false;
+		redirectLocation.clear();
     }
 	void HttpResponse::setStatusCode(int code) {
 		header.setStatusCode(code);

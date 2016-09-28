@@ -109,7 +109,6 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
                           host + ":" + port + "/" +
                           HttpSessionTool::urlMan(uri, session));
     response.setContentType("text/html");
-    header.setConnection("close");
 }
 
 /**
@@ -519,6 +518,8 @@ bool promptBoolean(const char * msg) {
 int main(int argc, char * args[]) {
 
 	LoggerFactory::getInstance().setLoggerDescriptorSimple("*", "basic", "console");
+
+	MimeTypes::load(DATA_PATH"/mimetypes");
 
 	ServerConfig config;
 

@@ -12,7 +12,8 @@ namespace HTTP {
 	public:
 		MimeTypes();
 		virtual ~MimeTypes();
-		static std::map<std::string, std::string> createMimeTypes();
+		static void clear();
+		static void load(const std::string & path);
 		static std::map<std::string, std::string> getMimeTypes();
 		static std::string getMimeType(const std::string & ext);
 	};

@@ -369,6 +369,10 @@ namespace HTTP {
 	HttpResponseHeader::~HttpResponseHeader() {
 	}
 
+	void HttpResponseHeader::clear() {
+		HttpHeader::clear();
+		setProtocol("HTTP/1.1");
+	}
 	string HttpResponseHeader::getProtocol() const {
 		return getPart1();
 	}

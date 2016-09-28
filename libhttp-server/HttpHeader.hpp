@@ -124,13 +124,13 @@ namespace HTTP {
 		HttpResponseHeader(const HttpHeader & other);
 		virtual ~HttpResponseHeader();
 
+		virtual void clear();
 		std::string getProtocol() const;
 		void setProtocol(const std::string & protocol);
 		int getStatusCode() const;
 		void setStatusCode(int statusCode);
 		std::string getMessage() const;
 		void setMessage(const std::string & message);
-        
         bool isRedirection();
         std::string getRedirectionLocation();
 	};

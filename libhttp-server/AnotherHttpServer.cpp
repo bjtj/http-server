@@ -332,7 +332,6 @@ namespace HTTP {
 	void HttpCommunication::handleError(HttpRequest & request, HttpResponse & response, int errorCode) {
 
 		response.setStatusCode(errorCode);
-		response.getHeader().setConnection("close");
 
 		switch (errorCode) {
 		case 404:
