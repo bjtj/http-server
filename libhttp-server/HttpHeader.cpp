@@ -60,7 +60,7 @@ namespace HTTP {
 		return part2;
 	}
 	string HttpHeader::getPart3() const {
-		return part2;
+		return part3;
 	}
 	void HttpHeader::setPart1(const string & part) {
 		part1 = part;

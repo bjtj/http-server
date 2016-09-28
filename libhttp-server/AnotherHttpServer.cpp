@@ -276,12 +276,12 @@ namespace HTTP {
 			sendResponseContent(connection);
 		}
 		if (responseContentTransferDone) {
-			communicationCompleted = true;
 			AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
 			if (!handler.nil()) {
 				handler->onHttpResponseTransferCompleted(request, response);
 			}
-			if (request.getHeader().getProtocol() != "HTTP/1.0" &&
+			communicationCompleted = true;
+			if (request.getHeader().getProtocol() == "HTTP/1.1" &&
 				Text::equalsIgnoreCase(request.getHeaderFieldIgnoreCase("Connection"), "close") == false &&
 				Text::equalsIgnoreCase(response.getHeaderFieldIgnoreCase("Connection"), "close") == false) {
 				reset();
