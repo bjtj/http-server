@@ -17,6 +17,7 @@ libhttp_serverinc_HEADERS = \
 	FixedTransfer.hpp \
 	HttpAuth.hpp \
 	HttpEncoderDecoder.hpp \
+	HttpException.hpp \
 	HttpHeader.hpp \
 	HttpHeaderParser.hpp \
 	HttpHeaderReader.hpp \
@@ -68,6 +69,7 @@ libhttp_server_la_SOURCES = \
 	HttpAuth.hpp \
 	HttpEncoderDecoder.cpp \
 	HttpEncoderDecoder.hpp \
+	HttpException.hpp \
 	HttpHeader.cpp \
 	HttpHeader.hpp \
 	HttpHeaderParser.cpp \

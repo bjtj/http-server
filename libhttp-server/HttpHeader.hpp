@@ -121,16 +121,20 @@ namespace HTTP {
 	private:
 	public:
 		HttpResponseHeader();
+		HttpResponseHeader(int statusCode);
+		HttpResponseHeader(int statusCode, const std::string & statusString);
 		HttpResponseHeader(const HttpHeader & other);
 		virtual ~HttpResponseHeader();
-
-		virtual void clear();
+		void clear();
+		void init();
 		std::string getProtocol() const;
 		void setProtocol(const std::string & protocol);
+		void setStatus(int statusCode);
+		void setStatus(int statusCode, const std::string & statusString);
 		int getStatusCode() const;
 		void setStatusCode(int statusCode);
-		std::string getMessage() const;
-		void setMessage(const std::string & message);
+		std::string getStatusString() const;
+		void setStatusString(const std::string & statusString);
         bool isRedirection();
         std::string getRedirectionLocation();
 	};

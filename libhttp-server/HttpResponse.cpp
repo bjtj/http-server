@@ -21,13 +21,11 @@ namespace HTTP {
 		_needRedirect = false;
 		redirectLocation.clear();
     }
-	void HttpResponse::setStatusCode(int code) {
-		header.setStatusCode(code);
-		header.setMessage(HttpStatusCodes::getMessage(code));
+	void HttpResponse::setStatus(int statusCode) {
+		header.setStatus(statusCode);
 	}
-	void HttpResponse::setStatusCode(int code, string message) {
-		header.setStatusCode(code);
-		header.setMessage(message);
+	void HttpResponse::setStatus(int statusCode, const string & statusString) {
+		header.setStatus(statusCode, statusString);
 	}
 	int HttpResponse::getStatusCode() {
 		return header.getStatusCode();
@@ -38,7 +36,7 @@ namespace HTTP {
 	void HttpResponse::setContentLength(unsigned long long length) {
 		header.setContentLength(length);
 	}
-	void HttpResponse::setContentType(string type) {
+	void HttpResponse::setContentType(const string & type) {
 		header.setHeaderField("Content-Type", type);
 	}
 	string HttpResponse::getHeaderField(const string & name) const {

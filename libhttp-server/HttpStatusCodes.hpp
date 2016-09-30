@@ -8,13 +8,12 @@ namespace HTTP {
 	
 	class HttpStatusCodes {
 	private:
-        static std::map<int, std::string> codes;
+        static std::map<int, std::string> _codes;
 	public:
 		HttpStatusCodes();
 		virtual ~HttpStatusCodes();
-
-		static std::map<int, std::string> createCodes();
-		static std::string getMessage(int code);
+		static std::string getStatusString(int code);
+		static std::map<int, std::string> & codes();
 	};
 
 	

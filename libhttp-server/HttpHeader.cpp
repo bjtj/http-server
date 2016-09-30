@@ -2,6 +2,7 @@
 #include <liboslayer/Text.hpp>
 #include "HttpEncoderDecoder.hpp"
 #include "HttpHeader.hpp"
+#include "HttpStatusCodes.hpp"
 
 namespace HTTP {
 
@@ -361,16 +362,27 @@ namespace HTTP {
 	 */
 	
 	HttpResponseHeader::HttpResponseHeader() {
-		setProtocol("HTTP/1.1");
+		init();
+	}
+	HttpResponseHeader::HttpResponseHeader(int statusCode) {
+		init();
+		setStatus(statusCode);
+	}
+	HttpResponseHeader::HttpResponseHeader(int statusCode, const string & statusString) {
+		init();
+		setStatus(statusCode, statusString);
 	}
 	HttpResponseHeader::HttpResponseHeader(const HttpHeader & other) {
 		setHeader(other);
 	}
 	HttpResponseHeader::~HttpResponseHeader() {
+		/**/
 	}
-
 	void HttpResponseHeader::clear() {
 		HttpHeader::clear();
+		init();
+	}
+	void HttpResponseHeader::init() {
 		setProtocol("HTTP/1.1");
 	}
 	string HttpResponseHeader::getProtocol() const {
@@ -379,16 +391,24 @@ namespace HTTP {
 	void HttpResponseHeader::setProtocol(const string & protocol) {
 		setPart1(protocol);
 	}
+	void HttpResponseHeader::setStatus(int statusCode) {
+		setStatusCode(statusCode);
+		setStatusString(HttpStatusCodes::getStatusString(statusCode));
+	}
+	void HttpResponseHeader::setStatus(int statusCode, const string & statusString) {
+		setStatusCode(statusCode);
+		setStatusString(statusString);
+	}
 	int HttpResponseHeader::getStatusCode() const {
 		return Text::toInt(getPart2());
 	}
 	void HttpResponseHeader::setStatusCode(int statusCode) {
 		setPart2(Text::toString(statusCode));
 	}
-	std::string HttpResponseHeader::getMessage() const {
+	std::string HttpResponseHeader::getStatusString() const {
 		return getPart3();
 	}
-	void HttpResponseHeader::setMessage(const std::string & message)  {
+	void HttpResponseHeader::setStatusString(const std::string & message)  {
 		setPart3(message);
 	}
     bool HttpResponseHeader::isRedirection() {

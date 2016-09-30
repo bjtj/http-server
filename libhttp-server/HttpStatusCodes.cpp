@@ -4,14 +4,7 @@ namespace HTTP {
 
 	using namespace std;
 
-	map<int, string> HttpStatusCodes::codes = HttpStatusCodes::createCodes();
-	
-	HttpStatusCodes::HttpStatusCodes() {
-	}
-	HttpStatusCodes::~HttpStatusCodes() {
-	}
-
-	map<int, string> HttpStatusCodes::createCodes() {
+	static map<int, string> createCodes() {
 		map<int, string> codes;
 		codes[100] = "Continue";
 		codes[101] = "Switching Protocols";
@@ -56,12 +49,23 @@ namespace HTTP {
 		codes[505] = "HTTP Version Not Supported";
 		return codes;
 	}
-	string HttpStatusCodes::getMessage(int code) {
-		string msg = codes[code];
+
+	map<int, string> HttpStatusCodes::_codes = createCodes();
+	
+	HttpStatusCodes::HttpStatusCodes() {
+	}
+	HttpStatusCodes::~HttpStatusCodes() {
+	}
+
+	string HttpStatusCodes::getStatusString(int code) {
+		string msg = _codes[code];
 		if (msg.empty()) {
 			return "Unknown";
 		}
 		return msg;
 	}
-	
+
+	map<int, string> & HttpStatusCodes::codes() {
+		return _codes;
+	}
 }

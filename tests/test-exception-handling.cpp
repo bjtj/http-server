@@ -17,12 +17,13 @@ public:
 			throw Exception("error!");
 		}
 		
-		response.setStatusCode(200);
+		response.setStatus(200);
 		response.setContentType("text/plain");
 		setFixedTransfer(response, "hello");
 	}
 	virtual bool onException(HttpRequest & request, HttpResponse & response, Exception & e) {
-		response.setStatusCode(500);
+		cerr << "onException()" << endl;
+		response.setStatus(500);
 		response.setContentType("text/plain");
 		setFixedTransfer(response, "error");
 		return true;
@@ -68,6 +69,7 @@ static void httpGet(const string & url, const LinkedStringMap & fields, OnHttpRe
 	client.setUrl(url);
 	client.setRequest("GET", fields);
 	client.execute();
+	client.closeConnection();
 }
 
 class ExceptionHandlingTestCase : public TestCase {
@@ -91,12 +93,16 @@ public:
 		delete server;
 	}
 	virtual void test() {
+		
+		LinkedStringMap fields;
+		fields["Connection"] = "close";
+		
 		DumpResponseHandler handler;
-		httpGet("http://localhost:9000/", LinkedStringMap(), &handler);
+		httpGet("http://localhost:9000/", fields, &handler);
 		ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 		ASSERT(handler.getDump(), ==, "hello");
 
-		httpGet("http://localhost:9000/error", LinkedStringMap(), &handler);
+		httpGet("http://localhost:9000/error", fields, &handler);
 		ASSERT(handler.getResponseHeader().getStatusCode(), ==, 500);
 		ASSERT(handler.getDump(), ==, "error");
 	}

@@ -104,7 +104,7 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
         port = url.getPort();
     }
     
-    response.setStatusCode(302);
+    response.setStatus(302);
     header.setHeaderField("Location", (config.isSecure() ? "https://" : "http://") +
                           host + ":" + port + "/" +
                           HttpSessionTool::urlMan(uri, session));
@@ -139,7 +139,7 @@ public:
 			
 		} catch (Exception & e) {
 			logger->loge(" ** error");
-			response.setStatusCode(500);
+			response.setStatus(500);
 			response.setContentType("text/html");
 			setFixedTransfer(response, "Server Error/" + e.getMessage());
 		}
@@ -174,19 +174,19 @@ public:
 				file = File(File::mergePaths(basePath, indexName));
 				if (!file.exists()) {
 					logger->logd(log + " := 404 no index, " + File::mergePaths(basePath, indexName));
-					response.setStatusCode(404);
+					response.setStatus(404);
 					return;
 				}
 			} else {
 				logger->logd(log + " := 404 not found (" + file.getPath() + ")");
-				response.setStatusCode(404);
+				response.setStatus(404);
 				return;
 			}
         }
 
 		if (file.getExtension() == "lsp") {
 
-			response.setStatusCode(200);
+			response.setStatus(200);
 			response.setContentType("text/html");
 
 			FileStream reader(file, "rb");
@@ -211,7 +211,7 @@ public:
 				File file(response["set-file-transfer"]);
 				if (!file.exists() || !file.isFile()) {
 					logger->logd(log + " := 404");
-					response.setStatusCode(404);
+					response.setStatus(404);
 					setFixedTransfer(response, "Not Found");
 					return;
 				}
@@ -239,7 +239,7 @@ public:
 							} catch (Exception e) {
 								logger->logd(log + " := 500 " + e.getMessage());
 								response.setContentType("text/html");
-								response.setStatusCode(500);
+								response.setStatus(500);
 								setFixedTransfer(response, e.getMessage());
 								return;
 							}
@@ -248,7 +248,7 @@ public:
 				}
 
 				logger->logd(log + " := 200 fixed transfer");
-				response.setStatusCode(200);
+				response.setStatus(200);
 				setFileTransfer(response, file);
 				return;
 			}
@@ -259,7 +259,7 @@ public:
 		}
 
 		logger->logd(log + " := 200 static");
-        response.setStatusCode(200);
+        response.setStatus(200);
 		setContentTypeWithFile(request, response, file);
 		if (request.getParameter("transfer") == "download") {
 			setContentDispositionWithFile(request, response, file);
@@ -377,14 +377,14 @@ public:
 				string dump = in.readFullAsString();
 				in.close();
 				
-				response.setStatusCode(statusCode);
+				response.setStatus(statusCode);
 				response.setContentType(contentType);
 				setFixedTransfer(response, dump);
 				
 			} else {
 
 				DumpResult result = getHttpDump(request.getMethod(), url);
-				response.setStatusCode(result.statusCode());
+				response.setStatus(result.statusCode());
 				if (result.statusCode() != 500) {
 
 					FileStream out(file, "wb");
@@ -401,7 +401,7 @@ public:
 		} else {
 
 			DumpResult result = getHttpDump(request.getMethod(), url);
-			response.setStatusCode(result.statusCode());
+			response.setStatus(result.statusCode());
 			if (result.statusCode() != 500) {
 				response.setContentType(result.contentType());
 				setFixedTransfer(response, result.dump());
@@ -462,7 +462,7 @@ public:
 			
 		} catch (Exception & e) {
 			logger->loge(" ** error");
-			response.setStatusCode(500);
+			response.setStatus(500);
 			response.setContentType("text/html");
 			setFixedTransfer(response, "Server Error/" + e.getMessage());
 		}
@@ -480,7 +480,7 @@ public:
 			request.parseWwwFormUrlencoded();
 		}
 
-		response.setStatusCode(200);
+		response.setStatus(200);
 		setFixedTransfer(response, "hello");
     }
 };

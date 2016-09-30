@@ -70,7 +70,7 @@ namespace HTTP {
 		return false;
 	}
 	void BasicAuth::setAuthentication(HttpResponse & response) {
-		response.setStatusCode(401);
+		response.setStatus(401);
 		response.getHeader().setHeaderField("WWW-Authenticate", "Basic realm=\"" + realm() + "\"");
 	}
 }

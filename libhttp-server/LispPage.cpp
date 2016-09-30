@@ -186,7 +186,7 @@ namespace HTTP {
 				Iterator<_VAR> iter(args);
 				if (name->getSymbol() == "set-status-code") {
 					int status = (int)LISP::eval(iter.next(), env)->getInteger().getInteger();
-					response.setStatusCode(status);
+					response.setStatus(status);
 					return HEAP_ALLOC(env, LISP::Integer(status));
 				} else if (name->getSymbol() == "set-response-header") {
 					string name = LISP::eval(iter.next(), env)->toString();

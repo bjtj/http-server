@@ -43,21 +43,21 @@ public:
 		File file(fullpath);
 
 		if (path == "/") {
-			response.setStatusCode(200);
+			response.setStatus(200);
 			response.setContentType("text/plain");
 			setFixedTransfer(response, "Hello World");
 			return;
 		}
 
 		if (path == "/medium") {
-			response.setStatusCode(200);
+			response.setStatus(200);
 			response.setContentType("text/plain");
 			setFixedTransfer(response, medium);
 			return;
 		}
 
 		if (path == "/taketime") {
-			response.setStatusCode(200);
+			response.setStatus(200);
 			response.setContentType("text/plain");
 			idle(1000);
 			setFixedTransfer(response, "taketime!");
@@ -65,7 +65,7 @@ public:
 		}
 
 		if (!file.exists() || !file.isFile()) {
-			response.setStatusCode(404);
+			response.setStatus(404);
 			response.setContentType("text/plain");
 			setFixedTransfer(response, "Not Found");
 			return;
@@ -73,13 +73,13 @@ public:
 
 		string ext = file.getExtension();
 		if (mimeTypes.find(ext) != mimeTypes.end()) {
-			response.setStatusCode(200);
+			response.setStatus(200);
 			response.setContentType(mimeTypes[ext]);
 			setFileTransfer(response, file);
 			return;
 		}
 
-		response.setStatusCode(200);
+		response.setStatus(200);
 		response.setContentType("text/plain");
 		setFileTransfer(response, file);
 	}

@@ -90,7 +90,7 @@ namespace HTTP {
 		AutoRef<DataSource> source(new FileDataSource(stream));
 		AutoRef<DataTransfer> transfer(new FixedTransfer(source, size));
 
-		response.setStatusCode(206);
+		response.setStatus(206);
 		response.setContentLength(size);
 		string bytes = "bytes=";
 		bytes.append(Text::toString(start));
@@ -331,7 +331,7 @@ namespace HTTP {
 
 	void HttpCommunication::handleError(HttpRequest & request, HttpResponse & response, int errorCode) {
 
-		response.setStatusCode(errorCode);
+		response.setStatus(errorCode);
 
 		switch (errorCode) {
 		case 404:

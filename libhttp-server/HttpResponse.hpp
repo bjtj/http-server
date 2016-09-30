@@ -29,12 +29,12 @@ namespace HTTP {
 		virtual ~HttpResponse();
         
         void clear();
-		void setStatusCode(int code);
-		void setStatusCode(int code, std::string message);
+		void setStatus(int statusCode);
+		void setStatus(int statusCode, const std::string & statusString);
 		int getStatusCode();
 		void setParts(std::vector<std::string> &parts);
 		void setContentLength(unsigned long long length);
-		void setContentType(std::string type);
+		void setContentType(const std::string & type);
         bool completeContentTransfer();
 		std::string getHeaderField(const std::string & name) const;
 		std::string getHeaderFieldIgnoreCase(const std::string & name) const;

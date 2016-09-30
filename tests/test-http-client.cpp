@@ -56,14 +56,14 @@ public:
 			unsigned long tick = tick_milli();
 			unsigned long delay = (unsigned long)Text::toLong(request.getParameter("timeout"));
 			idle(delay);
-			response.setStatusCode(200);
+			response.setStatus(200);
 			response.setContentType("text/plain");
 			setFixedTransfer(response, ("Duration - " + Text::toString(tick_milli() - tick) + " ms."));
 			return;
 		}
 		
 		string ret;
-		response.setStatusCode(200);
+		response.setStatus(200);
 		response.setContentType("text/plain");
 		ret.append("method: " + request.getMethod() + "\n");
 		ret.append("path: " + request.getPath() + "\n");
