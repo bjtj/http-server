@@ -96,7 +96,7 @@ namespace HTTP {
     
     void ConnectionManager::onConnect(AutoRef<Socket> client) {
         AutoRef<Connection> connection = makeConnection(client);
-		connection->recvTimeout() = recvTimeout;
+		connection->setRecvTimeout(recvTimeout);
         AutoRef<Communication> communication = communicationMaker->makeCommunication();
 		registerConnection(connection);
 		try {

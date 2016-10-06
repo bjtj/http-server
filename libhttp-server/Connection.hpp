@@ -46,7 +46,8 @@ namespace HTTP {
 		OS::InetAddress getRemoteAddress();
 		OS::InetAddress getLocalAddress();
 		UTIL::Lifetime & recvLifetime();
-		unsigned long & recvTimeout();
+		unsigned long getRecvTimeout();
+		void setRecvTimeout(unsigned long timeout);
 		bool expiredRecvTimeout();
 	};
 }

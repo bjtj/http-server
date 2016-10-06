@@ -70,6 +70,7 @@ namespace HTTP {
 	}
 
 	int Connection::send(const char * data, size_t len) {
+		_recvLifetime.resetLifetime();
 		return _socket->send(data, len);
 	}
 
@@ -115,8 +116,13 @@ namespace HTTP {
 		return _recvLifetime;
 	}
 
-	unsigned long & Connection::recvTimeout() {
+	unsigned long Connection::getRecvTimeout() {
 		return _recvTimeout;
+	}
+	
+	void Connection::setRecvTimeout(unsigned long timeout) {
+		this->_recvTimeout = timeout;
+		_socket->setRecvTimeout(timeout);
 	}
 
 	bool Connection::expiredRecvTimeout() {
