@@ -181,7 +181,7 @@ namespace HTTP {
 		void startAsync();
 		void poll(unsigned long timeout);
 		void stop();
-		std::string getStatus();
+		size_t connections();
 	};
 }
 

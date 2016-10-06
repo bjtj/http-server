@@ -593,7 +593,7 @@ int main(int argc, char * args[]) {
 				break;
 			} else if (!strcmp(buffer, "s")) {
 				printf("Listen port: %d\n", config.getPort());
-				printf(" ** Detail: %s\n", server->getStatus().c_str());
+				printf(" ** Connections: %ld\n", server->connections());
 			} else if (!strcmp(buffer, "load")) {
 				// TODO: implement
 			}

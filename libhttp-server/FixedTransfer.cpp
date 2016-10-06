@@ -22,7 +22,7 @@ namespace HTTP {
 			throw Exception("sink required");
 		}
 
-		connection.setReadSize(indicator.adjustReadSize(connection.getLimit()));
+		connection.packet().setLimit(indicator.adjustReadSize(connection.packet().getLimit()));
 		Packet & packet = connection.read();
 		indicator.offset(sink()->write(packet.getData(), packet.getLength()));
 

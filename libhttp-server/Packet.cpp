@@ -1,25 +1,27 @@
 #include "Packet.hpp"
+#include <liboslayer/Text.hpp>
 
 namespace HTTP {
     
     using namespace OS;
+	using namespace UTIL;
 
-    Packet::Packet(size_t size) : buffer(NULL), size(size), pos(0), limit(size) {
-        if (size > 0) {
-            buffer = new char[size];
+    Packet::Packet(size_t capacity) : buffer(NULL), _capacity(capacity), _pos(0), _limit(capacity) {
+        if (_capacity > 0) {
+            buffer = new char[_capacity];
 			clear();
         }
     }
-    Packet::Packet(char * buffer, size_t size) : buffer(buffer), size(size), pos(0), limit(size){
+    Packet::Packet(char * buffer, size_t capacity) : buffer(buffer), _capacity(capacity), _pos(0), _limit(capacity){
 		clear();
     }
     Packet::Packet(const Packet & other) {
-        size = other.size;
-        pos = 0;
-        limit = other.limit;
-        if (size > 0) {
-            buffer = new char[size];
-            memcpy(buffer, other.buffer, size);
+        _capacity = other._capacity;
+        _pos = 0;
+        _limit = other._limit;
+        if (_capacity > 0) {
+            buffer = new char[_capacity];
+            memcpy(buffer, other.buffer, _capacity);
         } else {
             buffer = NULL;
         }
@@ -34,11 +36,11 @@ namespace HTTP {
     }
     
     void Packet::clear() {
-        memset(buffer, 0, size);
-        pos = 0;
+        memset(buffer, 0, _capacity);
+        _pos = 0;
     }
     size_t Packet::remaining() {
-        return limit - pos;
+        return (_limit - _pos);
     }
     void Packet::write(const char * data, size_t len) {
         size_t remain = remaining();
@@ -46,32 +48,37 @@ namespace HTTP {
             throw Exception("overflow", -1, 0);
         }
         
-        memcpy(buffer + pos, data, len);
-        pos += len;
+        memcpy(buffer + _pos, data, len);
+        _pos += len;
     }
     char * Packet::getData() {
         return buffer;
     }
     size_t Packet::getLength() {
-        return pos;
+        return _pos;
     }
     void Packet::setPosition(size_t position) {
-        if (position > limit) {
-            throw Exception("overlimit", -1, 0);
+        if (position > _limit) {
+            throw Exception("postion (" + Text::toString(position) + ") is out of limit (" +
+							Text::toString(_limit) + ")");
         }
-        this->pos = position;
+        this->_pos = position;
     }
     size_t Packet::getLimit() {
-        return limit;
+        return _limit;
     }
-    void Packet::resetLimit() {
-        limit = size;
+    void Packet::restoreLimit() {
+        _limit = _capacity;
     }
     void Packet::setLimit(size_t limit) {
-        if (limit > size) {
-            throw Exception("oversize", -1, 0);
+        if (limit > _capacity) {
+			throw Exception("limit (" + Text::toString(_pos) + ") is out of capacity (" +
+							Text::toString(limit) + ")");
         }
-        this->limit = limit;
+        this->_limit = limit;
     }
-    
+
+	size_t Packet::capacity() {
+		return _capacity;
+	}
 }

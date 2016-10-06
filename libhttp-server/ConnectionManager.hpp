@@ -86,31 +86,42 @@ namespace HTTP {
 		UTIL::AutoRef<ServerSocketMaker> serverSocketMaker;
 		UTIL::AutoRef<OS::ServerSocket> serverSocket;
         OS::Selector selector;
-        std::map<int, UTIL::AutoRef<Connection> > connectionTable;
+        std::map<int, UTIL::AutoRef<Connection> > connections;
         OS::Semaphore connectionsLock;
 		UTIL::AutoRef<CommunicationMaker> communicationMaker;
 		ConnectionThreadPool threadPool;
 		UTIL::AutoRef<OnMaxCapacity> onMaxCapacity;
+		unsigned long recvTimeout;
         
     public:
-        ConnectionManager(UTIL::AutoRef<CommunicationMaker> communicationMaker, size_t threadCount);
-        ConnectionManager(UTIL::AutoRef<CommunicationMaker> communicationMaker, size_t threadCount, UTIL::AutoRef<ServerSocketMaker> serverSocketMaker);
+        ConnectionManager(UTIL::AutoRef<CommunicationMaker> communicationMaker,
+						  size_t threadCount);
+        ConnectionManager(UTIL::AutoRef<CommunicationMaker> communicationMaker,
+						  size_t threadCount,
+						  UTIL::AutoRef<ServerSocketMaker> serverSocketMaker);
         virtual ~ConnectionManager();
-        virtual UTIL::AutoRef<Connection> makeConnection(UTIL::AutoRef<OS::Socket> client);
-        void onConnect(UTIL::AutoRef<OS::Socket> client);
-        void onDisconnect(UTIL::AutoRef<Connection> connection);
-        void clearConnections();
 		void start(int port);
         void start(int port, int backlog);
+		void stop();
         void poll(unsigned long timeout);
+        void clearConnections();
+		void onConnect(UTIL::AutoRef<OS::Socket> client);
+		UTIL::AutoRef<Connection> makeConnection(UTIL::AutoRef<OS::Socket> client);
+        void onDisconnect(UTIL::AutoRef<Connection> connection);
+		void registerConnection(UTIL::AutoRef<Connection> connection);
+		void unregisterConnection(UTIL::AutoRef<Connection> connection);
 		void removeCompletedConnections();
-        void stop();
         void stopAllThreads();
 		void startCommunication(UTIL::AutoRef<Communication> communication, UTIL::AutoRef<Connection> connection);
 		size_t getConnectionCount();
 		virtual void update(UTIL::Observable * target);
+		void handleMaxCapacity(UTIL::AutoRef<Connection> connection);
 		void setOnMaxCapacity(UTIL::AutoRef<OnMaxCapacity> onMaxCapacity);
-		std::string getStatus();
+		void setRecvTimeout(unsigned long recvTimeout);
+		unsigned long getRecvTimeout();
+		size_t available();
+		size_t working();
+		size_t capacity();
     };
 }
 

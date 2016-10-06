@@ -181,7 +181,7 @@ namespace HTTP {
                 AutoRef<DataTransfer> transfer = request.getTransfer();
 				if (!transfer.nil()) {
 					transfer->recv(connection);
-					readRequestContent(request, response, connection.getPacket());
+					readRequestContent(request, response, connection.packet());
 					if (transfer->completed()) {
 						AutoRef<DataSink> sink = transfer->sink();
 						onHttpRequestContentCompleted(request, sink, response);
@@ -197,13 +197,13 @@ namespace HTTP {
 
 	void HttpCommunication::readRequestHeaderIfNeed(Connection & connection) {
 		if (!requestHeaderReader.complete()) {
-			connection.setReadSize(1);
+			connection.packet().setLimit(1);
 			Packet & packet = connection.read();
             requestHeaderReader.read(packet.getData(), (int)packet.getLength());
 			packet.clear();
 			if (requestHeaderReader.complete()) {
                 request.setHeader(requestHeaderReader.getHeader());
-				connection.resetReadLimit();
+				connection.packet().restoreLimit();
 			}
 		}
 	}
@@ -387,7 +387,8 @@ namespace HTTP {
 		virtual ~MaxClientHandler() {}
 		virtual void onMaxCapacity(ConnectionManager & cm, AutoRef<Connection> connection) {
 
-			logger->loge("ConnectinoManager / status : " + cm.getStatus());
+			logger->loge("ConnectinoManager / free : " + Text::toString(cm.available()) +
+						 ", work : " + Text::toString(cm.working()));
 			
 			string content = "<html><head><title>Not available</title></head><body><h1>Too much connection</h1><p>Try again</p></body></html>";
 			string header = "HTTP/1.1 503 Service Not Available\r\nContent-Length: " + Text::toString(content.size()) + "\r\nContent-Type: text/html\r\n\r\n";
@@ -407,6 +408,7 @@ namespace HTTP {
 		thread(NULL) {
 
 		connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
+		connectionManager.setRecvTimeout(config.getIntegerProperty("recv.timeout", 0));
 	}
     
     AnotherHttpServer::AnotherHttpServer(HttpServerConfig config, AutoRef<ServerSocketMaker> serverSocketMaker) :
@@ -417,6 +419,7 @@ namespace HTTP {
 		thread(NULL) {
 
 		connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
+		connectionManager.setRecvTimeout(config.getIntegerProperty("recv.timeout", 0));
     }
     
 	AnotherHttpServer::~AnotherHttpServer() {
@@ -462,8 +465,8 @@ namespace HTTP {
 
 		connectionManager.stop();
 	}
-	
-	string AnotherHttpServer::getStatus() {
-		return connectionManager.getStatus();
+
+	size_t AnotherHttpServer::connections() {
+		return connectionManager.working();
 	}
 }

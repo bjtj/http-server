@@ -38,23 +38,19 @@ namespace HTTP {
 
 
 	void ConnectionThread::connectionTask() {
-
 		connection->registerSelector(selector, Selector::READ | Selector::WRITE);
-
 		try {
-
 			connection->negotiate();
-			
             communication->onConnected(*connection);
-            while (!interrupted() && !connection->isTerminateSignaled()) {
-                
+            while (!interrupted() && !connection->isTerminateFlaged()) {
+				if (connection->expiredRecvTimeout()) {
+					throw IOException("recv timeout");
+				}
                 if (connection->isSelectable()) {
                     if (selector.select(1000) > 0) {
-                        
                         if (connection->isReadableSelected(selector)) {
                             communication->onReceivable(*connection);
                         }
-                        
                         if (connection->isWritableSelected(selector)) {
                             communication->onWriteable(*connection);
                         }
@@ -63,7 +59,6 @@ namespace HTTP {
                     communication->onReceivable(*connection);
                     communication->onWriteable(*connection);
                 }
-
                 if (connection->isClosed() || communication->isCommunicationCompleted()) {
                     break;
                 }
@@ -78,7 +73,7 @@ namespace HTTP {
 
 		connection->unregisterSelector(selector, Selector::READ | Selector::WRITE);
         connection->close();
-        connection->setCompleted();
+        connection->completed() = true;
         
         // delete communication;
 		communication = NULL;

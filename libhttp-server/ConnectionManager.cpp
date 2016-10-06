@@ -9,80 +9,32 @@ namespace HTTP {
     using namespace UTIL;
     
     static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
-    
-	/**
-	 * @brief ConnectionManager
-	 */
 
-    ConnectionManager::ConnectionManager(AutoRef<CommunicationMaker> communicationMaker, size_t threadCount) :
+    ConnectionManager::ConnectionManager(AutoRef<CommunicationMaker> communicationMaker,
+										 size_t threadCount) :
 		connectionsLock(1),
 		communicationMaker(communicationMaker),
-		threadPool(threadCount) {
-		
+		threadPool(threadCount),
+		recvTimeout(0)
+	{
 		serverSocketMaker = AutoRef<ServerSocketMaker>(new DefaultServerSocketMaker);
-
 		threadPool.addObserver(this);
     }
     
-    ConnectionManager::ConnectionManager(AutoRef<CommunicationMaker> communicationMaker, size_t threadCount, AutoRef<ServerSocketMaker> serverSocketMaker) :
+    ConnectionManager::ConnectionManager(AutoRef<CommunicationMaker> communicationMaker,
+										 size_t threadCount,
+										 AutoRef<ServerSocketMaker> serverSocketMaker) :
 		serverSocketMaker(serverSocketMaker),
 		connectionsLock(1),
 		communicationMaker(communicationMaker),
-		threadPool(threadCount) {
-
+		threadPool(threadCount),
+		recvTimeout(0)
+	{
 		threadPool.addObserver(this);
     }
 
     ConnectionManager::~ConnectionManager() {
         stop();
-    }
-    
-    AutoRef<Connection> ConnectionManager::makeConnection(AutoRef<Socket> client) {
-        return AutoRef<Connection>(new Connection(client));
-    }
-    
-    void ConnectionManager::onConnect(AutoRef<Socket> client) {
-        AutoRef<Connection> connection = makeConnection(client);
-        AutoRef<Communication> communication = communicationMaker->makeCommunication();
-
-        connectionsLock.wait();
-        connectionTable[connection->getId()] = connection;
-        connectionsLock.post();
-
-		try {
-			startCommunication(communication, connection);
-		} catch (Exception & e) {
-			logger->loge(e.getMessage());
-
-			if (!onMaxCapacity.nil()) {
-				onMaxCapacity->onMaxCapacity(*this, connection);
-			}
-			
-			connection->close();
-			onDisconnect(connection);
-		}
-    }
-    
-    void ConnectionManager::onDisconnect(AutoRef<Connection> connection) {
-        connectionsLock.wait();
-        int id = connection->getId();
-        if (connectionTable.find(id) != connectionTable.end()) {
-            connectionTable.erase(id);
-        }
-        connectionsLock.post();
-    }
-    
-    void ConnectionManager::clearConnections() {
-        connectionsLock.wait();
-        for (map<int, AutoRef<Connection> >::const_iterator iter = connectionTable.begin(); iter != connectionTable.end(); iter++) {
-            AutoRef<Connection> connection = iter->second;
-            connection->signalTerminate();
-            while (!connection->isCompleted()) {
-                idle(10);
-            }
-        }
-        connectionTable.clear();
-        connectionsLock.post();
     }
 
 	void ConnectionManager::start(int port) {
@@ -93,7 +45,6 @@ namespace HTTP {
         if (!serverSocket.nil()) {
             return;
         }
-        
         serverSocket = serverSocketMaker->makeServerSocket(port);
         serverSocket->setReuseAddr(true);
         serverSocket->bind();
@@ -106,7 +57,6 @@ namespace HTTP {
         if (serverSocket.nil()) {
             return;
         }
-
         clearConnections();
         stopAllThreads();
         serverSocket->unregisterSelector(selector, Selector::READ);
@@ -129,12 +79,65 @@ namespace HTTP {
         }
     }
 
+	void ConnectionManager::clearConnections() {
+        connectionsLock.wait();
+        for (map<int, AutoRef<Connection> >::const_iterator iter = connections.begin();
+			 iter != connections.end(); iter++)
+		{
+            AutoRef<Connection> connection = iter->second;
+            connection->flagTerminate(true);
+            while (!connection->completed()) {
+                idle(10);
+            }
+        }
+        connections.clear();
+        connectionsLock.post();
+    }
+    
+    void ConnectionManager::onConnect(AutoRef<Socket> client) {
+        AutoRef<Connection> connection = makeConnection(client);
+		connection->recvTimeout() = recvTimeout;
+        AutoRef<Communication> communication = communicationMaker->makeCommunication();
+		registerConnection(connection);
+		try {
+			startCommunication(communication, connection);
+		} catch (Exception & e) {
+			logger->loge(e.getMessage());
+			handleMaxCapacity(connection);
+			connection->close();
+			onDisconnect(connection);
+		}
+    }
+
+	AutoRef<Connection> ConnectionManager::makeConnection(AutoRef<Socket> client) {
+        return AutoRef<Connection>(new Connection(client));
+    }
+    
+    void ConnectionManager::onDisconnect(AutoRef<Connection> connection) {
+		unregisterConnection(connection);
+    }
+
+	void ConnectionManager::registerConnection(UTIL::AutoRef<Connection> connection) {
+		connectionsLock.wait();
+        connections[connection->getId()] = connection;
+        connectionsLock.post();
+	}
+	
+	void ConnectionManager::unregisterConnection(UTIL::AutoRef<Connection> connection) {
+		connectionsLock.wait();
+        int id = connection->getId();
+        if (connections.find(id) != connections.end()) {
+            connections.erase(id);
+        }
+        connectionsLock.post();
+	}
+
 	void ConnectionManager::removeCompletedConnections() {
         connectionsLock.wait();
-        for (map<int, AutoRef<Connection> >::iterator iter = connectionTable.begin(); iter != connectionTable.end();) {
+        for (map<int, AutoRef<Connection> >::iterator iter = connections.begin(); iter != connections.end();) {
             AutoRef<Connection> connection = iter->second;
-            if (connection->isCompleted()) {
-				connectionTable.erase(iter++);
+            if (connection->completed()) {
+				connections.erase(iter++);
             } else {
                 iter++;
             }
@@ -152,7 +155,7 @@ namespace HTTP {
 
 	size_t ConnectionManager::getConnectionCount() {
 		connectionsLock.wait();
-		size_t cnt = connectionTable.size();
+		size_t cnt = connections.size();
 		connectionsLock.post();
 		return cnt;
 	}
@@ -162,13 +165,33 @@ namespace HTTP {
 		onDisconnect(t->getConnection());
 	}
 
+	void ConnectionManager::handleMaxCapacity(AutoRef<Connection> connection) {
+		if (!onMaxCapacity.nil()) {
+			onMaxCapacity->onMaxCapacity(*this, connection);
+		}
+	}
+
 	void ConnectionManager::setOnMaxCapacity(AutoRef<OnMaxCapacity> onMaxCapacity) {
 		this->onMaxCapacity = onMaxCapacity;
 	}
 
-	string ConnectionManager::getStatus() {
-		string status;
-		status = "free: " + Text::toString(threadPool.freeCount()) + ",working:" + Text::toString(threadPool.workingCount());
-		return status;
+	void ConnectionManager::setRecvTimeout(unsigned long recvTimeout) {
+		this->recvTimeout = recvTimeout;
+	}
+	
+	unsigned long ConnectionManager::getRecvTimeout() {
+		return recvTimeout;
+	}
+
+	size_t ConnectionManager::available() {
+		return threadPool.freeCount();
+	}
+	
+	size_t ConnectionManager::working() {
+		return threadPool.workingCount();
+	}
+	
+	size_t ConnectionManager::capacity() {
+		return threadPool.capacity();
 	}
 }
