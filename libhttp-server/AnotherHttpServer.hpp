@@ -105,9 +105,7 @@ namespace HTTP {
 	 * @brief HttpCommunication
 	 */
 	class HttpCommunication : public Communication {
-
 	private:
-
 		HttpRequest request;
 		HttpHeaderReader requestHeaderReader;
 		HttpResponse response;
@@ -116,15 +114,14 @@ namespace HTTP {
 		bool responseHeaderTransferDone;
 		bool responseContentTransferDone;
 		bool communicationCompleted;
-    
 		UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
-
 	public:
-
 		HttpCommunication(UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher);
 		virtual ~HttpCommunication();
 
 		void reset();
+		virtual bool isReadable();
+		virtual bool isWritable();
 		virtual void onConnected(Connection & connection);
 		virtual void onReceivable(Connection & connection);
 		void readRequestHeaderIfNeed(Connection & connection);

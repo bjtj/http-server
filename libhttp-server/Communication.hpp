@@ -10,6 +10,8 @@ namespace HTTP {
     public:
         Communication();
         virtual ~Communication();
+		virtual bool isReadable();
+		virtual bool isWritable();
         virtual void onConnected(Connection & connection) = 0;
 		virtual void onReceivable(Connection & connection) = 0;
         virtual void onWriteable(Connection & connection) = 0;

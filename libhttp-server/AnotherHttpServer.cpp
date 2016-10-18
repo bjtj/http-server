@@ -169,6 +169,14 @@ namespace HTTP {
 		request.setLocalAddress(connection.getLocalAddress());
 	}
 
+	bool HttpCommunication::isReadable() {
+		return writeable == false;
+	}
+	
+	bool HttpCommunication::isWritable() {
+		return writeable == true;
+	}
+
 	void HttpCommunication::onReceivable(Connection & connection) {
 		if (writeable) {
 			return;

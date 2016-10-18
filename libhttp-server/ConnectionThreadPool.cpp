@@ -50,7 +50,7 @@ namespace HTTP {
 					if (connection->isReadableSelected(selector)) {
 						do {
 							communication->onReceivable(*connection);
-						} while (connection->socket()->pending() > 0);
+						} while (connection->socket()->pending() > 0 && communication->isReadable());
 					}
 					if (connection->isWritableSelected(selector)) {
 						communication->onWriteable(*connection);
