@@ -35,10 +35,6 @@ namespace HTTP {
 		return id;
 	}
 
-	bool Connection::isSelectable() {
-		return _socket->isSelectable();
-	}
-
 	void Connection::registerSelector(Selector & selector, unsigned char flags) {
 		_socket->registerSelector(selector, flags);
 	}
@@ -64,14 +60,19 @@ namespace HTTP {
 	}
 
 	int Connection::recv(char * buffer, size_t size) {
-		_recvLifetime.resetLifetime();
 		int ret = _socket->recv(buffer, size);
+		if (ret > 0) {
+			_recvLifetime.resetLifetime();
+		}
 		return ret;
 	}
 
 	int Connection::send(const char * data, size_t len) {
-		_recvLifetime.resetLifetime();
-		return _socket->send(data, len);
+		int ret = _socket->send(data, len);
+		if (ret > 0) {
+			_recvLifetime.resetLifetime();
+		}
+		return ret;
 	}
 
 	void Connection::close() {

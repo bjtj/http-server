@@ -46,24 +46,20 @@ namespace HTTP {
 				if (connection->expiredRecvTimeout()) {
 					throw IOException("recv timeout");
 				}
-                if (connection->isSelectable()) {
-                    if (selector.select(1000) > 0) {
-                        if (connection->isReadableSelected(selector)) {
-                            communication->onReceivable(*connection);
-                        }
-                        if (connection->isWritableSelected(selector)) {
-                            communication->onWriteable(*connection);
-                        }
-                    }
-                } else {
-                    communication->onReceivable(*connection);
-                    communication->onWriteable(*connection);
-                }
+				if (selector.select(1000) > 0) {
+					if (connection->isReadableSelected(selector)) {
+						do {
+							communication->onReceivable(*connection);
+						} while (connection->socket()->pending() > 0);
+					}
+					if (connection->isWritableSelected(selector)) {
+						communication->onWriteable(*connection);
+					}
+				}
                 if (connection->isClosed() || communication->isCommunicationCompleted()) {
                     break;
                 }
             }
-            
         } catch (IOException & e) {
             logger->loge(e.getMessage());
         }

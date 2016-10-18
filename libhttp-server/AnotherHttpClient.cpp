@@ -190,43 +190,24 @@ namespace HTTP {
 	}
     
     void AnotherHttpClient::communicate() {
-
 		TimeoutChecker readTimeoutChecker(recvTimeout);
-        
         while (!interrupted) {
-
-			if (connection->isSelectable()) {
-				if (selector.select(100) > 0) {
-                
-					if (connection->isWritableSelected(selector)) {
-						sendRequestHeader();
-						sendRequestContent();
-					}
-                
-					if (connection->isReadableSelected(selector)) {
+			if (selector.select(100) > 0) {
+				if (connection->isWritableSelected(selector)) {
+					sendRequestHeader();
+					sendRequestContent();
+				}
+				if (connection->isReadableSelected(selector)) {
+					do {
 						recvResponseHeader();
 						recvResponseContent();
-					
-						readTimeoutChecker.reset();
-					}
-                
-					if (complete) {
-						break;
-					}
+					} while (connection->socket()->pending() > 0);
+					readTimeoutChecker.reset();
 				}
-			} else {
-
-				// TODO: test this
-				sendRequestHeader();
-				sendRequestContent();
-				recvResponseHeader();
-				recvResponseContent();
-				readTimeoutChecker.reset();
 				if (complete) {
 					break;
 				}
 			}
-
 			if (readTimeoutChecker.timeout() > 0 && readTimeoutChecker.trigger()) {
 				throw Exception("recv timeout - " + Text::toString(recvTimeout) + " ms.");
 			}

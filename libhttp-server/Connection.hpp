@@ -28,7 +28,6 @@ namespace HTTP {
 		virtual ~Connection();
 		int getId();
 		UTIL::AutoRef<OS::Socket> socket();
-		bool isSelectable();
 		void registerSelector(OS::Selector & selector, unsigned char flags);
 		void unregisterSelector(OS::Selector & selector, unsigned char flags);
 		bool isReadableSelected(OS::Selector & selector);
