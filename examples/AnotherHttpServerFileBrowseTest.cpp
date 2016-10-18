@@ -190,6 +190,8 @@ public:
 			response.setContentType("text/html");
 
 			FileStream reader(file, "rb");
+			string dump = reader.readFullAsString();
+			reader.close();
 			
 			LispPage page;
 			page.applyWeb();
@@ -197,7 +199,7 @@ public:
 			page.applySession(session);
 			page.applyRequest(request);
 			page.applyResponse(response);
-			string content = page.parseLispPage(reader.readFullAsString());
+			string content = page.parseLispPage(dump);
 
 			if (response.needRedirect()) {
 				logger->logd(log + " := 302 redirect");

@@ -11,13 +11,16 @@ namespace HTTP {
      */
     class FixedTransfer : public DataTransfer {
     private:
-
 		BufferIndicator indicator;
-        
+		char * _buffer;
+		size_t _size;
     public:
 		FixedTransfer(UTIL::AutoRef<DataSource> source, size_t size);
 		FixedTransfer(UTIL::AutoRef<DataSink> sink, size_t size);
         virtual ~FixedTransfer();
+	private:
+		void realloc(size_t size);
+	public:
 		virtual void recv(Connection & connection);
         virtual void send(Connection & connection);
 		virtual unsigned long long size();
