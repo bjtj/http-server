@@ -193,11 +193,11 @@ namespace HTTP {
 		TimeoutChecker readTimeoutChecker(recvTimeout);
         while (!interrupted) {
 			if (selector.select(100) > 0) {
-				if (connection->isWritableSelected(selector)) {
+				if (connection->isWritable(selector)) {
 					sendRequestHeader();
 					sendRequestContent();
 				}
-				if (connection->isReadableSelected(selector)) {
+				if (connection->isReadable(selector)) {
 					do {
 						recvResponseHeader();
 						recvResponseContent();

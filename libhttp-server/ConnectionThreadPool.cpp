@@ -47,12 +47,12 @@ namespace HTTP {
 					throw IOException("recv timeout");
 				}
 				if (selector.select(1000) > 0) {
-					if (connection->isReadableSelected(selector)) {
+					if (connection->isReadable(selector)) {
 						do {
 							communication->onReceivable(*connection);
 						} while (connection->socket()->pending() > 0 && communication->isReadable());
 					}
-					if (connection->isWritableSelected(selector)) {
+					if (connection->isWritable(selector)) {
 						communication->onWriteable(*connection);
 					}
 				}

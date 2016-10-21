@@ -43,12 +43,12 @@ namespace HTTP {
 		_socket->unregisterSelector(selector, flags);
 	}
 
-	bool Connection::isReadableSelected(Selector & selector) {
-		return selector.isReadableSelected(*_socket);
+	bool Connection::isReadable(Selector & selector) {
+		return _socket->isReadable(selector);
 	}
 
-	bool Connection::isWritableSelected(Selector & selector) {
-		return selector.isWritableSelected(*_socket);
+	bool Connection::isWritable(Selector & selector) {
+		return _socket->isWritable(selector);
 	}
 
 	void Connection::negotiate() {

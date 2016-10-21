@@ -66,7 +66,7 @@ namespace HTTP {
     
     void ConnectionManager::poll(unsigned long timeout) {
         if (selector.select(timeout) > 0) {
-            if (selector.isReadableSelected(*serverSocket)) {
+            if (selector.isReadable(*serverSocket)) {
 				try {
 					AutoRef<Socket> client(serverSocket->accept());
 					if (!client.nil()) {

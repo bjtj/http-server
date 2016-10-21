@@ -30,8 +30,8 @@ namespace HTTP {
 		UTIL::AutoRef<OS::Socket> socket();
 		void registerSelector(OS::Selector & selector, unsigned char flags);
 		void unregisterSelector(OS::Selector & selector, unsigned char flags);
-		bool isReadableSelected(OS::Selector & selector);
-		bool isWritableSelected(OS::Selector & selector);
+		bool isReadable(OS::Selector & selector);
+		bool isWritable(OS::Selector & selector);
 		void negotiate();
 		int recv(char * buffer, size_t size);
 		int send(const char * data, size_t len);
