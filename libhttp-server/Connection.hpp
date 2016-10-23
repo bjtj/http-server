@@ -21,6 +21,9 @@ namespace HTTP {
 		int id;
 		UTIL::Lifetime _recvLifetime;
 		unsigned long _recvTimeout;
+        unsigned long _recvCount;
+        unsigned long _sendCount;
+        unsigned long _sendTryCount;
 
 	public:
 		Connection(UTIL::AutoRef<OS::Socket> socket);
@@ -48,6 +51,9 @@ namespace HTTP {
 		unsigned long getRecvTimeout();
 		void setRecvTimeout(unsigned long timeout);
 		bool expiredRecvTimeout();
+        unsigned long recvCount();
+        unsigned long sendCount();
+        unsigned long sendTryCount();
 	};
 }
 

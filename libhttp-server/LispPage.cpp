@@ -278,9 +278,7 @@ namespace HTTP {
 					if (!line.empty() && reader.read(line + " ") > 0) {
 						vector<string> commands = reader.getCommands();
 						for (vector<string>::iterator cmd = commands.begin(); !env.quit() && cmd != commands.end(); cmd++) {
-							if (!compile(*cmd, env)) {
-								break;
-							}
+                            compile(*cmd, env);
 						}
 						reader.clearCommands();
 					}

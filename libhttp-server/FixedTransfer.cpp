@@ -11,15 +11,20 @@ namespace HTTP {
      */
     
 	FixedTransfer::FixedTransfer(AutoRef<DataSource> source, size_t size)
-		: DataTransfer(source), indicator(size), _size(size)
+		: DataTransfer(source), indicator(size), _buffer(NULL), _size(1024)
 	{
-		_buffer = new char[size];
+		_buffer = new char[_size];
 	}
+    
+    FixedTransfer::FixedTransfer(AutoRef<DataSource> source, size_t size, size_t fragmentSize)
+    : DataTransfer(source), indicator(size), _buffer(NULL), _size(fragmentSize)
+    {
+        _buffer = new char[_size];
+    }
 	
 	FixedTransfer::FixedTransfer(AutoRef<DataSink> sink, size_t size)
-		: DataTransfer(sink), indicator(size), _size(size)
+		: DataTransfer(sink), indicator(size), _buffer(NULL), _size(0)
 	{
-		_buffer = new char[size];
 	}
 	
     FixedTransfer::~FixedTransfer() {
@@ -45,14 +50,9 @@ namespace HTTP {
 		if (indicator.remain()) {
 			size_t size = indicator.adjustReadSize(_size);
 			size_t readlen = source()->read(_buffer, size);
-			try {
-				size_t sendlen = connection.send(_buffer, readlen);
-				indicator.offset(sendlen);
-			} catch (IOException & e) {
-				throw e;
-			}
+            size_t sendlen = connection.send(_buffer, readlen);
+            indicator.offset(sendlen);
 		}
-
         if (indicator.completed()) {
 			complete();
         }

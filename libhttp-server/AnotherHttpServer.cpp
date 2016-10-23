@@ -54,42 +54,34 @@ namespace HTTP {
 	}
 
 	void HttpRequestHandler::setFileTransfer(HttpResponse & response, const string & filepath) {
-
 		File file(filepath);
 		setFileTransfer(response, file);
 	}
 
 	void HttpRequestHandler::setFileTransfer(HttpResponse & response, OS::File & file) {
-
 		AutoRef<DataSource> source(new FileDataSource(FileStream(file, "rb")));
 		AutoRef<DataTransfer> transfer(new FixedTransfer(source, (size_t)file.getSize()));
-
 		response.clearTransfer();
 		response.setTransfer(transfer);
 		response.setContentLength(file.getSize());
 	}
 
 	void HttpRequestHandler::setPartialFileTransfer(HttpResponse & response, OS::File & file, size_t start, size_t end) {
-
 		if (file.getSize() < 1) {
 			throw Exception("empty file");
 		}
-
 		if (end == 0 || end >= (size_t)file.getSize()) {
 			end = (size_t)file.getSize() - 1;
 		}
-
 		if (start >= end) {
-			throw Exception("wrong range start error");
+            throw Exception("wrong range start error : end(" + Text::toString(end) +
+                            ") but start(" + Text::toString(start) + ")");
 		}
-
 		size_t size = (end - start + 1);
-
 		FileStream stream(file, "rb");
 		stream.seek(start);
 		AutoRef<DataSource> source(new FileDataSource(stream));
-		AutoRef<DataTransfer> transfer(new FixedTransfer(source, size));
-
+		AutoRef<DataTransfer> transfer(new FixedTransfer(source, size, 4096));
 		response.setStatus(206);
 		response.setContentLength(size);
 		string bytes = "bytes=";
@@ -182,25 +174,27 @@ namespace HTTP {
 			return;
 		}
 		readRequestHeaderIfNeed(connection);
-		if (requestHeaderReader.complete()) {
-            if (!requestHeaderHandled) {
-                onRequestHeader(request, response);
-            } else {
-                AutoRef<DataTransfer> transfer = request.getTransfer();
-				if (!transfer.nil()) {
-					transfer->recv(connection);
-					readRequestContent(request, response, connection.packet());
-					if (transfer->completed()) {
-						AutoRef<DataSink> sink = transfer->sink();
-						onHttpRequestContentCompleted(request, sink, response);
-						writeable = true;
-					}
-				} else {
-					onHttpRequestContentCompleted(request, AutoRef<DataSink>(), response);
-                    writeable = true;
-				}
+		if (!requestHeaderReader.complete()) {
+            return;
+        }
+        if (!requestHeaderHandled) {
+            onRequestHeader(request, response);
+            return;
+        }
+        AutoRef<DataTransfer> transfer = request.getTransfer();
+        if (!transfer.nil()) {
+            transfer->recv(connection);
+            readRequestContent(request, response, connection.packet());
+            if (transfer->completed()) {
+                AutoRef<DataSink> sink = transfer->sink();
+                onHttpRequestContentCompleted(request, sink, response);
+                writeable = true;
             }
-		}
+        } else {
+            onHttpRequestContentCompleted(request, AutoRef<DataSink>(), response);
+            writeable = true;
+        }
+        
 	}
 
 	void HttpCommunication::readRequestHeaderIfNeed(Connection & connection) {
@@ -298,28 +292,24 @@ namespace HTTP {
 	}
 
 	void HttpCommunication::sendResponseHeader(Connection & connection) {
-
 		HttpResponseHeader & header = response.getHeader();
-            
         string headerString = header.toString();
-        connection.send(headerString.c_str(), (int)headerString.length());
-		// TODO: check write length and compare the header string length
+        if (connection.send(headerString.c_str(), (int)headerString.length()) != (int)headerString.length()) {
+            // TODO: retry
+            throw Exception("Response Header send failed");
+        }
 		responseHeaderTransferDone = true;
-
 		AutoRef<HttpRequestHandler> handler = dispatcher->getRequestHandler(request.getPath());
 		if (!handler.nil()) {
 			handler->onHttpResponseHeaderCompleted(request, response);
 		}
-            
         if (!header.isChunkedTransfer() && header.getContentLength() == 0) {
             responseContentTransferDone = true;
         }
 	}
 
 	void HttpCommunication::sendResponseContent(Connection & connection) {
-
         AutoRef<DataTransfer> responseTransfer = response.getTransfer();
-
 		if (!responseTransfer.empty()) {
 			responseTransfer->send(connection);
 			if (responseTransfer->completed()) {
@@ -411,23 +401,23 @@ namespace HTTP {
 	AnotherHttpServer::AnotherHttpServer(HttpServerConfig config) :
 		config(config),
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
-		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
+		_connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
 						  config.getIntegerProperty("thread.count", 20)),
 		thread(NULL) {
 
-		connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
-		connectionManager.setRecvTimeout(config.getIntegerProperty("recv.timeout", 0));
+		_connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
+		_connectionManager.setRecvTimeout(config.getIntegerProperty("recv.timeout", 0));
 	}
     
     AnotherHttpServer::AnotherHttpServer(HttpServerConfig config, AutoRef<ServerSocketMaker> serverSocketMaker) :
 		config(config),
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
-		connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
+		_connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
 						  config.getIntegerProperty("thread.count", 20), serverSocketMaker),
 		thread(NULL) {
 
-		connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
-		connectionManager.setRecvTimeout(config.getIntegerProperty("recv.timeout", 0));
+		_connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
+		_connectionManager.setRecvTimeout(config.getIntegerProperty("recv.timeout", 0));
     }
     
 	AnotherHttpServer::~AnotherHttpServer() {
@@ -446,7 +436,7 @@ namespace HTTP {
 	}
 
 	void AnotherHttpServer::start() {
-		connectionManager.start(getPort(), config.getIntegerProperty("backlog", 5));
+		_connectionManager.start(getPort(), config.getIntegerProperty("backlog", 5));
 	}
 
 	void AnotherHttpServer::startAsync() {
@@ -459,7 +449,7 @@ namespace HTTP {
 	}
 
 	void AnotherHttpServer::poll(unsigned long timeout) {
-		connectionManager.poll(timeout);
+		_connectionManager.poll(timeout);
 	}
 
 	void AnotherHttpServer::stop() {
@@ -471,10 +461,14 @@ namespace HTTP {
 			thread = NULL;
 		}
 
-		connectionManager.stop();
+		_connectionManager.stop();
 	}
 
 	size_t AnotherHttpServer::connections() {
-		return connectionManager.working();
+		return _connectionManager.working();
 	}
+    
+    ConnectionManager & AnotherHttpServer::connectionManager() {
+        return _connectionManager;
+    }
 }

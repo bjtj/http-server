@@ -162,7 +162,7 @@ namespace HTTP {
 
 		HttpServerConfig config;
 		UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
-		ConnectionManager connectionManager;
+		ConnectionManager _connectionManager;
 		OS::Thread * thread;
 
 	public:
@@ -179,6 +179,7 @@ namespace HTTP {
 		void poll(unsigned long timeout);
 		void stop();
 		size_t connections();
+        ConnectionManager & connectionManager();
 	};
 }
 

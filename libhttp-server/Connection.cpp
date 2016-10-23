@@ -12,17 +12,24 @@ namespace HTTP {
 		_completed(false),
 		_packet(4096),
 		id(socket->getFd()),
-		_recvTimeout(0)
+		_recvTimeout(0),
+        _recvCount(0),
+        _sendCount(0),
+        _sendTryCount(0)
 	{
 		/**/
 	}
+    
 	Connection::Connection(AutoRef<Socket> socket, size_t packetSize) :
 		_socket(socket),
 		terminateFlag(false),
 		_completed(false),
 		_packet(packetSize),
 		id(socket->getFd()),
-		_recvTimeout(0)
+        _recvTimeout(0),
+        _recvCount(0),
+        _sendCount(0),
+        _sendTryCount(0)
 	{
 		/**/
 	}
@@ -63,14 +70,17 @@ namespace HTTP {
 		int ret = _socket->recv(buffer, size);
 		if (ret > 0) {
 			_recvLifetime.resetLifetime();
+            _recvCount += ret;
 		}
 		return ret;
 	}
 
 	int Connection::send(const char * data, size_t len) {
+        _sendTryCount += len;
 		int ret = _socket->send(data, len);
 		if (ret > 0) {
 			_recvLifetime.resetLifetime();
+            _sendCount += ret;
 		}
 		return ret;
 	}
@@ -78,6 +88,7 @@ namespace HTTP {
 	void Connection::close() {
 		_socket->close();
 	}
+    
 	bool Connection::isClosed() {
 		return _socket->isClosed();
 	}
@@ -129,4 +140,16 @@ namespace HTTP {
 	bool Connection::expiredRecvTimeout() {
 		return ((_recvTimeout != 0) && (_recvLifetime.lifetime() >= _recvTimeout));
 	}
+    
+    unsigned long Connection::recvCount() {
+        return _recvCount;
+    }
+    
+    unsigned long Connection::sendCount() {
+        return _sendCount;
+    }
+    
+    unsigned long Connection::sendTryCount() {
+        return _sendTryCount;
+    }
 }

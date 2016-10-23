@@ -121,6 +121,7 @@ private:
 	string prefix;
 	string indexName;
 	map<string, string> mimeTypes;
+    map<string, string> lspMemCache;
 public:
 	StaticHttpRequestHandler(ServerConfig & config, const string & basePath, const string & prefix, const string & indexName) : config(config), basePath(basePath), prefix(prefix), indexName(indexName) {
 		mimeTypes = MimeTypes::getMimeTypes();
@@ -128,15 +129,11 @@ public:
     virtual ~StaticHttpRequestHandler() {}
     
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
-
 		try {
-			
 			doHandle(request, sink, response);
-			
 			if (request.getMethod() == "HEAD") {
 				response.setTransfer(AutoRef<DataTransfer>(NULL));
 			}
-			
 		} catch (Exception & e) {
 			logger->loge(" ** error");
 			response.setStatus(500);
@@ -146,30 +143,21 @@ public:
 	}
 
 	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
-
 		string log;
-
 		logger->logd(Text::format("** Part2: %s [%s:%d]", request.getHeader().getPart2().c_str(),
                                  request.getRemoteAddress().getHost().c_str(),
 								 request.getRemoteAddress().getPort()));
-
 		if (request.isWwwFormUrlEncoded()) {
 			request.parseWwwFormUrlencoded();
 		}
-        
         response.setContentLength(0);
-
 		HttpSession & session = HttpSessionTool::getSession(request, sessionManager);
 		session.updateLastAccessTime();
-
 		string path = request.getPath();
 		path = path.substr(prefix.size());
-
-		log = " ** static :: prefix : '" + prefix + "' / path : '" + path + "'";
-
+		log = "** static :: prefix : '" + prefix + "' / path : '" + path + "'";
         File file(File::mergePaths(basePath, path));
         if (!file.exists() || !file.isFile()) {
-
 			if (path == "/") {
 				file = File(File::mergePaths(basePath, indexName));
 				if (!file.exists()) {
@@ -185,14 +173,15 @@ public:
         }
 
 		if (file.getExtension() == "lsp") {
-
 			response.setStatus(200);
 			response.setContentType("text/html");
-
-			FileStream reader(file, "rb");
-			string dump = reader.readFullAsString();
-			reader.close();
-			
+            if (lspMemCache.find(file.getPath()) == lspMemCache.end() ||
+                lspMemCache[file.getPath()].size() != file.getSize()) {
+                FileStream reader(file, "rb");
+                lspMemCache[file.getPath()] = reader.readFullAsString();
+                reader.close();
+            }
+            string dump = lspMemCache[file.getPath()];
 			LispPage page;
 			page.applyWeb();
 			page.applyAuth(request, response);
@@ -200,16 +189,12 @@ public:
 			page.applyRequest(request);
 			page.applyResponse(response);
 			string content = page.parseLispPage(dump);
-
 			if (response.needRedirect()) {
 				logger->logd(log + " := 302 redirect");
 				redirect(config, request, response, session, response.getRedirectLocation());
 				return;
 			}
-
-
 			if (response["set-file-transfer"].empty() == false) {
-
 				File file(response["set-file-transfer"]);
 				if (!file.exists() || !file.isFile()) {
 					logger->logd(log + " := 404");
@@ -217,10 +202,8 @@ public:
 					setFixedTransfer(response, "Not Found");
 					return;
 				}
-
 				setContentTypeWithFile(request, response, file);
 				setContentDispositionWithFile(request, response, file);
-
 				string range = request.getHeaderFieldIgnoreCase("Range");
 				if (!range.empty()) {
 					size_t f = range.find("=");
@@ -248,18 +231,15 @@ public:
 						}
 					}
 				}
-
 				logger->logd(log + " := 200 fixed transfer");
 				response.setStatus(200);
 				setFileTransfer(response, file);
 				return;
 			}
-			
-			logger->logd(log + " := 200 lisp page");;
+			logger->logd(log + " := 200 lisp page");
 			setFixedTransfer(response, content);
 			return;
 		}
-
 		logger->logd(log + " := 200 static");
         response.setStatus(200);
 		setContentTypeWithFile(request, response, file);
@@ -595,7 +575,11 @@ int main(int argc, char * args[]) {
 				break;
 			} else if (!strcmp(buffer, "s")) {
 				printf("Listen port: %d\n", config.getPort());
-				printf(" ** Connections: %ld\n", server->connections());
+				printf(" * Connections: %ld\n", server->connections());
+                vector<AutoRef<Connection> > conns = server->connectionManager().getConnectionList();
+                for (vector<AutoRef<Connection> >::iterator iter = conns.begin(); iter != conns.end(); iter++) {
+                    printf(" - recv: %ld, send: %ld (%ld)\n", (*iter)->recvCount(), (*iter)->sendCount(), (*iter)->sendTryCount());
+                }
 			} else if (!strcmp(buffer, "load")) {
 				// TODO: implement
 			}

@@ -122,6 +122,7 @@ namespace HTTP {
 		size_t available();
 		size_t working();
 		size_t capacity();
+        std::vector<UTIL::AutoRef<Connection> > getConnectionList();
     };
 }
 

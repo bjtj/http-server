@@ -16,6 +16,7 @@ namespace HTTP {
 		size_t _size;
     public:
 		FixedTransfer(UTIL::AutoRef<DataSource> source, size_t size);
+        FixedTransfer(UTIL::AutoRef<DataSource> source, size_t size, size_t fragmentSize);
 		FixedTransfer(UTIL::AutoRef<DataSink> sink, size_t size);
         virtual ~FixedTransfer();
 	private:

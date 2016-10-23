@@ -194,4 +194,14 @@ namespace HTTP {
 	size_t ConnectionManager::capacity() {
 		return threadPool.capacity();
 	}
+    
+    vector<AutoRef<Connection> > ConnectionManager::getConnectionList() {
+        vector<AutoRef<Connection> > lst;
+        connectionsLock.wait();
+        for (map<int, AutoRef<Connection> >::iterator iter = connections.begin(); iter != connections.end(); iter++) {
+            lst.push_back(iter->second);
+        }
+        connectionsLock.post();
+        return lst;
+    }
 }
