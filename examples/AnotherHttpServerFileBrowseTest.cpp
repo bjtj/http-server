@@ -495,6 +495,9 @@ bool promptBoolean(const char * msg) {
     return false;
 }
 
+#if !defined(DATA_PATH)
+#define DATA_PATH ""
+#endif
 
 /**
  * @brief 

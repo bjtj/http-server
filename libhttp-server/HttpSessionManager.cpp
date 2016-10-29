@@ -37,6 +37,7 @@ namespace HTTP {
 			getSession(id);
 			return true;
 		} catch (Exception & e) {
+			(void)e;
 			return false;
 		}
 	}
