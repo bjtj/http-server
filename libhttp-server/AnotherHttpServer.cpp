@@ -456,7 +456,7 @@ namespace HTTP {
 
 		if (thread) {
 			thread->interrupt();
-			thread->join();
+			thread->wait();
 			delete thread;
 			thread = NULL;
 		}

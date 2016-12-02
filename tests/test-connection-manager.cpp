@@ -89,7 +89,7 @@ public:
 	virtual void tearDown() {
 
 		thread->interrupt();
-		thread->join();
+		thread->wait();
 		delete thread;
 		
 		cm->stop();
@@ -143,7 +143,7 @@ public:
 	virtual void tearDown() {
 
 		thread->interrupt();
-		thread->join();
+		thread->wait();
 		delete thread;
 		
 		cm->stop();
@@ -205,7 +205,7 @@ public:
 	virtual void tearDown() {
 
 		thread->interrupt();
-		thread->join();
+		thread->wait();
 		delete thread;
 
 		cm->stop();
