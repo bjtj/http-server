@@ -11,9 +11,10 @@ namespace HTTP {
 	
 	class LispPage {
 	private:
-		LISP::Env global_env;
+		LISP::Env _env;
 	public:
 		LispPage();
+		LispPage(LISP::Env * parentEnv);
 		virtual ~LispPage();
 		LISP::Env & env();
 		std::string toLispySymbolName(const std::string & name);

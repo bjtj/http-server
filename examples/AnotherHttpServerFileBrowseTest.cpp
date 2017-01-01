@@ -117,16 +117,23 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
 class StaticHttpRequestHandler : public HttpRequestHandler {
 private:
 	ServerConfig & config;
+	LISP::Env & env;
     string basePath;
 	string prefix;
 	string indexName;
 	map<string, string> mimeTypes;
     map<string, string> lspMemCache;
 public:
-	StaticHttpRequestHandler(ServerConfig & config, const string & basePath, const string & prefix, const string & indexName) : config(config), basePath(basePath), prefix(prefix), indexName(indexName) {
+	StaticHttpRequestHandler(ServerConfig & config,
+							 LISP::Env & env,
+							 const string & basePath,
+							 const string & prefix,
+							 const string & indexName)
+		: config(config), env(env), basePath(basePath), prefix(prefix), indexName(indexName)
+	{
 		mimeTypes = MimeTypes::getMimeTypes();
 	}
-    virtual ~StaticHttpRequestHandler() {}
+    virtual ~StaticHttpRequestHandler() {/* empty */}
     
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 		try {
@@ -176,19 +183,20 @@ public:
 			response.setStatus(200);
 			response.setContentType("text/html");
             if (lspMemCache.find(file.getPath()) == lspMemCache.end() ||
-                lspMemCache[file.getPath()].size() != file.getSize()) {
+                (filesize_t)lspMemCache[file.getPath()].size() != file.getSize()) {
                 FileStream reader(file, "rb");
                 lspMemCache[file.getPath()] = reader.readFullAsString();
                 reader.close();
             }
             string dump = lspMemCache[file.getPath()];
-			LispPage page;
+			LispPage page(&env);
 			page.applyWeb();
 			page.applyAuth(request, response);
 			page.applySession(session);
 			page.applyRequest(request);
 			page.applyResponse(response);
 			string content = page.parseLispPage(dump);
+			env.gc();
 			if (response.needRedirect()) {
 				logger->logd(log + " := 302 redirect");
 				redirect(config, request, response, session, response.getRedirectLocation());
@@ -557,7 +565,13 @@ int main(int argc, char * args[]) {
         server = new AnotherHttpServer(config);
     }
 
-	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config, config["static.base.path"], "/static", config["index.name"]));
+	LISP::Env env;
+	LISP::native(env);
+	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config,
+																		   env,
+																		   config["static.base.path"],
+																		   "/static",
+																		   config["index.name"]));
     server->registerRequestHandler("/static/*", staticHandler);
 
 	AutoRef<BasicAuth> auth(new BasicAuth(config["auth.username"], config["auth.password"]));
@@ -574,7 +588,7 @@ int main(int argc, char * args[]) {
 	while (1) {
 		char buffer[1024] = {0,};
 		if (readline(buffer, sizeof(buffer)) > 0) {
-			if (!strcmp(buffer, "q")) {
+			if (!strcmp(buffer, "q") || !strcmp(buffer, "quit")) {
 				break;
 			} else if (!strcmp(buffer, "s")) {
 				printf("Listen port: %d\n", config.getPort());

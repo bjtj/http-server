@@ -19,14 +19,17 @@ namespace HTTP {
 	static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
 	
 	LispPage::LispPage() {
-		LISP::native(global_env);
+		LISP::native(_env);
+	}
+
+	LispPage::LispPage(LISP::Env * parentEnv) : _env(parentEnv) {
 	}
 	
 	LispPage::~LispPage() {
 	}
 	
 	LISP::Env & LispPage::env() {
-		return global_env;
+		return _env;
 	}
 
 	string LispPage::toLispySymbolName(const string & name) {
@@ -41,7 +44,7 @@ namespace HTTP {
 	}
 	
 	void LispPage::applyWeb() {
-		applyWeb(global_env);
+		applyWeb(_env);
 	}
 	void LispPage::applyWeb(LISP::Env & env) {
 		class Enc : public LISP::Procedure {
@@ -66,11 +69,11 @@ namespace HTTP {
 			}
 		};
         
-		env["url-encode"] = HEAP_ALLOC(env, UTIL::AutoRef<LISP::Procedure>(new Enc("url-encode")));
-		env["url-decode"] = HEAP_ALLOC(env, UTIL::AutoRef<LISP::Procedure>(new Dec("url-decode")));
+		env.local()["url-encode"] = HEAP_ALLOC(env, UTIL::AutoRef<LISP::Procedure>(new Enc("url-encode")));
+		env.local()["url-decode"] = HEAP_ALLOC(env, UTIL::AutoRef<LISP::Procedure>(new Dec("url-decode")));
 	}
 	void LispPage::applyAuth(HttpRequest & request, HttpResponse & response) {
-		applyAuth(global_env, request, response);
+		applyAuth(_env, request, response);
 	}
 	void LispPage::applyAuth(LISP::Env & env, HttpRequest & request, HttpResponse & response) {
 		class Auth : public LISP::Procedure {
@@ -98,10 +101,10 @@ namespace HTTP {
 				return HEAP_ALLOC(env, "nil");
 			}
 		};
-		env["proc-basic-auth"] = HEAP_ALLOC(env, UTIL::AutoRef<LISP::Procedure>(new Auth("auth", request, response)));
+		env.local()["proc-basic-auth"] = HEAP_ALLOC(env, UTIL::AutoRef<LISP::Procedure>(new Auth("auth", request, response)));
 	}
 	void LispPage::applySession(HttpSession & session) {
-		applySession(global_env, session);
+		applySession(_env, session);
 	}
 	void LispPage::applySession(LISP::Env & env, HttpSession & session) {
 		
@@ -132,12 +135,12 @@ namespace HTTP {
 			}
 		};
 		UTIL::AutoRef<LISP::Procedure> proc(new LispSession("url", session));
-		env["url"] = HEAP_ALLOC(env, proc);
-		env["get-session-value"] = HEAP_ALLOC(env, proc);
-		env["set-session-value"] = HEAP_ALLOC(env, proc);
+		env.local()["url"] = HEAP_ALLOC(env, proc);
+		env.local()["get-session-value"] = HEAP_ALLOC(env, proc);
+		env.local()["set-session-value"] = HEAP_ALLOC(env, proc);
 	}
 	void LispPage::applyRequest(HttpRequest & request) {
-		applyRequest(global_env, request);
+		applyRequest(_env, request);
 	}
 	void LispPage::applyRequest(LISP::Env & env, HttpRequest & request) {
 		class LispRequest : public LISP::Procedure {
@@ -165,14 +168,14 @@ namespace HTTP {
 			}
 		};
 		UTIL::AutoRef<LISP::Procedure> proc(new LispRequest("request*", request));
-		env["get-request-method"] = HEAP_ALLOC(env, proc);
-		env["get-request-path"] = HEAP_ALLOC(env, proc);
-		env["get-request-param"] = HEAP_ALLOC(env, proc);
-		env["get-request-header"] = HEAP_ALLOC(env, proc);
+		env.local()["get-request-method"] = HEAP_ALLOC(env, proc);
+		env.local()["get-request-path"] = HEAP_ALLOC(env, proc);
+		env.local()["get-request-param"] = HEAP_ALLOC(env, proc);
+		env.local()["get-request-header"] = HEAP_ALLOC(env, proc);
 	}
 
 	void LispPage::applyResponse(HttpResponse & response) {
-		applyResponse(global_env, response);
+		applyResponse(_env, response);
 	}
 	void LispPage::applyResponse(LISP::Env & env, HttpResponse & response) {
 		class LispResponse : public LISP::Procedure {
@@ -207,14 +210,14 @@ namespace HTTP {
 			}
 		};
 		UTIL::AutoRef<LISP::Procedure> proc(new LispResponse("response*", response));
-		env["set-status-code"] = HEAP_ALLOC(env, proc);
-		env["set-response-header"] = HEAP_ALLOC(env, proc);
-		env["set-redirect"] = HEAP_ALLOC(env, proc);
-		env["set-file-transfer"] = HEAP_ALLOC(env, proc);
+		env.local()["set-status-code"] = HEAP_ALLOC(env, proc);
+		env.local()["set-response-header"] = HEAP_ALLOC(env, proc);
+		env.local()["set-redirect"] = HEAP_ALLOC(env, proc);
+		env.local()["set-file-transfer"] = HEAP_ALLOC(env, proc);
 		
 	}
 	void LispPage::applyLoadPage() {
-		applyLoadPage(global_env);
+		applyLoadPage(_env);
 	}
 	void LispPage::applyLoadPage(LISP::Env & env) {
 		class LispLoadPage : public LISP::Procedure {
@@ -229,7 +232,7 @@ namespace HTTP {
 			}
 		};
 		UTIL::AutoRef<LISP::Procedure> proc(new LispLoadPage("load-page"));
-		env["load-page"] = HEAP_ALLOC(env, proc);
+		env.local()["load-page"] = HEAP_ALLOC(env, proc);
 	}
     
 	bool LispPage::compile(const string & line, LISP::Env & env) {
@@ -242,23 +245,23 @@ namespace HTTP {
 		}
 	}
 	string LispPage::parseLispPage(const string & src) {
-		return parseLispPage(global_env, src);
+		return parseLispPage(_env, src);
 	}
 	string LispPage::parseLispPage(LISP::Env & env, const string & src) {
         
 		size_t f = 0;
 		size_t s = 0;
 
-		if (env["*content*"].nil()) {
-			env["*content*"] = HEAP_ALLOC(env, LISP::text(""));
+		if (env.local()["*content*"].nil()) {
+			env.local()["*content*"] = HEAP_ALLOC(env, LISP::text(""));
 		}
 
 		while (!env.quit() && (f = src.find("<%", f)) != string::npos) {
             
 			if (f - s > 0) {
 				string txt = src.substr(s, f - s);
-				_VAR content = env["*content*"];
-				env["*content*"] = HEAP_ALLOC(env, LISP::text(content->toString() + txt));
+				_VAR content = env.local()["*content*"];
+				env.local()["*content*"] = HEAP_ALLOC(env, LISP::text(content->toString() + txt));
 			}
             
 			size_t e = src.find("%>", f);
@@ -289,8 +292,8 @@ namespace HTTP {
 		}
 		if (!env.quit() && s < src.length()) {
 			string txt = src.substr(s);
-			_VAR content = env["*content*"];
-			env["*content*"] = HEAP_ALLOC(env, LISP::text(content->toString() + txt));
+			_VAR content = env.local()["*content*"];
+			env.local()["*content*"] = HEAP_ALLOC(env, LISP::text(content->toString() + txt));
 		}
         
 		return env.get("*content*")->toString();
