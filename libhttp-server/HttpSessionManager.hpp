@@ -1,6 +1,7 @@
 #ifndef __HTTP_SESSION_MANAGER_HPP__
 #define __HTTP_SESSION_MANAGER_HPP__
 
+#include <liboslayer/os.hpp>
 #include <vector>
 #include "HttpSession.hpp"
 
@@ -9,7 +10,10 @@ namespace HTTP {
 	private:
 		unsigned long timeout;
 		std::vector<HttpSession*> sessions;
+		OS::Semaphore sem;
 
+	private:
+		/* do not allow copy */
 		HttpSessionManager(const HttpSessionManager & other);
 		HttpSessionManager & operator=(const HttpSessionManager & other);
 	

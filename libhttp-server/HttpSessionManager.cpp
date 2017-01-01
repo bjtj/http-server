@@ -6,21 +6,24 @@ namespace HTTP {
 	using namespace OS;
 	
 	HttpSessionManager::HttpSessionManager(unsigned long timeout)
-		: timeout(timeout) {
+		: timeout(timeout), sem(1) {
 	}
 	HttpSessionManager::~HttpSessionManager() {
 		clear();
 	}
 
 	void HttpSessionManager::clear() {
+		sem.wait();
 		for (vector<HttpSession*>::iterator iter = sessions.begin();
 			 iter != sessions.end(); iter++) {
 			delete *iter;
 		}
 		sessions.clear();
+		sem.post();
 	}
 
 	void HttpSessionManager::removeOutdatedSessions() {
+		sem.wait();
 		for (vector<HttpSession*>::iterator iter = sessions.begin();
 			 iter != sessions.end();) {
 			if ((*iter)->outdated()) {
@@ -30,6 +33,7 @@ namespace HTTP {
 				iter++;
 			}
 		}
+		sem.post();
 	}
 	
 	bool HttpSessionManager::hasSession(unsigned long id) {
@@ -43,6 +47,7 @@ namespace HTTP {
 	}
 	
 	HttpSession & HttpSessionManager::getSession(unsigned long id) {
+		OS::AutoLock lock(sem);
 		for (vector<HttpSession*>::iterator iter = sessions.begin();
 			 iter != sessions.end(); iter++) {
 			if ((*iter)->getId() == id) {
@@ -53,13 +58,16 @@ namespace HTTP {
 	}
 	
 	HttpSession & HttpSessionManager::createSession() {
+		sem.wait();
 		HttpSession * session = new HttpSession;
 		session->setTimeout(timeout);
 		sessions.push_back(session);
 		return **sessions.rbegin();
+		sem.post();
 	}
 	
 	void HttpSessionManager::destroySession(unsigned long id) {
+		sem.wait();
 		for (vector<HttpSession*>::iterator iter = sessions.begin();
 			 iter != sessions.end(); iter++) {
 			if ((*iter)->getId() == id) {
@@ -68,6 +76,7 @@ namespace HTTP {
 				break;
 			}
 		}
+		sem.post();
 	}
 
 	vector<HttpSession*> & HttpSessionManager::getSessions() {
