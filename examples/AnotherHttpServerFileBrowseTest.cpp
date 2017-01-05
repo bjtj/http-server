@@ -189,7 +189,8 @@ public:
                 reader.close();
             }
             string dump = lspMemCache[file.getPath()];
-			LispPage page(&env);
+//			LispPage page(&env);
+            LispPage page;
 			page.applyWeb();
 			page.applyAuth(request, response);
 			page.applySession(session);

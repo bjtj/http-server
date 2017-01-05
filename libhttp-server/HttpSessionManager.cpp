@@ -58,12 +58,11 @@ namespace HTTP {
 	}
 	
 	HttpSession & HttpSessionManager::createSession() {
-		sem.wait();
+        OS::AutoLock lock(sem);
 		HttpSession * session = new HttpSession;
 		session->setTimeout(timeout);
 		sessions.push_back(session);
 		return **sessions.rbegin();
-		sem.post();
 	}
 	
 	void HttpSessionManager::destroySession(unsigned long id) {
