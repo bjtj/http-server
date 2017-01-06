@@ -1,6 +1,6 @@
-noinst_PROGRAMS=FileBrowseHttpServerTest
+noinst_PROGRAMS=HttpServerSample
 
-FileBrowseHttpServerTest_SOURCES=AnotherHttpServerFileBrowseTest.cpp
+HttpServerSample_SOURCES=HttpServerSample.cpp
 
 AM_CPPFLAGS = -I$(top_srcdir)
 AM_CXXFLAGS=$(PTHREAD_CXXFLAGS) -DDATA_PATH="\"$(srcdir)/data\""
