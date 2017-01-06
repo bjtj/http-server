@@ -1,4 +1,3 @@
-#include <iostream>
 #include <liboslayer/os.hpp>
 #include <liboslayer/SecureSocket.hpp>
 #include <liboslayer/FileStream.hpp>
