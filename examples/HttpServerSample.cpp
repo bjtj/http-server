@@ -149,8 +149,6 @@ public:
 			request.parseWwwFormUrlencoded();
 		}
         response.setContentLength(0);
-		HttpSession & session = HttpSessionTool::getSession(request, sessionManager);
-		session.updateLastAccessTime();
 		string path = request.getPath();
 		path = path.substr(prefix.size());
 		log = "** static :: prefix : '" + prefix + "' / path : '" + path + "'";
@@ -171,6 +169,10 @@ public:
         }
 
 		if (file.getExtension() == "lsp") {
+            
+            HttpSession & session = HttpSessionTool::getSession(request, sessionManager);
+            session.updateLastAccessTime();
+            
 			response.setStatus(200);
 			response.setContentType("text/html");
             if (lspMemCache.find(file.getPath()) == lspMemCache.end() ||
