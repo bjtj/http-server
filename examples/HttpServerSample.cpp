@@ -22,8 +22,7 @@ using namespace OS;
 using namespace UTIL;
 using namespace HTTP;
 
-static AutoRef<Logger> logger = LoggerFactory::getInstance().getLogger(__FILE__);
-
+static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
 
 /**
  * @brief 
@@ -499,6 +498,8 @@ bool promptBoolean(const char * msg) {
  * @brief 
  */
 int main(int argc, char * args[]) {
+
+	System::getInstance()->ignoreSigpipe();
 	
 	LoggerFactory::getInstance().setLoggerDescriptorSimple("*", "basic", "console");
 	MimeTypes::load(DATA_PATH"/mimetypes");
@@ -519,8 +520,6 @@ int main(int argc, char * args[]) {
 	if (configPath.empty() == false) {
 		config.loadFromFile(configPath);
 	}
-
-	System::getInstance()->ignoreSigpipe();
 
     AnotherHttpServer * server = NULL;
 	config.setProperty("thread.count", 50);
