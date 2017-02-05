@@ -160,7 +160,7 @@ namespace HTTP {
 		return cnt;
 	}
 
-	void ConnectionManager::update(Observable * target) {
+	void ConnectionManager::onUpdate(Observable * target) {
 		ConnectionThread * t = (ConnectionThread*)target;
 		onDisconnect(t->getConnection());
 	}

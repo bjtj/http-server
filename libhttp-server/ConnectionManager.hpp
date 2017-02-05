@@ -114,7 +114,7 @@ namespace HTTP {
         void stopAllThreads();
 		void startCommunication(UTIL::AutoRef<Communication> communication, UTIL::AutoRef<Connection> connection);
 		size_t getConnectionCount();
-		virtual void update(UTIL::Observable * target);
+		virtual void onUpdate(UTIL::Observable * target);
 		void handleMaxCapacity(UTIL::AutoRef<Connection> connection);
 		void setOnMaxCapacity(UTIL::AutoRef<OnMaxCapacity> onMaxCapacity);
 		void setRecvTimeout(unsigned long recvTimeout);
