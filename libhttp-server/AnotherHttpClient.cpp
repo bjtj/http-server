@@ -76,42 +76,46 @@ namespace HTTP {
     }
 	void AnotherHttpClient::connect() {
 
-		if (!connection) {
-			string remoteHost = url.getHost();
-			int remotePort = url.getIntegerPort();
-
-			if (!socketMaker.nil()) {
-				socket = socketMaker->make(url.getProtocol(), OS::InetAddress(remoteHost, remotePort));
-			} else {
-				socket = AutoRef<Socket>(new Socket(OS::InetAddress(remoteHost, remotePort)));
-			}
-			
-			if (connectionTimeout > 0) {
-				socket->connect(connectionTimeout);
-			} else {
-				socket->connect();
-			}
-
-			if (recvTimeout > 0) {
-				socket->setRecvTimeout(recvTimeout);
-			}
-
-			connection = new Connection(socket);
-            connection->registerSelector(selector, Selector::READ | Selector::WRITE);
-		}
+		if (connection.nil() == false) {
+            return;
+        }
+        
+        string remoteHost = url.getHost();
+        int remotePort = url.getIntegerPort();
+        
+        if (!socketMaker.nil()) {
+            socket = socketMaker->make(url.getProtocol(), OS::InetAddress(remoteHost, remotePort));
+        } else {
+            socket = AutoRef<Socket>(new Socket(OS::InetAddress(remoteHost, remotePort)));
+        }
+        
+        if (connectionTimeout > 0) {
+            socket->connect(connectionTimeout);
+        } else {
+            socket->connect();
+        }
+        
+        if (recvTimeout > 0) {
+            socket->setRecvTimeout(recvTimeout);
+        }
+        
+        connection = new Connection(socket);
+        connection->registerSelector(selector, Selector::READ | Selector::WRITE);
+        
 	}
     void AnotherHttpClient::closeConnection() {
         
-        if (connection) {
-            
-            connection->unregisterSelector(selector, Selector::READ | Selector::WRITE);
-            
-            delete connection;
-            connection = NULL;
-            
-            socket->close();
-            socket = NULL;
+        if (connection.nil()) {
+            return;
         }
+        
+        connection->unregisterSelector(selector, Selector::READ | Selector::WRITE);
+        
+        connection = NULL;
+        
+        socket->close();
+        socket = NULL;
+        
     }
     
     void AnotherHttpClient::setUrl(const Url & url) {
@@ -257,7 +261,7 @@ namespace HTTP {
 			return;
 		}
 
-		transfer->send(*connection);
+		transfer->send(connection);
 
 		if (transfer->completed()) {
 			readable = true;
@@ -294,7 +298,7 @@ namespace HTTP {
 				return;
 			}
 
-			transfer->recv(*connection);
+			transfer->recv(connection);
 			if (transfer->completed()) {
                 onResponseTransferDone();
 			}

@@ -56,7 +56,7 @@ namespace HTTP {
 		Url url;
 		HttpRequest request;
 		HttpResponse response;
-		Connection * connection;
+        UTIL::AutoRef<Connection> connection;
 		UTIL::AutoRef<SocketMaker> socketMaker;
 		UTIL::AutoRef<OS::Socket> socket;
 		OS::Selector selector;

@@ -20,8 +20,8 @@ namespace HTTP {
 		DataTransfer(UTIL::AutoRef<DataSource> source);
 		DataTransfer(UTIL::AutoRef<DataSink> sink);
         virtual ~DataTransfer();
-		virtual void recv(Connection & connection) = 0;
-        virtual void send(Connection & connection) = 0;
+		virtual void recv(UTIL::AutoRef<Connection> connection) = 0;
+        virtual void send(UTIL::AutoRef<Connection> connection) = 0;
 		virtual unsigned long long size();
         void complete();
         virtual bool completed();

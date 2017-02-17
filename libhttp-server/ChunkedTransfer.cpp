@@ -21,13 +21,13 @@ namespace HTTP {
     ChunkedTransfer::~ChunkedTransfer() {
     }
 	
-	void ChunkedTransfer::recv(Connection & connection) {
+	void ChunkedTransfer::recv(UTIL::AutoRef<Connection> connection) {
 
 		if (sink().nil()) {
 			throw Exception("sink required");
 		}
 
-		Packet & packet = connection.read();
+		Packet & packet = connection->read();
         char * p = packet.getData();
 		size_t packetLength = packet.getLength();
 		
@@ -65,7 +65,7 @@ namespace HTTP {
         }
     }
 
-	void ChunkedTransfer::send(Connection & connection) {
+	void ChunkedTransfer::send(UTIL::AutoRef<Connection> connection) {
 		// TODO: need chunk generator
 
 		if (source().nil()) {

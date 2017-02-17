@@ -2,6 +2,7 @@
 #define __HTTP_SESSION_MANAGER_HPP__
 
 #include <liboslayer/os.hpp>
+#include <liboslayer/AutoRef.hpp>
 #include <vector>
 #include "HttpSession.hpp"
 
@@ -9,7 +10,7 @@ namespace HTTP {
 	class HttpSessionManager {
 	private:
 		unsigned long timeout;
-		std::vector<HttpSession*> sessions;
+        std::vector< UTIL::AutoRef<HttpSession> > sessions;
 		OS::Semaphore sem;
 
 	private:
@@ -23,10 +24,10 @@ namespace HTTP {
 		void clear();
 		void removeOutdatedSessions();
 		bool hasSession(unsigned long id);
-		HttpSession & getSession(unsigned long id);
-		HttpSession & createSession();
+		UTIL::AutoRef<HttpSession> getSession(unsigned long id);
+		UTIL::AutoRef<HttpSession> createSession();
 		void destroySession(unsigned long id);
-		std::vector<HttpSession*> & getSessions();
+		std::vector< UTIL::AutoRef<HttpSession> > & getSessions();
 	};
 }
 

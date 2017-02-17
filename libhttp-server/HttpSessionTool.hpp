@@ -17,24 +17,24 @@ namespace HTTP {
 			return request.getParameter("sessionId");
 		}
 
-		static HttpSession & getSession(HttpRequest & request, HttpSessionManager & sessionManager) {
+        static UTIL::AutoRef<HttpSession> getSession(HttpRequest & request, HttpSessionManager & sessionManager) {
 			std::string sessionId = getSessionId(request);
-			HttpSession & session = (sessionId.empty() ||
+            UTIL::AutoRef<HttpSession> session = (sessionId.empty() ||
 									 !sessionManager.hasSession(UTIL::Text::toInt(sessionId))) ?
 				sessionManager.createSession() : sessionManager.getSession(UTIL::Text::toInt(sessionId));
 		
-			if (session.outdated()) {
-				sessionManager.destroySession(session.getId());
+			if (session->outdated()) {
+				sessionManager.destroySession(session->getId());
 				return sessionManager.createSession();
 			}
 			return session;
 		}
 
-		static std::string urlMan(const std::string & u, HttpSession & session) {
+        static std::string urlMan(const std::string & u, UTIL::AutoRef<HttpSession> session) {
 			size_t f = u.find("?");
 			std::string path = (f == std::string::npos) ? u : u.substr(0, f);
 			std::string rest = (f == std::string::npos) ? "" : u.substr(f);
-			return path + ";sessionId=" + UTIL::Text::toString(session.getId()) + rest;
+			return path + ";sessionId=" + UTIL::Text::toString(session->getId()) + rest;
 		}
 	};
 	

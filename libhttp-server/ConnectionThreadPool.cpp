@@ -41,7 +41,7 @@ namespace HTTP {
 		connection->registerSelector(selector, Selector::READ | Selector::WRITE);
 		try {
 			connection->negotiate();
-            communication->onConnected(*connection);
+            communication->onConnected(connection);
             while (!interrupted() && !connection->isTerminateFlaged()) {
 				if (connection->expiredRecvTimeout()) {
 					throw IOException("recv timeout");
@@ -49,12 +49,13 @@ namespace HTTP {
 				if (selector.select(1000) > 0) {
 					if (connection->isReadable(selector)) {
 						do {
-							communication->onReceivable(*connection);
+							communication->onReceivable(connection);
 						} while (connection->socket()->pending() > 0 && communication->isReadable());
 					}
 					if (connection->isWritable(selector)) {
-						communication->onWriteable(*connection);
+						communication->onWriteable(connection);
 					}
+                    idle(10); // Please find the reason why select() called too much
 				}
                 if (connection->isClosed() || communication->isCommunicationCompleted()) {
                     break;
@@ -65,7 +66,7 @@ namespace HTTP {
         }
         
         // notify disconnection to connection manager
-        communication->onDisconnected(*connection);
+        communication->onDisconnected(connection);
 
 		connection->unregisterSelector(selector, Selector::READ | Selector::WRITE);
         connection->close();

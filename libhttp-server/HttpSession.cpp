@@ -19,7 +19,7 @@ namespace HTTP {
 	HttpSession::~HttpSession() {
 	}
 
-	unsigned long HttpSession::getId() {
+	unsigned long HttpSession::getId() const {
 		return id;
 	}
 

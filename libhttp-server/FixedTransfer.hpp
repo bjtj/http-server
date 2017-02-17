@@ -22,8 +22,8 @@ namespace HTTP {
 	private:
 		void realloc(size_t size);
 	public:
-		virtual void recv(Connection & connection);
-        virtual void send(Connection & connection);
+		virtual void recv(UTIL::AutoRef<Connection> connection);
+        virtual void send(UTIL::AutoRef<Connection> connection);
 		virtual unsigned long long size();
     };
 }

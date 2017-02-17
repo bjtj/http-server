@@ -4,6 +4,7 @@ namespace HTTP {
 
 	using namespace std;
 	using namespace OS;
+    using namespace UTIL;
 	
 	HttpSessionManager::HttpSessionManager(unsigned long timeout)
 		: timeout(timeout), sem(1) {
@@ -14,20 +15,15 @@ namespace HTTP {
 
 	void HttpSessionManager::clear() {
 		sem.wait();
-		for (vector<HttpSession*>::iterator iter = sessions.begin();
-			 iter != sessions.end(); iter++) {
-			delete *iter;
-		}
 		sessions.clear();
 		sem.post();
 	}
 
 	void HttpSessionManager::removeOutdatedSessions() {
 		sem.wait();
-		for (vector<HttpSession*>::iterator iter = sessions.begin();
+		for (vector< AutoRef<HttpSession> >::iterator iter = sessions.begin();
 			 iter != sessions.end();) {
 			if ((*iter)->outdated()) {
-				delete *iter;
 				iter = sessions.erase(iter);
 			} else {
 				iter++;
@@ -46,31 +42,30 @@ namespace HTTP {
 		}
 	}
 	
-	HttpSession & HttpSessionManager::getSession(unsigned long id) {
+	AutoRef<HttpSession> HttpSessionManager::getSession(unsigned long id) {
 		OS::AutoLock lock(sem);
-		for (vector<HttpSession*>::iterator iter = sessions.begin();
+		for (vector< AutoRef<HttpSession> >::iterator iter = sessions.begin();
 			 iter != sessions.end(); iter++) {
 			if ((*iter)->getId() == id) {
-				return **iter;
+				return *iter;
 			}
 		}
 		throw Exception("session not found", -1, 0);
 	}
 	
-	HttpSession & HttpSessionManager::createSession() {
+	AutoRef<HttpSession> HttpSessionManager::createSession() {
         OS::AutoLock lock(sem);
-		HttpSession * session = new HttpSession;
+		AutoRef<HttpSession> session(new HttpSession);
 		session->setTimeout(timeout);
 		sessions.push_back(session);
-		return **sessions.rbegin();
+		return *sessions.rbegin();
 	}
 	
 	void HttpSessionManager::destroySession(unsigned long id) {
 		sem.wait();
-		for (vector<HttpSession*>::iterator iter = sessions.begin();
+		for (vector< AutoRef<HttpSession> >::iterator iter = sessions.begin();
 			 iter != sessions.end(); iter++) {
 			if ((*iter)->getId() == id) {
-				delete *iter;
 				sessions.erase(iter);
 				break;
 			}
@@ -78,7 +73,7 @@ namespace HTTP {
 		sem.post();
 	}
 
-	vector<HttpSession*> & HttpSessionManager::getSessions() {
+	vector< AutoRef<HttpSession> > & HttpSessionManager::getSessions() {
 		return sessions;
 	}
 	

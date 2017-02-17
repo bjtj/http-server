@@ -31,26 +31,26 @@ namespace HTTP {
 		delete[] _buffer;
     }
 	
-	void FixedTransfer::recv(Connection & connection) {
+	void FixedTransfer::recv(UTIL::AutoRef<Connection> connection) {
 		if (sink().nil()) {
 			throw Exception("sink required");
 		}
-		connection.packet().setLimit(indicator.adjustReadSize(connection.packet().getLimit()));
-		Packet & packet = connection.read();
+		connection->packet().setLimit(indicator.adjustReadSize(connection->packet().getLimit()));
+		Packet & packet = connection->read();
 		indicator.offset(sink()->write(packet.getData(), packet.getLength()));
 		if (indicator.completed()) {
 			complete();
 		}
     }
 	
-    void FixedTransfer::send(Connection & connection) {
+    void FixedTransfer::send(UTIL::AutoRef<Connection> connection) {
 		if (source().nil()) {
 			throw Exception("source required");
 		}
 		if (indicator.remain()) {
 			size_t size = indicator.adjustReadSize(_size);
 			size_t readlen = source()->read(_buffer, size);
-            size_t sendlen = connection.send(_buffer, readlen);
+            size_t sendlen = connection->send(_buffer, readlen);
             indicator.offset(sendlen);
 		}
         if (indicator.completed()) {

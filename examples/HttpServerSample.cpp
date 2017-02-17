@@ -82,7 +82,7 @@ public:
 /**
  * @brief 
  */
-static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse & response, HttpSession & session, const string & uri) {
+static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse & response, AutoRef<HttpSession> session, const string & uri) {
     
     HttpResponseHeader & header = response.getHeader();
     
@@ -169,8 +169,8 @@ public:
 
 		if (file.getExtension() == "lsp") {
             
-            HttpSession & session = HttpSessionTool::getSession(request, sessionManager);
-            session.updateLastAccessTime();
+            AutoRef<HttpSession> session = HttpSessionTool::getSession(request, sessionManager);
+            session->updateLastAccessTime();
             
 			response.setStatus(200);
 			response.setContentType("text/html");
@@ -517,12 +517,12 @@ int main(int argc, char * args[]) {
 	config["listen.port"] = "9000";
 	config["static.base.path"] = "./";
 	config["index.name"] = "index.html";
+    config.setProperty("thread.count", 50);
 	if (configPath.empty() == false) {
 		config.loadFromFile(configPath);
 	}
 
     AnotherHttpServer * server = NULL;
-	config.setProperty("thread.count", 50);
     if (config.isSecure() == false) {
 		server = new AnotherHttpServer(config);
 	} else {

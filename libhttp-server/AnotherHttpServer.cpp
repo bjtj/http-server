@@ -156,9 +156,9 @@ namespace HTTP {
 		communicationCompleted = false;
 	}
 
-	void HttpCommunication::onConnected(Connection & connection) {
-        request.setRemoteAddress(connection.getRemoteAddress());
-		request.setLocalAddress(connection.getLocalAddress());
+	void HttpCommunication::onConnected(AutoRef<Connection> connection) {
+        request.setRemoteAddress(connection->getRemoteAddress());
+		request.setLocalAddress(connection->getLocalAddress());
 	}
 
 	bool HttpCommunication::isReadable() {
@@ -169,7 +169,7 @@ namespace HTTP {
 		return writeable == true;
 	}
 
-	void HttpCommunication::onReceivable(Connection & connection) {
+	void HttpCommunication::onReceivable(UTIL::AutoRef<Connection> connection) {
 		if (writeable) {
 			return;
 		}
@@ -184,7 +184,7 @@ namespace HTTP {
         AutoRef<DataTransfer> transfer = request.getTransfer();
         if (!transfer.nil()) {
             transfer->recv(connection);
-            readRequestContent(request, response, connection.packet());
+            readRequestContent(request, response, connection->packet());
             if (transfer->completed()) {
                 AutoRef<DataSink> sink = transfer->sink();
                 onHttpRequestContentCompleted(request, sink, response);
@@ -197,15 +197,15 @@ namespace HTTP {
         
 	}
 
-	void HttpCommunication::readRequestHeaderIfNeed(Connection & connection) {
+	void HttpCommunication::readRequestHeaderIfNeed(UTIL::AutoRef<Connection> connection) {
 		if (!requestHeaderReader.complete()) {
-			connection.packet().setLimit(1);
-			Packet & packet = connection.read();
+			connection->packet().setLimit(1);
+			Packet & packet = connection->read();
             requestHeaderReader.read(packet.getData(), (int)packet.getLength());
 			packet.clear();
 			if (requestHeaderReader.complete()) {
                 request.setHeader(requestHeaderReader.getHeader());
-				connection.packet().restoreLimit();
+				connection->packet().restoreLimit();
 			}
 		}
 	}
@@ -267,7 +267,7 @@ namespace HTTP {
         }
 	}
 
-	void HttpCommunication::onWriteable(Connection & connection) {
+	void HttpCommunication::onWriteable(UTIL::AutoRef<Connection> connection) {
 		if (!writeable) {
 			return;
 		}
@@ -291,10 +291,10 @@ namespace HTTP {
 		}
 	}
 
-	void HttpCommunication::sendResponseHeader(Connection & connection) {
+	void HttpCommunication::sendResponseHeader(UTIL::AutoRef<Connection> connection) {
 		HttpResponseHeader & header = response.getHeader();
         string headerString = header.toString();
-        if (connection.send(headerString.c_str(), (int)headerString.length()) != (int)headerString.length()) {
+        if (connection->send(headerString.c_str(), (int)headerString.length()) != (int)headerString.length()) {
             // TODO: retry
             throw Exception("Response Header send failed");
         }
@@ -308,7 +308,7 @@ namespace HTTP {
         }
 	}
 
-	void HttpCommunication::sendResponseContent(Connection & connection) {
+	void HttpCommunication::sendResponseContent(UTIL::AutoRef<Connection> connection) {
         AutoRef<DataTransfer> responseTransfer = response.getTransfer();
 		if (!responseTransfer.empty()) {
 			responseTransfer->send(connection);
@@ -320,7 +320,7 @@ namespace HTTP {
 		}
 	}
 
-	void HttpCommunication::onDisconnected(Connection & connection) {
+	void HttpCommunication::onDisconnected(UTIL::AutoRef<Connection> connection) {
 	}
 
 	bool HttpCommunication::isCommunicationCompleted() {

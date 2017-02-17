@@ -19,7 +19,7 @@ namespace HTTP {
 		HttpSession();
 		virtual ~HttpSession();
 
-		unsigned long getId();
+		unsigned long getId() const;
 		void updateLastAccessTime();
 		unsigned long getTimeout();
 		void setTimeout(unsigned long timeout);
