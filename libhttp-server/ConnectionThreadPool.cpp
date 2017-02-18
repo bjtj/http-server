@@ -53,9 +53,12 @@ namespace HTTP {
 						} while (connection->socket()->pending() > 0 && communication->isReadable());
 					}
 					if (connection->isWritable(selector)) {
+                        unsigned long cnt = connection->sendCount();
 						communication->onWriteable(connection);
+                        if (cnt == connection->sendCount()) {
+                            idle(10);
+                        }
 					}
-                    idle(10); // Please find the reason why select() called too much
 				}
                 if (connection->isClosed() || communication->isCommunicationCompleted()) {
                     break;

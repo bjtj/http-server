@@ -81,7 +81,7 @@ namespace HTTP {
 		FileStream stream(file, "rb");
 		stream.seek(start);
 		AutoRef<DataSource> source(new FileDataSource(stream));
-		AutoRef<DataTransfer> transfer(new FixedTransfer(source, size, 4096));
+		AutoRef<DataTransfer> transfer(new FixedTransfer(source, size, 10 * 1024));
 		response.setStatus(206);
 		response.setContentLength(size);
 		string bytes = "bytes=";
