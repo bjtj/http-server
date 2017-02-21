@@ -25,7 +25,7 @@ using namespace HTTP;
 static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
 
 /**
- * @brief 
+ * @brief dump response handler
  */
 class DumpResponseHandler : public OnHttpResponseListener {
 private:
@@ -114,14 +114,12 @@ private:
 	map<string, string> mimeTypes;
     map<string, string> lspMemCache;
 public:
-	StaticHttpRequestHandler(ServerConfig & config,
-							 LISP::Env & env,
-							 const string & basePath,
-							 const string & prefix,
-							 const string & indexName)
-		: config(config), env(env), basePath(basePath), prefix(prefix), indexName(indexName)
+	StaticHttpRequestHandler(ServerConfig & config, LISP::Env & env, const string & prefix)
+		: config(config), env(env), prefix(prefix)
 	{
 		mimeTypes = MimeTypes::getMimeTypes();
+		basePath = config["static.base.path"];
+		indexName = config["index.name"];
 	}
     virtual ~StaticHttpRequestHandler() {/* empty */}
     
@@ -150,6 +148,9 @@ public:
         response.setContentLength(0);
 		string path = request.getPath();
 		path = path.substr(prefix.size());
+		if (path.empty()) {
+			path = "/";
+		}
 		log = "** static :: prefix : '" + prefix + "' / path : '" + path + "'";
         File file(File::mergePaths(basePath, path));
         if (!file.exists() || !file.isFile()) {
@@ -551,12 +552,8 @@ int main(int argc, char * args[]) {
 
 	LISP::Env env;
 	LISP::native(env);
-	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config,
-																		   env,
-																		   config["static.base.path"],
-																		   "/static",
-																		   config["index.name"]));
-    server->registerRequestHandler("/static/*", staticHandler);
+	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config, env, "/static"));
+    server->registerRequestHandler("/static*", staticHandler);
 
 	AutoRef<BasicAuth> auth(new BasicAuth(config["auth.username"], config["auth.password"]));
 	AutoRef<HttpRequestHandler> authHandler(new AuthHttpRequestHandler(auth));
@@ -576,7 +573,7 @@ int main(int argc, char * args[]) {
 				break;
 			} else if (line == "s") {
 				printf("Listen port: %d\n", config.getPort());
-				printf(" * Connections: %ld\n", server->connections());
+				printf(" * Connections: %u\n", server->connections());
                 vector<AutoRef<Connection> > conns = server->connectionManager().getConnectionList();
                 for (vector<AutoRef<Connection> >::iterator iter = conns.begin(); iter != conns.end(); iter++) {
                     printf(" - recv: %ld, send: %ld (%ld)\n", (*iter)->recvCount(), (*iter)->sendCount(), (*iter)->sendTryCount());

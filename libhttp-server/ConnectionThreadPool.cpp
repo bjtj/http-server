@@ -36,33 +36,19 @@ namespace HTTP {
 		return connection;
 	}
 
-
 	void ConnectionThread::connectionTask() {
 		connection->registerSelector(selector, Selector::READ | Selector::WRITE);
 		try {
 			connection->negotiate();
             communication->onConnected(connection);
             while (!interrupted() && !connection->isTerminateFlaged()) {
-				if (connection->expiredRecvTimeout()) {
-					throw IOException("recv timeout");
+				testReceiveTimeout();
+				if (doReceive() == false && doWrite() == false) {
+					idle(10);
 				}
-				if (selector.select(1000) > 0) {
-					if (connection->isReadable(selector)) {
-						do {
-							communication->onReceivable(connection);
-						} while (connection->socket()->pending() > 0 && communication->isReadable());
-					}
-					if (connection->isWritable(selector)) {
-                        unsigned long cnt = connection->sendCount();
-						communication->onWriteable(connection);
-                        if (cnt == connection->sendCount()) {
-                            idle(10);
-                        }
-					}
+				if (closing()) {
+					break;
 				}
-                if (connection->isClosed() || communication->isCommunicationCompleted()) {
-                    break;
-                }
             }
         } catch (IOException & e) {
             logger->loge(e.getMessage());
@@ -75,8 +61,39 @@ namespace HTTP {
         connection->close();
         connection->completed() = true;
         
-        // delete communication;
 		communication = NULL;
+	}
+
+	void ConnectionThread::testReceiveTimeout() {
+		if (connection->expiredRecvTimeout()) {
+			throw IOException("recv timeout");
+		}
+	}
+
+	bool ConnectionThread::doReceive() {
+		bool proc = false;
+		if (connection->isReadable(selector)) {
+			do {
+				if (communication->onReceivable(connection)) {
+					proc = true;
+				}
+			} while (connection->socket()->pending() > 0 && communication->isReadable());
+		}
+		return proc;
+	}
+
+	bool ConnectionThread::doWrite() {
+		bool proc = false;
+		if (connection->isWritable(selector)) {
+			if (communication->onWriteable(connection)) {
+				proc = true;
+			}
+		}
+		return proc;
+	}
+
+	bool ConnectionThread::closing() {
+		return (connection->isClosed() || communication->isCommunicationCompleted());
 	}
 
 	/**

@@ -15,20 +15,20 @@ namespace HTTP {
 	HttpHeaderReader::~HttpHeaderReader() {
 	}
 	void HttpHeaderReader::clear() {
-		buffer.clear();
+		_buffer.clear();
 	}
 	bool HttpHeaderReader::complete() {
-		return buffer.find("\r\n\r\n") != string::npos;
+		return _buffer.find("\r\n\r\n") != string::npos;
 	}
 	int HttpHeaderReader::cutEndPos() {
-		size_t f = buffer.find("\r\n\r\n");
-		size_t diff = buffer.size() - (f + 4);
-		buffer = buffer.substr(0, f + 4);
+		size_t f = _buffer.find("\r\n\r\n");
+		size_t diff = _buffer.size() - (f + 4);
+		_buffer = _buffer.substr(0, f + 4);
 		return (int)diff;
 	}
 	void HttpHeaderReader::append(const char * data, size_t size) {
 		string x = string(data, size);
-		buffer += x;
+		_buffer += x;
 	}
 	size_t HttpHeaderReader::read(const char * data, size_t size) {
 		if (complete()) {
@@ -42,9 +42,13 @@ namespace HTTP {
 		return size;
 	}
 	bool HttpHeaderReader::parse() {
-		return parser.parse(buffer) < 0 ? false : true;
+		return parser.parse(_buffer) < 0 ? false : true;
 	}
 	HttpHeader & HttpHeaderReader::getHeader() {
 		return parser.getHeader();
+	}
+
+	string & HttpHeaderReader::buffer() {
+		return _buffer;
 	}
 }

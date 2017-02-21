@@ -18,7 +18,7 @@ namespace HTTP {
 	class HttpHeaderReader {
 	private:
 		HttpHeaderParser parser;
-		std::string buffer;
+		std::string _buffer;
 	public:
 		HttpHeaderReader();
 		virtual ~HttpHeaderReader();
@@ -30,6 +30,7 @@ namespace HTTP {
 		size_t read(const char * data, size_t size);
 		bool parse();
 		HttpHeader & getHeader();
+		std::string & buffer();
 	};
 
 }

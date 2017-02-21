@@ -169,17 +169,17 @@ namespace HTTP {
 		return writeable == true;
 	}
 
-	void HttpCommunication::onReceivable(UTIL::AutoRef<Connection> connection) {
+	bool HttpCommunication::onReceivable(UTIL::AutoRef<Connection> connection) {
 		if (writeable) {
-			return;
+			return false;
 		}
 		readRequestHeaderIfNeed(connection);
 		if (!requestHeaderReader.complete()) {
-            return;
+            return true;
         }
         if (!requestHeaderHandled) {
             onRequestHeader(request, response);
-            return;
+            return true;
         }
         AutoRef<DataTransfer> transfer = request.getTransfer();
         if (!transfer.nil()) {
@@ -194,13 +194,15 @@ namespace HTTP {
             onHttpRequestContentCompleted(request, AutoRef<DataSink>(), response);
             writeable = true;
         }
-        
+        return true;
 	}
 
 	void HttpCommunication::readRequestHeaderIfNeed(UTIL::AutoRef<Connection> connection) {
 		if (!requestHeaderReader.complete()) {
 			connection->packet().setLimit(1);
 			Packet & packet = connection->read();
+			if (requestHeaderReader.buffer().size() == 0) {
+			}
             requestHeaderReader.read(packet.getData(), (int)packet.getLength());
 			packet.clear();
 			if (requestHeaderReader.complete()) {
@@ -267,9 +269,9 @@ namespace HTTP {
         }
 	}
 
-	void HttpCommunication::onWriteable(UTIL::AutoRef<Connection> connection) {
+	bool HttpCommunication::onWriteable(UTIL::AutoRef<Connection> connection) {
 		if (!writeable) {
-			return;
+			return false;
 		}
 		if (!responseHeaderTransferDone) {
             sendResponseHeader(connection);
@@ -289,6 +291,7 @@ namespace HTTP {
 				reset();
 			}
 		}
+		return true;
 	}
 
 	void HttpCommunication::sendResponseHeader(UTIL::AutoRef<Connection> connection) {

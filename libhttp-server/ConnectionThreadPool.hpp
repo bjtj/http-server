@@ -25,8 +25,11 @@ namespace HTTP {
 		UTIL::AutoRef<Connection> getConnection();
 		virtual void onTask();
 		void connectionTask();
+		void testReceiveTimeout();
+		bool doReceive();
+		bool doWrite();
+		bool closing();
 	};
-
 
 	/**
 	 * @brief ConnectionThreadPool

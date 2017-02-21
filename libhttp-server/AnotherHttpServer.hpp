@@ -123,13 +123,13 @@ namespace HTTP {
 		virtual bool isReadable();
 		virtual bool isWritable();
         virtual void onConnected(UTIL::AutoRef<Connection> connection);
-		virtual void onReceivable(UTIL::AutoRef<Connection> connection);
+		virtual bool onReceivable(UTIL::AutoRef<Connection> connection);
 		void readRequestHeaderIfNeed(UTIL::AutoRef<Connection> connection);
 		void readRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet);
 		void onRequestHeader(HttpRequest & request, HttpResponse & response);
 		void onHttpRequestContentCompleted(HttpRequest & request, UTIL::AutoRef<DataSink> sink, HttpResponse & response);
 		void prepareRequestContentTransfer(HttpRequest & request, UTIL::AutoRef<DataSink> sink);
-		virtual void onWriteable(UTIL::AutoRef<Connection> connection);
+		virtual bool onWriteable(UTIL::AutoRef<Connection> connection);
 		void sendResponseHeader(UTIL::AutoRef<Connection> connection);
 		void sendResponseContent(UTIL::AutoRef<Connection> connection);
 		virtual void onDisconnected(UTIL::AutoRef<Connection> connection);
