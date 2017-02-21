@@ -43,9 +43,11 @@ namespace HTTP {
             communication->onConnected(connection);
             while (!interrupted() && !connection->isTerminateFlaged()) {
 				testReceiveTimeout();
-				if (doReceive() == false && doWrite() == false) {
-					idle(10);
-				}
+                if (selector.select(1000) > 0) {
+                    if (doReceive() == false && doWrite() == false) {
+                        idle(10);
+                    }
+                }				
 				if (closing()) {
 					break;
 				}

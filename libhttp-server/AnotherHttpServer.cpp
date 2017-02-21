@@ -201,8 +201,6 @@ namespace HTTP {
 		if (!requestHeaderReader.complete()) {
 			connection->packet().setLimit(1);
 			Packet & packet = connection->read();
-			if (requestHeaderReader.buffer().size() == 0) {
-			}
             requestHeaderReader.read(packet.getData(), (int)packet.getLength());
 			packet.clear();
 			if (requestHeaderReader.complete()) {

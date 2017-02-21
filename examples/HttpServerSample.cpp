@@ -573,7 +573,7 @@ int main(int argc, char * args[]) {
 				break;
 			} else if (line == "s") {
 				printf("Listen port: %d\n", config.getPort());
-				printf(" * Connections: %u\n", server->connections());
+				printf(" * Connections: %zu\n", server->connections());
                 vector<AutoRef<Connection> > conns = server->connectionManager().getConnectionList();
                 for (vector<AutoRef<Connection> >::iterator iter = conns.begin(); iter != conns.end(); iter++) {
                     printf(" - recv: %ld, send: %ld (%ld)\n", (*iter)->recvCount(), (*iter)->sendCount(), (*iter)->sendTryCount());
