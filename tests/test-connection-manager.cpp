@@ -21,21 +21,24 @@ public:
 		return addr.getHost() + ":" + Text::toString(addr.getPort());
 	}
 
-	virtual void onConnected(Connection & connection) {
-		cout << " ** connected from: " << toString(connection.getRemoteAddress()) << endl;
+	virtual void onConnected(AutoRef<Connection> connection) {
+		cout << " ** connected from: " << toString(connection->getRemoteAddress()) << endl;
 	}
-	virtual void onReceivable(Connection & connection) {
-		Packet & packet = connection.read();
+	virtual bool onReceivable(AutoRef<Connection> connection) {
+		Packet & packet = connection->read();
 		content.append(packet.getData(), packet.getLength());
+		return true;
 	}
-	virtual void onWriteable(Connection & connection) {
-		if (content.size() > 0) {
-			connection.send(content.c_str(), content.size());
-			content = "";
+	virtual bool onWriteable(AutoRef<Connection> connection) {
+		if (content.size() == 0) {
+			return false;
 		}
+		connection->send(content.c_str(), content.size());
+		content = "";
+		return true;
 	}
-	virtual void onDisconnected(Connection & connection) {
-		cout << " ** disconnected! - " << toString(connection.getRemoteAddress()) << endl;
+	virtual void onDisconnected(AutoRef<Connection> connection) {
+		cout << " ** disconnected! - " << toString(connection->getRemoteAddress()) << endl;
 	}
 	virtual bool isCommunicationCompleted() {
 		return false;

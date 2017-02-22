@@ -404,7 +404,8 @@ namespace HTTP {
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
 		_connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
 						  config.getIntegerProperty("thread.count", 20)),
-		thread(NULL) {
+		thread(NULL)
+	{
 
 		_connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
 		_connectionManager.setRecvTimeout(config.getIntegerProperty("recv.timeout", 0));
@@ -415,13 +416,15 @@ namespace HTTP {
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
 		_connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
 						  config.getIntegerProperty("thread.count", 20), serverSocketMaker),
-		thread(NULL) {
+		thread(NULL)
+	{
 
 		_connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
 		_connectionManager.setRecvTimeout(config.getIntegerProperty("recv.timeout", 0));
     }
     
 	AnotherHttpServer::~AnotherHttpServer() {
+		/**/
 	}
 
 	void AnotherHttpServer::registerRequestHandler(const string & pattern, AutoRef<HttpRequestHandler> handler) {

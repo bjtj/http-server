@@ -108,7 +108,7 @@ namespace HTTP {
         void setFollowRedirect(bool followRedirect);
         void setOnHttpResponseListener(OnHttpResponseListener * responseListener);
 		void setUserData(UTIL::AutoRef<UserData> userData);
-        Url & getUrl();
+        Url getUrl();
         HttpResponse & getResponse();
         
 	};

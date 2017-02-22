@@ -46,11 +46,36 @@ namespace HTTP {
 	 * @brief AnotherHttpClient
 	 */
     
-    AnotherHttpClient::AnotherHttpClient() : debug(false), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), recvTimeout(0), followRedirect(false) {
+    AnotherHttpClient::AnotherHttpClient() :
+		debug(false),
+		connection(NULL),
+		socket(NULL),
+		requestHeaderSent(false),
+		responseHeaderReceived(false),
+		readable(false),
+		interrupted(false),
+		complete(false),
+		responseListener(NULL),
+		connectionTimeout(0),
+		recvTimeout(0),
+		followRedirect(false) {
         
     }
 
-	AnotherHttpClient::AnotherHttpClient(AutoRef<SocketMaker> socketMaker) : debug(false), connection(NULL), socketMaker(socketMaker), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), recvTimeout(0), followRedirect(false) {
+	AnotherHttpClient::AnotherHttpClient(AutoRef<SocketMaker> socketMaker) :
+		debug(false),
+		connection(NULL),
+		socketMaker(socketMaker),
+		socket(NULL),
+		requestHeaderSent(false),
+		responseHeaderReceived(false),
+		readable(false),
+		interrupted(false),
+		complete(false),
+		responseListener(NULL),
+		connectionTimeout(0),
+		recvTimeout(0),
+		followRedirect(false) {
         
     }
     
@@ -346,9 +371,10 @@ namespace HTTP {
         this->responseListener = responseListener;
     }
 
-    Url & AnotherHttpClient::getUrl() {
+    Url AnotherHttpClient::getUrl() {
         return url;
     }
+	
     HttpResponse & AnotherHttpClient::getResponse() {
         return response;
     }

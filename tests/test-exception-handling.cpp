@@ -49,7 +49,7 @@ public:
         }
     }
     virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
-        cout << "Error/e: " << e.getMessage() << endl;
+        cout << " * [Error] " << e.getMessage() << endl;
     }
 	HttpResponseHeader & getResponseHeader() {
 		return responseHeader;
@@ -98,11 +98,11 @@ public:
 		fields["Connection"] = "close";
 		
 		DumpResponseHandler handler;
-		httpGet("http://localhost:9000/", fields, &handler);
+		httpGet("http://127.0.0.1:9000/", fields, &handler);
 		ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 		ASSERT(handler.getDump(), ==, "hello");
 
-		httpGet("http://localhost:9000/error", fields, &handler);
+		httpGet("http://127.0.0.1:9000/error", fields, &handler);
 		ASSERT(handler.getResponseHeader().getStatusCode(), ==, 500);
 		ASSERT(handler.getDump(), ==, "error");
 	}

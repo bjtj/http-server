@@ -100,11 +100,11 @@ public:
         if (!sink.nil()) {
 			dump = ((StringDataSink*)&sink)->data();
         } else {
-			throw Exception("what the f!!!!");
+			throw Exception("sink->data() failed");
 		}
     }
     virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
-        cout << "Error/e: " << e.getMessage() << endl;
+        cout << " [Error] " << e.getMessage() << endl;
     }
 	HttpResponseHeader & getResponseHeader() {
 		return responseHeader;

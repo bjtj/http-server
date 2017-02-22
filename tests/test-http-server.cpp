@@ -14,11 +14,12 @@ using namespace UTIL;
 
 static string s_last_msg;
 
+static void httpGet(const string & url, OnHttpResponseListener * handler);
 static void httpGet(const string & url, const LinkedStringMap & fields, OnHttpResponseListener * handler);
 
 
 /**
- *
+ * my http request handler
  */
 class MyHttpRequestHandler : public HttpRequestHandler {
 private:
@@ -90,7 +91,7 @@ public:
 };
 
 /**
- *
+ * dump response handelr
  */
 class DumpResponseHandler : public OnHttpResponseListener {
 private:
@@ -98,8 +99,8 @@ private:
 	string dump;
 	File file;
 public:
-    DumpResponseHandler() {}
-    virtual ~DumpResponseHandler() {}
+    DumpResponseHandler() {/**/}
+    virtual ~DumpResponseHandler() {/**/}
 	virtual AutoRef<DataSink> getDataSink() {
 		return AutoRef<DataSink>(new StringDataSink);
 	}
@@ -109,12 +110,12 @@ public:
 			try {
 				dump = ((StringDataSink*)&sink)->data();
 			} catch (Exception & e) {
-				cout << "transfer->getString()" << endl;
+				cerr << " - [Error] sink->data()" << endl;
 			}
         }
     }
     virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
-        cout << "Error/e: " << e.getMessage() << endl;
+        cout << " - [Error] " << e.getMessage() << endl;
     }
 	HttpResponseHeader & getResponseHeader() {
 		return responseHeader;
@@ -125,14 +126,14 @@ public:
 };
 
 /**
- *
+ * http server test case
  */
 class HttpServerTestCase : public TestCase {
 private:
 	AnotherHttpServer * server;
 public:
-    HttpServerTestCase() : TestCase("HttpServerTestCase") {}
-	HttpServerTestCase(const string & name) : TestCase(name) {}
+    HttpServerTestCase() : TestCase("HttpServerTestCase") {/**/}
+	HttpServerTestCase(const string & name) : TestCase(name) {/**/}
     virtual ~HttpServerTestCase() {}
 
 	virtual void setUp(TestEnvironment & env) {
@@ -153,16 +154,16 @@ public:
 
 	virtual void test() {
 		DumpResponseHandler handler;
-		httpGet("http://localhost:9000/", LinkedStringMap(), &handler);
+		httpGet("http://127.0.0.1:9000/", &handler);
 		ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 		ASSERT(handler.getDump(), ==, "Hello World");
 	}
 };
 
 /**
- *
+ * synchronized http client task
  */
-class SynchrosizedHttpClientTask : public Task {
+class SynchronizedHttpClientTask : public Task {
 private:
 	static int idx;
 	CountDownLatch & latch;
@@ -170,24 +171,24 @@ private:
 	string url;
 	int id;
 public:
-	SynchrosizedHttpClientTask(CountDownLatch & latch, CountDownLatch & doneLatch, const string & url) : latch(latch), doneLatch(doneLatch), url(url) {
+	SynchronizedHttpClientTask(CountDownLatch & latch, CountDownLatch & doneLatch, const string & url) : latch(latch), doneLatch(doneLatch), url(url) {
 		id = idx++;
 	}
-	virtual ~SynchrosizedHttpClientTask() {}
+	virtual ~SynchronizedHttpClientTask() {}
 	virtual void doTask() {
 
 		latch.await();
 		
 		DumpResponseHandler handler;
 		cout << "[" << id << "] http get" << endl;
-		httpGet(url, LinkedStringMap(), &handler);
+		httpGet(url, &handler);
 		cout << "[" << id << "] " << handler.getResponseHeader().getStatusCode() << endl;
 
 		doneLatch.countDown();
 	}
 };
 
-int SynchrosizedHttpClientTask::idx = 0;
+int SynchronizedHttpClientTask::idx = 0;
 
 /**
  *
@@ -196,8 +197,8 @@ class HttpServerMaxConnectionTestCase : public HttpServerTestCase {
 private:
 	
 public:
-	HttpServerMaxConnectionTestCase() : HttpServerTestCase("HttpServerMaxConnectionTestCase") {}
-	virtual ~HttpServerMaxConnectionTestCase() {}
+	HttpServerMaxConnectionTestCase() : HttpServerTestCase("HttpServerMaxConnectionTestCase") {/**/}
+	virtual ~HttpServerMaxConnectionTestCase() {/**/}
 	virtual void test() {
 		TaskThreadPool pool(50);
 		pool.start();
@@ -206,7 +207,8 @@ public:
 		CountDownLatch doneLatch(50);
 		
 		for (size_t i = 0; i < 50; i++) {
-			pool.setTask(AutoRef<Task>(new SynchrosizedHttpClientTask(latch, doneLatch, "http://localhost:9000/medium")));
+			pool.setTask(AutoRef<Task>(new SynchronizedHttpClientTask(
+										   latch, doneLatch, "http://127.0.0.1:9000/medium")));
 		}
 		
 		idle(100);
@@ -228,8 +230,8 @@ class HttpServerBlockingTestCase : public HttpServerTestCase {
 private:
 	
 public:
-	HttpServerBlockingTestCase() : HttpServerTestCase("HttpServerMaxConnectionTestCase") {}
-	virtual ~HttpServerBlockingTestCase() {}
+	HttpServerBlockingTestCase() : HttpServerTestCase("HttpServerMaxConnectionTestCase") {/**/}
+	virtual ~HttpServerBlockingTestCase() {/**/}
 	virtual void test() {
 		size_t cnt = 3;
 		TaskThreadPool pool(cnt);
@@ -239,7 +241,7 @@ public:
 		CountDownLatch doneLatch(cnt);
 		
 		for (size_t i = 0; i < cnt; i++) {
-			pool.setTask(AutoRef<Task>(new SynchrosizedHttpClientTask(latch, doneLatch, "http://localhost:9000/taketime")));
+			pool.setTask(AutoRef<Task>(new SynchronizedHttpClientTask(latch, doneLatch, "http://127.0.0.1:9000/taketime")));
 		}
 		
 		idle(100);
@@ -255,7 +257,14 @@ public:
 };
 
 /**
- *
+ * http get
+ */
+static void httpGet(const string & url, OnHttpResponseListener * handler) {
+	httpGet(url, LinkedStringMap(), handler);
+}
+
+/**
+ * http get
  */
 static void httpGet(const string & url, const LinkedStringMap & fields, OnHttpResponseListener * handler) {
 	AnotherHttpClient client;
@@ -264,7 +273,7 @@ static void httpGet(const string & url, const LinkedStringMap & fields, OnHttpRe
 	client.setOnHttpResponseListener(handler);
     
 	client.setFollowRedirect(true);
-	client.setUrl(url);
+	client.setUrl(Url(url));
 	client.setRequest("GET", fields);
 	client.execute();
 }

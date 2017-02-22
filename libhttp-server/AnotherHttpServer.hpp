@@ -64,7 +64,7 @@ namespace HTTP {
 	private:
 
 		/**
-		 * @brief
+		 * @brief request handler node
 		 */
 		class RequestHandlerNode {
 		private:
@@ -159,14 +159,12 @@ namespace HTTP {
 	 */
 	class AnotherHttpServer {
 	private:
-
 		HttpServerConfig config;
 		UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
 		ConnectionManager _connectionManager;
 		OS::Thread * thread;
 
 	public:
-
 		AnotherHttpServer(HttpServerConfig config);
         AnotherHttpServer(HttpServerConfig config, UTIL::AutoRef<ServerSocketMaker> serverSocketMaker);
 		virtual ~AnotherHttpServer();
