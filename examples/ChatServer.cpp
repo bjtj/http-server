@@ -1,3 +1,4 @@
+#include <iostream>
 #include <liboslayer/os.hpp>
 #include <liboslayer/FileStream.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
@@ -40,6 +41,7 @@ public:
 		content.append("</ul>");
 		content.append("<form method=\"POST\">Message: <input type=\"text\" name=\"msg\" /></form>");
 
+		response.setStatus(200);
 		setFixedTransfer(response, "<html><head><title>Chat</title></head><body>" + content + "</body></html>");
 	}
 };
@@ -69,6 +71,7 @@ int main(int argc, char *args[]) {
 	}
 
 	server.stop();
+	cout << "[Bye]" << endl;
     
     return 0;
 }
