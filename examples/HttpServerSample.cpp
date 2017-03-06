@@ -107,15 +107,14 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
 class StaticHttpRequestHandler : public HttpRequestHandler {
 private:
 	ServerConfig & config;
-	LISP::Env & env;
     string basePath;
 	string prefix;
 	string indexName;
 	map<string, string> mimeTypes;
     map<string, string> lspMemCache;
 public:
-	StaticHttpRequestHandler(ServerConfig & config, LISP::Env & env, const string & prefix)
-		: config(config), env(env), prefix(prefix)
+	StaticHttpRequestHandler(ServerConfig & config, const string & prefix)
+		: config(config), prefix(prefix)
 	{
 		mimeTypes = MimeTypes::getMimeTypes();
 		basePath = config["static.base.path"];
@@ -137,6 +136,9 @@ public:
 		}
 	}
 
+	/**
+	 * handle web
+	 */
 	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 		string log;
 		logger->logd(Text::format("** Part2: %s [%s:%d]", request.getHeader().getPart2().c_str(),
@@ -158,91 +160,22 @@ public:
 				file = File(File::mergePaths(basePath, indexName));
 				if (!file.exists()) {
 					logger->logd(log + " := 404 no index, " + File::mergePaths(basePath, indexName));
-					response.setStatus(404);
+					setErrorPage(response, 404);
 					return;
 				}
 			} else {
 				logger->logd(log + " := 404 not found (" + file.getPath() + ")");
-				response.setStatus(404);
+				setErrorPage(response, 404);
 				return;
 			}
         }
 
 		if (file.getExtension() == "lsp") {
-            
-            AutoRef<HttpSession> session = HttpSessionTool::getSession(request, sessionManager);
-            session->updateLastAccessTime();
-            
-			response.setStatus(200);
-			response.setContentType("text/html");
-            if (lspMemCache.find(file.getPath()) == lspMemCache.end() ||
-                (filesize_t)lspMemCache[file.getPath()].size() != file.getSize()) {
-                FileStream reader(file, "rb");
-                lspMemCache[file.getPath()] = reader.readFullAsString();
-                reader.close();
-            }
-            string dump = lspMemCache[file.getPath()];
-            LispPage page;
-			page.applyWeb();
-			page.applyAuth(request, response);
-			page.applySession(session);
-			page.applyRequest(request);
-			page.applyResponse(response);
-			unsigned long tick = tick_milli();
-			string content = page.parseLispPage(dump);
-			env.gc();
-			printf(" ** parsing : %ld ms.\n", tick_milli() - tick);
-			if (response.needRedirect()) {
-				logger->logd(log + " := 302 redirect");
-				redirect(config, request, response, session, response.getRedirectLocation());
-				return;
-			}
-			if (response["set-file-transfer"].empty() == false) {
-				File file(response["set-file-transfer"]);
-				if (!file.exists() || !file.isFile()) {
-					logger->logd(log + " := 404");
-					response.setStatus(404);
-					setFixedTransfer(response, "Not Found");
-					return;
-				}
-				setContentTypeWithFile(request, response, file);
-				setContentDispositionWithFile(request, response, file);
-				string range = request.getHeaderFieldIgnoreCase("Range");
-				if (!range.empty()) {
-					size_t f = range.find("=");
-					if (f != string::npos) {
-						range = range.substr(f + 1);
-						f = range.find("-");
-						if (f != string::npos) {
-							string start = range.substr(0, f);
-							string end = range.substr(f + 1);
-							try {
-								logger->logd(log + " := 206 partial transfer(" + start + "~" + end + ")");
-								// TODO: implicitly handling the response code
-								setPartialFileTransfer(response,
-													   file,
-													   (size_t)Text::toLong(start),
-													   (size_t)Text::toLong(end));
-								return;
-							} catch (Exception e) {
-								logger->logd(log + " := 500 " + e.getMessage());
-								response.setContentType("text/html");
-								response.setStatus(500);
-								setFixedTransfer(response, e.getMessage());
-								return;
-							}
-						}
-					}
-				}
-				logger->logd(log + " := 200 fixed transfer");
-				response.setStatus(200);
-				setFileTransfer(response, file);
-				return;
-			}
-			logger->logd(log + " := 200 lisp page");
-			setFixedTransfer(response, content);
+            handleLispPage(file, request, sink, response);
+			logger->logd(log + " := " + Text::toString(response.getStatusCode()));
 			return;
 		}
+		
 		logger->logd(log + " := 200 static");
         response.setStatus(200);
 		setContentTypeWithFile(request, response, file);
@@ -252,6 +185,112 @@ public:
         setFileTransfer(response, file);
     }
 
+	/**
+	 * handle lisp page
+	 */
+	void handleLispPage(File & file, HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
+		AutoRef<HttpSession> session = HttpSessionTool::getSession(request, sessionManager);
+		session->updateLastAccessTime();
+		response.setStatus(200);
+		response.setContentType("text/html");
+		if (lspMemCache.find(file.getPath()) == lspMemCache.end() ||
+			(filesize_t)lspMemCache[file.getPath()].size() != file.getSize()) {
+			FileStream reader(file, "rb");
+			lspMemCache[file.getPath()] = reader.readFullAsString();
+			reader.close();
+		}
+		string dump = lspMemCache[file.getPath()];
+		string content = procLispPage(request, response, session, dump);
+		if (response.needRedirect()) {
+			redirect(config, request, response, session, response.getRedirectLocation());
+			return;
+		}
+		if (response["set-file-transfer"].empty() == false) {
+			File file(response["set-file-transfer"]);
+			if (!file.exists() || !file.isFile()) {
+				setErrorPage(response, 404);
+				return;
+			}
+			setFileTransferX(request, response, file);
+			return;
+		}
+		setFixedTransfer(response, content);
+	}
+
+	/**
+	 * parse range
+	 */
+	bool parseRange(const string & range, size_t & from, size_t & to) {
+		if (range.empty()) {
+			return false;
+		}
+		size_t s = range.find("=");
+		if (s == string::npos) {
+			return false;
+		}
+		size_t f = range.find("-", s + 1);
+		if (f == string::npos) {
+			return false;
+		}
+		from = (size_t)Text::toLong(range.substr(s + 1, f));
+		to = (size_t)Text::toLong(range.substr(f + 1));
+		return true;
+	}
+
+	/**
+	 * proc lisp page
+	 */
+	string procLispPage(HttpRequest & request, HttpResponse & response, AutoRef<HttpSession> session, const string & dump) {
+		LispPage page;
+		page.applyWeb();
+		page.applyAuth(request, response);
+		page.applySession(session);
+		page.applyRequest(request);
+		page.applyResponse(response);
+		unsigned long tick = tick_milli();
+		string content = page.parseLispPage(dump);
+		logger->logd(Text::format(" ** parsing : %ld ms.", tick_milli() - tick));
+		return content;
+	}
+
+	/**
+	 * error page
+	 */
+	void setErrorPage(HttpResponse & response, int errorCode) {
+		response.setStatus(errorCode);
+		switch (errorCode) {
+		case 404:
+			setFixedTransfer(response, "Not Found");
+			break;
+		default:
+			break;
+		}
+	}
+
+	/**
+	 * set file transfer
+	 */
+	void setFileTransferX(HttpRequest & request, HttpResponse & response, File & file) {
+		setContentTypeWithFile(request, response, file);
+		setContentDispositionWithFile(request, response, file);
+		string range = request.getHeaderFieldIgnoreCase("Range");
+		if (!range.empty()) {
+			try {
+				setPartialFileTransfer(request, response, file);
+			} catch (Exception e) {
+				response.setContentType("text/html");
+				response.setStatus(500);
+				setFixedTransfer(response, e.getMessage());
+			}
+			return;
+		}
+		response.setStatus(200);
+		setFileTransfer(response, file);
+	}
+
+	/**
+	 * set content type
+	 */
 	void setContentTypeWithFile(HttpRequest & request, HttpResponse & response, File & file) {
 		map<string, string> types = mimeTypes;
 
@@ -262,6 +301,9 @@ public:
 		}
 	}
 
+	/**
+	 * set cotnent disposition
+	 */
 	void setContentDispositionWithFile(HttpRequest & request, HttpResponse & response, File & file) {
 		response.getHeader().setHeaderField("Content-Disposition",
 											"attachment; filename=\"" + file.getFileName() + "\"");
@@ -550,9 +592,7 @@ int main(int argc, char * args[]) {
 #endif
     }
 
-	LISP::Env env;
-	LISP::native(env);
-	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config, env, "/static"));
+	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config, "/static"));
     server->registerRequestHandler("/static*", staticHandler);
 
 	AutoRef<BasicAuth> auth(new BasicAuth(config["auth.username"], config["auth.password"]));

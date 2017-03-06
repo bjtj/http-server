@@ -44,10 +44,8 @@ namespace HTTP {
 	}
     
 	void HttpRequestHandler::setFixedTransfer(HttpResponse & response, const string & content) {
-
 		AutoRef<DataSource> source(new StringDataSource(content));
 		AutoRef<DataTransfer> transfer(new FixedTransfer(source, content.size()));
-
         response.clearTransfer();
         response.setTransfer(transfer);
 		response.setContentLength(content.size());
@@ -66,15 +64,24 @@ namespace HTTP {
 		response.setContentLength(file.getSize());
 	}
 
-	void HttpRequestHandler::setPartialFileTransfer(HttpResponse & response, OS::File & file, size_t start, size_t end) {
+	void HttpRequestHandler::setPartialFileTransfer(HttpRequest & request, HttpResponse & response, OS::File & file) {
+		string range = request.getHeaderFieldIgnoreCase("Range");
+		if (range.empty()) {
+			throw Exception("Range field empty");
+		}
+		size_t start;
+		size_t end;
+		if (parseRange(range, start, end) == false) {
+			throw Exception("Parse range failed");
+		}
 		if (file.getSize() < 1) {
-			throw Exception("empty file");
+			throw Exception("Empty file");
 		}
 		if (end == 0 || end >= (size_t)file.getSize()) {
 			end = (size_t)file.getSize() - 1;
 		}
 		if (start >= end) {
-            throw Exception("wrong range start error : end(" + Text::toString(end) +
+            throw Exception("Wrong range start error : end(" + Text::toString(end) +
                             ") but start(" + Text::toString(start) + ")");
 		}
 		size_t size = (end - start + 1);
@@ -92,6 +99,23 @@ namespace HTTP {
 		bytes.append(Text::toString(file.getSize()));
 		response.getHeader().setHeaderField("Content-Range", bytes);
 		response.setTransfer(transfer);
+	}
+
+	bool HttpRequestHandler::parseRange(const string & range, size_t & from, size_t & to) {
+		if (range.empty()) {
+			return false;
+		}
+		size_t s = range.find("=");
+		if (s == string::npos) {
+			return false;
+		}
+		size_t f = range.find("-", s + 1);
+		if (f == string::npos) {
+			return false;
+		}
+		from = (size_t)Text::toLong(range.substr(s + 1, f));
+		to = (size_t)Text::toLong(range.substr(f + 1));
+		return true;
 	}
 	
 	/**
