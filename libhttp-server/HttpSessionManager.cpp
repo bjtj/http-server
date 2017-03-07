@@ -7,7 +7,7 @@ namespace HTTP {
     using namespace UTIL;
 	
 	HttpSessionManager::HttpSessionManager(unsigned long timeout)
-		: timeout(timeout), sem(1) {
+		: id_idx(0), timeout(timeout), sem(1) {
 	}
 	HttpSessionManager::~HttpSessionManager() {
 		clear();
@@ -55,7 +55,7 @@ namespace HTTP {
 	
 	AutoRef<HttpSession> HttpSessionManager::createSession() {
         OS::AutoLock lock(sem);
-		AutoRef<HttpSession> session(new HttpSession);
+		AutoRef<HttpSession> session(new HttpSession(id_idx++));
 		session->setTimeout(timeout);
 		sessions.push_back(session);
 		return *sessions.rbegin();

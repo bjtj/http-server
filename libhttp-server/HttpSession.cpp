@@ -8,10 +8,7 @@ namespace HTTP {
 		return tick_milli();
 	}
 
-	unsigned long HttpSession::id_idx = 0;
-
-	HttpSession::HttpSession() {
-		id = id_idx++;
+	HttpSession::HttpSession(unsigned long id) : id(id) {
 		creationTime = s_tick();
 		lastAccessTime = s_tick();
 	}

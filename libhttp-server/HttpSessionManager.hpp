@@ -7,17 +7,20 @@
 #include "HttpSession.hpp"
 
 namespace HTTP {
+
+	/**
+	 * http session manager
+	 */
 	class HttpSessionManager {
 	private:
+		unsigned long id_idx;
 		unsigned long timeout;
         std::vector< UTIL::AutoRef<HttpSession> > sessions;
 		OS::Semaphore sem;
-
 	private:
 		/* do not allow copy */
 		HttpSessionManager(const HttpSessionManager & other);
 		HttpSessionManager & operator=(const HttpSessionManager & other);
-	
 	public:
 		HttpSessionManager(unsigned long timeout);
 		virtual ~HttpSessionManager();
