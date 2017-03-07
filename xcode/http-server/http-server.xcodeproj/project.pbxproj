@@ -26,6 +26,8 @@
 		E87F366D1C51067A00970869 /* HttpSession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E87F36681C51067A00970869 /* HttpSession.cpp */; };
 		E87F366E1C51067A00970869 /* HttpSessionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E87F366A1C51067A00970869 /* HttpSessionManager.cpp */; };
 		E87F366F1C51067A00970869 /* HttpSessionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E87F366A1C51067A00970869 /* HttpSessionManager.cpp */; };
+		E8848F001E6F73DF00FFA522 /* WebServerUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8848EFE1E6F73DF00FFA522 /* WebServerUtil.cpp */; };
+		E8848F011E6F740700FFA522 /* WebServerUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8848EFE1E6F73DF00FFA522 /* WebServerUtil.cpp */; };
 		E88A80141CB446FB00241D44 /* BufferIndicator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88A800D1CB446FB00241D44 /* BufferIndicator.cpp */; };
 		E88A80151CB4473300241D44 /* BufferIndicator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88A800D1CB446FB00241D44 /* BufferIndicator.cpp */; };
 		E89501521C14648B009434B1 /* HttpEncoderDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E89501501C14648B009434B1 /* HttpEncoderDecoder.cpp */; };
@@ -152,6 +154,8 @@
 		E87F36691C51067A00970869 /* HttpSession.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpSession.hpp; path = "../../libhttp-server/HttpSession.hpp"; sourceTree = "<group>"; };
 		E87F366A1C51067A00970869 /* HttpSessionManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpSessionManager.cpp; path = "../../libhttp-server/HttpSessionManager.cpp"; sourceTree = "<group>"; };
 		E87F366B1C51067A00970869 /* HttpSessionManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpSessionManager.hpp; path = "../../libhttp-server/HttpSessionManager.hpp"; sourceTree = "<group>"; };
+		E8848EFE1E6F73DF00FFA522 /* WebServerUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WebServerUtil.cpp; path = "../../libhttp-server/WebServerUtil.cpp"; sourceTree = "<group>"; };
+		E8848EFF1E6F73DF00FFA522 /* WebServerUtil.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = WebServerUtil.hpp; path = "../../libhttp-server/WebServerUtil.hpp"; sourceTree = "<group>"; };
 		E88A800D1CB446FB00241D44 /* BufferIndicator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BufferIndicator.cpp; path = "../../libhttp-server/BufferIndicator.cpp"; sourceTree = "<group>"; };
 		E88A800E1CB446FB00241D44 /* BufferIndicator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BufferIndicator.hpp; path = "../../libhttp-server/BufferIndicator.hpp"; sourceTree = "<group>"; };
 		E88A800F1CB446FB00241D44 /* DataSink.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DataSink.hpp; path = "../../libhttp-server/DataSink.hpp"; sourceTree = "<group>"; };
@@ -261,6 +265,8 @@
 		E8FAB2441BD7D2A500E89DC5 /* http-server-c++ */ = {
 			isa = PBXGroup;
 			children = (
+				E8848EFE1E6F73DF00FFA522 /* WebServerUtil.cpp */,
+				E8848EFF1E6F73DF00FFA522 /* WebServerUtil.hpp */,
 				E86940491D1C004900192CBB /* BasicAuth.cpp */,
 				E869404A1D1C004900192CBB /* BasicAuth.hpp */,
 				E869404B1D1C004900192CBB /* HttpAuth.cpp */,
@@ -434,6 +440,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E8848F011E6F740700FFA522 /* WebServerUtil.cpp in Sources */,
 				E88A80151CB4473300241D44 /* BufferIndicator.cpp in Sources */,
 				E89501531C1464A3009434B1 /* HttpEncoderDecoder.cpp in Sources */,
 				E8B161391BFDF8B9002D68C7 /* AnotherHttpClient.cpp in Sources */,
@@ -479,6 +486,7 @@
 				E87F366E1C51067A00970869 /* HttpSessionManager.cpp in Sources */,
 				E8B160DE1BF9E4FA002D68C7 /* Packet.cpp in Sources */,
 				E88A80141CB446FB00241D44 /* BufferIndicator.cpp in Sources */,
+				E8848F001E6F73DF00FFA522 /* WebServerUtil.cpp in Sources */,
 				E8FAB2661BD7D2CE00E89DC5 /* ChunkedReader.cpp in Sources */,
 				E869404D1D1C004900192CBB /* BasicAuth.cpp in Sources */,
 				E8FAB26C1BD7D2CE00E89DC5 /* HttpParameter.cpp in Sources */,
