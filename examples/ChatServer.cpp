@@ -2,6 +2,7 @@
 #include <liboslayer/os.hpp>
 #include <liboslayer/FileStream.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
+#include <libhttp-server/WebServerUtil.hpp>
 
 using namespace std;
 using namespace OS;
@@ -11,7 +12,7 @@ using namespace HTTP;
 /**
  * 
  */
-class ChatHandler : public HttpRequestHandler {
+class ChatHandler : public HttpRequestHandler, public WebServerUtil {
 private:
 	vector<string> messages;
 	Semaphore sem;

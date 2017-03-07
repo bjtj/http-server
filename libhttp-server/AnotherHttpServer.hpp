@@ -36,11 +36,11 @@ namespace HTTP {
 		virtual void onHttpResponseTransferCompleted(HttpRequest & request, HttpResponse & response);
 		virtual bool onException(HttpRequest & request, HttpResponse & response, OS::Exception & ex);
 
-		void setFixedTransfer(HttpResponse & response, const std::string & content);
-		void setFileTransfer(HttpResponse & response, const std::string & filepath);
-		void setFileTransfer(HttpResponse & response, OS::File & file);
-		void setPartialFileTransfer(HttpRequest & request, HttpResponse & response, OS::File & file);
-		bool parseRange(const std::string & range, size_t & from, size_t & to);
+		// void setFixedTransfer(HttpResponse & response, const std::string & content);
+		// void setFileTransfer(HttpResponse & response, const std::string & filepath);
+		// void setFileTransfer(HttpResponse & response, OS::File & file);
+		// void setPartialFileTransfer(HttpRequest & request, HttpResponse & response, OS::File & file);
+		// bool parseRange(const std::string & range, size_t & from, size_t & to);
 	};
 
 	/**

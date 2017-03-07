@@ -16,6 +16,7 @@
 #include <liboslayer/Hash.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/BasicAuth.hpp>
+#include <libhttp-server/WebServerUtil.hpp>
 
 using namespace std;
 using namespace OS;
@@ -99,12 +100,13 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
                           host + ":" + port + "/" +
                           HttpSessionTool::urlMan(uri, session));
     response.setContentType("text/html");
+	response.setContentLength(0);
 }
 
 /**
  * @brief 
  */
-class StaticHttpRequestHandler : public HttpRequestHandler {
+class StaticHttpRequestHandler : public HttpRequestHandler, public WebServerUtil {
 private:
 	ServerConfig & config;
     string basePath;
@@ -140,36 +142,35 @@ public:
 	 * handle web
 	 */
 	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
-		string log;
-		logger->logd(Text::format("** Part2: %s [%s:%d]", request.getHeader().getPart2().c_str(),
-                                 request.getRemoteAddress().getHost().c_str(),
-								 request.getRemoteAddress().getPort()));
+		
 		if (request.isWwwFormUrlEncoded()) {
 			request.parseWwwFormUrlencoded();
 		}
-        response.setContentLength(0);
+		
 		string path = request.getPath();
 		path = path.substr(prefix.size());
 		if (path.empty()) {
 			path = "/";
 		}
-		log = "** static :: prefix : '" + prefix + "' / path : '" + path + "'";
+		string log = Text::format("[%s:%d] ** STATIC :: path : '%s'",
+						   request.getRemoteAddress().getHost().c_str(),
+						   request.getRemoteAddress().getPort(),
+						   path.c_str());
         File file(File::mergePaths(basePath, path));
         if (!file.exists() || !file.isFile()) {
-			if (path == "/") {
-				file = File(File::mergePaths(basePath, indexName));
-				if (!file.exists()) {
-					logger->logd(log + " := 404 no index, " + File::mergePaths(basePath, indexName));
-					setErrorPage(response, 404);
-					return;
-				}
-			} else {
+			if (path != "/") {
 				logger->logd(log + " := 404 not found (" + file.getPath() + ")");
 				setErrorPage(response, 404);
 				return;
 			}
+			file = File(File::mergePaths(basePath, indexName));
+			if (!file.exists()) {
+				logger->logd(log + " := 404 no index, " + File::mergePaths(basePath, indexName));
+				setErrorPage(response, 404);
+				return;
+			}
         }
-
+		
 		if (file.getExtension() == "lsp") {
             handleLispPage(file, request, sink, response);
 			logger->logd(log + " := " + Text::toString(response.getStatusCode()));
@@ -215,26 +216,6 @@ public:
 			return;
 		}
 		setFixedTransfer(response, content);
-	}
-
-	/**
-	 * parse range
-	 */
-	bool parseRange(const string & range, size_t & from, size_t & to) {
-		if (range.empty()) {
-			return false;
-		}
-		size_t s = range.find("=");
-		if (s == string::npos) {
-			return false;
-		}
-		size_t f = range.find("-", s + 1);
-		if (f == string::npos) {
-			return false;
-		}
-		from = (size_t)Text::toLong(range.substr(s + 1, f));
-		to = (size_t)Text::toLong(range.substr(f + 1));
-		return true;
 	}
 
 	/**
@@ -313,7 +294,7 @@ public:
 /**
  * @brief 
  */
-class ProxyHandler : public HttpRequestHandler {
+class ProxyHandler : public HttpRequestHandler, public WebServerUtil {
 private:
 
 	/**
@@ -370,7 +351,6 @@ private:
 
 	ServerConfig config;
 	SimpleHash hash;
-	
 public:
 	ProxyHandler(const ServerConfig & config) : config(config) {}
     virtual ~ProxyHandler() {}
@@ -463,16 +443,13 @@ public:
 /**
  * @brief 
  */
-class AuthHttpRequestHandler : public HttpRequestHandler {
+class AuthHttpRequestHandler : public HttpRequestHandler, public WebServerUtil {
 private:
 	AutoRef<BasicAuth> auth;
 public:
-	AuthHttpRequestHandler(AutoRef<BasicAuth> auth) : auth(auth) {
-	}
+	AuthHttpRequestHandler(AutoRef<BasicAuth> auth) : auth(auth) {}
     virtual ~AuthHttpRequestHandler() {}
-    
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
-
 		try {
 			if (!auth.nil() && !auth->validate(request)) {
 				auth->setAuthentication(response);
@@ -480,13 +457,10 @@ public:
 				setFixedTransfer(response, "Authentication required");
 				return;
 			}
-			
 			doHandle(request, sink, response);
-
 			if (request.getMethod() == "HEAD") {
 				response.setTransfer(AutoRef<DataTransfer>(NULL));
 			}
-			
 		} catch (Exception & e) {
 			logger->loge(" ** error");
 			response.setStatus(500);
@@ -496,17 +470,13 @@ public:
 	}
 
 	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
-
 		string log;
-
 		logger->logd(Text::format("** Part2: %s [%s:%d]", request.getHeader().getPart2().c_str(),
                                  request.getRemoteAddress().getHost().c_str(),
 								 request.getRemoteAddress().getPort()));
-
 		if (request.isWwwFormUrlEncoded()) {
 			request.parseWwwFormUrlencoded();
 		}
-
 		response.setStatus(200);
 		setFixedTransfer(response, "hello");
     }
@@ -616,7 +586,10 @@ int main(int argc, char * args[]) {
 				printf(" * Connections: %zu\n", server->connections());
                 vector<AutoRef<Connection> > conns = server->connectionManager().getConnectionList();
                 for (vector<AutoRef<Connection> >::iterator iter = conns.begin(); iter != conns.end(); iter++) {
-                    printf(" - recv: %ld, send: %ld (%ld)\n", (*iter)->recvCount(), (*iter)->sendCount(), (*iter)->sendTryCount());
+                    printf("  - Recv: %10s Bytes / Send: %10s Bytes (%ld)\n",
+						   Text::toCommaNumber(Text::toString((*iter)->recvCount())).c_str(),
+						   Text::toCommaNumber(Text::toString((*iter)->sendCount())).c_str(),
+						   (*iter)->sendTryCount());
                 }
 			} else if (line == "load") {
 				// TODO: implement

@@ -34,7 +34,8 @@ libhttp_serverinc_HEADERS = \
 	Packet.hpp \
 	StringDataSink.hpp \
 	StringDataSource.hpp \
-	Url.hpp
+	Url.hpp \
+	WebServerUtil.hpp
 
 lib_LTLIBRARIES = libhttp-server.la
 libhttp_server_la_SOURCES = \
@@ -99,7 +100,9 @@ libhttp_server_la_SOURCES = \
 	StringDataSink.hpp \
 	StringDataSource.hpp \
 	Url.cpp \
-	Url.hpp
+	Url.hpp \
+	WebServerUtil.cpp \
+	WebServerUtil.hpp
 
 libhttp_server_la_CXXFLAGS = $(PTHREAD_CXXFLAGS) $(LIBOSLAYER_CFLAGS)
 libhttp_server_la_LIBADD = $(LIBOSLAYER_LIBS)
