@@ -68,7 +68,7 @@ namespace HTTP {
 		bytes.append(Text::toString(end));
 		bytes.append("/");
 		bytes.append(Text::toString(file.getSize()));
-		response.getHeader().setHeaderField("Content-Range", bytes);
+		response.header().setHeaderField("Content-Range", bytes);
 		response.setTransfer(transfer);
 	}
 

@@ -39,7 +39,7 @@ public:
 		return AutoRef<DataSink>(new StringDataSink);
 	}
 	virtual void onTransferDone(HttpResponse & response, AutoRef<DataSink> sink, AutoRef<UserData> userData) {
-		responseHeader = response.getHeader();
+		responseHeader = response.header();
         if (!sink.nil()) {
 			dump = ((StringDataSink*)&sink)->data();
         } else {
@@ -85,7 +85,7 @@ public:
  */
 static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse & response, AutoRef<HttpSession> session, const string & uri) {
     
-    HttpResponseHeader & header = response.getHeader();
+    HttpResponseHeader & header = response.header();
     
     string host = config.getHost();
     string port = Text::toString(request.getLocalAddress().getPort());
@@ -152,20 +152,21 @@ public:
 		if (path.empty()) {
 			path = "/";
 		}
-		string log = Text::format("[%s:%d] ** STATIC :: path : '%s'",
-						   request.getRemoteAddress().getHost().c_str(),
-						   request.getRemoteAddress().getPort(),
-						   path.c_str());
+		string log = Text::format("| %s:%d | STATIC | %s '%s'",
+								  request.getRemoteAddress().getHost().c_str(),
+								  request.getRemoteAddress().getPort(),
+								  request.getMethod().c_str(),
+								  path.c_str());
         File file(File::mergePaths(basePath, path));
         if (!file.exists() || !file.isFile()) {
 			if (path != "/") {
-				logger->logd(log + " := 404 not found (" + file.getPath() + ")");
+				logger->logd(log + " | 404 Not Found (" + file.getPath() + ")");
 				setErrorPage(response, 404);
 				return;
 			}
 			file = File(File::mergePaths(basePath, indexName));
 			if (!file.exists()) {
-				logger->logd(log + " := 404 no index, " + File::mergePaths(basePath, indexName));
+				logger->logd(log + " | 404 No Index File, " + File::mergePaths(basePath, indexName));
 				setErrorPage(response, 404);
 				return;
 			}
@@ -173,11 +174,11 @@ public:
 		
 		if (file.getExtension() == "lsp") {
             handleLispPage(file, request, sink, response);
-			logger->logd(log + " := " + Text::toString(response.getStatusCode()));
+			logger->logd(log + " : (LISP PAGE '" + file.getName() + "') | " + Text::toString(response.getStatusCode()));
 			return;
 		}
 		
-		logger->logd(log + " := 200 static");
+		logger->logd(log + " | 200 OK");
         response.setStatus(200);
 		setContentTypeWithFile(request, response, file);
 		if (request.getParameter("transfer") == "download") {
@@ -202,8 +203,16 @@ public:
 		}
 		string dump = lspMemCache[file.getPath()];
 		string content = procLispPage(request, response, session, dump);
-		if (response.needRedirect()) {
+		if (response.redirectRequested()) {
 			redirect(config, request, response, session, response.getRedirectLocation());
+			return;
+		}
+		if (response.forwardRequested()) {
+			string location = response.getForwardLocation();
+			logger->logd(Text::format(" ** Forward :: location : %s", location.c_str()));
+			request.setPath(location);
+			response.cancelForward();
+			doHandle(request, sink, response);
 			return;
 		}
 		if (response["set-file-transfer"].empty() == false) {
@@ -286,8 +295,8 @@ public:
 	 * set cotnent disposition
 	 */
 	void setContentDispositionWithFile(HttpRequest & request, HttpResponse & response, File & file) {
-		response.getHeader().setHeaderField("Content-Disposition",
-											"attachment; filename=\"" + file.getFileName() + "\"");
+		response.header().setHeaderField("Content-Disposition",
+										 "attachment; filename=\"" + file.getFileName() + "\"");
 	}
 };
 
@@ -574,7 +583,7 @@ int main(int argc, char * args[]) {
 
 	server->startAsync();
 
-	printf("Listening... %d\n", config.getPort());
+	printf("[Listening... / port: %d]\n", config.getPort());
 	
 	while (1) {
 		string line = readline();
@@ -597,10 +606,10 @@ int main(int argc, char * args[]) {
 		}
 	}
 
-	printf("** stopping\n");
+	printf("[Stopping...]\n");
 	server->stop();
     delete server;
-	printf("** done\n");
+	printf("[Done]\n");
     
     return 0;
 }

@@ -18,10 +18,12 @@ namespace HTTP {
 	 */
 	class HttpResponse {
 	private:
-		HttpResponseHeader header;
+		HttpResponseHeader _header;
         UTIL::AutoRef<DataTransfer> transfer;
-		bool _needRedirect;
-		std::string redirectLocation;
+		bool _redirectRequested;
+		std::string _redirectLocation;
+		bool _forwardRequested;
+		std::string _forwardLocation;
 		std::map<std::string, std::string> props;
 		
 	public:
@@ -38,14 +40,18 @@ namespace HTTP {
         bool completeContentTransfer();
 		std::string getHeaderField(const std::string & name) const;
 		std::string getHeaderFieldIgnoreCase(const std::string & name) const;
-		HttpResponseHeader & getHeader();
-        void setHeader(HttpHeader & header);
+		HttpResponseHeader & header();
         void setTransfer(UTIL::AutoRef<DataTransfer> transfer);
         UTIL::AutoRef<DataTransfer> getTransfer();
 		void clearTransfer();
 		void setRedirect(const std::string & location);
+		void cancelRedirect();
+		void setForward(const std::string & location);
+		void cancelForward();
 		std::string getRedirectLocation();
-		bool needRedirect();
+		std::string getForwardLocation();
+		bool redirectRequested();
+		bool forwardRequested();
 		std::string & operator[] (const std::string & name);
 	};
 }

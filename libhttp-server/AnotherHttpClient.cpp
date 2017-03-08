@@ -39,7 +39,7 @@ namespace HTTP {
 		return NULL;
 	}
 	void OnHttpResponseListener::onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData) {
-		response.setTransfer(AutoRef<DataTransfer>(createDataTransfer(response.getHeader(), getDataSink())));
+		response.setTransfer(AutoRef<DataTransfer>(createDataTransfer(response.header(), getDataSink())));
 	}
 
 	/**
@@ -303,7 +303,7 @@ namespace HTTP {
 
 			if (responseHeaderReader.complete()) {
                 
-                response.setHeader(responseHeaderReader.getHeader());
+                response.header() = responseHeaderReader.getHeader();
                 
                 if (responseListener) {
                     responseListener->onResponseHeader(response, userData);
@@ -351,11 +351,11 @@ namespace HTTP {
 	}
     
     bool AnotherHttpClient::needRedirect() {
-        return followRedirect ? response.getHeader().isRedirection() : false;
+        return followRedirect ? response.header().isRedirection() : false;
     }
     
     void AnotherHttpClient::handleRedirect() {
-        string location = response.getHeader().getRedirectionLocation();
+        string location = response.header().getRedirectionLocation();
         url = Url(location);
         request.getHeader().setPath(url.getPathAndQuery());
         request.getHeader().setHost(url.getAddress());

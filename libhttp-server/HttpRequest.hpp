@@ -34,6 +34,7 @@ namespace HTTP {
         void setHeader(HttpHeader & header);
 		std::string getMethod() const;
 		std::string getPath() const;
+		void setPath(const std::string & path);
 		std::string getHeaderField(const std::string & name) const;
 		std::string getHeaderFieldIgnoreCase(const std::string & name) const;
 		UTIL::LinkedStringListMap & getHeaderFields();

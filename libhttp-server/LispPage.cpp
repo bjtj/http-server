@@ -189,16 +189,28 @@ namespace HTTP {
 				Iterator<_VAR> iter(args);
 				if (name->getSymbol() == "set-status-code") {
 					int status = (int)LISP::eval(iter.next(), env)->getInteger().getInteger();
-					response.setStatus(status);
+					string statusMessage;
+					if (iter.has()) {
+						statusMessage = LISP::eval(iter.next(), env)->toString();
+					}
+					if (statusMessage.empty()) {
+						response.setStatus(status);
+					} else {
+						response.setStatus(status, statusMessage);
+					}
 					return HEAP_ALLOC(env, LISP::Integer(status));
 				} else if (name->getSymbol() == "set-response-header") {
 					string name = LISP::eval(iter.next(), env)->toString();
 					string value = LISP::eval(iter.next(), env)->toString();
-					response.getHeader().setHeaderField(name, value);
+					response.header().setHeaderField(name, value);
 					return HEAP_ALLOC(env, LISP::text(value));
 				} else if (name->getSymbol() == "set-redirect") {
 					string location = LISP::eval(iter.next(), env)->toString();
 					response.setRedirect(location);
+					return HEAP_ALLOC(env, LISP::text(location));
+				} else if (name->getSymbol() == "set-forward") {
+					string location = LISP::eval(iter.next(), env)->toString();
+					response.setForward(location);
 					return HEAP_ALLOC(env, LISP::text(location));
 				} else if (name->getSymbol() == "set-file-transfer") {
 					string path = LISP::eval(iter.next(), env)->toString();
@@ -213,6 +225,7 @@ namespace HTTP {
 		env.local()["set-status-code"] = HEAP_ALLOC(env, proc);
 		env.local()["set-response-header"] = HEAP_ALLOC(env, proc);
 		env.local()["set-redirect"] = HEAP_ALLOC(env, proc);
+		env.local()["set-forward"] = HEAP_ALLOC(env, proc);
 		env.local()["set-file-transfer"] = HEAP_ALLOC(env, proc);
 		
 	}

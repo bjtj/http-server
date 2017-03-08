@@ -11,46 +11,45 @@ namespace HTTP {
 	/**
 	 * @brief http response constructor
 	 */
-	HttpResponse::HttpResponse() : _needRedirect(false) {
+	HttpResponse::HttpResponse() : _redirectRequested(false), _forwardRequested(false) {
 	}
 	HttpResponse::~HttpResponse() {
 	}
     void HttpResponse::clear() {
-        header.clear();
+        _header.clear();
         clearTransfer();
-		_needRedirect = false;
-		redirectLocation.clear();
+		_redirectRequested = false;
+		_redirectLocation.clear();
+		_forwardRequested = false;
+		_forwardLocation.clear();
     }
 	void HttpResponse::setStatus(int statusCode) {
-		header.setStatus(statusCode);
+		_header.setStatus(statusCode);
 	}
 	void HttpResponse::setStatus(int statusCode, const string & statusString) {
-		header.setStatus(statusCode, statusString);
+		_header.setStatus(statusCode, statusString);
 	}
 	int HttpResponse::getStatusCode() {
-		return header.getStatusCode();
+		return _header.getStatusCode();
 	}
 	void HttpResponse::setParts(vector<string> & parts) {
-		header.setParts(parts);
+		_header.setParts(parts);
 	}
 	void HttpResponse::setContentLength(unsigned long long length) {
-		header.setContentLength(length);
+		_header.setContentLength(length);
 	}
 	void HttpResponse::setContentType(const string & type) {
-		header.setHeaderField("Content-Type", type);
+		_header.setHeaderField("Content-Type", type);
 	}
 	string HttpResponse::getHeaderField(const string & name) const {
-		return header.getHeaderField(name);
+		return _header.getHeaderField(name);
 	}
 	string HttpResponse::getHeaderFieldIgnoreCase(const string & name) const {
-		return header.getHeaderFieldIgnoreCase(name);
+		return _header.getHeaderFieldIgnoreCase(name);
 	}
-	HttpResponseHeader & HttpResponse::getHeader() {
-		return header;
+	HttpResponseHeader & HttpResponse::header() {
+		return _header;
 	}
-    void HttpResponse::setHeader(HttpHeader & header) {
-        this->header.setHeader(header);
-    }
     void HttpResponse::setTransfer(AutoRef<DataTransfer> transfer) {
         this->transfer = transfer;
     }
@@ -62,16 +61,39 @@ namespace HTTP {
 	}
 
 	void HttpResponse::setRedirect(const string & location) {
-		_needRedirect = true;
-		redirectLocation = location;
+		_redirectRequested = true;
+		_redirectLocation = location;
+	}
+
+	void HttpResponse::cancelRedirect() {
+		_redirectRequested = false;
+		_redirectLocation.clear();
+	}
+
+	void HttpResponse::setForward(const string & location) {
+		_forwardRequested = true;
+		_forwardLocation = location;
+	}
+
+	void HttpResponse::cancelForward() {
+		_forwardRequested = false;
+		_forwardLocation.clear();
 	}
 
 	string HttpResponse::getRedirectLocation() {
-		return redirectLocation;
+		return _redirectLocation;
 	}
 
-	bool HttpResponse::needRedirect() {
-		return _needRedirect;
+	string HttpResponse::getForwardLocation() {
+		return _forwardLocation;
+	}
+
+	bool HttpResponse::redirectRequested() {
+		return _redirectRequested;
+	}
+
+	bool HttpResponse::forwardRequested() {
+		return _forwardRequested;
 	}
 
 	string & HttpResponse::operator[] (const string & name) {

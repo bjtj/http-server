@@ -242,7 +242,7 @@ namespace HTTP {
 	}
 
 	void HttpCommunication::sendResponseHeader(UTIL::AutoRef<Connection> connection) {
-		HttpResponseHeader & header = response.getHeader();
+		HttpResponseHeader & header = response.header();
         string headerString = header.toString();
         if (connection->send(headerString.c_str(), (int)headerString.length()) != (int)headerString.length()) {
             // TODO: retry
