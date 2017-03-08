@@ -118,7 +118,7 @@ namespace HTTP {
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
 				if (name->getSymbol() == "url") {
-					string url = iter.next()->toString();
+					string url = LISP::eval(iter.next(), env)->toString();
 					return HEAP_ALLOC(env, LISP::text(HttpSessionTool::urlMan(url, session)));
 				} else if (name->getSymbol() == "get-session-value") {
 					string name = LISP::eval(iter.next(), env)->toString();

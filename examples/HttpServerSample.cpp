@@ -108,20 +108,30 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
  */
 class StaticHttpRequestHandler : public HttpRequestHandler, public WebServerUtil {
 private:
-	ServerConfig & config;
+	bool dedicated;
+	ServerConfig config;
     string basePath;
 	string prefix;
 	string indexName;
 	map<string, string> mimeTypes;
     map<string, string> lspMemCache;
 public:
-	StaticHttpRequestHandler(ServerConfig & config, const string & prefix)
-		: config(config), prefix(prefix)
+	StaticHttpRequestHandler(const ServerConfig & config, const string & prefix)
+		: dedicated(false), config(config), prefix(prefix)
 	{
 		mimeTypes = MimeTypes::getMimeTypes();
 		basePath = config["static.base.path"];
 		indexName = config["index.name"];
 	}
+
+	StaticHttpRequestHandler(bool dedicated, const ServerConfig & config, const string & prefix)
+		: dedicated(dedicated), config(config), prefix(prefix)
+	{
+		mimeTypes = MimeTypes::getMimeTypes();
+		basePath = config["static.base.path"];
+		indexName = config["dedicated.index.name"];
+	}
+	
     virtual ~StaticHttpRequestHandler() {/* empty */}
     
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
@@ -157,7 +167,11 @@ public:
 								  request.getRemoteAddress().getPort(),
 								  request.getMethod().c_str(),
 								  path.c_str());
-        File file(File::mergePaths(basePath, path));
+		
+		File file(File::mergePaths(basePath, path));
+		if (dedicated) {
+			file = File(File::mergePaths(basePath, indexName));
+		}
         if (!file.exists() || !file.isFile()) {
 			if (path != "/") {
 				logger->logd(log + " | 404 Not Found (" + file.getPath() + ")");
@@ -573,6 +587,9 @@ int main(int argc, char * args[]) {
 
 	AutoRef<HttpRequestHandler> staticHandler(new StaticHttpRequestHandler(config, "/static"));
     server->registerRequestHandler("/static*", staticHandler);
+
+	AutoRef<HttpRequestHandler> davStaticHandler(new StaticHttpRequestHandler(true, config, "/dav"));
+    server->registerRequestHandler("/dav*", davStaticHandler);
 
 	AutoRef<BasicAuth> auth(new BasicAuth(config["auth.username"], config["auth.password"]));
 	AutoRef<HttpRequestHandler> authHandler(new AuthHttpRequestHandler(auth));
