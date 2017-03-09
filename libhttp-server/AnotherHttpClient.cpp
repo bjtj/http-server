@@ -148,7 +148,7 @@ namespace HTTP {
     }
 
 	void AnotherHttpClient::setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields) {
-		HttpRequestHeader & header = request.getHeader();
+		HttpRequestHeader & header = request.header();
         header.setMethod(method);
         header.setPath(url.getPathAndQuery());
         header.setProtocol("HTTP/1.1");
@@ -172,17 +172,17 @@ namespace HTTP {
 	}
     
     void AnotherHttpClient::setFixedTransfer(AutoRef<DataTransfer> transfer, size_t size) {
-        HttpRequestHeader & header = request.getHeader();
+        HttpRequestHeader & header = request.header();
         if (transfer.nil()) {
             header.setContentLength(0);
         } else {
-			request.getHeader().setContentLength(size);
+			request.header().setContentLength(size);
             request.setTransfer(transfer);
         }
     }
 
 	void AnotherHttpClient::setChunkedTransfer(AutoRef<DataTransfer> transfer) {
-        HttpRequestHeader & header = request.getHeader();
+        HttpRequestHeader & header = request.header();
 		header.setChunkedTransfer(true);
 		request.setTransfer(transfer);
     }
@@ -269,7 +269,7 @@ namespace HTTP {
 	void AnotherHttpClient::sendRequestHeader() {
 
 		if (!requestHeaderSent) {
-			string header = request.getHeader().toString();
+			string header = request.header().toString();
 			connection->send(header.c_str(), header.length());
 			requestHeaderSent = true;
 		}
@@ -357,8 +357,8 @@ namespace HTTP {
     void AnotherHttpClient::handleRedirect() {
         string location = response.header().getRedirectionLocation();
         url = Url(location);
-        request.getHeader().setPath(url.getPathAndQuery());
-        request.getHeader().setHost(url.getAddress());
+        request.header().setPath(url.getPathAndQuery());
+        request.header().setHost(url.getAddress());
         
         closeConnection();
     }

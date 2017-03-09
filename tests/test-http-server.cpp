@@ -5,6 +5,7 @@
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/StringDataSink.hpp>
+#include <libhttp-server/WebServerUtil.hpp>
 
 using namespace std;
 using namespace HTTP;
@@ -21,7 +22,7 @@ static void httpGet(const string & url, const LinkedStringMap & fields, OnHttpRe
 /**
  * my http request handler
  */
-class MyHttpRequestHandler : public HttpRequestHandler {
+class MyHttpRequestHandler : public HttpRequestHandler, public WebServerUtil {
 private:
 	HttpServerConfig config;
 	map<string, string> mimeTypes;
@@ -105,7 +106,7 @@ public:
 		return AutoRef<DataSink>(new StringDataSink);
 	}
     virtual void onTransferDone(HttpResponse & response, AutoRef<DataSink> sink, AutoRef<UserData> userData) {
-		responseHeader = response.getHeader();
+		responseHeader = response.header();
         if (!sink.nil()) {
 			try {
 				dump = ((StringDataSink*)&sink)->data();

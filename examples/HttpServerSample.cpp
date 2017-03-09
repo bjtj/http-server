@@ -494,7 +494,7 @@ public:
 
 	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 		string log;
-		logger->logd(Text::format("** Part2: %s [%s:%d]", request.getHeader().getPart2().c_str(),
+		logger->logd(Text::format("** Part2: %s [%s:%d]", request.header().getPart2().c_str(),
                                  request.getRemoteAddress().getHost().c_str(),
 								 request.getRemoteAddress().getPort()));
 		if (request.isWwwFormUrlEncoded()) {

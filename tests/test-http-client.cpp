@@ -2,6 +2,7 @@
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/StringDataSink.hpp>
+#include <libhttp-server/WebServerUtil.hpp>
 #include <liboslayer/SecureSocket.hpp>
 #include "utils.hpp"
 
@@ -38,7 +39,7 @@ public:
 };
 
 
-class RequestEchoHandler : public HttpRequestHandler {
+class RequestEchoHandler : public HttpRequestHandler, public WebServerUtil {
 private:
 public:
     RequestEchoHandler() {}
@@ -96,7 +97,7 @@ public:
 		return AutoRef<DataSink>(new StringDataSink);
 	}
 	virtual void onTransferDone(HttpResponse & response, AutoRef<DataSink> sink, AutoRef<UserData> userData) {
-		responseHeader = response.getHeader();
+		responseHeader = response.header();
         if (!sink.nil()) {
 			dump = ((StringDataSink*)&sink)->data();
         } else {

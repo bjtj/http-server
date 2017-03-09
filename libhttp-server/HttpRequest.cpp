@@ -13,71 +13,68 @@ namespace HTTP {
     HttpRequest::HttpRequest() {
     }
 	HttpRequest::HttpRequest(HttpHeader & header)
-		: header(header) {
+		: _header(header) {
 	}
 	HttpRequest::~HttpRequest() {
 	}
     void HttpRequest::clear() {
-        header.clear();
+        _header.clear();
         clearTransfer();
     }
-    void HttpRequest::setHeader(HttpHeader & header) {
-        this->header.setHeader(header);
+    void HttpRequest::setHeader(const HttpHeader & header) {
+        _header.setHeader(header);
     }
 	string HttpRequest::getMethod() const {
-		return header.getMethod();
+		return _header.getMethod();
 	}
 	string HttpRequest::getPath() const {
-		return header.getPath();
+		return _header.getPath();
 	}
 	void HttpRequest::setPath(const string & path) {
-		header.setPath(path);
+		_header.setPath(path);
 	}
 	string HttpRequest::getHeaderField(const string & name) const {
-		return header.getHeaderField(name);
+		return _header.getHeaderField(name);
 	}
 	string HttpRequest::getHeaderFieldIgnoreCase(const string & name) const {
-		return header.getHeaderFieldIgnoreCase(name);
+		return _header.getHeaderFieldIgnoreCase(name);
 	}
 	LinkedStringListMap & HttpRequest::getHeaderFields() {
-		return header.getHeaderFields();
+		return _header.getHeaderFields();
 	}
 	map<string, string> HttpRequest::getHeaderFieldsStdMap() {
-		return header.getHeaderFieldsStdMap();
+		return _header.getHeaderFieldsStdMap();
 	}
     vector<string> HttpRequest::getParameterNames() {
-        return header.getParameterNames();
+        return _header.getParameterNames();
     }
 	string HttpRequest::getParameter(const string & name) {
-		return header.getParameter(name);
+		return _header.getParameter(name);
 	}
 	string HttpRequest::getParameter(const char * name) {
-		return header.getParameter(name);
+		return _header.getParameter(name);
 	}
 	vector<string> HttpRequest::getParameters(string & name) {
-		return header.getParameters(name);
+		return _header.getParameters(name);
 	}
-	HttpRequestHeader & HttpRequest::getHeader() {
-		return header;
-	}
-	const HttpRequestHeader & HttpRequest::getHeader() const {
-		return header;
+	HttpRequestHeader & HttpRequest::header() {
+		return _header;
 	}
 	int HttpRequest::getContentLength() {
-		return header.getContentLength();
+		return _header.getContentLength();
 	}
 	string HttpRequest::getContentType() {
-		return header.getContentType();
+		return _header.getContentType();
 	}
 	bool HttpRequest::isWwwFormUrlEncoded() {
-		return (header.getContentType().empty() || header.getContentType() == "application/x-www-form-urlencoded");
+		return (_header.getContentType().empty() || _header.getContentType() == "application/x-www-form-urlencoded");
 	}
 	void HttpRequest::parseWwwFormUrlencoded() {
 		if (transfer.nil()) {
 			return;
 		}
 		string data = ((StringDataSink*)&transfer->sink())->data();
-		header.parseQuery(data);
+		_header.parseQuery(data);
 	}
     UTIL::AutoRef<DataTransfer> HttpRequest::getTransfer() {
         return transfer;

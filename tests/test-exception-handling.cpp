@@ -1,6 +1,7 @@
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/StringDataSink.hpp>
+#include <libhttp-server/WebServerUtil.hpp>
 #include <liboslayer/TestSuite.hpp>
 
 using namespace std;
@@ -8,7 +9,7 @@ using namespace OS;
 using namespace UTIL;
 using namespace HTTP;
 
-class MyHttpRequestHandler : public HttpRequestHandler {
+class MyHttpRequestHandler : public HttpRequestHandler, public WebServerUtil {
 private:
 public:
 	virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
@@ -39,7 +40,7 @@ public:
     DumpResponseHandler() {}
     virtual ~DumpResponseHandler() {}
     virtual void onTransferDone(HttpResponse & response, AutoRef<DataSink> sink, AutoRef<UserData> userData) {
-		responseHeader = response.getHeader();
+		responseHeader = response.header();
         if (!sink.nil()) {
 			try {
 				dump = ((StringDataSink*)&sink)->data();

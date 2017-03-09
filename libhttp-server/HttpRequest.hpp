@@ -20,7 +20,7 @@ namespace HTTP {
 	 */
 	class HttpRequest {
 	private:
-        HttpRequestHeader header;
+        HttpRequestHeader _header;
         UTIL::AutoRef<DataTransfer> transfer;
         OS::InetAddress remoteAddress;
 		OS::InetAddress localAddress;
@@ -31,7 +31,7 @@ namespace HTTP {
 		virtual ~HttpRequest();
 		
         void clear();
-        void setHeader(HttpHeader & header);
+        void setHeader(const HttpHeader & header);
 		std::string getMethod() const;
 		std::string getPath() const;
 		void setPath(const std::string & path);
@@ -43,8 +43,7 @@ namespace HTTP {
 		std::string getParameter(const std::string & name);
 		std::string getParameter(const char * name);
 		std::vector<std::string> getParameters(std::string & name);
-		HttpRequestHeader & getHeader();
-		const HttpRequestHeader & getHeader() const;
+		HttpRequestHeader & header();
 		int getContentLength();
 		std::string getContentType();
 		bool isWwwFormUrlEncoded();
