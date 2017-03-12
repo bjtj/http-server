@@ -35,12 +35,6 @@ namespace HTTP {
 		virtual void onHttpResponseHeaderCompleted(HttpRequest & request, HttpResponse & response);
 		virtual void onHttpResponseTransferCompleted(HttpRequest & request, HttpResponse & response);
 		virtual bool onException(HttpRequest & request, HttpResponse & response, OS::Exception & ex);
-
-		// void setFixedTransfer(HttpResponse & response, const std::string & content);
-		// void setFileTransfer(HttpResponse & response, const std::string & filepath);
-		// void setFileTransfer(HttpResponse & response, OS::File & file);
-		// void setPartialFileTransfer(HttpRequest & request, HttpResponse & response, OS::File & file);
-		// bool parseRange(const std::string & range, size_t & from, size_t & to);
 	};
 
 	/**
@@ -61,45 +55,43 @@ namespace HTTP {
 	 * @brief SimpleHttpRequestHandlerDispatcher
 	 */
 	class SimpleHttpRequestHandlerDispatcher : public HttpRequestHandlerDispatcher {
-
 	private:
-
-		/**
+	    /**
 		 * @brief request handler node
 		 */
 		class RequestHandlerNode {
-		private:
-			std::string pattern;
+		private:			
+			std::string _pattern;
 			UTIL::AutoRef<HttpRequestHandler> handler;
-
 		public:
-			RequestHandlerNode(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler) : pattern(pattern), handler(handler) {
+			RequestHandlerNode(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler)
+				: _pattern(pattern), handler(handler) {
 			}
 			virtual ~RequestHandlerNode() {
 			}
-
 			bool patternMatch(const std::string & query) {
-				return UTIL::Text::match(pattern, query);
+				return UTIL::Text::match(_pattern, query);
 			}
-
 			bool equalsPattern(const std::string & pattern) {
-				return (!pattern.compare(pattern) ? true : false);
+				return (!_pattern.compare(pattern) ? true : false);
 			}
-
 			UTIL::AutoRef<HttpRequestHandler> getHandler() {
 				return handler;
 			}
+			std::string & pattern() {
+				return _pattern;
+			}
 		};
-
 		std::vector<RequestHandlerNode> handlers;
-
+		OS::Semaphore sem;
 	public:
-
 		SimpleHttpRequestHandlerDispatcher();
 		virtual ~SimpleHttpRequestHandlerDispatcher();
 		virtual void registerRequestHandler(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler);
 		virtual void unregisterRequestHandler(const std::string & pattern);
 		virtual UTIL::AutoRef<HttpRequestHandler> getRequestHandler(const std::string & path);
+	private:
+		static bool _fn_sort_desc(RequestHandlerNode a, RequestHandlerNode b);
 	};
 
 	/**
