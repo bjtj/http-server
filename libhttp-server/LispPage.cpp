@@ -7,8 +7,8 @@
 #include <liboslayer/FileStream.hpp>
 #include "BasicAuth.hpp"
 
-#define _VAR OS::Obj<LISP::Var> 
-#define DECL_PROC() OS::Obj<LISP::Var> proc(OS::Obj<LISP::Var> name, vector<OS::Obj<LISP::Var> > & args, LISP::Env & env)
+#define _VAR OS::GCRef<LISP::Var> 
+#define DECL_PROC() OS::GCRef<LISP::Var> proc(OS::GCRef<LISP::Var> name, vector<OS::GCRef<LISP::Var> > & args, LISP::Env & env)
 #define HEAP_ALLOC(E,V) E.alloc(new LISP::Var(V))
 
 namespace HTTP {
