@@ -8,7 +8,7 @@
 
 namespace HTTP {
     
-    DECL_NAMED_ONLY_EXCEPTION(UrlParseException);
+    DECL_NAMED_EXCEPTION(UrlParseException);
     
     /**
      * @brief Url

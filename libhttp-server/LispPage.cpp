@@ -8,7 +8,7 @@
 #include "BasicAuth.hpp"
 
 #define _VAR OS::GCRef<LISP::Var> 
-#define DECL_PROC() OS::GCRef<LISP::Var> proc(OS::GCRef<LISP::Var> name, vector<OS::GCRef<LISP::Var> > & args, LISP::Env & env)
+#define DECL_PROC() OS::GCRef<LISP::Var> proc(LISP::Env & env, OS::GCRef<LISP::Var> name, vector<OS::GCRef<LISP::Var> > & args)
 #define HEAP_ALLOC(E,V) E.alloc(new LISP::Var(V))
 
 namespace HTTP {
@@ -54,7 +54,7 @@ namespace HTTP {
 			virtual ~Enc() {}
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
-				return HEAP_ALLOC(env, LISP::text(HttpEncoder::encode(LISP::eval(iter.next(), env)->toString())));
+				return HEAP_ALLOC(env, LISP::text(HttpEncoder::encode(LISP::eval(env, iter.next())->toString())));
 			}
 		};
         
@@ -65,7 +65,7 @@ namespace HTTP {
 			virtual ~Dec() {}
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
-				return HEAP_ALLOC(env, LISP::text(HttpDecoder::decode(LISP::eval(iter.next(), env)->toString())));
+				return HEAP_ALLOC(env, LISP::text(HttpDecoder::decode(LISP::eval(env, iter.next())->toString())));
 			}
 		};
         
@@ -86,9 +86,9 @@ namespace HTTP {
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
 				if (name->getSymbol() == "proc-basic-auth") {
-					string realm = LISP::eval(iter.next(), env)->toString();
-					string username = LISP::eval(iter.next(), env)->toString();
-					string password = LISP::eval(iter.next(), env)->toString();
+					string realm = LISP::eval(env, iter.next())->toString();
+					string username = LISP::eval(env, iter.next())->toString();
+					string password = LISP::eval(env, iter.next())->toString();
 
 					BasicAuth auth(realm, username, password);
 					
@@ -118,14 +118,14 @@ namespace HTTP {
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
 				if (name->getSymbol() == "url") {
-					string url = LISP::eval(iter.next(), env)->toString();
+					string url = LISP::eval(env, iter.next())->toString();
 					return HEAP_ALLOC(env, LISP::text(HttpSessionTool::urlMan(url, session)));
 				} else if (name->getSymbol() == "get-session-value") {
-					string name = LISP::eval(iter.next(), env)->toString();
+					string name = LISP::eval(env, iter.next())->toString();
 					return HEAP_ALLOC(env, LISP::text((*session)[name]));
 				} else if (name->getSymbol() == "set-session-value") {
-					string name = LISP::eval(iter.next(), env)->toString();
-					string value = LISP::eval(iter.next(), env)->toString();
+					string name = LISP::eval(env, iter.next())->toString();
+					string value = LISP::eval(env, iter.next())->toString();
 					(*session)[name] = value;
 					return HEAP_ALLOC(env, LISP::text(value));
 				}
@@ -157,10 +157,10 @@ namespace HTTP {
 				} else if (name->getSymbol() == "get-request-path") {
 					return HEAP_ALLOC(env, LISP::text(request.getPath()));
 				} else if (name->getSymbol() == "get-request-param") {
-					string paramName = LISP::eval(iter.next(), env)->toString();
+					string paramName = LISP::eval(env, iter.next())->toString();
 					return HEAP_ALLOC(env, LISP::text(request.getParameter(paramName)));
 				} else if (name->getSymbol() == "get-request-header") {
-					string paramName = LISP::eval(iter.next(), env)->toString();
+					string paramName = LISP::eval(env, iter.next())->toString();
 					return HEAP_ALLOC(env, LISP::text(request.getHeaderFieldIgnoreCase(paramName)));
 				}
 				
@@ -188,10 +188,10 @@ namespace HTTP {
 			virtual DECL_PROC() {
 				Iterator<_VAR> iter(args);
 				if (name->getSymbol() == "set-status-code") {
-					int status = (int)LISP::eval(iter.next(), env)->getInteger().getInteger();
+					int status = (int)LISP::eval(env, iter.next())->getInteger().getInteger();
 					string statusMessage;
 					if (iter.has()) {
-						statusMessage = LISP::eval(iter.next(), env)->toString();
+						statusMessage = LISP::eval(env, iter.next())->toString();
 					}
 					if (statusMessage.empty()) {
 						response.setStatus(status);
@@ -200,20 +200,20 @@ namespace HTTP {
 					}
 					return HEAP_ALLOC(env, LISP::Integer(status));
 				} else if (name->getSymbol() == "set-response-header") {
-					string name = LISP::eval(iter.next(), env)->toString();
-					string value = LISP::eval(iter.next(), env)->toString();
+					string name = LISP::eval(env, iter.next())->toString();
+					string value = LISP::eval(env, iter.next())->toString();
 					response.header().setHeaderField(name, value);
 					return HEAP_ALLOC(env, LISP::text(value));
 				} else if (name->getSymbol() == "set-redirect") {
-					string location = LISP::eval(iter.next(), env)->toString();
+					string location = LISP::eval(env, iter.next())->toString();
 					response.setRedirect(location);
 					return HEAP_ALLOC(env, LISP::text(location));
 				} else if (name->getSymbol() == "set-forward") {
-					string location = LISP::eval(iter.next(), env)->toString();
+					string location = LISP::eval(env, iter.next())->toString();
 					response.setForward(location);
 					return HEAP_ALLOC(env, LISP::text(location));
 				} else if (name->getSymbol() == "set-file-transfer") {
-					string path = LISP::eval(iter.next(), env)->toString();
+					string path = LISP::eval(env, iter.next())->toString();
 					response["set-file-transfer"] = path;
 					return HEAP_ALLOC(env, LISP::text(path));
 				}
@@ -240,7 +240,7 @@ namespace HTTP {
 			virtual ~LispLoadPage() {}
 			virtual DECL_PROC() {
 				Iterator<_VAR> iter(args);
-				FileStream reader(LISP::pathname(env, LISP::eval(iter.next(), env))->getFile(), "rb");
+				FileStream reader(LISP::pathname(env, LISP::eval(env, iter.next()))->getFile(), "rb");
 				return HEAP_ALLOC(env, LISP::text(LispPage::parseLispPage(env, reader.readFullAsString())));
 			}
 		};
@@ -248,9 +248,9 @@ namespace HTTP {
 		env.local()["load-page"] = HEAP_ALLOC(env, proc);
 	}
     
-	bool LispPage::compile(const string & line, LISP::Env & env) {
+	bool LispPage::compile(LISP::Env & env, const string & line) {
 		try {
-			LISP::compile(line, env);
+			LISP::compile(env, line);
 			return !env.quit();
 		} catch (OS::Exception & e) {
 			logger->loge("ERROR: " + e.getMessage());
@@ -284,7 +284,7 @@ namespace HTTP {
 				// print
 				string line = Text::trim(code.substr(1));
 				line = "(setq *content* (string-append *content* " + line + "))";
-				compile(line, env);
+				compile(env, line);
 			} else {
 				// code
 				vector<string> lines = Text::split(code, "\n");
@@ -294,7 +294,7 @@ namespace HTTP {
 					if (!line.empty() && reader.read(line + " ") > 0) {
 						vector<string> commands = reader.getCommands();
 						for (vector<string>::iterator cmd = commands.begin(); !env.quit() && cmd != commands.end(); cmd++) {
-                            compile(*cmd, env);
+                            compile(env, *cmd);
 						}
 						reader.clearCommands();
 					}
