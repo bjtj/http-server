@@ -33,6 +33,9 @@ namespace HTTP {
 	void HttpRequest::setPath(const string & path) {
 		_header.setPath(path);
 	}
+	string HttpRequest::getRawPath() const {
+		return _header.getRawPath();
+	}
 	string HttpRequest::getHeaderField(const string & name) const {
 		return _header.getHeaderField(name);
 	}

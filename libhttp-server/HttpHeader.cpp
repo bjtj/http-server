@@ -12,19 +12,17 @@ namespace HTTP {
 	/**
 	 * @brief HttpHeader
 	 */
-	HttpHeader::HttpHeader() : valid(false) {
+	HttpHeader::HttpHeader() {
 	}
-	HttpHeader::HttpHeader(std::string part1, std::string part2, std::string part3) : valid(false) {
+	
+	HttpHeader::HttpHeader(std::string part1, std::string part2, std::string part3) {
 		setParts(part1, part2, part3);
 	}
+	
 	HttpHeader::~HttpHeader() {
 	}
 
-	bool HttpHeader::isValid() {
-		return valid;
-	}
 	void HttpHeader::clear() {
-		valid = false;
 		firstline.clear();
 		part1.clear();
 		part2.clear();
@@ -33,7 +31,6 @@ namespace HTTP {
 	}
 
 	void HttpHeader::setHeader(const HttpHeader & other) {
-		valid = other.valid;
 		firstline = other.firstline;
 		part1 = other.part1;
 		part2 = other.part2;
@@ -229,6 +226,9 @@ namespace HTTP {
 		setPart2(path);
 		parsePath(path);
 	}
+	string HttpRequestHeader::getRawPath() const {
+		return getPart2();
+	}
 	string HttpRequestHeader::getProtocol() const {
 		return getPart3();
 	}
@@ -236,9 +236,7 @@ namespace HTTP {
 		setPart3(protocol);
 	}
 	void HttpRequestHeader::parsePath(const string & path) {
-
 		params.clear();
-		
 		resourcePath = extractResourcePath(path);
 		vector<KeyValue> kvs = parseSemiColonParameters(extractWithoutQuery(extractWithoutFragment(path)));
 		setParameters(kvs);

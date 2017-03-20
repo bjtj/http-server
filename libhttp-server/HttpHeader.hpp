@@ -17,29 +17,26 @@ namespace HTTP {
 	 */
 	class HttpHeader {
 	private:
-		bool valid;
 		std::string firstline;
 		std::string part1;
 		std::string part2;
 		std::string part3;
 		UTIL::LinkedStringListMap fields;
-		
 	public:
 		HttpHeader();
 		HttpHeader(std::string par1, std::string part2, std::string part3);
 		virtual ~HttpHeader();
-		virtual bool isValid();
 		virtual void clear();
 		virtual void setHeader(const HttpHeader & other);
-		virtual void setFirstLine(std::string & firstline);
-		virtual void setParts(std::vector<std::string> & parts);
-		virtual void setParts(std::string par1, std::string part2, std::string part3);
-		virtual std::string getPart1() const;
-		virtual std::string getPart2() const;
-		virtual std::string getPart3() const;
-		virtual void setPart1(const std::string & part);
-		virtual void setPart2(const std::string & part);
-		virtual void setPart3(const std::string & part);
+		void setFirstLine(std::string & firstline);
+		void setParts(std::vector<std::string> & parts);
+		void setParts(std::string par1, std::string part2, std::string part3);
+		std::string getPart1() const;
+		std::string getPart2() const;
+		std::string getPart3() const;
+		void setPart1(const std::string & part);
+		void setPart2(const std::string & part);
+		void setPart3(const std::string & part);
 		std::string makeFirstLine() const;
 		bool hasHeaderField(const std::string & name) const;
 		std::string getHeaderField(const std::string & name) const;
@@ -59,7 +56,6 @@ namespace HTTP {
 		void removeHeaderFieldIgnoreCase(const std::string & name);
 
         /* HTTP */
-        
 		std::string getContentType() const;
 		void setContentType(std::string contentType);
 		int getContentLength() const;
@@ -74,7 +70,6 @@ namespace HTTP {
 		std::string & operator[] (const std::string & fieldName);
 	};
 
-
 	/**
 	 * @breif HttpRequestHeader
 	 */
@@ -83,18 +78,17 @@ namespace HTTP {
 		std::string resourcePath;
 		std::map<std::string, HttpParameter> params;
 		std::string fragment;
-
 	public:
 		HttpRequestHeader();
 		HttpRequestHeader(const HttpHeader & other);
 		virtual ~HttpRequestHeader();
-
 		virtual void clear();
         virtual void setHeader(const HttpHeader & other);
 		std::string getMethod() const;
 		void setMethod(const std::string & method) ;
 		std::string getPath() const;
 		void setPath(const std::string & path) ;
+		std::string getRawPath() const;
 		std::string getProtocol() const;
 		void setProtocol(const std::string & protocol) ;
 		std::string extractResourcePath(const std::string & path);
@@ -126,7 +120,7 @@ namespace HTTP {
 		HttpResponseHeader(int statusCode, const std::string & statusString);
 		HttpResponseHeader(const HttpHeader & other);
 		virtual ~HttpResponseHeader();
-		void clear();
+		virtual void clear();
 		void init();
 		std::string getProtocol() const;
 		void setProtocol(const std::string & protocol);
