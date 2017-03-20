@@ -16,6 +16,8 @@ libhttp_serverinc_HEADERS = \
 	FileDataSource.hpp \
 	FixedTransfer.hpp \
 	HttpAuth.hpp \
+	HttpCommunication.hpp \
+	HttpCommunicationMaker.hpp \
 	HttpEncoderDecoder.hpp \
 	HttpException.hpp \
 	HttpHeader.hpp \
@@ -23,6 +25,8 @@ libhttp_serverinc_HEADERS = \
 	HttpHeaderReader.hpp \
 	HttpParameter.hpp \
 	HttpRequest.hpp \
+	HttpRequestHandler.hpp \
+	HttpRequestHandlerDispatcher.hpp \
 	HttpResponse.hpp \
 	HttpServerConfig.hpp \
 	HttpSession.hpp \
@@ -32,6 +36,7 @@ libhttp_serverinc_HEADERS = \
 	LispPage.hpp \
 	MimeTypes.hpp \
 	Packet.hpp \
+	SimpleHttpRequestHandlerDispatcher.hpp \
 	StringDataSink.hpp \
 	StringDataSource.hpp \
 	Url.hpp \
@@ -68,6 +73,10 @@ libhttp_server_la_SOURCES = \
 	FixedTransfer.hpp \
 	HttpAuth.cpp \
 	HttpAuth.hpp \
+	HttpCommunication.cpp \
+	HttpCommunication.hpp \
+	HttpCommunicationMaker.cpp \
+	HttpCommunicationMaker.hpp \
 	HttpEncoderDecoder.cpp \
 	HttpEncoderDecoder.hpp \
 	HttpException.hpp \
@@ -81,6 +90,9 @@ libhttp_server_la_SOURCES = \
 	HttpParameter.hpp \
 	HttpRequest.cpp \
 	HttpRequest.hpp \
+	HttpRequestHandler.cpp \
+	HttpRequestHandler.hpp \
+	HttpRequestHandlerDispatcher.hpp \
 	HttpResponse.cpp \
 	HttpResponse.hpp \
 	HttpServerConfig.hpp \
@@ -97,6 +109,8 @@ libhttp_server_la_SOURCES = \
 	MimeTypes.hpp \
 	Packet.cpp \
 	Packet.hpp \
+	SimpleHttpRequestHandlerDispatcher.cpp \
+	SimpleHttpRequestHandlerDispatcher.hpp \
 	StringDataSink.hpp \
 	StringDataSource.hpp \
 	Url.cpp \

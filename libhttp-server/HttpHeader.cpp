@@ -81,7 +81,7 @@ namespace HTTP {
     string HttpHeader::getHeaderField(const std::string & name) const {
 		for (size_t i = 0; i < fields.size(); i++) {
 			if (fields[i].name() == name) {
-				return fields[i].first_safe("");
+				return fields[i].obj().first("");
 			}
 		}
 		return "";
@@ -97,7 +97,7 @@ namespace HTTP {
 	string HttpHeader::getHeaderFieldIgnoreCase(const string & name) const {
 		for (size_t i = 0; i < fields.size(); i++) {
 			if (Text::equalsIgnoreCase(fields[i].name(), name)) {
-				return fields[i].first_safe("");
+				return fields[i].obj().first("");
 			}
 		}
 		return "";
@@ -109,6 +109,12 @@ namespace HTTP {
 		return Text::toInt(getHeaderFieldIgnoreCase(name));
 	}
 	void HttpHeader::setHeaderField(string name, string value) {
+		fields[name].clearSet(value);
+	}
+	void HttpHeader::setHeaderField(string name, StringList value) {
+		fields[name] = value;
+	}
+	void HttpHeader::setHeaderField(string name, vector<string> value) {
 		fields[name] = value;
 	}
 	void HttpHeader::setHeaderFields(map<string, string> & fields) {
@@ -124,7 +130,7 @@ namespace HTTP {
 		return fields;
 	}
 	map<string, string> HttpHeader::getHeaderFieldsStdMap() {
-		return fields.toStdMap();
+		return fields.to_first_map("");
 	}
 	void HttpHeader::removeHeaderField(const string & name) {
 		fields.erase(name);
@@ -176,18 +182,18 @@ namespace HTTP {
 	string HttpHeader::toString() const {
 		string ret = makeFirstLine() + "\r\n";
 		for (size_t i = 0; i < fields.size(); i++) {
-			ret += (fields[i].name() + ": " + fields[i].first_safe("") + "\r\n");
+			ret += (fields[i].name() + ": " + fields[i].obj().first("") + "\r\n");
 		}
 		ret += "\r\n";
 		return ret;
 	}
 	string & HttpHeader::operator[] (const string & fieldName) {
 		for (size_t i = 0; i < fields.size(); i++) {
-			if (fields[i].size() > 0 && Text::equalsIgnoreCase(fields[i].name(), fieldName)) {
-				return fields[i].first();
+			if (fields[i].obj().size() > 0 && Text::equalsIgnoreCase(fields[i].name(), fieldName)) {
+				return fields[i].obj().first();
 			}
 		}
-		fields[fieldName] = "";
+		fields[fieldName].clearSet("");
 		return fields[fieldName].first();
 	}
 
@@ -234,8 +240,8 @@ namespace HTTP {
 		params.clear();
 		
 		resourcePath = extractResourcePath(path);
-		vector<NameValue> nvs = parseSemiColonParameters(extractWithoutQuery(extractWithoutFragment(path)));
-		setParameters(nvs);
+		vector<KeyValue> kvs = parseSemiColonParameters(extractWithoutQuery(extractWithoutFragment(path)));
+		setParameters(kvs);
 		parseQuery(extractQuery(extractWithoutFragment(path)));
 		fragment = extractFragment(path);
 	}
@@ -280,13 +286,13 @@ namespace HTTP {
 		}
 		return "";
 	}
-	vector<NameValue> HttpRequestHeader::parseSemiColonParameters(const string & path) {
+	vector<KeyValue> HttpRequestHeader::parseSemiColonParameters(const string & path) {
 
-		vector<NameValue> nvs;
+		vector<KeyValue> kvs;
 		
 		size_t s = path.find(";");
 		if (s == string::npos) {
-			return nvs;
+			return kvs;
 		}
 
 		while (s != string::npos) {
@@ -297,23 +303,23 @@ namespace HTTP {
 			} else {
 				part = path.substr(s + 1);
 			}
-			NameValue nv = parseNameValue(part);
-			nvs.push_back(nv);
+			KeyValue nv = parseKeyValue(part);
+			kvs.push_back(nv);
 			s = f;
 		}
 
-		return nvs;
+		return kvs;
 	}
-	NameValue HttpRequestHeader::parseNameValue(const string & text) {
-		NameValue nv;
+	KeyValue HttpRequestHeader::parseKeyValue(const string & text) {
+		KeyValue kv;
 		size_t f = text.find("=");
 		if (f != string::npos) {
-			nv.name() = text.substr(0, f);
-			nv.value() = text.substr(f + 1);
+			kv.key() = text.substr(0, f);
+			kv.value() = text.substr(f + 1);
 		} else {
-			nv.name() = text;
+			kv.key() = text;
 		}
-		return nv;
+		return kv;
 	}
 	void HttpRequestHeader::parseQuery(const string & query) {
 		if (query.empty()) {
@@ -321,8 +327,8 @@ namespace HTTP {
 		}
 		vector<string> queries = Text::split(query, "&");
 		for (size_t i = 0; i < queries.size(); i++) {
-			NameValue nv = parseNameValue(queries[i]);
-			setParameter(nv.name(), HttpDecoder::decode(HttpDecoder::decode_plus(nv.value())));
+			KeyValue kv = parseKeyValue(queries[i]);
+			setParameter(kv.key(), HttpDecoder::decode(HttpDecoder::decode_plus(kv.value())));
 		}
 	}
     vector<string> HttpRequestHeader::getParameterNames() {
@@ -347,9 +353,9 @@ namespace HTTP {
 		params[name].appendValue(value);
 	}
 
-	void HttpRequestHeader::setParameters(vector<NameValue> & nvs) {
-		for (vector<NameValue>::iterator iter = nvs.begin(); iter != nvs.end(); iter++) {
-			setParameter(iter->name(), iter->value());
+	void HttpRequestHeader::setParameters(vector<KeyValue> & kvs) {
+		for (vector<KeyValue>::iterator iter = kvs.begin(); iter != kvs.end(); iter++) {
+			setParameter(iter->key(), iter->value());
 		}
 	}
 

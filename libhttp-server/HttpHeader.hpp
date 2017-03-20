@@ -28,7 +28,6 @@ namespace HTTP {
 		HttpHeader();
 		HttpHeader(std::string par1, std::string part2, std::string part3);
 		virtual ~HttpHeader();
-
 		virtual bool isValid();
 		virtual void clear();
 		virtual void setHeader(const HttpHeader & other);
@@ -49,6 +48,8 @@ namespace HTTP {
 		int getHeaderFieldAsInteger(std::string name) const;
 		int getHeaderFieldIgnoreCaseAsInteger(std::string name) const;
 		void setHeaderField(std::string name, std::string value);
+		void setHeaderField(std::string name, UTIL::StringList value);
+		void setHeaderField(std::string name, std::vector<std::string> value);
 		void setHeaderFields(std::map<std::string, std::string> & fields);
 		void appendHeaderFields(const UTIL::LinkedStringMap & fields);
 		void appendHeaderFields(const std::map<std::string, std::string> & fields);
@@ -102,15 +103,15 @@ namespace HTTP {
 		std::string extractQuery(const std::string & path);
 		std::string extractWithoutFragment(const std::string & path);
 		std::string extractFragment(const std::string & path);
-		std::vector<UTIL::NameValue> parseSemiColonParameters(const std::string & path);
-		UTIL::NameValue parseNameValue(const std::string & text);
+		std::vector<UTIL::KeyValue> parseSemiColonParameters(const std::string & path);
+		UTIL::KeyValue parseKeyValue(const std::string & text);
 		void parsePath(const std::string & path);
 		void parseQuery(const std::string & query);
         std::vector<std::string> getParameterNames();
 		std::string getParameter(std::string name);
 		std::vector<std::string> getParameters(std::string name);
 		void setParameter(std::string name, std::string value);
-		void setParameters(std::vector<UTIL::NameValue> & nvs);
+		void setParameters(std::vector<UTIL::KeyValue> & nvs);
         void setHost(const std::string & host);
 	};
 

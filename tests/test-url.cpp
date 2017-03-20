@@ -41,6 +41,12 @@ static void test_url() {
 	ASSERT(url.toString(), ==, "http://username:password@localhost:80/");
 }
 
+static void test_url_tostring() {
+	string u = "http://localhost:9000/page.html?a=A&b=B&c=C";
+	Url url(u);
+	ASSERT(url.toString(), ==, u);
+}
+
 static void test_file_url() {
 	Url url("file:///test.txt");
 	ASSERT(url.getPath(), ==, "/test.txt");
@@ -56,6 +62,7 @@ int main(int argc, char *args[]) {
 	Url url;
 
 	test_url();
+	test_url_tostring();
 	test_file_url();
     
     return 0;

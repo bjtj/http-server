@@ -67,7 +67,7 @@ namespace HTTP {
         return this->path;
     }
     string Url::getQueryString() const {
-        return Text::toString(parameters.toNameValueList(), "=", "&");
+        return Text::toString(parameters.const_elements(), "=", "&");
     }
 	void Url::getUsername(const string & username) {
 		this->username = username;

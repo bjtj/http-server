@@ -281,7 +281,7 @@ namespace HTTP {
 		}
 
         AutoRef<DataTransfer> transfer = request.getTransfer();
-		if (transfer.empty()) {
+		if (transfer.nil()) {
 			readable = true;
 			return;
 		}
@@ -314,15 +314,12 @@ namespace HTTP {
 		}
 	}
 	void AnotherHttpClient::recvResponseContent() {
-
 		if (readable && responseHeaderReceived) {
-            
             AutoRef<DataTransfer> transfer = response.getTransfer();
-			if (transfer.empty()) {
+			if (transfer.nil()) {
                 onResponseTransferDone();
 				return;
 			}
-
 			transfer->recv(connection);
 			if (transfer->completed()) {
                 onResponseTransferDone();

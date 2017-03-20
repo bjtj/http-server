@@ -23,15 +23,12 @@ namespace HTTP {
 		std::string path;
         UTIL::LinkedStringMap parameters;
 		std::vector<std::string> knownSchemes;
-
 	public:
         Url();
 		Url(const char * urlStr);
 		Url(const std::string & urlStr);
 		virtual ~Url();
-
 		void initKnownSchemes();
-
 		std::string getUsername() const;
 		std::string getPassword() const;
 		std::string getScheme() const;
@@ -52,26 +49,19 @@ namespace HTTP {
 		void setPath(const std::string & path);
         void setRelativePath(const std::string & relativePath);
 		Url relativePath(const std::string & relativePath) const;
-
 		void setParameter(const std::string & name, const std::string & value);
         UTIL::LinkedStringMap & getParameters();
-
         void setUrl(const std::string & urlStr);
 		void parseUrlString(const std::string & urlStr);
 		void parseAddress(const std::string & address);
 		void parsePath(const std::string & resource);
         void parseQuery(const std::string & query);
-
 		std::string getAddress() const;
-
 		int getKnownPort(const std::string & scheme);
 		bool isKnownScheme(const std::string & scheme);
-        
 		virtual std::string toString() const;
-
 		Url& operator=(const std::string & urlStr);
 		Url& operator=(const char * urlStr);
-
 	protected:
 		void clear();
 	};

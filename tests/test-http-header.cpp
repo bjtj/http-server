@@ -24,13 +24,10 @@ static void test_http_header_to_string() {
 	header.setPart2("/");
 	header.setPart3("HTTP/1.1");
 	ASSERT(header.toString(), ==, "GET / HTTP/1.1\r\n\r\n");
-
 	header.setHeaderField("HOST", "239.255.255.250");
 	ASSERT(header.toString(), ==, "GET / HTTP/1.1\r\nHOST: 239.255.255.250\r\n\r\n");
-	
 	header.setHeaderField("SERVER", "TestServer/1.0");
 	ASSERT(header.toString(), ==, "GET / HTTP/1.1\r\nHOST: 239.255.255.250\r\nSERVER: TestServer/1.0\r\n\r\n");
-
 	header.setHeaderField("Ext", "");
 	ASSERT(header.toString(), ==, "GET / HTTP/1.1\r\nHOST: 239.255.255.250\r\nSERVER: TestServer/1.0\r\nExt: \r\n\r\n");
 }
