@@ -210,8 +210,8 @@ namespace HTTP {
 		void setStatusCode(int statusCode);
 		std::string getStatusString() const;
 		void setStatusString(const std::string & statusString);
-        bool isRedirection();
-        std::string getRedirectionLocation();
+        bool isRedirectionStatus();
+        std::string getLocation();
 	};
 }
 

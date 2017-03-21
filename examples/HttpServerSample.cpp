@@ -309,7 +309,7 @@ public:
 	 * set cotnent disposition
 	 */
 	void setContentDispositionWithFile(HttpRequest & request, HttpResponse & response, File & file) {
-		response.header().setHeaderField("Content-Disposition",
+		response.setHeaderField("Content-Disposition",
 										 "attachment; filename=\"" + file.getFileName() + "\"");
 	}
 };
@@ -494,7 +494,7 @@ public:
 
 	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 		string log;
-		logger->logd(Text::format("** Part2: %s [%s:%d]", request.header().getPart2().c_str(),
+		logger->logd(Text::format("** Part2: %s [%s:%d]", request.getRawPath().c_str(),
                                  request.getRemoteAddress().getHost().c_str(),
 								 request.getRemoteAddress().getPort()));
 		if (request.isWwwFormUrlEncoded()) {

@@ -176,7 +176,7 @@ namespace HTTP {
         if (transfer.nil()) {
             header.setContentLength(0);
         } else {
-			request.header().setContentLength(size);
+			request.setContentLength(size);
             request.setTransfer(transfer);
         }
     }
@@ -348,14 +348,14 @@ namespace HTTP {
 	}
     
     bool AnotherHttpClient::needRedirect() {
-        return followRedirect ? response.header().isRedirection() : false;
+        return followRedirect ? response.isRedirectionStatus() : false;
     }
     
     void AnotherHttpClient::handleRedirect() {
-        string location = response.header().getRedirectionLocation();
+        string location = response.getLocation();
         url = Url(location);
-        request.header().setPath(url.getPathAndQuery());
-        request.header().setHost(url.getAddress());
+        request.setPath(url.getPathAndQuery());
+        request.setHost(url.getAddress());
         
         closeConnection();
     }

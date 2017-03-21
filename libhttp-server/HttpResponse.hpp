@@ -47,6 +47,8 @@ namespace HTTP {
 		std::string getForwardLocation();
 		bool redirectRequested();
 		bool forwardRequested();
+		bool isRedirectionStatus();
+		std::string getLocation();
 		std::string & operator[] (const std::string & name);
 	};
 }

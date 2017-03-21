@@ -143,7 +143,7 @@ namespace HTTP {
 	}
 
 	void HttpCommunication::prepareRequestContentTransfer(HttpRequest & request, AutoRef<DataSink> sink) {
-		if (request.header().isChunkedTransfer()) {
+		if (request.isChunkedTransfer()) {
 			request.setTransfer(AutoRef<DataTransfer>(new ChunkedTransfer(sink)));
         } else {
             if (request.getContentLength() > 0) {
@@ -169,7 +169,7 @@ namespace HTTP {
 				handler->onHttpResponseTransferCompleted(request, response);
 			}
 			communicationCompleted = true;
-			if (request.header().getProtocol() == "HTTP/1.1" &&
+			if (request.getProtocol() == "HTTP/1.1" &&
 				Text::equalsIgnoreCase(request.getHeaderFieldIgnoreCase("Connection"), "close") == false &&
 				Text::equalsIgnoreCase(response.getHeaderFieldIgnoreCase("Connection"), "close") == false) {
 				reset();

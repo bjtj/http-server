@@ -202,7 +202,7 @@ namespace HTTP {
 				} else if (name->getSymbol() == "set-response-header") {
 					string name = LISP::eval(env, iter.next())->toString();
 					string value = LISP::eval(env, iter.next())->toString();
-					response.header().setHeaderField(name, value);
+					response.setHeaderField(name, value);
 					return HEAP_ALLOC(env, LISP::text(value));
 				} else if (name->getSymbol() == "set-redirect") {
 					string location = LISP::eval(env, iter.next())->toString();

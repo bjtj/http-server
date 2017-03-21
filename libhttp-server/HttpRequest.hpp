@@ -32,6 +32,8 @@ namespace HTTP {
         virtual void clear();
         void setHeader(const HttpHeader & header);
 		std::string getMethod() const;
+		std::string getProtocol() const;
+		void setHost(const std::string & host);
 		std::string getPath() const;
 		void setPath(const std::string & path);
 		std::string getRawPath() const;

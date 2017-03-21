@@ -89,6 +89,14 @@ namespace HTTP {
 		return _forwardRequested;
 	}
 
+	bool HttpResponse::isRedirectionStatus() {
+		return _header.isRedirectionStatus();
+	}
+
+	string HttpResponse::getLocation() {
+		return _header.getLocation();
+	}
+
 	string & HttpResponse::operator[] (const string & name) {
 		return props[name];
 	}

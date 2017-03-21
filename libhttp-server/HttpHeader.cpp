@@ -469,10 +469,10 @@ namespace HTTP {
 	void HttpResponseHeader::setStatusString(const std::string & message)  {
 		setPart3(message);
 	}
-    bool HttpResponseHeader::isRedirection() {
+    bool HttpResponseHeader::isRedirectionStatus() {
         return (getStatusCode() == 301 || getStatusCode() == 302);
     }
-    string HttpResponseHeader::getRedirectionLocation() {
+    string HttpResponseHeader::getLocation() {
         return getHeaderFieldIgnoreCase("Location");
     }
 }

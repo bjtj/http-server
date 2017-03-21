@@ -71,6 +71,6 @@ namespace HTTP {
 	}
 	void BasicAuth::setAuthentication(HttpResponse & response) {
 		response.setStatus(401);
-		response.header().setHeaderField("WWW-Authenticate", "Basic realm=\"" + realm() + "\"");
+		response.setHeaderField("WWW-Authenticate", "Basic realm=\"" + realm() + "\"");
 	}
 }

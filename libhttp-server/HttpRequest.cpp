@@ -27,6 +27,12 @@ namespace HTTP {
 	string HttpRequest::getMethod() const {
 		return _header.getMethod();
 	}
+	string HttpRequest::getProtocol() const {
+		return _header.getProtocol();
+	}
+	void HttpRequest::setHost(const std::string & host) {
+		_header.setHost(host);
+	}
 	string HttpRequest::getPath() const {
 		return _header.getPath();
 	}
