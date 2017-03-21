@@ -24,51 +24,131 @@ namespace HTTP {
 		UTIL::LinkedStringListMap fields;
 	public:
 		HttpHeader();
-		HttpHeader(std::string par1, std::string part2, std::string part3);
+		HttpHeader(std::string part1, std::string part2, std::string part3);
 		virtual ~HttpHeader();
+		std::string makeFirstLine() const;
 		virtual void clear();
 		virtual void setHeader(const HttpHeader & other);
-		void setFirstLine(std::string & firstline);
-		void setParts(std::vector<std::string> & parts);
-		void setParts(std::string par1, std::string part2, std::string part3);
-		std::string getPart1() const;
-		std::string getPart2() const;
-		std::string getPart3() const;
-		void setPart1(const std::string & part);
-		void setPart2(const std::string & part);
-		void setPart3(const std::string & part);
-		std::string makeFirstLine() const;
-		bool hasHeaderField(const std::string & name) const;
-		std::string getHeaderField(const std::string & name) const;
-		bool hasHeaderFieldIgnoreCase(const std::string & name) const;
-		std::string getHeaderFieldIgnoreCase(const std::string & name) const;
-		int getHeaderFieldAsInteger(std::string name) const;
-		int getHeaderFieldIgnoreCaseAsInteger(std::string name) const;
-		void setHeaderField(std::string name, std::string value);
-		void setHeaderField(std::string name, UTIL::StringList value);
-		void setHeaderField(std::string name, std::vector<std::string> value);
-		void setHeaderFields(std::map<std::string, std::string> & fields);
-		void appendHeaderFields(const UTIL::LinkedStringMap & fields);
-		void appendHeaderFields(const std::map<std::string, std::string> & fields);
-		UTIL::LinkedStringListMap & getHeaderFields();
-		std::map<std::string, std::string> getHeaderFieldsStdMap();
-		void removeHeaderField(const std::string & name);
-		void removeHeaderFieldIgnoreCase(const std::string & name);
+		virtual void setFirstLine(std::string & firstline);
+		virtual void setParts(std::vector<std::string> & parts);
+		virtual void setParts(std::string part1, std::string part2, std::string part3);
+		virtual std::string getPart1() const;
+		virtual std::string getPart2() const;
+		virtual std::string getPart3() const;
+		virtual void setPart1(const std::string & part);
+		virtual void setPart2(const std::string & part);
+		virtual void setPart3(const std::string & part);
+		virtual bool hasHeaderField(const std::string & name) const;
+		virtual std::string getHeaderField(const std::string & name) const;
+		virtual bool hasHeaderFieldIgnoreCase(const std::string & name) const;
+		virtual std::string getHeaderFieldIgnoreCase(const std::string & name) const;
+		virtual int getHeaderFieldAsInteger(std::string name) const;
+		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name) const;
+		virtual void setHeaderField(std::string name, std::string value);
+		virtual void setHeaderField(std::string name, UTIL::StringList value);
+		virtual void setHeaderField(std::string name, std::vector<std::string> value);
+		virtual void setHeaderFields(std::map<std::string, std::string> & fields);
+		virtual void appendHeaderFields(const UTIL::LinkedStringMap & fields);
+		virtual void appendHeaderFields(const std::map<std::string, std::string> & fields);
+		virtual UTIL::LinkedStringListMap & getHeaderFields();
+		virtual std::map<std::string, std::string> getHeaderFieldsStdMap();
+		virtual void removeHeaderField(const std::string & name);
+		virtual void removeHeaderFieldIgnoreCase(const std::string & name);
 
         /* HTTP */
-		std::string getContentType() const;
-		void setContentType(std::string contentType);
-		int getContentLength() const;
-		void setContentLength(int contentLength);
-		void setContentLength(size_t contentLength);
-		void setContentLength(unsigned long long contentLength);
-		bool isChunkedTransfer() const;
-		void setChunkedTransfer(bool chunked);
-        void setConnection(const std::string & connection);
-        bool keepConnection();
+		virtual std::string getContentType() const;
+		virtual void setContentType(std::string contentType);
+		virtual int getContentLength() const;
+		virtual void setContentLength(long long contentLength);
+		virtual bool isChunkedTransfer() const;
+		virtual void setChunkedTransfer(bool chunked);
+        virtual void setConnection(const std::string & connection);
+        virtual bool keepConnection();
 		virtual std::string toString() const;
 		std::string & operator[] (const std::string & fieldName);
 	};
+
+	/**
+	 * http header delegator
+	 */
+	class HttpHeaderDelegator : public HttpHeader {
+	private:
+		HttpHeader & _header;
+	public:
+		HttpHeaderDelegator(HttpHeader & header) : _header(header) {}
+		virtual ~HttpHeaderDelegator() {}
+		virtual void clear()
+			{_header.clear();}
+		virtual void setFirstLine(std::string & firstline)
+			{_header.setFirstLine(firstline);}
+		virtual void setParts(std::vector<std::string> & parts)
+			{_header.setParts(parts);}
+		virtual void setParts(std::string part1, std::string part2, std::string part3)
+			{_header.setParts(part1, part2, part3);}
+		virtual std::string getPart1() const
+			{return _header.getPart1();}
+		virtual std::string getPart2() const
+			{return _header.getPart2();}
+		virtual std::string getPart3() const
+			{return _header.getPart3();}
+		virtual void setPart1(const std::string & part)
+			{_header.setPart1(part);}
+		virtual void setPart2(const std::string & part)
+			{_header.setPart2(part);}
+		virtual void setPart3(const std::string & part)
+			{_header.setPart3(part);}
+		virtual bool hasHeaderField(const std::string & name) const
+			{return _header.hasHeaderField(name);}
+		virtual std::string getHeaderField(const std::string & name) const
+			{return _header.getHeaderField(name);}
+		virtual bool hasHeaderFieldIgnoreCase(const std::string & name) const
+			{return _header.hasHeaderFieldIgnoreCase(name);}
+		virtual std::string getHeaderFieldIgnoreCase(const std::string & name) const
+			{return _header.getHeaderFieldIgnoreCase(name);}
+		virtual int getHeaderFieldAsInteger(std::string name) const
+			{return _header.getHeaderFieldAsInteger(name);}
+		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name) const
+			{return _header.getHeaderFieldIgnoreCaseAsInteger(name);}
+		virtual void setHeaderField(std::string name, std::string value)
+			{_header.setHeaderField(name, value);}
+		virtual void setHeaderField(std::string name, UTIL::StringList value)
+			{_header.setHeaderField(name, value);}
+		virtual void setHeaderField(std::string name, std::vector<std::string> value)
+			{_header.setHeaderField(name, value);}
+		virtual void setHeaderFields(std::map<std::string, std::string> & fields)
+			{_header.setHeaderFields(fields);}
+		virtual void appendHeaderFields(const UTIL::LinkedStringMap & fields)
+			{_header.appendHeaderFields(fields);}
+		virtual void appendHeaderFields(const std::map<std::string, std::string> & fields)
+			{_header.appendHeaderFields(fields);}
+		virtual UTIL::LinkedStringListMap & getHeaderFields()
+			{return _header.getHeaderFields();}
+		virtual std::map<std::string, std::string> getHeaderFieldsStdMap()
+			{return _header.getHeaderFieldsStdMap();}
+		virtual void removeHeaderField(const std::string & name)
+			{_header.removeHeaderField(name);}
+		virtual void removeHeaderFieldIgnoreCase(const std::string & name)
+			{_header.removeHeaderFieldIgnoreCase(name);}
+
+        /* HTTP */
+		virtual std::string getContentType() const
+			{return _header.getContentType();}
+		virtual void setContentType(std::string contentType)
+			{_header.setContentType(contentType);}
+		virtual int getContentLength() const
+			{return _header.getContentLength();}
+		virtual void setContentLength(long long contentLength)
+			{_header.setContentLength(contentLength);}
+		virtual bool isChunkedTransfer() const
+			{return _header.isChunkedTransfer();}
+		virtual void setChunkedTransfer(bool chunked)
+			{_header.setChunkedTransfer(chunked);}
+        virtual void setConnection(const std::string & connection)
+			{_header.setConnection(connection);}
+        virtual bool keepConnection()
+			{return _header.keepConnection();}
+	};
+
 
 	/**
 	 * @breif HttpRequestHeader

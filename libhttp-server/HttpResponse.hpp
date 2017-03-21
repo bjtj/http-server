@@ -16,7 +16,7 @@ namespace HTTP {
 	/**
 	 * @brief http response
 	 */
-	class HttpResponse {
+	class HttpResponse : public HttpHeaderDelegator {
 	private:
 		HttpResponseHeader _header;
         UTIL::AutoRef<DataTransfer> transfer;
@@ -29,17 +29,12 @@ namespace HTTP {
 	public:
 		HttpResponse();
 		virtual ~HttpResponse();
-        
-        void clear();
+        virtual void clear();
 		void setStatus(int statusCode);
 		void setStatus(int statusCode, const std::string & statusString);
 		int getStatusCode();
 		void setParts(std::vector<std::string> &parts);
-		void setContentLength(unsigned long long length);
-		void setContentType(const std::string & type);
         bool completeContentTransfer();
-		std::string getHeaderField(const std::string & name) const;
-		std::string getHeaderFieldIgnoreCase(const std::string & name) const;
 		HttpResponseHeader & header();
         void setTransfer(UTIL::AutoRef<DataTransfer> transfer);
         UTIL::AutoRef<DataTransfer> getTransfer();

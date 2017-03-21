@@ -18,7 +18,7 @@ namespace HTTP {
 	/**
 	 * @brief http request
 	 */
-	class HttpRequest {
+	class HttpRequest : public HttpHeaderDelegator {
 	private:
         HttpRequestHeader _header;
         UTIL::AutoRef<DataTransfer> transfer;
@@ -27,26 +27,19 @@ namespace HTTP {
 
 	public:
         HttpRequest();
-		HttpRequest(HttpHeader & header);
 		virtual ~HttpRequest();
 		
-        void clear();
+        virtual void clear();
         void setHeader(const HttpHeader & header);
 		std::string getMethod() const;
 		std::string getPath() const;
 		void setPath(const std::string & path);
 		std::string getRawPath() const;
-		std::string getHeaderField(const std::string & name) const;
-		std::string getHeaderFieldIgnoreCase(const std::string & name) const;
-		UTIL::LinkedStringListMap & getHeaderFields();
-		std::map<std::string, std::string> getHeaderFieldsStdMap();
         std::vector<std::string> getParameterNames();
 		std::string getParameter(const std::string & name);
 		std::string getParameter(const char * name);
 		std::vector<std::string> getParameters(std::string & name);
 		HttpRequestHeader & header();
-		int getContentLength();
-		std::string getContentType();
 		bool isWwwFormUrlEncoded();
 		void parseWwwFormUrlencoded();
         UTIL::AutoRef<DataTransfer> getTransfer();

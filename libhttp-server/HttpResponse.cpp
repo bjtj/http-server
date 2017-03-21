@@ -11,7 +11,8 @@ namespace HTTP {
 	/**
 	 * @brief http response constructor
 	 */
-	HttpResponse::HttpResponse() : _redirectRequested(false), _forwardRequested(false) {
+	HttpResponse::HttpResponse()
+		: HttpHeaderDelegator(_header), _redirectRequested(false), _forwardRequested(false) {
 	}
 	HttpResponse::~HttpResponse() {
 	}
@@ -35,27 +36,19 @@ namespace HTTP {
 	void HttpResponse::setParts(vector<string> & parts) {
 		_header.setParts(parts);
 	}
-	void HttpResponse::setContentLength(unsigned long long length) {
-		_header.setContentLength(length);
-	}
-	void HttpResponse::setContentType(const string & type) {
-		_header.setHeaderField("Content-Type", type);
-	}
-	string HttpResponse::getHeaderField(const string & name) const {
-		return _header.getHeaderField(name);
-	}
-	string HttpResponse::getHeaderFieldIgnoreCase(const string & name) const {
-		return _header.getHeaderFieldIgnoreCase(name);
-	}
+	
 	HttpResponseHeader & HttpResponse::header() {
 		return _header;
 	}
+	
     void HttpResponse::setTransfer(AutoRef<DataTransfer> transfer) {
         this->transfer = transfer;
     }
+	
     AutoRef<DataTransfer> HttpResponse::getTransfer() {
         return transfer;
     }
+	
 	void HttpResponse::clearTransfer() {
         transfer = NULL;
 	}
