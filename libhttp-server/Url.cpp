@@ -6,27 +6,28 @@ namespace HTTP {
 	using namespace std;
     using namespace UTIL;
 
+	static vector<string> createSchemes() {
+		vector<string> schemes;
+		schemes.push_back("http");
+		schemes.push_back("https");
+		schemes.push_back("file");
+		return schemes;
+	}
+
+	vector<string> Url::knownSchemes = createSchemes();
+
     Url::Url() {
-		initKnownSchemes();
     }
-    
+	
 	Url::Url(const char * urlStr) {
-		initKnownSchemes();
 		parseUrlString(urlStr);
 	}
+	
 	Url::Url(const string & urlStr) {
-		initKnownSchemes();
 		parseUrlString(urlStr);
 	}
 	
 	Url::~Url() {
-	}
-
-	void Url::initKnownSchemes() {
-		knownSchemes.clear();
-		knownSchemes.push_back("http");
-		knownSchemes.push_back("https");
-		knownSchemes.push_back("file");
 	}
 
 	string Url::getUsername() const {
@@ -135,7 +136,7 @@ namespace HTTP {
 		
 		size_t f = urlStr.find("://");
 		if (f == string::npos) {
-			throw UrlParseException("no protocol found");
+			throw WrongUrlFormatException("no protocol found");
 		}
 
 		scheme = u.substr(0, f);
@@ -267,6 +268,13 @@ namespace HTTP {
 		ret.append(p);
 
 		return ret;
+	}
+
+	void Url::validateUrlFormat(const string & url) {
+		size_t f = url.find("://");
+		if (f == string::npos) {
+			throw WrongUrlFormatException("no protocol found");
+		}
 	}
 
 	Url& Url::operator=(const char * urlStr) {

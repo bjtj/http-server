@@ -9,6 +9,7 @@
 namespace HTTP {
     
     DECL_NAMED_EXCEPTION(UrlParseException);
+	DECL_EXCEPTION(WrongUrlFormatException, UrlParseException);
     
     /**
      * @brief Url
@@ -22,13 +23,12 @@ namespace HTTP {
 		std::string port;
 		std::string path;
         UTIL::LinkedStringMap parameters;
-		std::vector<std::string> knownSchemes;
+		static std::vector<std::string> knownSchemes;
 	public:
         Url();
 		Url(const char * urlStr);
 		Url(const std::string & urlStr);
 		virtual ~Url();
-		void initKnownSchemes();
 		std::string getUsername() const;
 		std::string getPassword() const;
 		std::string getScheme() const;
@@ -60,6 +60,7 @@ namespace HTTP {
 		int getKnownPort(const std::string & scheme);
 		bool isKnownScheme(const std::string & scheme);
 		virtual std::string toString() const;
+		static void validateUrlFormat(const std::string & url);
 		Url& operator=(const std::string & urlStr);
 		Url& operator=(const char * urlStr);
 	protected:
