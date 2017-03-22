@@ -48,9 +48,11 @@ namespace HTTP {
 		virtual void setHeaderField(std::string name, UTIL::StringList value);
 		virtual void setHeaderField(std::string name, std::vector<std::string> value);
 		virtual void setHeaderFields(std::map<std::string, std::string> & fields);
+		virtual void appendHeaderField(const std::string & name, const std::string & value);
 		virtual void appendHeaderFields(const UTIL::LinkedStringMap & fields);
 		virtual void appendHeaderFields(const std::map<std::string, std::string> & fields);
-		virtual UTIL::LinkedStringListMap & getHeaderFields();
+		virtual UTIL::StringList getHeaderFields(const std::string & name);
+		virtual UTIL::LinkedStringListMap getHeaderFields();
 		virtual std::map<std::string, std::string> getHeaderFieldsStdMap();
 		virtual void removeHeaderField(const std::string & name);
 		virtual void removeHeaderFieldIgnoreCase(const std::string & name);
@@ -117,11 +119,15 @@ namespace HTTP {
 			{_header.setHeaderField(name, value);}
 		virtual void setHeaderFields(std::map<std::string, std::string> & fields)
 			{_header.setHeaderFields(fields);}
+		virtual void appendHeaderField(const std::string & name, const std::string & value)
+			{_header.appendHeaderField(name, value);}
 		virtual void appendHeaderFields(const UTIL::LinkedStringMap & fields)
 			{_header.appendHeaderFields(fields);}
 		virtual void appendHeaderFields(const std::map<std::string, std::string> & fields)
 			{_header.appendHeaderFields(fields);}
-		virtual UTIL::LinkedStringListMap & getHeaderFields()
+		virtual UTIL::StringList getHeaderFields(const std::string & name)
+			{return _header.getHeaderFields(name);}
+		virtual UTIL::LinkedStringListMap getHeaderFields()
 			{return _header.getHeaderFields();}
 		virtual std::map<std::string, std::string> getHeaderFieldsStdMap()
 			{return _header.getHeaderFieldsStdMap();}
@@ -147,6 +153,8 @@ namespace HTTP {
 			{_header.setConnection(connection);}
         virtual bool keepConnection()
 			{return _header.keepConnection();}
+		virtual std::string toString()
+			{return _header.toString();}
 	};
 
 

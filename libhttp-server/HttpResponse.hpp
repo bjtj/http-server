@@ -10,6 +10,7 @@
 #include "HttpHeader.hpp"
 #include "ChunkedReader.hpp"
 #include "DataTransfer.hpp"
+#include "Cookie.hpp"
 
 namespace HTTP {
 
@@ -50,6 +51,7 @@ namespace HTTP {
 		bool isRedirectionStatus();
 		std::string getLocation();
 		std::string & operator[] (const std::string & name);
+		void setCookies(const std::vector<Cookie> & cookies);
 	};
 }
 

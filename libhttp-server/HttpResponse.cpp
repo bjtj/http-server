@@ -100,4 +100,10 @@ namespace HTTP {
 	string & HttpResponse::operator[] (const string & name) {
 		return props[name];
 	}
+
+	void HttpResponse::setCookies(const vector<Cookie> & cookies) {
+		for (vector<Cookie>::const_iterator iter = cookies.begin(); iter != cookies.end(); iter++) {
+			_header.appendHeaderField("Set-Cookie", iter->toString());
+		}
+	}
 }

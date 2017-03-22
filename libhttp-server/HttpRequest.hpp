@@ -10,8 +10,8 @@
 #include "HttpHeader.hpp"
 #include "ChunkedReader.hpp"
 #include "Packet.hpp"
-
 #include "DataTransfer.hpp"
+#include "Cookie.hpp"
 
 namespace HTTP {
 
@@ -51,8 +51,8 @@ namespace HTTP {
         OS::InetAddress & getRemoteAddress();
 		void setLocalAddress(const OS::InetAddress & localAddress);
 		OS::InetAddress & getLocalAddress();
+		std::vector<Cookie> getCookies();
 	};
-
 }
 
 #endif

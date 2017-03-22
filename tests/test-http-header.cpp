@@ -6,6 +6,18 @@ using namespace std;
 using namespace HTTP;
 using namespace UTIL;
 
+static void test_http_header() {
+	HttpHeader header;
+	header.appendHeaderField("Cookie", "A");
+	header.appendHeaderField("Cookie", "B");
+	ASSERT(header.getHeaderFields("Cookie").size(), ==, 2);
+	ASSERT(header.getHeaderFields("Cookie")[0], ==, "A");
+	ASSERT(header.getHeaderFields("Cookie")[1], ==, "B");
+	header.setHeaderField("Cookie", "C");
+	ASSERT(header.getHeaderFields("Cookie").size(), ==, 1);
+	ASSERT(header.getHeaderField("Cookie"), ==, "C");
+}
+
 static void test_http_request_header() {
 
 	string path = "/hello;session=123?a=b&b=c";
@@ -33,7 +45,7 @@ static void test_http_header_to_string() {
 }
 
 int main(int argc, char *args[]) {
-
+	test_http_header();
 	test_http_request_header();
 	test_http_header_to_string();
     

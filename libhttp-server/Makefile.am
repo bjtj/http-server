@@ -10,6 +10,7 @@ libhttp_serverinc_HEADERS = \
 	Connection.hpp \
 	ConnectionManager.hpp \
 	ConnectionThreadPool.hpp \
+	Cookie.hpp \
 	DataSink.hpp \
 	DataSource.hpp \
 	DataTransfer.hpp \
@@ -64,6 +65,8 @@ libhttp_server_la_SOURCES = \
 	ConnectionManager.hpp \
 	ConnectionThreadPool.cpp \
 	ConnectionThreadPool.hpp \
+	Cookie.cpp \
+	Cookie.hpp \
 	DataSink.hpp \
 	DataSource.hpp \
 	DataTransfer.cpp \

@@ -136,6 +136,10 @@ namespace HTTP {
 	void HttpHeader::setHeaderFields(map<string, string> & fields) {
 		this->fields = fields;
 	}
+
+	void HttpHeader::appendHeaderField(const string & name, const string & value) {
+		fields.append(name, value);
+	}
 	
 	void HttpHeader::appendHeaderFields(const LinkedStringMap & fields) {
 		this->fields.append(fields);
@@ -144,8 +148,12 @@ namespace HTTP {
 	void HttpHeader::appendHeaderFields(const map<string, string> & fields) {
 		this->fields.append(fields);
 	}
+
+	StringList HttpHeader::getHeaderFields(const string & name) {
+		return fields[name];
+	}
 	
-	LinkedStringListMap & HttpHeader::getHeaderFields() {
+	LinkedStringListMap HttpHeader::getHeaderFields() {
 		return fields;
 	}
 	
@@ -203,11 +211,18 @@ namespace HTTP {
     }
 	
 	string HttpHeader::toString() const {
-		string ret = makeFirstLine() + "\r\n";
+		string ret;
+		ret.append(makeFirstLine());
+		ret.append("\r\n");
 		for (size_t i = 0; i < fields.size(); i++) {
-			ret += (fields[i].name() + ": " + fields[i].obj().first("") + "\r\n");
+			for (size_t j = 0; j < fields[i].obj().size(); j++) {
+				ret.append(fields[i].name());
+				ret.append(": ");
+				ret.append(fields[i].obj()[j]);
+				ret.append("\r\n");
+			}
 		}
-		ret += "\r\n";
+		ret.append("\r\n");
 		return ret;
 	}
 	

@@ -102,4 +102,13 @@ namespace HTTP {
 	InetAddress & HttpRequest::getLocalAddress() {
 		return localAddress;
 	}
+
+	vector<Cookie> HttpRequest::getCookies() {
+		vector<Cookie> cookies;
+		StringList lst = _header.getHeaderFields("Cookie");
+		for (size_t i = 0; i < lst.size(); i++) {
+			cookies.push_back(Cookie(lst[i]));
+		}
+		return cookies;
+	}
 }

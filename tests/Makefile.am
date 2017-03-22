@@ -10,7 +10,8 @@ check_PROGRAMS=\
 	test-data-sink \
 	test-http-server \
 	test-exception-handling \
-	test-http-client 
+	test-http-client \
+	test-cookie
 
 test_http_header_SOURCES = test-http-header.cpp
 test_url_SOURCES = test-url.cpp
@@ -22,6 +23,7 @@ test_data_sink_SOURCES = test-data-sink.cpp
 test_http_server_SOURCES = test-http-server.cpp
 test_exception_handling_SOURCES = test-exception-handling.cpp
 test_http_client_SOURCES = test-http-client.cpp
+test_cookie_SOURCES = test-cookie.cpp
 
 AM_CPPFLAGS = -I$(top_srcdir)
 AM_CXXFLAGS=$(PTHREAD_CXXFLAGS)
