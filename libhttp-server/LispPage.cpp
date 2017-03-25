@@ -251,11 +251,13 @@ namespace HTTP {
 	bool LispPage::compile(LISP::Env & env, const string & line) {
 		try {
 			LISP::compile(env, line);
-			return !env.quit();
+		} catch (LISP::ExitLispException & e) {
+			// exit by code
 		} catch (OS::Exception & e) {
 			logger->loge("ERROR: " + e.getMessage());
 			return false;
 		}
+		return true;
 	}
 	string LispPage::parseLispPage(const string & src) {
 		return parseLispPage(_env, src);
@@ -269,7 +271,7 @@ namespace HTTP {
 			env.local()["*content*"] = HEAP_ALLOC(env, LISP::text(""));
 		}
 
-		while (!env.quit() && (f = src.find("<%", f)) != string::npos) {
+		while ((f = src.find("<%", f)) != string::npos) {
             
 			if (f - s > 0) {
 				string txt = src.substr(s, f - s);
@@ -289,11 +291,11 @@ namespace HTTP {
 				// code
 				vector<string> lines = Text::split(code, "\n");
 				LISP::BufferedCommandReader reader;
-				for (vector<string>::iterator iter = lines.begin(); !env.quit() && iter != lines.end(); iter++) {
+				for (vector<string>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
 					string line = *iter;
 					if (!line.empty() && reader.read(line + " ") > 0) {
 						vector<string> commands = reader.getCommands();
-						for (vector<string>::iterator cmd = commands.begin(); !env.quit() && cmd != commands.end(); cmd++) {
+						for (vector<string>::iterator cmd = commands.begin(); cmd != commands.end(); cmd++) {
                             compile(env, *cmd);
 						}
 						reader.clearCommands();
@@ -303,7 +305,7 @@ namespace HTTP {
             
 			s = f = e + 2;
 		}
-		if (!env.quit() && s < src.length()) {
+		if (s < src.length()) {
 			string txt = src.substr(s);
 			_VAR content = env.local()["*content*"];
 			env.local()["*content*"] = HEAP_ALLOC(env, LISP::text(content->toString() + txt));
