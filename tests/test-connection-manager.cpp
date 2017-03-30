@@ -45,7 +45,6 @@ public:
 	}
 };
 
-
 class EchoCommunicationMaker : public CommunicationMaker {
 public:
 	EchoCommunicationMaker() {}
