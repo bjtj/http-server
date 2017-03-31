@@ -41,7 +41,7 @@ namespace HTTP {
 	}
 	
 	bool HttpRequestHandler::onException(HttpRequest & request, HttpResponse & response, Exception & ex) {
-		logger->loge("Error message - " + ex.getMessage());
+		logger->loge("Error message - " + ex.toString());
 		return false;
 	}
 }

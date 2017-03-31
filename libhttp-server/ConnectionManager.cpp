@@ -73,7 +73,7 @@ namespace HTTP {
 						onConnect(client);
 					}
 				} catch (IOException & e) {
-					logger->loge("client connection handling failed with '" + e.getMessage() + "'");
+					logger->loge("client connection handling failed with '" + e.toString() + "'");
 				}
             }
         }
@@ -102,7 +102,7 @@ namespace HTTP {
 		try {
 			startCommunication(communication, connection);
 		} catch (Exception & e) {
-			logger->loge(e.getMessage());
+			logger->loge(e.toString());
 			handleMaxCapacity(connection);
 			connection->close();
 			onDisconnect(connection);
