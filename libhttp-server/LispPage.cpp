@@ -259,10 +259,8 @@ namespace HTTP {
 		return parseLispPage(_env, src);
 	}
 	string LispPage::parseLispPage(LISP::Env & env, const string & src) {
-        
 		size_t f = 0;
 		size_t s = 0;
-
 		if (env.scope().rsearch("*content*").nil()) {
 			env.scope().put("*content*", HEAP_ALLOC(env, LISP::wrap_text("")));
 		}
@@ -270,7 +268,7 @@ namespace HTTP {
 			if (f - s > 0) {
 				string txt = src.substr(s, f - s);
 				_VAR content = env.scope().rget("*content*");
-				env.scope().rget("*content*") = HEAP_ALLOC(env, LISP::wrap_text(content->toString() + txt));
+				env.scope().rput("*content*", HEAP_ALLOC(env, LISP::wrap_text(content->toString() + txt)));
 			}
 			size_t e = src.find("%>", f);
 			string code = src.substr(f + 2, e - (f + 2));
@@ -294,15 +292,13 @@ namespace HTTP {
 					}
 				}
 			}
-            
 			s = f = e + 2;
 		}
 		if (s < src.length()) {
 			string txt = src.substr(s);
 			_VAR content = env.scope().rget("*content*");
-			env.scope().rget("*content*") = HEAP_ALLOC(env, LISP::wrap_text(content->toString() + txt));
+			env.scope().rput("*content*", HEAP_ALLOC(env, LISP::wrap_text(content->toString() + txt)));
 		}
-        
 		return env.scope().rget("*content*")->toString();
 	}
 }
