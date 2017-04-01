@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E81F60A01E8DCF0C0082D294 /* Cookie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E81F609D1E8DCF0C0082D294 /* Cookie.cpp */; };
+		E81F60A11E8DCF0C0082D294 /* Cookie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E81F609D1E8DCF0C0082D294 /* Cookie.cpp */; };
 		E822FD151CD772E300C02F43 /* MimeTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E822FD131CD772E300C02F43 /* MimeTypes.cpp */; };
 		E822FD161CD772E300C02F43 /* MimeTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E822FD131CD772E300C02F43 /* MimeTypes.cpp */; };
 		E827894D1BDD19920009E46A /* ChunkedReader.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = E8FAB2461BD7D2CE00E89DC5 /* ChunkedReader.hpp */; };
@@ -152,6 +154,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E81F609D1E8DCF0C0082D294 /* Cookie.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Cookie.cpp; path = "../../libhttp-server/Cookie.cpp"; sourceTree = "<group>"; };
+		E81F609E1E8DCF0C0082D294 /* Cookie.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Cookie.hpp; path = "../../libhttp-server/Cookie.hpp"; sourceTree = "<group>"; };
+		E81F609F1E8DCF0C0082D294 /* HttpException.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpException.hpp; path = "../../libhttp-server/HttpException.hpp"; sourceTree = "<group>"; };
 		E822FD131CD772E300C02F43 /* MimeTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MimeTypes.cpp; path = "../../libhttp-server/MimeTypes.cpp"; sourceTree = "<group>"; };
 		E822FD141CD772E300C02F43 /* MimeTypes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MimeTypes.hpp; path = "../../libhttp-server/MimeTypes.hpp"; sourceTree = "<group>"; };
 		E86940491D1C004900192CBB /* BasicAuth.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BasicAuth.cpp; path = "../../libhttp-server/BasicAuth.cpp"; sourceTree = "<group>"; };
@@ -282,6 +287,9 @@
 		E8FAB2441BD7D2A500E89DC5 /* http-server-c++ */ = {
 			isa = PBXGroup;
 			children = (
+				E81F609D1E8DCF0C0082D294 /* Cookie.cpp */,
+				E81F609E1E8DCF0C0082D294 /* Cookie.hpp */,
+				E81F609F1E8DCF0C0082D294 /* HttpException.hpp */,
 				E8EE1B5A1E8014DA0086E173 /* HttpCommunication.cpp */,
 				E8EE1B5B1E8014DA0086E173 /* HttpCommunication.hpp */,
 				E8EE1B5C1E8014DA0086E173 /* HttpCommunicationMaker.cpp */,
@@ -467,6 +475,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8EE1B6A1E8014DA0086E173 /* SimpleHttpRequestHandlerDispatcher.cpp in Sources */,
+				E81F60A11E8DCF0C0082D294 /* Cookie.cpp in Sources */,
 				E8848F011E6F740700FFA522 /* WebServerUtil.cpp in Sources */,
 				E88A80151CB4473300241D44 /* BufferIndicator.cpp in Sources */,
 				E89501531C1464A3009434B1 /* HttpEncoderDecoder.cpp in Sources */,
@@ -507,6 +516,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8EE1B691E8014DA0086E173 /* SimpleHttpRequestHandlerDispatcher.cpp in Sources */,
+				E81F60A01E8DCF0C0082D294 /* Cookie.cpp in Sources */,
 				E8B161371BFDF2F0002D68C7 /* ConnectionThreadPool.cpp in Sources */,
 				E8B160EE1BFA9D71002D68C7 /* DataTransfer.cpp in Sources */,
 				E8FAB23E1BD7D29800E89DC5 /* http_server.mm in Sources */,
