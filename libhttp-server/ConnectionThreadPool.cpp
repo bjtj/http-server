@@ -28,7 +28,7 @@ namespace HTTP {
 		try {
 			connectionTask();
 		} catch (NullException & e) {
-			logger->loge(e.getMessage());
+			logger->loge(e.toString());
 		}
 	}
 
@@ -53,7 +53,7 @@ namespace HTTP {
 				}
             }
         } catch (IOException & e) {
-            logger->loge(e.getMessage());
+            logger->loge(e.toString());
         }
         
         // notify disconnection to connection manager

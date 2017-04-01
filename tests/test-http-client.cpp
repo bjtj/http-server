@@ -105,7 +105,7 @@ public:
 		}
     }
     virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
-        cout << " [Error] " << e.getMessage() << endl;
+        cout << " [Error] " << e.toString() << endl;
     }
 	HttpResponseHeader & getResponseHeader() {
 		return responseHeader;

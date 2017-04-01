@@ -235,7 +235,7 @@ public:
 					}
 					cout << " ** [" << id << "]EchoVisitorTask/complete" << endl;
 				} catch (Exception & e) {
-					cout << " ** [" << id << "]EchoVisitorTask/error: " << e.getMessage() << endl;
+					cout << " ** [" << id << "]EchoVisitorTask/error: " << e.toString() << endl;
 				}
 				
 				sock.close();

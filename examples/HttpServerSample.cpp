@@ -47,7 +47,7 @@ public:
 		}
     }
     virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
-		logger->loge("Error/e: " + e.getMessage());
+		logger->loge("Error/e: " + e.toString());
     }
 	HttpResponseHeader & getResponseHeader() {
 		return responseHeader;
@@ -144,7 +144,7 @@ public:
 			logger->loge(" ** error");
 			response.setStatus(500);
 			response.setContentType("text/html");
-			setFixedTransfer(response, "Server Error/" + e.getMessage());
+			setFixedTransfer(response, "Server Error/" + e.toString());
 		}
 	}
 
@@ -284,7 +284,7 @@ public:
 			} catch (Exception e) {
 				response.setContentType("text/html");
 				response.setStatus(500);
-				setFixedTransfer(response, e.getMessage());
+				setFixedTransfer(response, e.toString());
 			}
 			return;
 		}
@@ -456,7 +456,7 @@ public:
 			result.contentType() = handler.getResponseHeader()["content-type"];
 			result.dump() = handler.getDump();
 		} catch (Exception & e) {
-			logger->loge(e.getMessage());
+			logger->loge(e.toString());
 			result.statusCode() = 500;
 		}
 		return result;
@@ -488,7 +488,7 @@ public:
 			logger->loge(" ** error");
 			response.setStatus(500);
 			response.setContentType("text/html");
-			setFixedTransfer(response, "Server Error/" + e.getMessage());
+			setFixedTransfer(response, "Server Error/" + e.toString());
 		}
 	}
 

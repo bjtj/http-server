@@ -247,7 +247,7 @@ namespace HTTP {
 			logger->logd("Normal Exit");
 			// exit by code
 		} catch (OS::Exception & e) {
-			logger->loge("ERROR: " + e.getMessage());
+			logger->loge("ERROR: " + e.toString());
 			return false;
 		} catch (std::exception & e) {
 			logger->loge("ERROR: " + string(e.what()));

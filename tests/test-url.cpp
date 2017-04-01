@@ -45,21 +45,21 @@ static void test_url() {
 		Url::validateUrlFormat("");
 		throw "It should not be thrown!";
 	} catch (UrlParseException & e) {
-		ASSERT(e.getMessage().size(), >, 0);
+		ASSERT(e.toString().size(), >, 0);
 	}
 
 	try {
 		Url::validateUrlFormat("//");
 		throw "It should not be thrown!";
 	} catch (UrlParseException & e) {
-		ASSERT(e.getMessage().size(), >, 0);
+		ASSERT(e.toString().size(), >, 0);
 	}
 
 	try {
 		Url::validateUrlFormat("/home/user/");
 		throw "It should not be thrown!";
 	} catch (UrlParseException & e) {
-		ASSERT(e.getMessage().size(), >, 0);
+		ASSERT(e.toString().size(), >, 0);
 	}
 
 	Url::validateUrlFormat("file:///home/user/");
