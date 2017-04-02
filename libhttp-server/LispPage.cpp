@@ -243,9 +243,8 @@ namespace HTTP {
 	bool LispPage::compile(LISP::Env & env, const string & line) {
 		try {
 			LISP::compile(env, line);
-		} catch (LISP::ExitLispException & e) {
-			logger->logd("Normal Exit");
-			// exit by code
+		} catch (LISP::ExitLispException e) {
+			throw e;
 		} catch (OS::Exception & e) {
 			logger->loge("ERROR: " + e.toString());
 			return false;
@@ -264,40 +263,45 @@ namespace HTTP {
 		if (env.scope()->rsearch("*content*").nil()) {
 			env.scope()->put("*content*", HEAP_ALLOC(env, LISP::wrap_text("")));
 		}
-		while ((f = src.find("<%", f)) != string::npos) {
-			if (f - s > 0) {
-				string txt = src.substr(s, f - s);
+		try {
+			while ((f = src.find("<%", f)) != string::npos) {
+				if (f - s > 0) {
+					string txt = src.substr(s, f - s);
+					_VAR content = env.scope()->rget("*content*");
+					env.scope()->rput("*content*", HEAP_ALLOC(env, LISP::wrap_text(content->toString() + txt)));
+				}
+				size_t e = src.find("%>", f);
+				string code = src.substr(f + 2, e - (f + 2));
+				if (*code.begin() == '=') {
+					// print
+					string line = Text::trim(code.substr(1));
+					line = "(setq *content* (string-append *content* " + line + "))";
+					compile(env, line);
+				} else {
+					// code
+					vector<string> lines = Text::split(code, "\n");
+					LISP::BufferedCommandReader reader;
+					for (vector<string>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
+						string line = *iter;
+						if (!line.empty() && reader.read(line + " ") > 0) {
+							vector<string> commands = reader.getCommands();
+							for (vector<string>::iterator cmd = commands.begin(); cmd != commands.end(); cmd++) {
+								compile(env, *cmd);
+							}
+							reader.clearCommands();
+						}
+					}
+				}
+				s = f = e + 2;
+			}
+			if (s < src.length()) {
+				string txt = src.substr(s);
 				_VAR content = env.scope()->rget("*content*");
 				env.scope()->rput("*content*", HEAP_ALLOC(env, LISP::wrap_text(content->toString() + txt)));
 			}
-			size_t e = src.find("%>", f);
-			string code = src.substr(f + 2, e - (f + 2));
-			if (*code.begin() == '=') {
-				// print
-				string line = Text::trim(code.substr(1));
-				line = "(setq *content* (string-append *content* " + line + "))";
-				compile(env, line);
-			} else {
-				// code
-				vector<string> lines = Text::split(code, "\n");
-				LISP::BufferedCommandReader reader;
-				for (vector<string>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
-					string line = *iter;
-					if (!line.empty() && reader.read(line + " ") > 0) {
-						vector<string> commands = reader.getCommands();
-						for (vector<string>::iterator cmd = commands.begin(); cmd != commands.end(); cmd++) {
-                            compile(env, *cmd);
-						}
-						reader.clearCommands();
-					}
-				}
-			}
-			s = f = e + 2;
-		}
-		if (s < src.length()) {
-			string txt = src.substr(s);
-			_VAR content = env.scope()->rget("*content*");
-			env.scope()->rput("*content*", HEAP_ALLOC(env, LISP::wrap_text(content->toString() + txt)));
+		} catch (LISP::ExitLispException e) {
+			// exit by code
+			logger->logd("[LispPage - (quit)]");
 		}
 		return env.scope()->rget("*content*")->toString();
 	}
