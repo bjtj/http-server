@@ -22,7 +22,7 @@ namespace HTTP {
     public:
         ServerSocketMaker() {}
         virtual ~ServerSocketMaker() {}
-        virtual UTIL::AutoRef<OS::ServerSocket> makeServerSocket(int port) = 0;
+        virtual OS::AutoRef<OS::ServerSocket> makeServerSocket(int port) = 0;
     };
 
 	/**
@@ -33,8 +33,8 @@ namespace HTTP {
     public:
         DefaultServerSocketMaker() {}
         virtual ~DefaultServerSocketMaker() {}
-        virtual UTIL::AutoRef<OS::ServerSocket> makeServerSocket(int port) {
-            return UTIL::AutoRef<OS::ServerSocket>(new OS::ServerSocket(port));
+        virtual OS::AutoRef<OS::ServerSocket> makeServerSocket(int port) {
+            return OS::AutoRef<OS::ServerSocket>(new OS::ServerSocket(port));
         }
     };
     
@@ -63,7 +63,7 @@ namespace HTTP {
         CommunicationMaker() {}
         virtual ~CommunicationMaker() {}
         
-        virtual UTIL::AutoRef<Communication> makeCommunication() = 0;
+        virtual OS::AutoRef<Communication> makeCommunication() = 0;
     };
 
 	/**
@@ -73,7 +73,7 @@ namespace HTTP {
 	public:
 		OnMaxCapacity() {}
 		virtual ~OnMaxCapacity() {}
-		virtual void onMaxCapacity(ConnectionManager & cm, UTIL::AutoRef<Connection> connection) = 0;
+		virtual void onMaxCapacity(ConnectionManager & cm, OS::AutoRef<Connection> connection) = 0;
 	};
 
     
@@ -83,46 +83,46 @@ namespace HTTP {
 
     class ConnectionManager : public UTIL::Observer {
     private:
-		UTIL::AutoRef<ServerSocketMaker> serverSocketMaker;
-		UTIL::AutoRef<OS::ServerSocket> serverSocket;
+		OS::AutoRef<ServerSocketMaker> serverSocketMaker;
+		OS::AutoRef<OS::ServerSocket> serverSocket;
         OS::Selector selector;
-        std::map<int, UTIL::AutoRef<Connection> > connections;
+        std::map<int, OS::AutoRef<Connection> > connections;
         OS::Semaphore connectionsLock;
-		UTIL::AutoRef<CommunicationMaker> communicationMaker;
+		OS::AutoRef<CommunicationMaker> communicationMaker;
 		ConnectionThreadPool threadPool;
-		UTIL::AutoRef<OnMaxCapacity> onMaxCapacity;
+		OS::AutoRef<OnMaxCapacity> onMaxCapacity;
 		unsigned long recvTimeout;
         
     public:
-        ConnectionManager(UTIL::AutoRef<CommunicationMaker> communicationMaker,
+        ConnectionManager(OS::AutoRef<CommunicationMaker> communicationMaker,
 						  size_t threadCount);
-        ConnectionManager(UTIL::AutoRef<CommunicationMaker> communicationMaker,
+        ConnectionManager(OS::AutoRef<CommunicationMaker> communicationMaker,
 						  size_t threadCount,
-						  UTIL::AutoRef<ServerSocketMaker> serverSocketMaker);
+						  OS::AutoRef<ServerSocketMaker> serverSocketMaker);
         virtual ~ConnectionManager();
 		void start(int port);
         void start(int port, int backlog);
 		void stop();
         void poll(unsigned long timeout);
         void clearConnections();
-		void onConnect(UTIL::AutoRef<OS::Socket> client);
-		UTIL::AutoRef<Connection> makeConnection(UTIL::AutoRef<OS::Socket> client);
-        void onDisconnect(UTIL::AutoRef<Connection> connection);
-		void registerConnection(UTIL::AutoRef<Connection> connection);
-		void unregisterConnection(UTIL::AutoRef<Connection> connection);
+		void onConnect(OS::AutoRef<OS::Socket> client);
+		OS::AutoRef<Connection> makeConnection(OS::AutoRef<OS::Socket> client);
+        void onDisconnect(OS::AutoRef<Connection> connection);
+		void registerConnection(OS::AutoRef<Connection> connection);
+		void unregisterConnection(OS::AutoRef<Connection> connection);
 		void removeCompletedConnections();
         void stopAllThreads();
-		void startCommunication(UTIL::AutoRef<Communication> communication, UTIL::AutoRef<Connection> connection);
+		void startCommunication(OS::AutoRef<Communication> communication, OS::AutoRef<Connection> connection);
 		size_t getConnectionCount();
 		virtual void onUpdate(UTIL::Observable * target);
-		void handleMaxCapacity(UTIL::AutoRef<Connection> connection);
-		void setOnMaxCapacity(UTIL::AutoRef<OnMaxCapacity> onMaxCapacity);
+		void handleMaxCapacity(OS::AutoRef<Connection> connection);
+		void setOnMaxCapacity(OS::AutoRef<OnMaxCapacity> onMaxCapacity);
 		void setRecvTimeout(unsigned long recvTimeout);
 		unsigned long getRecvTimeout();
 		size_t available();
 		size_t working();
 		size_t capacity();
-        std::vector<UTIL::AutoRef<Connection> > getConnectionList();
+        std::vector<OS::AutoRef<Connection> > getConnectionList();
     };
 }
 

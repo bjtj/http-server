@@ -20,9 +20,9 @@ namespace HTTP {
 		class RequestHandlerNode {
 		private:			
 			std::string _pattern;
-			UTIL::AutoRef<HttpRequestHandler> handler;
+			OS::AutoRef<HttpRequestHandler> handler;
 		public:
-			RequestHandlerNode(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler)
+			RequestHandlerNode(const std::string & pattern, OS::AutoRef<HttpRequestHandler> handler)
 				: _pattern(pattern), handler(handler) {
 			}
 			virtual ~RequestHandlerNode() {
@@ -33,7 +33,7 @@ namespace HTTP {
 			bool equalsPattern(const std::string & pattern) {
 				return (!_pattern.compare(pattern) ? true : false);
 			}
-			UTIL::AutoRef<HttpRequestHandler> getHandler() {
+			OS::AutoRef<HttpRequestHandler> getHandler() {
 				return handler;
 			}
 			std::string & pattern() {
@@ -45,9 +45,9 @@ namespace HTTP {
 	public:
 		SimpleHttpRequestHandlerDispatcher();
 		virtual ~SimpleHttpRequestHandlerDispatcher();
-		virtual void registerRequestHandler(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler);
+		virtual void registerRequestHandler(const std::string & pattern, OS::AutoRef<HttpRequestHandler> handler);
 		virtual void unregisterRequestHandler(const std::string & pattern);
-		virtual UTIL::AutoRef<HttpRequestHandler> getRequestHandler(const std::string & path);
+		virtual OS::AutoRef<HttpRequestHandler> getRequestHandler(const std::string & path);
 	private:
 		static bool _fn_sort_desc(RequestHandlerNode a, RequestHandlerNode b);
 	};

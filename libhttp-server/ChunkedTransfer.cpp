@@ -21,7 +21,7 @@ namespace HTTP {
     ChunkedTransfer::~ChunkedTransfer() {
     }
 	
-	void ChunkedTransfer::recv(UTIL::AutoRef<Connection> connection) {
+	void ChunkedTransfer::recv(AutoRef<Connection> connection) {
 
 		if (sink().nil()) {
 			throw Exception("sink required");
@@ -65,7 +65,7 @@ namespace HTTP {
         }
     }
 
-	void ChunkedTransfer::send(UTIL::AutoRef<Connection> connection) {
+	void ChunkedTransfer::send(AutoRef<Connection> connection) {
 		// TODO: need chunk generator
 
 		if (source().nil()) {

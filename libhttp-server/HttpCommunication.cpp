@@ -55,7 +55,7 @@ namespace HTTP {
 		return writeable == true;
 	}
 
-	bool HttpCommunication::onReceivable(UTIL::AutoRef<Connection> connection) {
+	bool HttpCommunication::onReceivable(AutoRef<Connection> connection) {
 		if (writeable) {
 			return false;
 		}
@@ -83,7 +83,7 @@ namespace HTTP {
         return true;
 	}
 
-	void HttpCommunication::readRequestHeaderIfNeed(UTIL::AutoRef<Connection> connection) {
+	void HttpCommunication::readRequestHeaderIfNeed(AutoRef<Connection> connection) {
 		if (!requestHeaderReader.complete()) {
 			connection->packet().setLimit(1);
 			Packet & packet = connection->read();
@@ -153,7 +153,7 @@ namespace HTTP {
         }
 	}
 
-	bool HttpCommunication::onWriteable(UTIL::AutoRef<Connection> connection) {
+	bool HttpCommunication::onWriteable(AutoRef<Connection> connection) {
 		if (!writeable) {
 			return false;
 		}
@@ -178,7 +178,7 @@ namespace HTTP {
 		return true;
 	}
 
-	void HttpCommunication::sendResponseHeader(UTIL::AutoRef<Connection> connection) {
+	void HttpCommunication::sendResponseHeader(AutoRef<Connection> connection) {
 		HttpResponseHeader & header = response.header();
         string headerString = header.toString();
         if (connection->send(headerString.c_str(), (int)headerString.length()) != (int)headerString.length()) {
@@ -195,7 +195,7 @@ namespace HTTP {
         }
 	}
 
-	void HttpCommunication::sendResponseContent(UTIL::AutoRef<Connection> connection) {
+	void HttpCommunication::sendResponseContent(AutoRef<Connection> connection) {
         AutoRef<DataTransfer> responseTransfer = response.getTransfer();
 		if (!responseTransfer.nil()) {
 			responseTransfer->send(connection);
@@ -207,7 +207,7 @@ namespace HTTP {
 		}
 	}
 
-	void HttpCommunication::onDisconnected(UTIL::AutoRef<Connection> connection) {
+	void HttpCommunication::onDisconnected(AutoRef<Connection> connection) {
 		logger->logd("[DISCONNECTED] '" + connection->getRemoteAddress().getHost() + "'");
 	}
 

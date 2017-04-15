@@ -31,7 +31,7 @@ namespace HTTP {
 		delete[] _buffer;
     }
 	
-	void FixedTransfer::recv(UTIL::AutoRef<Connection> connection) {
+	void FixedTransfer::recv(AutoRef<Connection> connection) {
 		if (sink().nil()) {
 			throw Exception("sink required");
 		}
@@ -43,7 +43,7 @@ namespace HTTP {
 		}
     }
 	
-    void FixedTransfer::send(UTIL::AutoRef<Connection> connection) {
+    void FixedTransfer::send(AutoRef<Connection> connection) {
 		if (source().nil()) {
 			throw Exception("source required");
 		}

@@ -117,13 +117,13 @@ namespace HTTP {
 		unregisterConnection(connection);
     }
 
-	void ConnectionManager::registerConnection(UTIL::AutoRef<Connection> connection) {
+	void ConnectionManager::registerConnection(AutoRef<Connection> connection) {
 		connectionsLock.wait();
         connections[connection->getId()] = connection;
         connectionsLock.post();
 	}
 	
-	void ConnectionManager::unregisterConnection(UTIL::AutoRef<Connection> connection) {
+	void ConnectionManager::unregisterConnection(AutoRef<Connection> connection) {
 		connectionsLock.wait();
         int id = connection->getId();
         if (connections.find(id) != connections.end()) {

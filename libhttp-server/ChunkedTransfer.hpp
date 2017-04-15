@@ -18,11 +18,11 @@ namespace HTTP {
 
 	public:
 
-		ChunkedTransfer(UTIL::AutoRef<DataSource> source);
-		ChunkedTransfer(UTIL::AutoRef<DataSink> sink);
+		ChunkedTransfer(OS::AutoRef<DataSource> source);
+		ChunkedTransfer(OS::AutoRef<DataSink> sink);
 		virtual ~ChunkedTransfer();
-		virtual void recv(UTIL::AutoRef<Connection> connection);
-		virtual void send(UTIL::AutoRef<Connection> connection);
+		virtual void recv(OS::AutoRef<Connection> connection);
+		virtual void send(OS::AutoRef<Connection> connection);
 		virtual unsigned long long size();
 	};
 

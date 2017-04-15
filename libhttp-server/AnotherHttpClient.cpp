@@ -38,7 +38,7 @@ namespace HTTP {
 		}
 		return NULL;
 	}
-	void OnHttpResponseListener::onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData) {
+	void OnHttpResponseListener::onResponseHeader(HttpResponse & response, AutoRef<UserData> userData) {
 		response.setTransfer(AutoRef<DataTransfer>(createDataTransfer(response.header(), getDataSink())));
 	}
 
@@ -147,7 +147,7 @@ namespace HTTP {
         this->url = url;
     }
 
-	void AnotherHttpClient::setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields) {
+	void AnotherHttpClient::setRequest(const std::string & method, const LinkedStringMap & additionalHeaderFields) {
 		HttpRequestHeader & header = request.header();
         header.setMethod(method);
         header.setPath(url.getPathAndQuery());

@@ -5,6 +5,7 @@
 namespace HTTP {
 	
 	using namespace std;
+	using namespace OS;
 	using namespace UTIL;
 
 	OnBasicAuth::OnBasicAuth() {

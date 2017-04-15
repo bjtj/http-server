@@ -15,9 +15,9 @@ namespace HTTP {
 
 		HttpRequestHandlerDispatcher() {}
 		virtual ~HttpRequestHandlerDispatcher() {}
-		virtual void registerRequestHandler(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler) = 0;
+		virtual void registerRequestHandler(const std::string & pattern, OS::AutoRef<HttpRequestHandler> handler) = 0;
 		virtual void unregisterRequestHandler(const std::string & pattern) = 0;
-		virtual UTIL::AutoRef<HttpRequestHandler> getRequestHandler(const std::string & query) = 0;
+		virtual OS::AutoRef<HttpRequestHandler> getRequestHandler(const std::string & query) = 0;
 	};
 }
 

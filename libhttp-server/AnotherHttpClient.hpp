@@ -18,7 +18,7 @@ namespace HTTP {
 	public:
 		SocketMaker() {}
 		virtual ~SocketMaker() {}
-		virtual UTIL::AutoRef<OS::Socket> make(const std::string & protocol, const OS::InetAddress & addr) = 0;
+		virtual OS::AutoRef<OS::Socket> make(const std::string & protocol, const OS::InetAddress & addr) = 0;
 	};
 
 
@@ -40,11 +40,11 @@ namespace HTTP {
 	public:
 		OnHttpResponseListener();
 		virtual ~OnHttpResponseListener();
-		virtual UTIL::AutoRef<DataSink> getDataSink();
-		virtual DataTransfer * createDataTransfer(HttpHeader & header, UTIL::AutoRef<DataSink> sink);
-		virtual void onResponseHeader(HttpResponse & response, UTIL::AutoRef<UserData> userData);
-        virtual void onTransferDone(HttpResponse & response, UTIL::AutoRef<DataSink> sink, UTIL::AutoRef<UserData> userData) = 0;
-        virtual void onError(OS::Exception & e, UTIL::AutoRef<UserData> userData) = 0;
+		virtual OS::AutoRef<DataSink> getDataSink();
+		virtual DataTransfer * createDataTransfer(HttpHeader & header, OS::AutoRef<DataSink> sink);
+		virtual void onResponseHeader(HttpResponse & response, OS::AutoRef<UserData> userData);
+        virtual void onTransferDone(HttpResponse & response, OS::AutoRef<DataSink> sink, OS::AutoRef<UserData> userData) = 0;
+        virtual void onError(OS::Exception & e, OS::AutoRef<UserData> userData) = 0;
 	};
 
 	/**
@@ -56,9 +56,9 @@ namespace HTTP {
 		Url url;
 		HttpRequest request;
 		HttpResponse response;
-        UTIL::AutoRef<Connection> connection;
-		UTIL::AutoRef<SocketMaker> socketMaker;
-		UTIL::AutoRef<OS::Socket> socket;
+        OS::AutoRef<Connection> connection;
+		OS::AutoRef<SocketMaker> socketMaker;
+		OS::AutoRef<OS::Socket> socket;
 		OS::Selector selector;
 		bool requestHeaderSent;
 		bool responseHeaderReceived;
@@ -70,12 +70,12 @@ namespace HTTP {
 		unsigned long connectionTimeout;
 		unsigned long recvTimeout;
         bool followRedirect;
-		UTIL::AutoRef<UserData> userData;
+		OS::AutoRef<UserData> userData;
 
 	public:
 
         AnotherHttpClient();
-		AnotherHttpClient(UTIL::AutoRef<SocketMaker> socketMaker);
+		AnotherHttpClient(OS::AutoRef<SocketMaker> socketMaker);
 		AnotherHttpClient(const Url & url);
 		virtual ~AnotherHttpClient();
 
@@ -86,10 +86,10 @@ namespace HTTP {
         void closeConnection();
         void setUrl(const Url & url);
 		void setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields);
-        void setRequestWithFixedTransfer(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer, size_t size);
-		void setRequestWithChunkedTransfer(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, UTIL::AutoRef<DataTransfer> transfer);
-        void setFixedTransfer(UTIL::AutoRef<DataTransfer> transfer, size_t size);
-		void setChunkedTransfer(UTIL::AutoRef<DataTransfer> transfer);
+        void setRequestWithFixedTransfer(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, OS::AutoRef<DataTransfer> transfer, size_t size);
+		void setRequestWithChunkedTransfer(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, OS::AutoRef<DataTransfer> transfer);
+        void setFixedTransfer(OS::AutoRef<DataTransfer> transfer, size_t size);
+		void setChunkedTransfer(OS::AutoRef<DataTransfer> transfer);
 		void execute();
         void communicate();
 		void interrupt();
@@ -107,7 +107,7 @@ namespace HTTP {
         void handleRedirect();
         void setFollowRedirect(bool followRedirect);
         void setOnHttpResponseListener(OnHttpResponseListener * responseListener);
-		void setUserData(UTIL::AutoRef<UserData> userData);
+		void setUserData(OS::AutoRef<UserData> userData);
         Url getUrl();
         HttpResponse & getResponse();
         

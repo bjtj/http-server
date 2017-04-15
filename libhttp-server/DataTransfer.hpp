@@ -12,21 +12,21 @@ namespace HTTP {
     class DataTransfer {
     private:
         bool _completed;
-		UTIL::AutoRef<DataSource> _source;
-		UTIL::AutoRef<DataSink> _sink;
+		OS::AutoRef<DataSource> _source;
+		OS::AutoRef<DataSink> _sink;
 
     public:
         DataTransfer();
-		DataTransfer(UTIL::AutoRef<DataSource> source);
-		DataTransfer(UTIL::AutoRef<DataSink> sink);
+		DataTransfer(OS::AutoRef<DataSource> source);
+		DataTransfer(OS::AutoRef<DataSink> sink);
         virtual ~DataTransfer();
-		virtual void recv(UTIL::AutoRef<Connection> connection) = 0;
-        virtual void send(UTIL::AutoRef<Connection> connection) = 0;
+		virtual void recv(OS::AutoRef<Connection> connection) = 0;
+        virtual void send(OS::AutoRef<Connection> connection) = 0;
 		virtual unsigned long long size();
         void complete();
         virtual bool completed();
-		UTIL::AutoRef<DataSource> & source();
-		UTIL::AutoRef<DataSink> & sink();
+		OS::AutoRef<DataSource> & source();
+		OS::AutoRef<DataSink> & sink();
     };
 }
 

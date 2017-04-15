@@ -12,11 +12,11 @@ namespace HTTP {
 	 */
 	class HttpCommunicationMaker : public CommunicationMaker {
 	private:
-		UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
+		OS::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
 	public:
-		HttpCommunicationMaker(UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher);
+		HttpCommunicationMaker(OS::AutoRef<HttpRequestHandlerDispatcher> dispatcher);
 		virtual ~HttpCommunicationMaker();
-		virtual UTIL::AutoRef<Communication> makeCommunication();
+		virtual OS::AutoRef<Communication> makeCommunication();
 	};
 }
 

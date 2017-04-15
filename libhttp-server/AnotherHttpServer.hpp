@@ -29,14 +29,14 @@ namespace HTTP {
 	class AnotherHttpServer {
 	private:
 		HttpServerConfig config;
-		UTIL::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
+		OS::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
 		ConnectionManager _connectionManager;
 		OS::Thread * thread;
 	public:
 		AnotherHttpServer(HttpServerConfig config);
-        AnotherHttpServer(HttpServerConfig config, UTIL::AutoRef<ServerSocketMaker> serverSocketMaker);
+        AnotherHttpServer(HttpServerConfig config, OS::AutoRef<ServerSocketMaker> serverSocketMaker);
 		virtual ~AnotherHttpServer();
-		void registerRequestHandler(const std::string & pattern, UTIL::AutoRef<HttpRequestHandler> handler);
+		void registerRequestHandler(const std::string & pattern, OS::AutoRef<HttpRequestHandler> handler);
 		void unregisterRequestHandler(const std::string & pattern);
 		int getPort();
 		void start();

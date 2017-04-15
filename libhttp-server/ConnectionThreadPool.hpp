@@ -14,15 +14,15 @@ namespace HTTP {
 	 */
 	class ConnectionThread : public UTIL::StatefulThread {
 	private:
-		UTIL::AutoRef<Connection> connection;
-		UTIL::AutoRef<Communication> communication;
+		OS::AutoRef<Connection> connection;
+		OS::AutoRef<Communication> communication;
         OS::Selector selector;
 
 	public:
 		ConnectionThread();
 		virtual ~ConnectionThread();
-		void setConnection(UTIL::AutoRef<Connection> connection, UTIL::AutoRef<Communication> communication);
-		UTIL::AutoRef<Connection> getConnection();
+		void setConnection(OS::AutoRef<Connection> connection, OS::AutoRef<Communication> communication);
+		OS::AutoRef<Connection> getConnection();
 		virtual void onTask();
 		void connectionTask();
 		void testReceiveTimeout();
@@ -39,7 +39,7 @@ namespace HTTP {
 	public:
 		ConnectionThreadPool(size_t maxThreads);
 		virtual ~ConnectionThreadPool();
-		void createConnection(UTIL::AutoRef<Communication> communication, UTIL::AutoRef<Connection> connection);
+		void createConnection(OS::AutoRef<Communication> communication, OS::AutoRef<Connection> connection);
 	};
 }
 

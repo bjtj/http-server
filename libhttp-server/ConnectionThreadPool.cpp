@@ -102,18 +102,18 @@ namespace HTTP {
 	 * @brief ConnectionThreadInstanceCreator
 	 */
 
-	class ConnectionThreadInstanceCreator : public UTIL::InstanceCreator<UTIL::StatefulThread*> {
+	class ConnectionThreadInstanceCreator : public InstanceCreator<StatefulThread*> {
 	private:
 	public:
 		ConnectionThreadInstanceCreator() {
 		}
 		virtual ~ConnectionThreadInstanceCreator() {
 		}
-		virtual UTIL::StatefulThread * createInstance() {
+		virtual StatefulThread * createInstance() {
 			return new ConnectionThread;
 		}
 
-		virtual void releaseInstance(UTIL::StatefulThread * inst) {
+		virtual void releaseInstance(StatefulThread * inst) {
 			delete inst;
 		}
 	};

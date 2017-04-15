@@ -21,7 +21,7 @@ namespace HTTP {
 	class HttpRequest : public HttpHeaderDelegator {
 	private:
         HttpRequestHeader _header;
-        UTIL::AutoRef<DataTransfer> transfer;
+        OS::AutoRef<DataTransfer> transfer;
         OS::InetAddress remoteAddress;
 		OS::InetAddress localAddress;
 
@@ -44,8 +44,8 @@ namespace HTTP {
 		HttpRequestHeader & header();
 		bool isWwwFormUrlEncoded();
 		void parseWwwFormUrlencoded();
-        UTIL::AutoRef<DataTransfer> getTransfer();
-        void setTransfer(UTIL::AutoRef<DataTransfer> transfer);
+        OS::AutoRef<DataTransfer> getTransfer();
+        void setTransfer(OS::AutoRef<DataTransfer> transfer);
         void clearTransfer();
         void setRemoteAddress(const OS::InetAddress & remoteAddress);
         OS::InetAddress & getRemoteAddress();

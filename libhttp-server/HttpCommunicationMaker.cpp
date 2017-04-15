@@ -3,6 +3,7 @@
 
 namespace HTTP {
 
+	using namespace OS;
 	using namespace UTIL;
 
 	/**

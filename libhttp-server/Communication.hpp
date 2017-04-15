@@ -12,10 +12,10 @@ namespace HTTP {
         virtual ~Communication();
 		virtual bool isReadable();
 		virtual bool isWritable();
-        virtual void onConnected(UTIL::AutoRef<Connection> connection) = 0;
-		virtual bool onReceivable(UTIL::AutoRef<Connection> connection) = 0;
-        virtual bool onWriteable(UTIL::AutoRef<Connection> connection) = 0;
-        virtual void onDisconnected(UTIL::AutoRef<Connection> connection) = 0;
+        virtual void onConnected(OS::AutoRef<Connection> connection) = 0;
+		virtual bool onReceivable(OS::AutoRef<Connection> connection) = 0;
+        virtual bool onWriteable(OS::AutoRef<Connection> connection) = 0;
+        virtual void onDisconnected(OS::AutoRef<Connection> connection) = 0;
         virtual bool isCommunicationCompleted() = 0;
     };
     

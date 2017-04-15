@@ -20,7 +20,7 @@ namespace HTTP {
 	class HttpResponse : public HttpHeaderDelegator {
 	private:
 		HttpResponseHeader _header;
-        UTIL::AutoRef<DataTransfer> transfer;
+        OS::AutoRef<DataTransfer> transfer;
 		bool _redirectRequested;
 		std::string _redirectLocation;
 		bool _forwardRequested;
@@ -37,8 +37,8 @@ namespace HTTP {
 		void setParts(std::vector<std::string> &parts);
         bool completeContentTransfer();
 		HttpResponseHeader & header();
-        void setTransfer(UTIL::AutoRef<DataTransfer> transfer);
-        UTIL::AutoRef<DataTransfer> getTransfer();
+        void setTransfer(OS::AutoRef<DataTransfer> transfer);
+        OS::AutoRef<DataTransfer> getTransfer();
 		void clearTransfer();
 		void setRedirect(const std::string & location);
 		void cancelRedirect();

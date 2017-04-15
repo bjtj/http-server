@@ -49,7 +49,7 @@ namespace HTTP {
 		return port;
 	}
 	int Url::getIntegerPort() const {
-		return UTIL::Text::toInt(port);
+		return Text::toInt(port);
 	}
 	string Url::getPath() const {
 		return path;

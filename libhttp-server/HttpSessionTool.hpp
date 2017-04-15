@@ -17,9 +17,9 @@ namespace HTTP {
 			return request.getParameter("sessionId");
 		}
 
-        static UTIL::AutoRef<HttpSession> getSession(HttpRequest & request, HttpSessionManager & sessionManager) {
+        static OS::AutoRef<HttpSession> getSession(HttpRequest & request, HttpSessionManager & sessionManager) {
 			std::string sessionId = getSessionId(request);
-            UTIL::AutoRef<HttpSession> session = (sessionId.empty() ||
+            OS::AutoRef<HttpSession> session = (sessionId.empty() ||
 									 !sessionManager.hasSession(UTIL::Text::toInt(sessionId))) ?
 				sessionManager.createSession() : sessionManager.getSession(UTIL::Text::toInt(sessionId));
 		
@@ -30,7 +30,7 @@ namespace HTTP {
 			return session;
 		}
 
-        static std::string urlMan(const std::string & u, UTIL::AutoRef<HttpSession> session) {
+        static std::string urlMan(const std::string & u, OS::AutoRef<HttpSession> session) {
 			size_t f = u.find("?");
 			std::string path = (f == std::string::npos) ? u : u.substr(0, f);
 			std::string rest = (f == std::string::npos) ? "" : u.substr(f);

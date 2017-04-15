@@ -14,7 +14,7 @@ namespace HTTP {
 	 */
 	class Connection : public UTIL::Lifetime {
 	private:
-		UTIL::AutoRef<OS::Socket> _socket;
+		OS::AutoRef<OS::Socket> _socket;
 		bool terminateFlag;
 		bool _completed;
 		Packet _packet;
@@ -26,11 +26,11 @@ namespace HTTP {
         unsigned long _sendTryCount;
 
 	public:
-		Connection(UTIL::AutoRef<OS::Socket> socket);
-		Connection(UTIL::AutoRef<OS::Socket> socket, size_t packetSize);
+		Connection(OS::AutoRef<OS::Socket> socket);
+		Connection(OS::AutoRef<OS::Socket> socket, size_t packetSize);
 		virtual ~Connection();
 		int getId();
-		UTIL::AutoRef<OS::Socket> socket();
+		OS::AutoRef<OS::Socket> socket();
 		void registerSelector(OS::Selector & selector, unsigned char flags);
 		void unregisterSelector(OS::Selector & selector, unsigned char flags);
 		bool isReadable(OS::Selector & selector);

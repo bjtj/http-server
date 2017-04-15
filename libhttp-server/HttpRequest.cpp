@@ -75,11 +75,11 @@ namespace HTTP {
 		_header.parseQuery(data);
 	}
 	
-    UTIL::AutoRef<DataTransfer> HttpRequest::getTransfer() {
+    AutoRef<DataTransfer> HttpRequest::getTransfer() {
         return transfer;
     }
 	
-    void HttpRequest::setTransfer(UTIL::AutoRef<DataTransfer> transfer) {
+    void HttpRequest::setTransfer(AutoRef<DataTransfer> transfer) {
         this->transfer = transfer;
     }
 	

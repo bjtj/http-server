@@ -15,7 +15,7 @@ namespace HTTP {
 	private:
 		unsigned long id_idx;
 		unsigned long timeout;
-        std::vector< UTIL::AutoRef<HttpSession> > sessions;
+        std::vector< OS::AutoRef<HttpSession> > sessions;
 		OS::Semaphore sem;
 	private:
 		/* do not allow copy */
@@ -27,10 +27,10 @@ namespace HTTP {
 		void clear();
 		void removeOutdatedSessions();
 		bool hasSession(unsigned long id);
-		UTIL::AutoRef<HttpSession> getSession(unsigned long id);
-		UTIL::AutoRef<HttpSession> createSession();
+		OS::AutoRef<HttpSession> getSession(unsigned long id);
+		OS::AutoRef<HttpSession> createSession();
 		void destroySession(unsigned long id);
-		std::vector< UTIL::AutoRef<HttpSession> > & getSessions();
+		std::vector< OS::AutoRef<HttpSession> > & getSessions();
 	};
 }
 
