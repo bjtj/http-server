@@ -19,7 +19,7 @@ libhttp_serverinc_HEADERS = \
 	HttpAuth.hpp \
 	HttpCommunication.hpp \
 	HttpCommunicationMaker.hpp \
-	HttpEncoderDecoder.hpp \
+	UrlEncoderDecoder.hpp \
 	HttpException.hpp \
 	HttpHeader.hpp \
 	HttpHeaderParser.hpp \
@@ -80,8 +80,8 @@ libhttp_server_la_SOURCES = \
 	HttpCommunication.hpp \
 	HttpCommunicationMaker.cpp \
 	HttpCommunicationMaker.hpp \
-	HttpEncoderDecoder.cpp \
-	HttpEncoderDecoder.hpp \
+	UrlEncoderDecoder.cpp \
+	UrlEncoderDecoder.hpp \
 	HttpException.hpp \
 	HttpHeader.cpp \
 	HttpHeader.hpp \

@@ -1,4 +1,4 @@
-#include "HttpEncoderDecoder.hpp"
+#include "UrlEncoderDecoder.hpp"
 #include <liboslayer/Text.hpp>
 
 namespace HTTP {
@@ -13,13 +13,13 @@ namespace HTTP {
 	static string special = "@./\\-:";
 	static string known = num + hex + alpha + alphaBig + special;
 
-	HttpEncoder::HttpEncoder() {
+	UrlEncoder::UrlEncoder() {
 	}
 
-	HttpEncoder::~HttpEncoder() {
+	UrlEncoder::~UrlEncoder() {
 	}
 
-	string HttpEncoder::encode(const string & text) {
+	string UrlEncoder::encode(const string & text) {
 		
 		string ret;
 		size_t f = 0;
@@ -39,7 +39,7 @@ namespace HTTP {
 		return ret;
 	}
 
-	string HttpEncoder::toHexString(int ch) {
+	string UrlEncoder::toHexString(int ch) {
 		string hex = Text::toUpperHexString(ch);
 		if (hex.length() < 2) {
 			return "0" + hex;
@@ -51,13 +51,13 @@ namespace HTTP {
 	}
 
 
-	HttpDecoder::HttpDecoder() {
+	UrlDecoder::UrlDecoder() {
 	}
 
-	HttpDecoder::~HttpDecoder() {
+	UrlDecoder::~UrlDecoder() {
 	}
 
-	string HttpDecoder::decode(const string & text) {
+	string UrlDecoder::decode(const string & text) {
 
 		string ret;
 		size_t f = 0;
@@ -78,7 +78,7 @@ namespace HTTP {
 		return ret;
 	}
 
-	string HttpDecoder::decode_plus(const string & text) {
+	string UrlDecoder::decode_plus(const string & text) {
 		return Text::replaceAll(text, "+", " ");
 	}
 }

@@ -1,6 +1,6 @@
 #include <vector>
 #include "LispPage.hpp"
-#include "HttpEncoderDecoder.hpp"
+#include "UrlEncoderDecoder.hpp"
 #include "HttpSessionTool.hpp"
 #include <liboslayer/Iterator.hpp>
 #include <liboslayer/Logger.hpp>
@@ -53,7 +53,7 @@ namespace HTTP {
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
 				string txt = LISP::eval(env, scope, iter.next())->toString();
-				return HEAP_ALLOC(env, LISP::wrap_text(HttpEncoder::encode(txt)));
+				return HEAP_ALLOC(env, LISP::wrap_text(UrlEncoder::encode(txt)));
 			}
 		};
 		env.scope()->put_func("url-encode", HEAP_ALLOC(env, AutoRef<LISP::Procedure>(new Enc("url-encode"))));
@@ -65,7 +65,7 @@ namespace HTTP {
 			virtual ~Dec() {}
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
-				return HEAP_ALLOC(env, LISP::wrap_text(HttpDecoder::decode(LISP::eval(env, scope, iter.next())->toString())));
+				return HEAP_ALLOC(env, LISP::wrap_text(UrlDecoder::decode(LISP::eval(env, scope, iter.next())->toString())));
 			}
 		};
 		env.scope()->put_func("url-decode", HEAP_ALLOC(env, AutoRef<LISP::Procedure>(new Dec("url-decode"))));
