@@ -389,7 +389,7 @@ namespace HTTP {
 		vector<string> queries = Text::split(query, "&");
 		for (size_t i = 0; i < queries.size(); i++) {
 			KeyValue kv = parseKeyValue(queries[i]);
-			setParameter(kv.key(), UrlDecoder::decode(UrlDecoder::decode_plus(kv.value())));
+			setParameter(kv.key(), UrlDecoder::decode_plus(kv.value()));
 		}
 	}
 	

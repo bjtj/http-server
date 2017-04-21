@@ -101,7 +101,7 @@ public:
         if (!sink.nil()) {
 			dump = ((StringDataSink*)&sink)->data();
         } else {
-			throw Exception("sink->data() failed");
+			throw Exception("sink is nil");
 		}
     }
     virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
@@ -133,6 +133,8 @@ static DumpResponseHandler httpRequest(const Url & url, const string & method, c
 	client.setUrl(url);
 	client.setRequest(method, headers);
 	client.execute();
+
+	client.close();
 	
 	return handler;
 }
@@ -155,41 +157,49 @@ static DumpResponseHandler httpsRequest(const Url & url, const string & method, 
 	client.setUrl(url);
 	client.setRequest(method, headers);
 	client.execute();
+
+	client.close();
 	
 	return handler;
 }
 
 
 static void test_http_client() {
-	DumpResponseHandler handler = httpRequest("http://127.0.0.1:9999", "GET", LinkedStringMap());
+	
+	LinkedStringMap ext_headers;
+	
+	DumpResponseHandler handler = httpRequest("http://127.0.0.1:9999", "GET", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	ASSERT(handler.getDump(), ==, "method: GET\npath: /\n");
 
-	handler = httpRequest("http://127.0.0.1:9999", "SUBSCRIBE", LinkedStringMap());
+	handler = httpRequest("http://127.0.0.1:9999", "SUBSCRIBE", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	ASSERT(handler.getDump(), ==, "method: SUBSCRIBE\npath: /\n");
 
-	handler = httpRequest("http://127.0.0.1:9999", "UNSUBSCRIBE", LinkedStringMap());
+	handler = httpRequest("http://127.0.0.1:9999", "UNSUBSCRIBE", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	ASSERT(handler.getDump(), ==, "method: UNSUBSCRIBE\npath: /\n");
 
-	handler = httpRequest("http://127.0.0.1:9999/?a=A&b=B", "UNSUBSCRIBE", LinkedStringMap());
+	handler = httpRequest("http://127.0.0.1:9999/?a=A&b=B", "UNSUBSCRIBE", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	ASSERT(handler.getDump(), ==, "method: UNSUBSCRIBE\npath: /\n - a : A\n - b : B\n");
 
-	handler = httpRequest("http://127.0.0.1:9999/?b=B&a=A", "UNSUBSCRIBE", LinkedStringMap());
+	handler = httpRequest("http://127.0.0.1:9999/?b=B&a=A", "UNSUBSCRIBE", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	ASSERT(handler.getDump(), ==, "method: UNSUBSCRIBE\npath: /\n - a : A\n - b : B\n");
 }
 
 static void test_recv_timeout() {
-	DumpResponseHandler handler = httpRequest("http://127.0.0.1:9999/delay?timeout=500", "GET", LinkedStringMap());
+
+	LinkedStringMap ext_headers;
+	
+	DumpResponseHandler handler = httpRequest("http://127.0.0.1:9999/delay?timeout=500", "GET", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	cout << handler.getDump() << endl;
 
 	string err;
 	try {
-		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=2000", "GET", LinkedStringMap());
+		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=2000", "GET", ext_headers);
 	} catch (Exception & e) {
 		err = e.what();
 		cerr << e.what() << endl;
@@ -198,7 +208,7 @@ static void test_recv_timeout() {
 
 	err = "";
 	try {
-		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=3000", "GET", LinkedStringMap());
+		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=3000", "GET", ext_headers);
 	} catch (Exception & e) {
 		err = e.what();
 		cerr << e.what() << endl;
@@ -207,7 +217,10 @@ static void test_recv_timeout() {
 }
 
 static void test_https_client() {
-	DumpResponseHandler handler = httpsRequest("https://google.com", "GET", LinkedStringMap());
+
+	LinkedStringMap ext_headers;
+	
+	DumpResponseHandler handler = httpsRequest("https://google.com", "GET", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	cout << handler.getDump() << endl;
 }
@@ -222,6 +235,7 @@ int main(int argc, char *args[]) {
 	server.startAsync();
 
 	test_http_client();
+	idle(10); // TODO: check ; previous connection resist?
 	test_recv_timeout();
 	test_https_client();
 

@@ -10,8 +10,8 @@ namespace HTTP {
 	public:
 		UrlEncoder();
 		virtual ~UrlEncoder();
-
 		static std::string encode(const std::string & text);
+		static std::string encode_plus(const std::string & text);
 	private:
 		static std::string toHexString(int ch);
 	};
@@ -21,7 +21,6 @@ namespace HTTP {
 	public:
 		UrlDecoder();
 		virtual ~UrlDecoder();
-
 		static std::string decode(const std::string & text);
 		static std::string decode_plus(const std::string & text);
 	};

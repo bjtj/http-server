@@ -96,7 +96,7 @@ namespace HTTP {
 	}
     
     void AnotherHttpClient::reconnect() {
-        closeConnection();
+        close();
         connect();
     }
 	void AnotherHttpClient::connect() {
@@ -128,7 +128,7 @@ namespace HTTP {
         connection->registerSelector(selector, Selector::READ | Selector::WRITE);
         
 	}
-    void AnotherHttpClient::closeConnection() {
+    void AnotherHttpClient::close() {
         
         if (connection.nil()) {
             return;
@@ -215,7 +215,7 @@ namespace HTTP {
             }
 		}
 
-        closeConnection();
+        close();
 	}
     
     void AnotherHttpClient::communicate() {
@@ -249,7 +249,7 @@ namespace HTTP {
 
 	void AnotherHttpClient::clear() {
 
-        closeConnection();
+        close();
         
         request.clear();
         response.clear();
@@ -357,7 +357,7 @@ namespace HTTP {
         request.setPath(url.getPathAndQuery());
         request.setHost(url.getAddress());
         
-        closeConnection();
+        close();
     }
     
     void AnotherHttpClient::setFollowRedirect(bool followRedirect) {

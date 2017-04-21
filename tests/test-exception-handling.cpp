@@ -73,7 +73,7 @@ static void httpGet(const string & url, const LinkedStringMap & fields, OnHttpRe
 	client.setUrl(url);
 	client.setRequest("GET", fields);
 	client.execute();
-	client.closeConnection();
+	client.close();
 }
 
 /**

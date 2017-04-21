@@ -83,7 +83,7 @@ namespace HTTP {
 		void setDebug(bool debug);
         void reconnect();
 		void connect();
-        void closeConnection();
+        void close();
         void setUrl(const Url & url);
 		void setRequest(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields);
         void setRequestWithFixedTransfer(const std::string & method, const UTIL::LinkedStringMap & additionalHeaderFields, OS::AutoRef<DataTransfer> transfer, size_t size);
