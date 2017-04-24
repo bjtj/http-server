@@ -3,6 +3,7 @@
 
 #include <liboslayer/os.hpp>
 #include <liboslayer/AutoRef.hpp>
+#include <liboslayer/Semaphore.hpp>
 #include <vector>
 #include "HttpSession.hpp"
 
