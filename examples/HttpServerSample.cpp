@@ -136,6 +136,9 @@ public:
 		mimeTypes = MimeTypes::getMimeTypes();
 		basePath = config["static.base.path"];
 		indexName = config["dedicated.index.name"];
+        
+        // single lisp page
+        _lispPage.applyWeb();
 	}
 	
     virtual ~StaticHttpRequestHandler() {/* empty */}
