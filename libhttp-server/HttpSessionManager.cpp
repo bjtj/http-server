@@ -44,7 +44,7 @@ namespace HTTP {
 	}
 	
 	AutoRef<HttpSession> HttpSessionManager::getSession(unsigned long id) {
-		OS::AutoLock lock(Ref<Semaphore>(&sem));
+		OS::AutoLock lock((Ref<Semaphore>(&sem)));
 		for (vector< AutoRef<HttpSession> >::iterator iter = sessions.begin();
 			 iter != sessions.end(); iter++) {
 			if ((*iter)->getId() == id) {
@@ -55,7 +55,7 @@ namespace HTTP {
 	}
 	
 	AutoRef<HttpSession> HttpSessionManager::createSession() {
-        OS::AutoLock lock(Ref<Semaphore>(&sem));
+        OS::AutoLock lock((Ref<Semaphore>(&sem)));
 		AutoRef<HttpSession> session(new HttpSession(id_idx++));
 		session->setTimeout(timeout);
 		sessions.push_back(session);

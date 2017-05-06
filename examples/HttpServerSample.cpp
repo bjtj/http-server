@@ -251,7 +251,7 @@ public:
 	 * proc lisp page
 	 */
 	string procLispPage(HttpRequest & request, HttpResponse & response, AutoRef<HttpSession> session, const string & dump) {
-		AutoLock lock(Ref<Mutex>(&_mutex));
+		AutoLock lock((Ref<Mutex>(&_mutex)));
 		_lispPage.applyAuth(request, response);
 		_lispPage.applySession(session);
 		_lispPage.applyRequest(request);
