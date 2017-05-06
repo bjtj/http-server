@@ -10,6 +10,23 @@
 namespace HTTP {
 
 	/**
+	 * 
+	 */
+	class Range {
+	private:
+		size_t _from;
+		size_t _to;
+	public:
+		Range();
+		Range(size_t from, size_t to);
+		virtual ~Range();
+		size_t & from();
+		size_t & to();
+		size_t size() const;
+	};
+
+
+	/**
 	 * web server util
 	 */
 	class WebServerUtil {
@@ -21,7 +38,7 @@ namespace HTTP {
 		void setFileTransfer(HttpResponse & response, const std::string & filepath);
 		void setFileTransfer(HttpResponse & response, OS::File & file);
 		void setPartialFileTransfer(HttpRequest & request, HttpResponse & response, OS::File & file);
-		bool parseRange(const std::string & range, size_t & from, size_t & to);
+		Range parseRange(const std::string & range);
 	};
 }
 

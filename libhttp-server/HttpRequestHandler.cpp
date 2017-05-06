@@ -15,6 +15,7 @@ namespace HTTP {
 
 	HttpRequestHandler::HttpRequestHandler() {
 	}
+	
 	HttpRequestHandler::~HttpRequestHandler() {
 	}
 

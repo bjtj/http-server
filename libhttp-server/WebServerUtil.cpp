@@ -10,6 +10,23 @@ namespace HTTP {
 	using namespace std;
 	using namespace UTIL;
 
+	Range::Range() : _from(0), _to(0) {
+	}
+	Range::Range(size_t from, size_t to) : _from(from), _to(to) {
+	}
+	Range::~Range() {
+	}
+	size_t & Range::from() {
+		return _from;
+	}
+	size_t & Range::to() {
+		return _to;
+	}
+	size_t Range::size() const {
+		return _to - _from;
+	}
+	
+
 	WebServerUtil::WebServerUtil() {
 	}
 	WebServerUtil::~WebServerUtil() {
@@ -36,57 +53,52 @@ namespace HTTP {
 	}
 
 	void WebServerUtil::setPartialFileTransfer(HttpRequest & request, HttpResponse & response, OS::File & file) {
-		string range = request.getHeaderFieldIgnoreCase("Range");
-		if (range.empty()) {
+		string rangeParam = request.getHeaderFieldIgnoreCase("Range");
+		if (rangeParam.empty()) {
 			throw Exception("Range field empty");
 		}
-		size_t start;
-		size_t end;
-		if (parseRange(range, start, end) == false) {
-			throw Exception("Parse range failed");
-		}
+		Range range = parseRange(rangeParam);
 		if (file.getSize() < 1) {
 			throw Exception("Empty file");
 		}
-		if (end == 0 || end >= (size_t)file.getSize()) {
-			end = (size_t)file.getSize() - 1;
+		if (range.to() == 0 || range.to() >= (size_t)file.getSize()) {
+			range.to() = (size_t)file.getSize() - 1;
 		}
-		if (start >= end) {
-            throw Exception("Wrong range start error : end(" + Text::toString(end) +
-                            ") but start(" + Text::toString(start) + ")");
+		if (range.from() >= range.to()) {
+            throw Exception("Wrong range start error : end(" + Text::toString(range.to()) +
+                            ") but start(" + Text::toString(range.from()) + ")");
 		}
-		size_t size = (end - start + 1);
+		size_t size = (range.size() + 1);
 		FileStream stream(file, "rb");
-		stream.seek(start);
+		stream.seek(range.from());
 		AutoRef<DataSource> source(new FileDataSource(stream));
 		AutoRef<DataTransfer> transfer(new FixedTransfer(source, size, 10 * 1024));
 		response.setStatus(206);
 		response.setContentLength(size);
 		string bytes = "bytes=";
-		bytes.append(Text::toString(start));
+		bytes.append(Text::toString(range.from()));
 		bytes.append("-");
-		bytes.append(Text::toString(end));
+		bytes.append(Text::toString(range.to()));
 		bytes.append("/");
 		bytes.append(Text::toString(file.getSize()));
 		response.setHeaderField("Content-Range", bytes);
 		response.setTransfer(transfer);
 	}
 
-	bool WebServerUtil::parseRange(const string & range, size_t & from, size_t & to) {
+	Range WebServerUtil::parseRange(const string & range) {
 		if (range.empty()) {
-			return false;
+			throw Exception("empty string");
 		}
 		size_t s = range.find("=");
 		if (s == string::npos) {
-			return false;
+			throw Exception("'=' is missing");
 		}
 		size_t f = range.find("-", s + 1);
 		if (f == string::npos) {
-			return false;
+			throw Exception("'-' is missing");
 		}
-		from = (size_t)Text::toLong(range.substr(s + 1, f));
-		to = (size_t)Text::toLong(range.substr(f + 1));
-		return true;
+		return Range((size_t)Text::toLong(range.substr(s + 1, f)),
+					 (size_t)Text::toLong(range.substr(f + 1)));
 	}
 
 }

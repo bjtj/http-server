@@ -1,5 +1,6 @@
 #include "SimpleHttpRequestHandlerDispatcher.hpp"
 #include <algorithm>
+#include <liboslayer/AutoLock.hpp>
 
 namespace HTTP {
 
@@ -18,13 +19,13 @@ namespace HTTP {
 	}
 
 	void SimpleHttpRequestHandlerDispatcher::registerRequestHandler(const string & pattern, AutoRef<HttpRequestHandler> handler) {
-		AutoLock _lock(sem);
+		AutoLock _lock(Ref<Semaphore>(&sem));
 		handlers.push_back(RequestHandlerNode(pattern, handler));
 		sort(handlers.begin(), handlers.end(), _fn_sort_desc);
 	}
 
 	void SimpleHttpRequestHandlerDispatcher::unregisterRequestHandler(const string & pattern) {
-		AutoLock _lock(sem);
+		AutoLock _lock(Ref<Semaphore>(&sem));
 		for (vector<RequestHandlerNode>::iterator iter = handlers.begin(); iter != handlers.end();) {
 			RequestHandlerNode & node = *iter;
 			if (node.equalsPattern(pattern)) {
@@ -36,7 +37,7 @@ namespace HTTP {
 	}
 
 	AutoRef<HttpRequestHandler> SimpleHttpRequestHandlerDispatcher::getRequestHandler(const string & path) {
-		AutoLock _lock(sem);
+		AutoLock _lock(Ref<Semaphore>(&sem));
 		for (vector<RequestHandlerNode>::iterator iter = handlers.begin(); iter != handlers.end(); iter++) {
 			RequestHandlerNode & node = *iter;
 			if (node.patternMatch(path)) {

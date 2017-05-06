@@ -18,6 +18,10 @@ namespace HTTP {
 	using namespace UTIL;
 
 	static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
+
+	static string escapeText(const string & txt) {
+		return Text::replaceAll(Text::replaceAll(txt, "\\", "\\\\"), "\"", "\\\"");
+	}
 	
 	LispPage::LispPage() {
 		LISP::native(_env);
@@ -261,15 +265,12 @@ namespace HTTP {
 	string LispPage::parseLispPage(LISP::Env & env, const string & src) {
 		size_t f = 0;
 		size_t s = 0;
-		if (env.scope()->rsearch_sym("*content*").nil()) {
-			env.scope()->put_sym("*content*", HEAP_ALLOC(env, LISP::wrap_text("")));
-		}
+		compile(env, "(defparameter *content* \"\")");
 		try {
 			while ((f = src.find("<%", f)) != string::npos) {
 				if (f - s > 0) {
 					string txt = src.substr(s, f - s);
-					_VAR content = env.scope()->rget_sym("*content*");
-					env.scope()->rput_sym("*content*", HEAP_ALLOC(env, LISP::wrap_text(content->toString() + txt)));
+					compile(env, "(setq *content* (string-append *content* " + LISP::wrap_text(escapeText(txt)) + "))");
 				}
 				size_t e = src.find("%>", f);
 				string code = src.substr(f + 2, e - (f + 2));
@@ -297,8 +298,7 @@ namespace HTTP {
 			}
 			if (s < src.length()) {
 				string txt = src.substr(s);
-				_VAR content = env.scope()->rget_sym("*content*");
-				env.scope()->rput_sym("*content*", HEAP_ALLOC(env, LISP::wrap_text(content->toString() + txt)));
+				compile(env, "(setq *content* (string-append *content* " + LISP::wrap_text(escapeText(txt)) + "))");
 			}
 		} catch (LISP::ExitLispException e) {
 			// exit by code

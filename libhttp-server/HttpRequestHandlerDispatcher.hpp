@@ -12,7 +12,6 @@ namespace HTTP {
 	class HttpRequestHandlerDispatcher {
 	private:
 	public:
-
 		HttpRequestHandlerDispatcher() {}
 		virtual ~HttpRequestHandlerDispatcher() {}
 		virtual void registerRequestHandler(const std::string & pattern, OS::AutoRef<HttpRequestHandler> handler) = 0;

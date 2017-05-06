@@ -2,6 +2,7 @@
 #include <liboslayer/SecureSocket.hpp>
 #include <liboslayer/FileStream.hpp>
 #include <liboslayer/AutoRef.hpp>
+#include <liboslayer/AutoLock.hpp>
 #include <liboslayer/Logger.hpp>
 #include <liboslayer/Properties.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
@@ -115,6 +116,8 @@ private:
 	string indexName;
 	map<string, string> mimeTypes;
     map<string, string> lspMemCache;
+	LispPage _lispPage;
+	Mutex _mutex;
 public:
 	StaticHttpRequestHandler(const ServerConfig & config, const string & prefix)
 		: dedicated(false), config(config), prefix(prefix)
@@ -122,6 +125,9 @@ public:
 		mimeTypes = MimeTypes::getMimeTypes();
 		basePath = config["static.base.path"];
 		indexName = config["index.name"];
+
+		// single lisp page
+		_lispPage.applyWeb();
 	}
 
 	StaticHttpRequestHandler(bool dedicated, const ServerConfig & config, const string & prefix)
@@ -245,14 +251,13 @@ public:
 	 * proc lisp page
 	 */
 	string procLispPage(HttpRequest & request, HttpResponse & response, AutoRef<HttpSession> session, const string & dump) {
-		LispPage page;
-		page.applyWeb();
-		page.applyAuth(request, response);
-		page.applySession(session);
-		page.applyRequest(request);
-		page.applyResponse(response);
+		AutoLock lock(Ref<Mutex>(&_mutex));
+		_lispPage.applyAuth(request, response);
+		_lispPage.applySession(session);
+		_lispPage.applyRequest(request);
+		_lispPage.applyResponse(response);
 		unsigned long tick = tick_milli();
-		string content = page.parseLispPage(dump);
+		string content = _lispPage.parseLispPage(dump);
 		logger->logd(Text::format(" ** parsing : %ld ms.", tick_milli() - tick));
 		return content;
 	}

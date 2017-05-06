@@ -47,7 +47,7 @@ namespace HTTP {
 						 ", work : " + Text::toString(cm.working()));
 			
 			string content = "<html><head><title>Not available</title></head>"
-				"<body><h1>Too much connection</h1><p>Try again</p></body></html>";
+				"<body><h1>Too many connections</h1><p>Try again</p></body></html>";
 			string header = "HTTP/1.1 503 Service Not Available\r\nContent-Length: " +
 				Text::toString(content.size()) + "\r\nContent-Type: text/html\r\n\r\n";
 			connection->send(header.c_str(), header.size());

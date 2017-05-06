@@ -12,11 +12,10 @@ using namespace HTTP;
 static void test_lisp_page() {
 	LispPage page;
 	string content;
-	
 	content = page.parseLispPage("<% (setq *content* \"\") (setq *content* (string-append *content* \"hello\"))\n(setq *content* (string-append\n*content*\n\" world\"))  %>");
 	ASSERT(content, ==, "hello world");
 	content = page.parseLispPage("<% (setq *content* (string-append\n*content*\n\"hello world\")) %>");
-	ASSERT(content, ==, "hello worldhello world");
+	ASSERT(content, ==, "hello world");
 }
 
 static void test_apply_properties() {
