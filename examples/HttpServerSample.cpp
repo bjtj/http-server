@@ -169,7 +169,9 @@ public:
 		string path = request.getPath();
 		path = path.substr(prefix.size());
 		if (path.empty()) {
-			path = "/";
+			AutoRef<HttpSession> session = HttpSessionTool::getSession(request, sessionManager);
+			redirect(config, request, response, session, prefix.substr(1) + "/");
+			return;
 		}
 		string log = Text::format("| %s:%d | STATIC | %s '%s'",
 								  request.getRemoteAddress().getHost().c_str(),
