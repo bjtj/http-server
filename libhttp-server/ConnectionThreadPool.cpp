@@ -11,20 +11,21 @@ namespace HTTP {
 	static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
 
 	/**
-	 * @brief ConnectionThread
+	 * @brief ConnectionTask
 	 */
 
-	ConnectionThread::ConnectionThread() {
+	ConnectionTask::ConnectionTask(AutoRef<Connection> connection, AutoRef<Communication> communication) {
+		setConnection(connection, communication);
 	}
-	ConnectionThread::~ConnectionThread() {
+	ConnectionTask::~ConnectionTask() {
 	}
 
-	void ConnectionThread::setConnection(AutoRef<Connection> connection, AutoRef<Communication> communication) {
+	void ConnectionTask::setConnection(AutoRef<Connection> connection, AutoRef<Communication> communication) {
 		this->connection = connection;
 		this->communication = communication;
 	}
 
-	void ConnectionThread::onTask() {
+	void ConnectionTask::onTask() {
 		try {
 			connectionTask();
 		} catch (NullException & e) {
@@ -32,16 +33,16 @@ namespace HTTP {
 		}
 	}
 
-	AutoRef<Connection> ConnectionThread::getConnection() {
+	AutoRef<Connection> ConnectionTask::getConnection() {
 		return connection;
 	}
 
-	void ConnectionThread::connectionTask() {
+	void ConnectionTask::connectionTask() {
 		connection->registerSelector(selector, Selector::READ | Selector::WRITE);
 		try {
 			connection->negotiate();
             communication->onConnected(connection);
-            while (!interrupted() && !connection->isTerminateFlaged()) {
+            while (!isCanceled() && !connection->isTerminateFlaged()) {
 				testReceiveTimeout();
                 if (selector.select(1000) > 0) {
                     if (doReceive() == false && doWrite() == false) {
@@ -66,13 +67,13 @@ namespace HTTP {
 		communication = NULL;
 	}
 
-	void ConnectionThread::testReceiveTimeout() {
+	void ConnectionTask::testReceiveTimeout() {
 		if (connection->expiredRecvTimeout()) {
 			throw IOException("recv timeout");
 		}
 	}
 
-	bool ConnectionThread::doReceive() {
+	bool ConnectionTask::doReceive() {
 		bool proc = false;
 		if (connection->isReadable(selector)) {
 			do {
@@ -84,7 +85,7 @@ namespace HTTP {
 		return proc;
 	}
 
-	bool ConnectionThread::doWrite() {
+	bool ConnectionTask::doWrite() {
 		bool proc = false;
 		if (connection->isWritable(selector)) {
 			if (communication->onWriteable(connection)) {
@@ -94,50 +95,26 @@ namespace HTTP {
 		return proc;
 	}
 
-	bool ConnectionThread::closing() {
+	bool ConnectionTask::closing() {
 		return (connection->isClosed() || communication->isCommunicationCompleted());
 	}
-
-	/**
-	 * @brief ConnectionThreadInstanceCreator
-	 */
-
-	class ConnectionThreadInstanceCreator : public InstanceCreator<StatefulThread*> {
-	private:
-	public:
-		ConnectionThreadInstanceCreator() {
-		}
-		virtual ~ConnectionThreadInstanceCreator() {
-		}
-		virtual StatefulThread * createInstance() {
-			return new ConnectionThread;
-		}
-
-		virtual void releaseInstance(StatefulThread * inst) {
-			delete inst;
-		}
-	};
-
-	static ConnectionThreadInstanceCreator instanceCreator;
-
-
 
 	/**
 	 * @brief ConnectionThreadPool
 	 */
 
-	ConnectionThreadPool::ConnectionThreadPool(size_t maxThreads) : ThreadPool(maxThreads, instanceCreator)  {
+	ConnectionThreadPool::ConnectionThreadPool(size_t maxThreads) : ThreadPool(maxThreads)  {
 	}
 
 	ConnectionThreadPool::~ConnectionThreadPool() {
 	}
 
 	void ConnectionThreadPool::createConnection(AutoRef<Communication> communication, AutoRef<Connection> connection) {
-		ConnectionThread * thread = (ConnectionThread *)acquire();
+		StatefulThread * thread = acquire();
 		if (thread == NULL) {
 			throw Exception("ConnectionThreadPool error - no thread available");
 		}
-		thread->setConnection(connection, communication);
+		thread->task() = AutoRef<Task>(new ConnectionTask(connection, communication));
 		enqueue(thread);
 	}
 }

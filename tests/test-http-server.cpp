@@ -176,15 +176,12 @@ public:
 		id = idx++;
 	}
 	virtual ~SynchronizedHttpClientTask() {}
-	virtual void doTask() {
-
+	virtual void onTask() {
 		latch.await();
-		
 		DumpResponseHandler handler;
 		cout << "[" << id << "] http get" << endl;
 		httpGet(url, &handler);
 		cout << "[" << id << "] " << handler.getResponseHeader().getStatusCode() << endl;
-
 		doneLatch.countDown();
 	}
 };

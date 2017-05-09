@@ -161,8 +161,7 @@ namespace HTTP {
 	}
 
 	void ConnectionManager::onUpdate(Observable * target) {
-		ConnectionThread * t = (ConnectionThread*)target;
-		onDisconnect(t->getConnection());
+		onDisconnect(((ConnectionTask*)&((StatefulThread*)target)->task())->getConnection());
 	}
 
 	void ConnectionManager::handleMaxCapacity(AutoRef<Connection> connection) {

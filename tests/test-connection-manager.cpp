@@ -106,7 +106,7 @@ public:
 		public:
 			NormalVisitorTask(CountDownLatch & doneSignal, InetAddress remoteAddr) : doneSignal(doneSignal), remoteAddr(remoteAddr) {}
 			virtual ~NormalVisitorTask() {}
-			virtual void doTask() {
+			virtual void onTask() {
 				Socket sock(remoteAddr);
 				sock.connect();
 				sock.close();
@@ -160,7 +160,7 @@ public:
 		public:
 			EchoVisitorTask(CountDownLatch & doneSignal, InetAddress remoteAddr) : doneSignal(doneSignal), remoteAddr(remoteAddr) {}
 			virtual ~EchoVisitorTask() {}
-			virtual void doTask() {
+			virtual void onTask() {
 				Socket sock(remoteAddr);
 				sock.connect();
 				string say = "yeah!";
@@ -223,7 +223,7 @@ public:
 		public:
 			EchoVisitorTask(int id, CountDownLatch & doneSignal, InetAddress remoteAddr) : id(id), doneSignal(doneSignal), remoteAddr(remoteAddr) {}
 			virtual ~EchoVisitorTask() {}
-			virtual void doTask() {
+			virtual void onTask() {
 				Socket sock(remoteAddr);
 				sock.connect();
 				try {

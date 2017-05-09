@@ -5,6 +5,7 @@
 #include <liboslayer/AutoLock.hpp>
 #include <liboslayer/Logger.hpp>
 #include <liboslayer/Properties.hpp>
+#include <liboslayer/Pool.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/HttpSessionManager.hpp>
 #include <libhttp-server/HttpSessionTool.hpp>
@@ -116,29 +117,34 @@ private:
 	string indexName;
 	map<string, string> mimeTypes;
     map<string, string> lspMemCache;
-	LispPage _lispPage;
-	Mutex _mutex;
+	Pool<LispPage> lspPool;
 public:
 	StaticHttpRequestHandler(const ServerConfig & config, const string & prefix)
-		: dedicated(false), config(config), prefix(prefix)
+		: dedicated(false), config(config), prefix(prefix), lspPool(config.getIntegerProperty("thread.count", 50))
 	{
 		mimeTypes = MimeTypes::getMimeTypes();
 		basePath = config["static.base.path"];
 		indexName = config["index.name"];
 
-		// single lisp page
-		_lispPage.applyWeb();
+		// lisp page pool
+		deque<LispPage*> qu = lspPool.avail_queue();
+		for (deque<LispPage*>::iterator iter = qu.begin(); iter != qu.end(); iter++) {
+			(*iter)->applyWeb();
+		}
 	}
 
 	StaticHttpRequestHandler(bool dedicated, const ServerConfig & config, const string & prefix)
-		: dedicated(dedicated), config(config), prefix(prefix)
+		: dedicated(dedicated), config(config), prefix(prefix), lspPool(config.getIntegerProperty("thread.count", 50))
 	{
 		mimeTypes = MimeTypes::getMimeTypes();
 		basePath = config["static.base.path"];
 		indexName = config["dedicated.index.name"];
         
-        // single lisp page
-        _lispPage.applyWeb();
+        // lisp page pool
+		deque<LispPage*> qu = lspPool.avail_queue();
+		for (deque<LispPage*>::iterator iter = qu.begin(); iter != qu.end(); iter++) {
+			(*iter)->applyWeb();
+		}
 	}
 	
     virtual ~StaticHttpRequestHandler() {/* empty */}
@@ -256,15 +262,26 @@ public:
 	 * proc lisp page
 	 */
 	string procLispPage(HttpRequest & request, HttpResponse & response, AutoRef<HttpSession> session, const string & dump) {
-		AutoLock lock((Ref<Mutex>(&_mutex)));
-		_lispPage.applyAuth(request, response);
-		_lispPage.applySession(session);
-		_lispPage.applyRequest(request);
-		_lispPage.applyResponse(response);
-		unsigned long tick = tick_milli();
-		string content = _lispPage.parseLispPage(dump);
-		logger->logd(Text::format(" ** parsing : %ld ms.", tick_milli() - tick));
-		return content;
+
+		LispPage * page = lspPool.acquire();
+		if (page == NULL) {
+			throw Exception("no available lisp page processor");
+		}
+
+		try {
+			page->applyAuth(request, response);
+			page->applySession(session);
+			page->applyRequest(request);
+			page->applyResponse(response);
+			unsigned long tick = tick_milli();
+			string content = page->parseLispPage(dump);
+			logger->logd(Text::format(" ** parsing : %ld ms.", tick_milli() - tick));
+			lspPool.release(page);
+			return content;
+		} catch (Exception e) {
+			lspPool.release(page);
+			throw e;
+		}
 	}
 
 	/**

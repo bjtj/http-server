@@ -10,17 +10,17 @@
 namespace HTTP {
 
 	/**
-	 * @brief ConnectionThread
+	 * @brief ConnectionTask
 	 */
-	class ConnectionThread : public UTIL::StatefulThread {
+	class ConnectionTask : public UTIL::Task {
 	private:
 		OS::AutoRef<Connection> connection;
 		OS::AutoRef<Communication> communication;
         OS::Selector selector;
 
 	public:
-		ConnectionThread();
-		virtual ~ConnectionThread();
+		ConnectionTask(OS::AutoRef<Connection> connection, OS::AutoRef<Communication> communication);
+		virtual ~ConnectionTask();
 		void setConnection(OS::AutoRef<Connection> connection, OS::AutoRef<Communication> communication);
 		OS::AutoRef<Connection> getConnection();
 		virtual void onTask();
