@@ -248,6 +248,7 @@ namespace HTTP {
 	bool LispPage::compile(LISP::Env & env, const string & line) {
 		try {
 			LISP::compile(env, line);
+			env.gc();
 		} catch (LISP::ExitLispException e) {
 			throw e;
 		} catch (OS::Exception & e) {
