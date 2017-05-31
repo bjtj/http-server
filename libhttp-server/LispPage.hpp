@@ -33,6 +33,7 @@ namespace HTTP {
 		static void applyResponse(LISP::Env & env, HttpResponse & response);
 		static void applyLoadPage(LISP::Env & env);
 		static bool compile(LISP::Env & env, const std::string & line);
+		static std::string convertLispPageToCode(const std::string & src);
 		static std::string parseLispPage(LISP::Env & env, const std::string & src);
 	};
 }

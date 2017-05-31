@@ -263,48 +263,64 @@ namespace HTTP {
 	string LispPage::parseLispPage(const string & src) {
 		return parseLispPage(_env, src);
 	}
-	string LispPage::parseLispPage(LISP::Env & env, const string & src) {
-		size_t f = 0;
-		size_t s = 0;
-		compile(env, "(defparameter *content* \"\")");
-		try {
-			while ((f = src.find("<%", f)) != string::npos) {
-				if (f - s > 0) {
-					string txt = src.substr(s, f - s);
-					compile(env, "(setq *content* (string-append *content* " + LISP::wrap_text(escapeText(txt)) + "))");
-				}
-				size_t e = src.find("%>", f);
-				string code = src.substr(f + 2, e - (f + 2));
-				if (*code.begin() == '=') {
-					// print
-					string line = Text::trim(code.substr(1));
-					line = "(setq *content* (string-append *content* " + line + "))";
-					compile(env, line);
-				} else {
-					// code
-					vector<string> lines = Text::split(code, "\n");
-					LISP::BufferedCommandReader reader;
-					for (vector<string>::iterator iter = lines.begin(); iter != lines.end(); iter++) {
-						string line = *iter;
-						if (!line.empty() && reader.read(line + " ") > 0) {
-							vector<string> commands = reader.getCommands();
-							for (vector<string>::iterator cmd = commands.begin(); cmd != commands.end(); cmd++) {
-								compile(env, *cmd);
-							}
-							reader.clearCommands();
-						}
-					}
-				}
-				s = f = e + 2;
+	string LispPage::convertLispPageToCode(const string & src) {
+		vector<string> parts;
+		size_t s = src.find("<%");
+		size_t e = 0;
+		while (s != string::npos) {
+			string txt = src.substr(e, s - e);
+			if (txt.empty() == false) {
+				parts.push_back(txt);
 			}
-			if (s < src.length()) {
-				string txt = src.substr(s);
-				compile(env, "(setq *content* (string-append *content* " + LISP::wrap_text(escapeText(txt)) + "))");
+			e = src.find("%>", s + 2);
+			if (e == string::npos) {
+				throw Exception("format error - code block requires end tag '%>'");
+			}
+			string code = src.substr(s, e + 2 - s);
+			parts.push_back(code);
+			e += 2;
+			s = src.find("<%", e);
+		}
+		if (e < src.size()) {
+			parts.push_back(src.substr(e));
+		}
+		string ret;
+		for (size_t i = 0; i < parts.size(); i++) {
+			if (Text::startsWith(parts[i], "<%=")) {
+				ret.append("(setq *content* (string-append *content* ");
+				string p = parts[i].substr(3, parts[i].size() - 5);
+				ret.append(p);
+				ret.append("))");
+			} else if (Text::startsWith(parts[i], "<%")) {
+				string p = parts[i].substr(2, parts[i].size() - 4);
+				ret.append(p);
+			} else {
+				ret.append("(setq *content* (string-append *content* \"");
+				string p = escapeText(parts[i]);
+				ret.append(p);
+				ret.append("\"))");
+			}
+		}
+		return ret;
+	}
+
+	string LispPage::parseLispPage(LISP::Env & env, const string & src) {
+
+		compile(env, "(defparameter *content* \"\")");
+		
+		LISP::BufferedCommandReader reader;
+		reader.read(convertLispPageToCode(src));
+		vector<string> commands = reader.getCommands();
+		try {
+			for (vector<string>::iterator cmd = commands.begin(); cmd != commands.end(); cmd++) {
+				compile(env, *cmd);
 			}
 		} catch (LISP::ExitLispException e) {
-			// exit by code
 			logger->logd("[LispPage - (quit)]");
 		}
+		reader.clearCommands();
+
 		return env.scope()->rget_sym("*content*")->toString();
 	}
+	
 }
