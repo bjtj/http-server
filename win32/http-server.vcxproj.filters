@@ -72,9 +72,6 @@
     <ClInclude Include="..\libhttp-server\AnotherHttpClient.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\libhttp-server\HttpEncoderDecoder.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\libhttp-server\HttpServerConfig.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -115,6 +112,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\libhttp-server\HttpAuth.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\Cookie.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\HttpCommunication.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\HttpCommunicationMaker.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\HttpException.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\HttpRequestHandler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\HttpRequestHandlerDispatcher.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\SimpleHttpRequestHandlerDispatcher.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\UrlEncoderDecoder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\WebServerUtil.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -176,9 +200,6 @@
     <ClCompile Include="..\libhttp-server\AnotherHttpClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\libhttp-server\HttpEncoderDecoder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\libhttp-server\HttpSession.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -198,6 +219,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\libhttp-server\HttpAuth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\Cookie.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\HttpCommunication.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\HttpCommunicationMaker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\HttpRequestHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\SimpleHttpRequestHandlerDispatcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\UrlEncoderDecoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\WebServerUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

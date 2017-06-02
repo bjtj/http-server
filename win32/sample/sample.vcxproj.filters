@@ -18,10 +18,13 @@
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\examples\AnotherHttpServerFileBrowseTest.cpp">
+    <ClCompile Include="netcmd.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="netcmd.cpp">
+    <ClCompile Include="..\..\examples\HttpServerSample.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\examples\SimpleConnectionManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
