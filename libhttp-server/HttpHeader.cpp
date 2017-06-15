@@ -15,7 +15,7 @@ namespace HTTP {
 	HttpHeader::HttpHeader() {
 	}
 	
-	HttpHeader::HttpHeader(std::string part1, std::string part2, std::string part3) {
+	HttpHeader::HttpHeader(const string & part1, const string & part2, const string & part3) {
 		setParts(part1, part2, part3);
 	}
 	
@@ -42,17 +42,17 @@ namespace HTTP {
 		fields.clear();
 	}
 
-	void HttpHeader::setFirstLine(string & firstline) {
+	void HttpHeader::setFirstLine(const string & firstline) {
 		this->firstline = firstline;
 	}
 	
-	void HttpHeader::setParts(vector<string> & parts) {
+	void HttpHeader::setParts(const vector<string> & parts) {
 		setPart1(parts[0]);
 		setPart2(parts[1]);
 		setPart3(parts[2]);
 	}
 	
-	void HttpHeader::setParts(std::string part1, std::string part2, std::string part3) {
+	void HttpHeader::setParts(const string & part1, const string & part2, const string & part3) {
 		setPart1(part1);
 		setPart2(part2);
 		setPart3(part3);
@@ -82,11 +82,11 @@ namespace HTTP {
 		part3 = part;
 	}
 	
-	bool HttpHeader::hasHeaderField(const std::string & name) const {
+	bool HttpHeader::hasHeaderField(const string & name) const {
 		return fields.contains(name);
 	}
 	
-    string HttpHeader::getHeaderField(const std::string & name) const {
+    string HttpHeader::getHeaderField(const string & name) const {
 		for (size_t i = 0; i < fields.size(); i++) {
 			if (fields[i].name() == name) {
 				return fields[i].obj().first("");
@@ -95,7 +95,7 @@ namespace HTTP {
 		return "";
     }
 	
-	bool HttpHeader::hasHeaderFieldIgnoreCase(const std::string & name) const {
+	bool HttpHeader::hasHeaderFieldIgnoreCase(const string & name) const {
 		for (size_t i = 0; i < fields.size(); i++) {
 			if (Text::equalsIgnoreCase(fields[i].name(), name)) {
 				return true;
@@ -121,19 +121,19 @@ namespace HTTP {
 		return Text::toInt(getHeaderFieldIgnoreCase(name));
 	}
 	
-	void HttpHeader::setHeaderField(string name, string value) {
+	void HttpHeader::setHeaderField(const string & name, const string & value) {
 		fields[name].clearSet(value);
 	}
 	
-	void HttpHeader::setHeaderField(string name, StringList value) {
+	void HttpHeader::setHeaderField(const string & name, const StringList & value) {
 		fields[name] = value;
 	}
 	
-	void HttpHeader::setHeaderField(string name, vector<string> value) {
+	void HttpHeader::setHeaderField(const string & name, const vector<string> & value) {
 		fields[name] = value;
 	}
 	
-	void HttpHeader::setHeaderFields(map<string, string> & fields) {
+	void HttpHeader::setHeaderFields(const map<string, string> & fields) {
 		this->fields = fields;
 	}
 
@@ -202,7 +202,7 @@ namespace HTTP {
 		}
 	}
 	
-    void HttpHeader::setConnection(const std::string & connection) {
+    void HttpHeader::setConnection(const string & connection) {
         setHeaderField("Connection", connection);
     }
     
@@ -424,7 +424,7 @@ namespace HTTP {
 		}
 	}
 
-    void HttpRequestHeader::setHost(const std::string & host) {
+    void HttpRequestHeader::setHost(const string & host) {
         setHeaderField("Host", host);
     }
 
@@ -478,10 +478,10 @@ namespace HTTP {
 	void HttpResponseHeader::setStatusCode(int statusCode) {
 		setPart2(Text::toString(statusCode));
 	}
-	std::string HttpResponseHeader::getStatusString() const {
+	string HttpResponseHeader::getStatusString() const {
 		return getPart3();
 	}
-	void HttpResponseHeader::setStatusString(const std::string & message)  {
+	void HttpResponseHeader::setStatusString(const string & message)  {
 		setPart3(message);
 	}
     bool HttpResponseHeader::isRedirectionStatus() {

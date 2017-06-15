@@ -24,14 +24,14 @@ namespace HTTP {
 		UTIL::LinkedStringListMap fields;
 	public:
 		HttpHeader();
-		HttpHeader(std::string part1, std::string part2, std::string part3);
+		HttpHeader(const std::string & part1, const std::string & part2, const std::string & part3);
 		virtual ~HttpHeader();
 		std::string makeFirstLine() const;
 		virtual void clear();
 		virtual void setHeader(const HttpHeader & other);
-		virtual void setFirstLine(std::string & firstline);
-		virtual void setParts(std::vector<std::string> & parts);
-		virtual void setParts(std::string part1, std::string part2, std::string part3);
+		virtual void setFirstLine(const std::string & firstline);
+		virtual void setParts(const std::vector<std::string> & parts);
+		virtual void setParts(const std::string & part1, const std::string & part2, const std::string & part3);
 		virtual std::string getPart1() const;
 		virtual std::string getPart2() const;
 		virtual std::string getPart3() const;
@@ -44,10 +44,10 @@ namespace HTTP {
 		virtual std::string getHeaderFieldIgnoreCase(const std::string & name) const;
 		virtual int getHeaderFieldAsInteger(std::string name) const;
 		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name) const;
-		virtual void setHeaderField(std::string name, std::string value);
-		virtual void setHeaderField(std::string name, UTIL::StringList value);
-		virtual void setHeaderField(std::string name, std::vector<std::string> value);
-		virtual void setHeaderFields(std::map<std::string, std::string> & fields);
+		virtual void setHeaderField(const std::string & name, const std::string & value);
+		virtual void setHeaderField(const std::string & name, const UTIL::StringList & value);
+		virtual void setHeaderField(const std::string & name, const std::vector<std::string> & value);
+		virtual void setHeaderFields(const std::map<std::string, std::string> & fields);
 		virtual void appendHeaderField(const std::string & name, const std::string & value);
 		virtual void appendHeaderFields(const UTIL::LinkedStringMap & fields);
 		virtual void appendHeaderFields(const std::map<std::string, std::string> & fields);
@@ -81,11 +81,11 @@ namespace HTTP {
 		virtual ~HttpHeaderDelegator() {}
 		virtual void clear()
 			{_header.clear();}
-		virtual void setFirstLine(std::string & firstline)
+		virtual void setFirstLine(const std::string & firstline)
 			{_header.setFirstLine(firstline);}
-		virtual void setParts(std::vector<std::string> & parts)
+		virtual void setParts(const std::vector<std::string> & parts)
 			{_header.setParts(parts);}
-		virtual void setParts(std::string part1, std::string part2, std::string part3)
+		virtual void setParts(const std::string & part1, const std::string & part2, const std::string & part3)
 			{_header.setParts(part1, part2, part3);}
 		virtual std::string getPart1() const
 			{return _header.getPart1();}
@@ -107,17 +107,17 @@ namespace HTTP {
 			{return _header.hasHeaderFieldIgnoreCase(name);}
 		virtual std::string getHeaderFieldIgnoreCase(const std::string & name) const
 			{return _header.getHeaderFieldIgnoreCase(name);}
-		virtual int getHeaderFieldAsInteger(std::string name) const
+		virtual int getHeaderFieldAsInteger(const std::string & name) const
 			{return _header.getHeaderFieldAsInteger(name);}
 		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name) const
 			{return _header.getHeaderFieldIgnoreCaseAsInteger(name);}
-		virtual void setHeaderField(std::string name, std::string value)
+		virtual void setHeaderField(const std::string & name, const std::string & value)
 			{_header.setHeaderField(name, value);}
-		virtual void setHeaderField(std::string name, UTIL::StringList value)
+		virtual void setHeaderField(const std::string & name, const UTIL::StringList & value)
 			{_header.setHeaderField(name, value);}
-		virtual void setHeaderField(std::string name, std::vector<std::string> value)
+		virtual void setHeaderField(const std::string & name, const std::vector<std::string> & value)
 			{_header.setHeaderField(name, value);}
-		virtual void setHeaderFields(std::map<std::string, std::string> & fields)
+		virtual void setHeaderFields(const std::map<std::string, std::string> & fields)
 			{_header.setHeaderFields(fields);}
 		virtual void appendHeaderField(const std::string & name, const std::string & value)
 			{_header.appendHeaderField(name, value);}
