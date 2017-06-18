@@ -39,20 +39,6 @@ namespace HTTP {
     };
     
 	/**
-	 * @brief ConnectionMaker
-	 */
-    
-    class ConnectionMaker {
-    private:
-    public:
-        
-        ConnectionMaker() {}
-        virtual ~ConnectionMaker() {}
-        
-        virtual Connection * makeConnection() = 0;
-    };
-    
-	/**
 	 * @brief CommunicationMaker
 	 */
 

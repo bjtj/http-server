@@ -25,7 +25,6 @@ namespace HTTP {
 
 		void clear();
 		bool complete();
-		int cutEndPos();
 		void append(const char * data, size_t size);
 		size_t read(const char * data, size_t size);
 		bool parse();
