@@ -117,10 +117,7 @@ namespace HTTP {
 		part = (e != string::npos) ? line.substr(f, e - f) : line.substr(f);
 		part3 = part;
 
-		header.setFirstLine(line);
-		header.setPart1(part1);
-		header.setPart2(part2);
-		header.setPart3(part3);
+		header.setParts(part1, part2, part3);
 		return 0;
 	}
 	int HttpHeaderParser::parseHeaderField(HttpHeader & header, string line) {

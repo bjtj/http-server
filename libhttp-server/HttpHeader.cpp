@@ -1,4 +1,5 @@
 #include <iostream>
+#include <liboslayer/os.hpp>
 #include <liboslayer/Text.hpp>
 #include "UrlEncoderDecoder.hpp"
 #include "HttpHeader.hpp"
@@ -7,6 +8,7 @@
 namespace HTTP {
 
 	using namespace std;
+	using namespace OS;
 	using namespace UTIL;
 
 	/**
@@ -22,12 +24,11 @@ namespace HTTP {
 	HttpHeader::~HttpHeader() {
 	}
 
-	string HttpHeader::makeFirstLine() const {
+	string HttpHeader::getFirstLine() const {
 		return (part1 + " " + part2 + " " + part3);
 	}
 
 	void HttpHeader::setHeader(const HttpHeader & other) {
-		firstline = other.firstline;
 		part1 = other.part1;
 		part2 = other.part2;
 		part3 = other.part3;
@@ -35,15 +36,10 @@ namespace HTTP {
 	}
 
 	void HttpHeader::clear() {
-		firstline.clear();
 		part1.clear();
 		part2.clear();
 		part3.clear();
 		fields.clear();
-	}
-
-	void HttpHeader::setFirstLine(const string & firstline) {
-		this->firstline = firstline;
 	}
 	
 	void HttpHeader::setParts(const vector<string> & parts) {
@@ -212,7 +208,7 @@ namespace HTTP {
 	
 	string HttpHeader::toString() const {
 		string ret;
-		ret.append(makeFirstLine());
+		ret.append(getFirstLine());
 		ret.append("\r\n");
 		for (size_t i = 0; i < fields.size(); i++) {
 			for (size_t j = 0; j < fields[i].obj().size(); j++) {

@@ -17,7 +17,6 @@ namespace HTTP {
 	 */
 	class HttpHeader {
 	private:
-		std::string firstline;
 		std::string part1;
 		std::string part2;
 		std::string part3;
@@ -26,10 +25,9 @@ namespace HTTP {
 		HttpHeader();
 		HttpHeader(const std::string & part1, const std::string & part2, const std::string & part3);
 		virtual ~HttpHeader();
-		std::string makeFirstLine() const;
+		std::string getFirstLine() const;
 		virtual void clear();
 		virtual void setHeader(const HttpHeader & other);
-		virtual void setFirstLine(const std::string & firstline);
 		virtual void setParts(const std::vector<std::string> & parts);
 		virtual void setParts(const std::string & part1, const std::string & part2, const std::string & part3);
 		virtual std::string getPart1() const;
@@ -81,8 +79,6 @@ namespace HTTP {
 		virtual ~HttpHeaderDelegator() {}
 		virtual void clear()
 			{_header.clear();}
-		virtual void setFirstLine(const std::string & firstline)
-			{_header.setFirstLine(firstline);}
 		virtual void setParts(const std::vector<std::string> & parts)
 			{_header.setParts(parts);}
 		virtual void setParts(const std::string & part1, const std::string & part2, const std::string & part3)

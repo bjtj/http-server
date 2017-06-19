@@ -15,6 +15,9 @@ static string packetVisible(const string pack) {
 	return Text::replaceAll(Text::replaceAll(pack, "\n", "\\n"), "\r", "\\r");
 }
 
+/**
+ * 
+ */
 class MySocketMaker : public SocketMaker {
 public:
 	MySocketMaker() {}
@@ -22,6 +25,7 @@ public:
 	virtual AutoRef<Socket> make(const string & protocol, const InetAddress & addr) {
 
 		if (protocol == "https") {
+#if defined(USE_OPENSSL)
 			class MyVerifier : public CertificateVerifier {
 			public:
 				MyVerifier() {}
@@ -33,6 +37,9 @@ public:
 			SecureSocket * sock = new SecureSocket(addr);
 			sock->setVerifier(AutoRef<CertificateVerifier>(new MyVerifier));
 			return AutoRef<Socket>(sock);
+#else
+			throw Exception("openssl not supported");
+#endif
 		}
 		return AutoRef<Socket>(new Socket(addr));
 	}
@@ -139,6 +146,7 @@ static DumpResponseHandler httpRequest(const Url & url, const string & method, c
 	return handler;
 }
 
+#if defined(USE_OPENSSL)
 static DumpResponseHandler httpsRequest(const Url & url, const string & method, const LinkedStringMap & headers) {
 
 	cout << " ** Request/url : " << url.toString() << endl;
@@ -162,7 +170,7 @@ static DumpResponseHandler httpsRequest(const Url & url, const string & method, 
 	
 	return handler;
 }
-
+#endif
 
 static void test_http_client() {
 	
@@ -217,12 +225,13 @@ static void test_recv_timeout() {
 }
 
 static void test_https_client() {
-
+#if defined(USE_OPENSSL)
 	LinkedStringMap ext_headers;
 	
 	DumpResponseHandler handler = httpsRequest("https://google.com", "GET", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	cout << handler.getDump() << endl;
+#endif
 }
 
 int main(int argc, char *args[]) {
@@ -238,6 +247,7 @@ int main(int argc, char *args[]) {
 	idle(10); // TODO: check ; previous connection resist?
 	test_recv_timeout();
 	test_https_client();
+
 
 	server.stop();
 	
