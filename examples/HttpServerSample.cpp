@@ -5,6 +5,7 @@
 #include <liboslayer/AutoLock.hpp>
 #include <liboslayer/Logger.hpp>
 #include <liboslayer/Properties.hpp>
+#include <liboslayer/DatabaseDriver.hpp>
 #include <liboslayer/Pool.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/HttpSessionManager.hpp>
@@ -115,37 +116,55 @@ private:
     string basePath;
 	string prefix;
 	string indexName;
+	string driverPath;
+	string driverName;
 	map<string, string> mimeTypes;
     map<string, string> lspMemCache;
 	Pool<LispPage> lspPool;
 public:
-	StaticHttpRequestHandler(const ServerConfig & config, const string & prefix)
+	StaticHttpRequestHandler(ServerConfig & config, const string & prefix)
 		: dedicated(false), config(config), prefix(prefix), lspPool(config.getIntegerProperty("thread.count", 50))
 	{
 		mimeTypes = MimeTypes::getMimeTypes();
 		basePath = config["static.base.path"];
 		indexName = config["index.name"];
+		driverPath = config["db.driver.path"];
+		driverName = config["db.driver.name"];
 
-		// lisp page pool
-		deque<LispPage*> qu = lspPool.avail_queue();
-		for (deque<LispPage*>::iterator iter = qu.begin(); iter != qu.end(); iter++) {
-			(*iter)->applyWeb();
-		}
+		_init();
 	}
 
-	StaticHttpRequestHandler(bool dedicated, const ServerConfig & config, const string & prefix)
+	StaticHttpRequestHandler(bool dedicated, ServerConfig & config, const string & prefix)
 		: dedicated(dedicated), config(config), prefix(prefix), lspPool(config.getIntegerProperty("thread.count", 50))
 	{
 		mimeTypes = MimeTypes::getMimeTypes();
 		basePath = config["static.base.path"];
 		indexName = config["dedicated.index.name"];
+		driverPath = config["db.driver.path"];
+		driverName = config["db.driver.name"];
         
-        // lisp page pool
+        _init();
+	}
+
+private:
+	void _init() {
+
+		bool db_enabled = false;
+		if (driverName.empty() == false) {
+			DatabaseDriver::instance().load(driverName, AutoRef<Library>(new Library(driverPath, driverName)));
+			db_enabled = true;
+		}
+		
+		// lisp page pool
 		deque<LispPage*> qu = lspPool.avail_queue();
 		for (deque<LispPage*>::iterator iter = qu.begin(); iter != qu.end(); iter++) {
 			(*iter)->applyWeb();
+			if (db_enabled) {
+				(*iter)->applyDatabase();
+			}
 		}
 	}
+public:
 	
     virtual ~StaticHttpRequestHandler() {/* empty */}
     

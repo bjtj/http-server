@@ -5,6 +5,7 @@
 #include <liboslayer/Iterator.hpp>
 #include <liboslayer/Logger.hpp>
 #include <liboslayer/FileStream.hpp>
+#include <liboslayer/DatabaseDriver.hpp>
 #include "BasicAuth.hpp"
 
 #define _VAR OS::GCRef<LISP::Var> 
@@ -18,6 +19,9 @@ namespace HTTP {
 	using namespace UTIL;
 
 	static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
+
+	static int _db_seed;
+	static map< int, AutoRef<DatabaseConnection> > _db_connections;
 
 	static string escapeText(const string & txt) {
 		return Text::replaceAll(Text::replaceAll(txt, "\\", "\\\\"), "\"", "\\\"");
@@ -243,6 +247,67 @@ namespace HTTP {
 		};
 		AutoRef<LISP::Procedure> proc(new LispLoadPage("load-page"));
 		env.scope()->put_func("load-page", HEAP_ALLOC(env, proc));
+	}
+	void LispPage::applyDatabase() {
+		applyDatabase(_env);
+	}
+	void LispPage::applyDatabase(LISP::Env & env) {
+		class Database : public LISP::Procedure {
+		public:
+			Database(const string & name) : LISP::Procedure(name) {
+			}
+			virtual ~Database() {
+			}
+			virtual DECL_PROC() {
+				Iterator<_VAR> iter(args);
+				if (name->r_symbol() == "db:connect") {
+					string name = LISP::eval(env, scope, iter.next())->toString();
+					string hostname = LISP::eval(env, scope, iter.next())->toString();
+					int port = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
+					string username = LISP::eval(env, scope, iter.next())->toString();
+					string password = LISP::eval(env, scope, iter.next())->toString();
+					string dbname = LISP::eval(env, scope, iter.next())->toString();
+					AutoRef<DatabaseConnection> conn = DatabaseDriver::instance().getConnection(name);
+					conn->connect(hostname, port, username, password, dbname);
+					int id = _db_seed++;
+					_db_connections[id] = conn;
+					return HEAP_ALLOC(env, LISP::Integer(id));
+				} else if (name->r_symbol() == "db:disconnect") {
+					int id = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
+					_db_connections[id]->disconnect();
+					_db_connections.erase(id);
+					return HEAP_ALLOC(env, "nil");
+				} else if (name->r_symbol() == "db:query") {
+					int id = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
+					string query = LISP::eval(env, scope, iter.next())->toString();
+					AutoRef<ResultSet> result = _db_connections[id]->query(query);
+					int cnt = 0;
+					while (result->next()) {
+						string line;
+						for (int i = 0; i < result->fieldCount(); i++) {
+							if (i > 0) {
+								line.append(" ");
+							}
+							line.append(result->getString(i));
+						}
+						logger->logd(line);
+						cnt++;
+					}
+					return HEAP_ALLOC(env, LISP::Integer(cnt));
+				} else if (name->r_symbol() == "db:update") {
+					int id = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
+					string query = LISP::eval(env, scope, iter.next())->toString();
+					int ret = _db_connections[id]->queryUpdate(query);
+					return HEAP_ALLOC(env, LISP::Integer(ret));
+				}
+				return HEAP_ALLOC(env, "nil");
+			}
+		};
+		AutoRef<LISP::Procedure> proc(new Database("db:*"));
+		env.scope()->put_func("db:connect", HEAP_ALLOC(env, proc));
+		env.scope()->put_func("db:disconnect", HEAP_ALLOC(env, proc));
+		env.scope()->put_func("db:query", HEAP_ALLOC(env, proc));
+		env.scope()->put_func("db:update", HEAP_ALLOC(env, proc));
 	}
     
 	bool LispPage::compile(LISP::Env & env, const string & line) {

@@ -2,6 +2,8 @@
 #define __LISP_PAGE_HPP__
 
 #include <liboslayer/Lisp.hpp>
+#include <liboslayer/Library.hpp>
+#include <liboslayer/AutoRef.hpp>
 #include <string>
 #include "HttpSession.hpp"
 #include "HttpRequest.hpp"
@@ -24,6 +26,7 @@ namespace HTTP {
 		void applyRequest(HttpRequest & request);
 		void applyResponse(HttpResponse & response);
 		void applyLoadPage();
+		void applyDatabase();
 		std::string parseLispPage(const std::string & src);
 		
 		static void applyWeb(LISP::Env & env);
@@ -32,6 +35,7 @@ namespace HTTP {
 		static void applyRequest(LISP::Env & env, HttpRequest & request);
 		static void applyResponse(LISP::Env & env, HttpResponse & response);
 		static void applyLoadPage(LISP::Env & env);
+		static void applyDatabase(LISP::Env & env);
 		static bool compile(LISP::Env & env, const std::string & line);
 		static std::string convertLispPageToCode(const std::string & src);
 		static std::string parseLispPage(LISP::Env & env, const std::string & src);
