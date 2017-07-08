@@ -303,7 +303,7 @@ namespace HTTP {
 				} else if (name->r_symbol() == "db:update") {
 					int id = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
 					string query = LISP::eval(env, scope, iter.next())->toString();
-					int ret = _db_connections[id]->queryUpdate(query);
+					int ret = (int)_db_connections[id]->queryUpdate(query);
 					return HEAP_ALLOC(env, LISP::Integer(ret));
 				}
 				return HEAP_ALLOC(env, "nil");
