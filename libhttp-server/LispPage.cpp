@@ -165,6 +165,10 @@ namespace HTTP {
 				} else if (name->r_symbol() == "get-request-header") {
 					string paramName = LISP::eval(env, scope, iter.next())->toString();
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getHeaderFieldIgnoreCase(paramName)));
+				} else if (name->r_symbol() == "get-remote-host") {
+					return HEAP_ALLOC(env, LISP::wrap_text(request.getRemoteAddress().getHost()));
+				} else if (name->r_symbol() == "get-remote-port") {
+					return HEAP_ALLOC(env, LISP::Integer(request.getRemoteAddress().getPort()));
 				}
 				return HEAP_ALLOC(env, "nil");
 			}
@@ -174,6 +178,8 @@ namespace HTTP {
 		env.scope()->put_func("get-request-path", HEAP_ALLOC(env, proc));
 		env.scope()->put_func("get-request-param", HEAP_ALLOC(env, proc));
 		env.scope()->put_func("get-request-header", HEAP_ALLOC(env, proc));
+		env.scope()->put_func("get-remote-host", HEAP_ALLOC(env, proc));
+		env.scope()->put_func("get-remote-port", HEAP_ALLOC(env, proc));
 	}
 
 	void LispPage::applyResponse(HttpResponse & response) {
