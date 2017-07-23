@@ -148,20 +148,10 @@ public:
 
 private:
 	void _init() {
-
-		bool db_enabled = false;
-		if (driverName.empty() == false) {
-			DatabaseDriver::instance().load(driverName, AutoRef<Library>(new Library(driverPath, driverName)));
-			db_enabled = true;
-		}
-		
 		// lisp page pool
 		deque<LispPage*> qu = lspPool.avail_queue();
 		for (deque<LispPage*>::iterator iter = qu.begin(); iter != qu.end(); iter++) {
-			(*iter)->applyWeb();
-			if (db_enabled) {
-				(*iter)->applyDatabase();
-			}
+			(*iter)->applyWeb(config);
 		}
 	}
 public:
@@ -294,7 +284,7 @@ public:
 			page->applyResponse(response);
 			unsigned long tick = tick_milli();
 			string content = page->parseLispPage(dump);
-			logger->logd(Text::format(" ** parsing : %ld ms.", tick_milli() - tick));
+			logger->logd(Text::format(" ** processing : %ld ms.", tick_milli() - tick));
 			lspPool.release(page);
 			return content;
 		} catch (Exception e) {

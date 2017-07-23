@@ -20,9 +20,6 @@ namespace HTTP {
 
 	static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
 
-	static int _db_seed;
-	static map< int, AutoRef<DatabaseConnection> > _db_connections;
-
 	static string escapeText(const string & txt) {
 		return Text::replaceAll(Text::replaceAll(txt, "\\", "\\\\"), "\"", "\\\"");
 	}
@@ -49,10 +46,10 @@ namespace HTTP {
 		}
 	}
 	
-	void LispPage::applyWeb() {
-		applyWeb(_env);
+	void LispPage::applyWeb(HttpServerConfig & config) {
+		applyWeb(_env, config);
 	}
-	void LispPage::applyWeb(LISP::Env & env) {
+	void LispPage::applyWeb(LISP::Env & env, HttpServerConfig & config) {
 		class Enc : public LISP::Procedure {
 		private:
 		public:
@@ -77,6 +74,22 @@ namespace HTTP {
 			}
 		};
 		env.scope()->put_func("url-decode", HEAP_ALLOC(env, AutoRef<LISP::Procedure>(new Dec("url-decode"))));
+
+		class Config : public LISP::Procedure {
+		private:
+			HttpServerConfig config;
+		public:
+			Config(const string & name, HttpServerConfig & config)
+				: LISP::Procedure(name), config(config) {}
+			virtual ~Config() {}
+			virtual DECL_PROC() {
+				Iterator<_VAR > iter(args);
+				string key = LISP::eval(env, scope, iter.next())->toString();
+				return HEAP_ALLOC(env, LISP::wrap_text(config[key]));
+			}
+		};
+		env.scope()->put_func("http:get-config", HEAP_ALLOC(env, AutoRef<LISP::Procedure>(new Config("http:get-config", config))));
+
 	}
 	void LispPage::applyAuth(HttpRequest & request, HttpResponse & response) {
 		applyAuth(_env, request, response);
@@ -253,67 +266,6 @@ namespace HTTP {
 		};
 		AutoRef<LISP::Procedure> proc(new LispLoadPage("load-page"));
 		env.scope()->put_func("load-page", HEAP_ALLOC(env, proc));
-	}
-	void LispPage::applyDatabase() {
-		applyDatabase(_env);
-	}
-	void LispPage::applyDatabase(LISP::Env & env) {
-		class Database : public LISP::Procedure {
-		public:
-			Database(const string & name) : LISP::Procedure(name) {
-			}
-			virtual ~Database() {
-			}
-			virtual DECL_PROC() {
-				Iterator<_VAR> iter(args);
-				if (name->r_symbol() == "db:connect") {
-					string name = LISP::eval(env, scope, iter.next())->toString();
-					string hostname = LISP::eval(env, scope, iter.next())->toString();
-					int port = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
-					string username = LISP::eval(env, scope, iter.next())->toString();
-					string password = LISP::eval(env, scope, iter.next())->toString();
-					string dbname = LISP::eval(env, scope, iter.next())->toString();
-					AutoRef<DatabaseConnection> conn = DatabaseDriver::instance().getConnection(name);
-					conn->connect(hostname, port, username, password, dbname);
-					int id = _db_seed++;
-					_db_connections[id] = conn;
-					return HEAP_ALLOC(env, LISP::Integer(id));
-				} else if (name->r_symbol() == "db:disconnect") {
-					int id = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
-					_db_connections[id]->disconnect();
-					_db_connections.erase(id);
-					return HEAP_ALLOC(env, "nil");
-				} else if (name->r_symbol() == "db:query") {
-					int id = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
-					string query = LISP::eval(env, scope, iter.next())->toString();
-					AutoRef<ResultSet> result = _db_connections[id]->query(query);
-					int cnt = 0;
-					while (result->next()) {
-						string line;
-						for (int i = 0; i < result->fieldCount(); i++) {
-							if (i > 0) {
-								line.append(" ");
-							}
-							line.append(result->getString(i));
-						}
-						logger->logd(line);
-						cnt++;
-					}
-					return HEAP_ALLOC(env, LISP::Integer(cnt));
-				} else if (name->r_symbol() == "db:update") {
-					int id = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
-					string query = LISP::eval(env, scope, iter.next())->toString();
-					int ret = (int)_db_connections[id]->queryUpdate(query);
-					return HEAP_ALLOC(env, LISP::Integer(ret));
-				}
-				return HEAP_ALLOC(env, "nil");
-			}
-		};
-		AutoRef<LISP::Procedure> proc(new Database("db:*"));
-		env.scope()->put_func("db:connect", HEAP_ALLOC(env, proc));
-		env.scope()->put_func("db:disconnect", HEAP_ALLOC(env, proc));
-		env.scope()->put_func("db:query", HEAP_ALLOC(env, proc));
-		env.scope()->put_func("db:update", HEAP_ALLOC(env, proc));
 	}
     
 	bool LispPage::compile(LISP::Env & env, const string & line) {
