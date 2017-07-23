@@ -19,10 +19,8 @@ namespace HTTP {
 
         static OS::AutoRef<HttpSession> getSession(HttpRequest & request, HttpSessionManager & sessionManager) {
 			std::string sessionId = getSessionId(request);
-            OS::AutoRef<HttpSession> session = (sessionId.empty() ||
-									 !sessionManager.hasSession(UTIL::Text::toInt(sessionId))) ?
+            OS::AutoRef<HttpSession> session = (sessionId.empty() || !sessionManager.hasSession(UTIL::Text::toInt(sessionId))) ?
 				sessionManager.createSession() : sessionManager.getSession(UTIL::Text::toInt(sessionId));
-		
 			if (session->outdated()) {
 				sessionManager.destroySession(session->getId());
 				return sessionManager.createSession();

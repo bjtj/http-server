@@ -182,6 +182,16 @@ namespace HTTP {
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getRemoteAddress().getHost()));
 				} else if (name->r_symbol() == "get-remote-port") {
 					return HEAP_ALLOC(env, LISP::Integer(request.getRemoteAddress().getPort()));
+				} else if (name->r_symbol() == "get-cookie") {
+					string key = LISP::eval(env, scope, iter.next())->toString();
+					vector<Cookie> cookies = request.getCookies();
+					for (vector<Cookie>::iterator iter = cookies.begin(); iter != cookies.end(); iter++) {
+						Cookie & cookie = *iter;
+						if (cookie[key].empty() == false) {
+							return HEAP_ALLOC(env, LISP::wrap_text(cookie[key]));
+						}
+					}
+					return HEAP_ALLOC(env, "nil");
 				}
 				return HEAP_ALLOC(env, "nil");
 			}
@@ -193,6 +203,7 @@ namespace HTTP {
 		env.scope()->put_func("get-request-header", HEAP_ALLOC(env, proc));
 		env.scope()->put_func("get-remote-host", HEAP_ALLOC(env, proc));
 		env.scope()->put_func("get-remote-port", HEAP_ALLOC(env, proc));
+		env.scope()->put_func("get-cookie", HEAP_ALLOC(env, proc));
 	}
 
 	void LispPage::applyResponse(HttpResponse & response) {
@@ -237,6 +248,12 @@ namespace HTTP {
 					string path = LISP::eval(env, scope, iter.next())->toString();
 					response["set-file-transfer"] = path;
 					return HEAP_ALLOC(env, LISP::wrap_text(path));
+				} else if (name->r_symbol() == "set-cookie") {
+					string cookie = LISP::eval(env, scope, iter.next())->toString();
+					vector<Cookie> cookies;
+					cookies.push_back(Cookie(cookie));
+					response.setCookies(cookies);
+					return HEAP_ALLOC(env, LISP::wrap_text(cookie));
 				}
 				return HEAP_ALLOC(env, "nil");
 			}
@@ -247,6 +264,7 @@ namespace HTTP {
 		env.scope()->put_func("set-redirect", HEAP_ALLOC(env, proc));
 		env.scope()->put_func("set-forward", HEAP_ALLOC(env, proc));
 		env.scope()->put_func("set-file-transfer", HEAP_ALLOC(env, proc));
+		env.scope()->put_func("set-cookie", HEAP_ALLOC(env, proc));
 		
 	}
 	void LispPage::applyLoadPage() {
