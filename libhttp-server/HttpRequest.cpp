@@ -39,6 +39,9 @@ namespace HTTP {
 	void HttpRequest::setPath(const string & path) {
 		_header.setPath(path);
 	}
+	string HttpRequest::getDirectory() const {
+		return _header.getDirectory();
+	}
 	string HttpRequest::getRawPath() const {
 		return _header.getRawPath();
 	}
@@ -110,5 +113,16 @@ namespace HTTP {
 			cookies.push_back(Cookie(lst[i]));
 		}
 		return cookies;
+	}
+
+	string HttpRequest::getCookie(const string & key) {
+		vector<Cookie> cookies = getCookies();
+		for (vector<Cookie>::iterator iter = cookies.begin(); iter != cookies.end(); iter++) {
+			Cookie & cookie = *iter;
+			if (cookie[key].empty() == false) {
+				return cookie[key];
+			}
+		}
+		return "";
 	}
 }

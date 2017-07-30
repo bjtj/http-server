@@ -25,12 +25,13 @@ namespace HTTP {
 	public:
 		HttpSessionManager(unsigned long timeout);
 		virtual ~HttpSessionManager();
+		std::string genSessionId();
 		void clear();
 		void removeOutdatedSessions();
-		bool hasSession(unsigned long id);
-		OS::AutoRef<HttpSession> getSession(unsigned long id);
+		bool hasSession(const std::string & id);
+		OS::AutoRef<HttpSession> getSession(const std::string & id);
 		OS::AutoRef<HttpSession> createSession();
-		void destroySession(unsigned long id);
+		void destroySession(const std::string & id);
 		std::vector< OS::AutoRef<HttpSession> > & getSessions();
 	};
 }

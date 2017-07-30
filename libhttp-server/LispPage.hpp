@@ -23,7 +23,7 @@ namespace HTTP {
 		void applyProperties(const std::map<std::string, std::string> & props);
 		void applyWeb(HttpServerConfig & config);
 		void applyAuth(HttpRequest & request, HttpResponse & response);
-        void applySession(OS::AutoRef<HttpSession> session);
+        void applySession(HttpRequest & request, OS::AutoRef<HttpSession> session);
 		void applyRequest(HttpRequest & request);
 		void applyResponse(HttpResponse & response);
 		void applyLoadPage();
@@ -31,7 +31,7 @@ namespace HTTP {
 		
 		static void applyWeb(LISP::Env & env, HttpServerConfig & config);
 		static void applyAuth(LISP::Env & env, HttpRequest & request, HttpResponse & response);
-        static void applySession(LISP::Env & env, OS::AutoRef<HttpSession> session);
+        static void applySession(LISP::Env & env, HttpRequest & request, OS::AutoRef<HttpSession> session);
 		static void applyRequest(LISP::Env & env, HttpRequest & request);
 		static void applyResponse(LISP::Env & env, HttpResponse & response);
 		static void applyLoadPage(LISP::Env & env);

@@ -4,44 +4,50 @@ using namespace OS;
 
 namespace HTTP {
 
+	using namespace std;
+
 	static unsigned long s_tick() {
 		return tick_milli();
 	}
 
-	HttpSession::HttpSession(unsigned long id) : id(id) {
-		creationTime = s_tick();
-		lastAccessTime = s_tick();
+	HttpSession::HttpSession(const string & id) : _id(id) {
+		_creationTime = s_tick();
+		_lastAccessTime = s_tick();
 	}
 	
 	HttpSession::~HttpSession() {
 	}
 
-	unsigned long HttpSession::getId() const {
-		return id;
+	string & HttpSession::id() {
+		return _id;
+	}
+
+	string HttpSession::id() const {
+		return _id;
 	}
 
 	void HttpSession::updateLastAccessTime() {
-		lastAccessTime = s_tick();
+		_lastAccessTime = s_tick();
 	}
 	
-	unsigned long HttpSession::getTimeout() {
-		return timeout;
-	}
-	
-	void HttpSession::setTimeout(unsigned long timeout) {
-		this->timeout = timeout;
-	}
-	
-	bool HttpSession::outdated() {
-		return (s_tick() - lastAccessTime > timeout);
+	unsigned long & HttpSession::timeout() {
+		return _timeout;
 	}
 
-	unsigned long HttpSession::remainingLife() {
-		unsigned long ellapsed = s_tick() - lastAccessTime;
-		return (ellapsed < timeout) ? timeout - ellapsed : 0;
+	unsigned long HttpSession::timeout() const {
+		return _timeout;
+	}
+	
+	bool HttpSession::outdated() const {
+		return (s_tick() - _lastAccessTime > _timeout);
+	}
+
+	unsigned long HttpSession::remainingLife() const {
+		unsigned long ellapsed = s_tick() - _lastAccessTime;
+		return (ellapsed < _timeout) ? _timeout - ellapsed : 0;
 	}
 
 	std::string & HttpSession::operator[](const std::string & name) {
-		return props[name];
+		return _props[name];
 	}
 }

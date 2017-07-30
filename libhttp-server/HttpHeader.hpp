@@ -54,6 +54,8 @@ namespace HTTP {
 		virtual std::map<std::string, std::string> getHeaderFieldsStdMap();
 		virtual void removeHeaderField(const std::string & name);
 		virtual void removeHeaderFieldIgnoreCase(const std::string & name);
+		virtual void removeHeaderFields(const std::string & name);
+		virtual void removeHeaderFieldsIgnoreCase(const std::string & name);
 
         /* HTTP */
 		virtual std::string getContentType() const;
@@ -131,6 +133,10 @@ namespace HTTP {
 			{_header.removeHeaderField(name);}
 		virtual void removeHeaderFieldIgnoreCase(const std::string & name)
 			{_header.removeHeaderFieldIgnoreCase(name);}
+		virtual void removeHeaderFields(const std::string & name)
+			{_header.removeHeaderFields(name);}
+		virtual void removeHeaderFieldsIgnoreCase(const std::string & name)
+			{_header.removeHeaderFieldsIgnoreCase(name);}
 
         /* HTTP */
 		virtual std::string getContentType() const
@@ -172,6 +178,7 @@ namespace HTTP {
 		void setMethod(const std::string & method) ;
 		std::string getPath() const;
 		void setPath(const std::string & path) ;
+		std::string getDirectory() const;
 		std::string getRawPath() const;
 		std::string getProtocol() const;
 		void setProtocol(const std::string & protocol) ;

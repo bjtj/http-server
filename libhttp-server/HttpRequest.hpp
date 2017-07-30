@@ -36,6 +36,7 @@ namespace HTTP {
 		void setHost(const std::string & host);
 		std::string getPath() const;
 		void setPath(const std::string & path);
+		std::string getDirectory() const;
 		std::string getRawPath() const;
         std::vector<std::string> getParameterNames();
 		std::string getParameter(const std::string & name);
@@ -52,6 +53,7 @@ namespace HTTP {
 		void setLocalAddress(const OS::InetAddress & localAddress);
 		OS::InetAddress & getLocalAddress();
 		std::vector<Cookie> getCookies();
+		std::string getCookie(const std::string & key);
 	};
 }
 

@@ -101,7 +101,7 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
     response.setStatus(302);
     header.setHeaderField("Location", (config.isSecure() ? "https://" : "http://") +
                           host + ":" + port + "/" +
-                          HttpSessionTool::urlMan(uri, session));
+                          HttpSessionTool::urlMan(request, uri, session));
     response.setContentType("text/html");
 	response.setContentLength(0);
 }
@@ -184,7 +184,7 @@ public:
 		string path = request.getPath();
 		path = path.substr(prefix.size());
 		if (path.empty()) {
-			AutoRef<HttpSession> session = HttpSessionTool::getSession(request, sessionManager);
+			AutoRef<HttpSession> session = HttpSessionTool::handleSession(request, response, sessionManager);
 			redirect(config, request, response, session, prefix.substr(1) + "/");
 			return;
 		}
@@ -231,7 +231,7 @@ public:
 	 * handle lisp page
 	 */
 	void handleLispPage(File & file, HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
-		AutoRef<HttpSession> session = HttpSessionTool::getSession(request, sessionManager);
+		AutoRef<HttpSession> session = HttpSessionTool::handleSession(request, response, sessionManager);
 		session->updateLastAccessTime();
 		response.setStatus(200);
 		response.setContentType("text/html");
@@ -279,7 +279,7 @@ public:
 
 		try {
 			page->applyAuth(request, response);
-			page->applySession(session);
+			page->applySession(request, session);
 			page->applyRequest(request);
 			page->applyResponse(response);
 			unsigned long tick = tick_milli();

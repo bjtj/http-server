@@ -103,7 +103,11 @@ namespace HTTP {
 
 	void HttpResponse::setCookies(const vector<Cookie> & cookies) {
 		for (vector<Cookie>::const_iterator iter = cookies.begin(); iter != cookies.end(); iter++) {
-			_header.appendHeaderField("Set-Cookie", iter->toString());
+			setCookie(*iter);
 		}
+	}
+
+	void HttpResponse::setCookie(const Cookie & cookie) {
+		_header.appendHeaderField("Set-Cookie", cookie.toString());
 	}
 }

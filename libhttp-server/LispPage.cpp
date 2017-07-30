@@ -121,22 +121,23 @@ namespace HTTP {
 		};
 		env.scope()->put_func("proc-basic-auth", HEAP_ALLOC(env, AutoRef<LISP::Procedure>(new Auth("auth", request, response))));
 	}
-	void LispPage::applySession(AutoRef<HttpSession> session) {
-		applySession(_env, session);
+	void LispPage::applySession(HttpRequest & request, AutoRef<HttpSession> session) {
+		applySession(_env, request, session);
 	}
-	void LispPage::applySession(LISP::Env & env, AutoRef<HttpSession> session) {
+	void LispPage::applySession(LISP::Env & env, HttpRequest & request, AutoRef<HttpSession> session) {
 		class LispSession : public LISP::Procedure {
 		private:
+			HttpRequest & request;
 			AutoRef<HttpSession> session;
 		public:
-			LispSession(const string & name, AutoRef<HttpSession> session) :
-				LISP::Procedure(name), session(session) {}
+			LispSession(const string & name, HttpRequest & request, AutoRef<HttpSession> session) :
+				LISP::Procedure(name), request(request), session(session) {}
 			virtual ~LispSession() {}
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
 				if (name->r_symbol() == "url") {
 					string url = LISP::eval(env, scope, iter.next())->toString();
-					return HEAP_ALLOC(env, LISP::wrap_text(HttpSessionTool::urlMan(url, session)));
+					return HEAP_ALLOC(env, LISP::wrap_text(HttpSessionTool::urlMan(request, url, session)));
 				} else if (name->r_symbol() == "get-session-value") {
 					string name = LISP::eval(env, scope, iter.next())->toString();
 					return HEAP_ALLOC(env, LISP::wrap_text((*session)[name]));
@@ -150,7 +151,7 @@ namespace HTTP {
                 
 			}
 		};
-		AutoRef<LISP::Procedure> proc(new LispSession("url", session));
+		AutoRef<LISP::Procedure> proc(new LispSession("url", request, session));
 		env.scope()->put_func("url", HEAP_ALLOC(env, proc));
 		env.scope()->put_func("get-session-value", HEAP_ALLOC(env, proc));
 		env.scope()->put_func("set-session-value", HEAP_ALLOC(env, proc));

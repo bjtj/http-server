@@ -1,6 +1,7 @@
 #ifndef __HTTP_SESSION_HPP__
 #define __HTTP_SESSION_HPP__
 
+#include <string>
 #include <liboslayer/os.hpp>
 #include <liboslayer/StringElements.hpp>
 
@@ -11,20 +12,21 @@ namespace HTTP {
 	 */
 	class HttpSession {
 	private:
-		unsigned long id;
-		unsigned long creationTime;
-		unsigned long lastAccessTime;
-		unsigned long timeout;
-		UTIL::StringMap props;
+		std::string _id;
+		unsigned long _creationTime;
+		unsigned long _lastAccessTime;
+		unsigned long _timeout;
+		UTIL::StringMap _props;
 	public:
-		HttpSession(unsigned long id);
+		HttpSession(const std::string & id);
 		virtual ~HttpSession();
-		unsigned long getId() const;
+		std::string & id();
+		std::string id() const;
 		void updateLastAccessTime();
-		unsigned long getTimeout();
-		void setTimeout(unsigned long timeout);
-		bool outdated();
-		unsigned long remainingLife();
+		unsigned long & timeout();
+		unsigned long timeout() const;
+		bool outdated() const;
+		unsigned long remainingLife() const;
 		std::string & operator[](const std::string & name);
 	};
 }

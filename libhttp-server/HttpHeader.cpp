@@ -1,6 +1,7 @@
 #include <iostream>
 #include <liboslayer/os.hpp>
 #include <liboslayer/Text.hpp>
+#include <liboslayer/File.hpp>
 #include "UrlEncoderDecoder.hpp"
 #include "HttpHeader.hpp"
 #include "HttpStatusCodes.hpp"
@@ -162,12 +163,15 @@ namespace HTTP {
 	}
 	
 	void HttpHeader::removeHeaderFieldIgnoreCase(const string & name) {
-		for (size_t i = 0; i < fields.size(); i++) {
-			if (Text::equalsIgnoreCase(fields[i].name(), name)) {
-				fields.erase(fields[i].name());
-				return;
-			}
-		}
+		fields.eraseIgnoreCase(name);
+	}
+
+	void HttpHeader::removeHeaderFields(const string & name) {
+		fields.eraseAll(name);
+	}
+	
+	void HttpHeader::removeHeaderFieldsIgnoreCase(const string & name) {
+		fields.eraseAllIgnoreCase(name);
 	}
 	
 	string HttpHeader::getContentType() const {
@@ -271,6 +275,10 @@ namespace HTTP {
 	void HttpRequestHeader::setPath(const string & path) {
 		setPart2(path);
 		parsePath(path);
+	}
+
+	string HttpRequestHeader::getDirectory() const {
+		return File::getDirectory(resourcePath);
 	}
 	
 	string HttpRequestHeader::getRawPath() const {
