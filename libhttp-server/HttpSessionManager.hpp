@@ -14,10 +14,10 @@ namespace HTTP {
 	 */
 	class HttpSessionManager {
 	private:
-		unsigned long id_idx;
-		unsigned long timeout;
-        std::vector< OS::AutoRef<HttpSession> > sessions;
-		OS::Semaphore sem;
+		unsigned long _id_idx;
+		unsigned long _timeout;
+        std::vector< OS::AutoRef<HttpSession> > _sessions;
+		OS::Semaphore _sem;
 	private:
 		/* do not allow copy */
 		HttpSessionManager(const HttpSessionManager & other);
@@ -29,6 +29,7 @@ namespace HTTP {
 		void clear();
 		void removeOutdatedSessions();
 		bool hasSession(const std::string & id);
+		unsigned long & timeout();
 		OS::AutoRef<HttpSession> getSession(const std::string & id);
 		OS::AutoRef<HttpSession> createSession();
 		void destroySession(const std::string & id);

@@ -60,8 +60,6 @@ public:
 	}
 };
 
-HttpSessionManager sessionManager(30 * 60 * 1000);
-
 /**
  * @brief 
  */
@@ -111,6 +109,7 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
  */
 class StaticHttpRequestHandler : public HttpRequestHandler, public WebServerUtil {
 private:
+	HttpSessionManager sessionManager;
 	bool dedicated;
 	ServerConfig config;
     string basePath;
@@ -123,7 +122,7 @@ private:
 	Pool<LispPage> lspPool;
 public:
 	StaticHttpRequestHandler(ServerConfig & config, const string & prefix)
-		: dedicated(false), config(config), prefix(prefix), lspPool(config.getIntegerProperty("thread.count", 50))
+		: sessionManager(30 * 60 * 1000), dedicated(false), config(config), prefix(prefix), lspPool(config.getIntegerProperty("thread.count", 50))
 	{
 		mimeTypes = MimeTypes::getMimeTypes();
 		basePath = config["static.base.path"];
@@ -135,7 +134,7 @@ public:
 	}
 
 	StaticHttpRequestHandler(bool dedicated, ServerConfig & config, const string & prefix)
-		: dedicated(dedicated), config(config), prefix(prefix), lspPool(config.getIntegerProperty("thread.count", 50))
+		: sessionManager(30 * 60 * 1000), dedicated(dedicated), config(config), prefix(prefix), lspPool(config.getIntegerProperty("thread.count", 50))
 	{
 		mimeTypes = MimeTypes::getMimeTypes();
 		basePath = config["static.base.path"];
@@ -148,6 +147,15 @@ public:
 
 private:
 	void _init() {
+
+		if (config.contains("session.timeout")) {
+			unsigned long timeout = (unsigned long)config.getIntegerProperty("session.timeout");
+			if (timeout < 60) {
+				timeout = 60;
+			}
+			sessionManager.timeout() = timeout * 1000;
+		}
+		
 		// lisp page pool
 		deque<LispPage*> qu = lspPool.avail_queue();
 		for (deque<LispPage*>::iterator iter = qu.begin(); iter != qu.end(); iter++) {

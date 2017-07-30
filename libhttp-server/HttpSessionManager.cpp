@@ -9,33 +9,33 @@ namespace HTTP {
     using namespace UTIL;
 	
 	HttpSessionManager::HttpSessionManager(unsigned long timeout)
-		: id_idx(0), timeout(timeout), sem(1) {
+		: _id_idx(0), _timeout(timeout), _sem(1) {
 	}
 	HttpSessionManager::~HttpSessionManager() {
 		clear();
 	}
 
 	std::string HttpSessionManager::genSessionId() {
-		return Text::toString(id_idx++);
+		return Text::toString(_id_idx++);
 	}
 
 	void HttpSessionManager::clear() {
-		sem.wait();
-		sessions.clear();
-		sem.post();
+		_sem.wait();
+		_sessions.clear();
+		_sem.post();
 	}
 
 	void HttpSessionManager::removeOutdatedSessions() {
-		sem.wait();
-		for (vector< AutoRef<HttpSession> >::iterator iter = sessions.begin();
-			 iter != sessions.end();) {
+		_sem.wait();
+		for (vector< AutoRef<HttpSession> >::iterator iter = _sessions.begin();
+			 iter != _sessions.end();) {
 			if ((*iter)->outdated()) {
-				iter = sessions.erase(iter);
+				iter = _sessions.erase(iter);
 			} else {
 				iter++;
 			}
 		}
-		sem.post();
+		_sem.post();
 	}
 	
 	bool HttpSessionManager::hasSession(const string & id) {
@@ -47,11 +47,15 @@ namespace HTTP {
 			return false;
 		}
 	}
+
+	unsigned long & HttpSessionManager::timeout() {
+		return _timeout;
+	}
 	
 	AutoRef<HttpSession> HttpSessionManager::getSession(const string & id) {
-		OS::AutoLock lock((Ref<Semaphore>(&sem)));
-		for (vector< AutoRef<HttpSession> >::iterator iter = sessions.begin();
-			 iter != sessions.end(); iter++) {
+		OS::AutoLock lock((Ref<Semaphore>(&_sem)));
+		for (vector< AutoRef<HttpSession> >::iterator iter = _sessions.begin();
+			 iter != _sessions.end(); iter++) {
 			if ((*iter)->id() == id) {
 				return *iter;
 			}
@@ -60,27 +64,27 @@ namespace HTTP {
 	}
 	
 	AutoRef<HttpSession> HttpSessionManager::createSession() {
-        OS::AutoLock lock((Ref<Semaphore>(&sem)));
+        OS::AutoLock lock((Ref<Semaphore>(&_sem)));
 		AutoRef<HttpSession> session(new HttpSession(genSessionId()));
-		session->timeout() = timeout;
-		sessions.push_back(session);
-		return *sessions.rbegin();
+		session->timeout() = _timeout;
+		_sessions.push_back(session);
+		return *_sessions.rbegin();
 	}
 	
 	void HttpSessionManager::destroySession(const string & id) {
-		sem.wait();
-		for (vector< AutoRef<HttpSession> >::iterator iter = sessions.begin();
-			 iter != sessions.end(); iter++) {
+		_sem.wait();
+		for (vector< AutoRef<HttpSession> >::iterator iter = _sessions.begin();
+			 iter != _sessions.end(); iter++) {
 			if ((*iter)->id() == id) {
-				sessions.erase(iter);
+				_sessions.erase(iter);
 				break;
 			}
 		}
-		sem.post();
+		_sem.post();
 	}
 
 	vector< AutoRef<HttpSession> > & HttpSessionManager::getSessions() {
-		return sessions;
+		return _sessions;
 	}
 	
 }
