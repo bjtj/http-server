@@ -429,8 +429,9 @@ public:
     virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 
 		string url = request.getParameter("u");
-
-		if (config["proxy.cache"] == "y") {
+        string nocache = request.getParameter("nocache");
+        
+        if (config["proxy.cache"] == "y" && nocache != "yes") {
 			
 			unsigned long h = hash.hash(url.c_str());
 			string path = config["proxy.cache.path"];
