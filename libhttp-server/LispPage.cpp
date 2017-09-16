@@ -24,7 +24,7 @@ namespace HTTP {
 		return Text::replaceAll(Text::replaceAll(txt, "\\", "\\\\"), "\"", "\\\"");
 	}
 	
-	LispPage::LispPage() {
+    LispPage::LispPage() {
 		LISP::native(_env);
 	}
 	
@@ -295,9 +295,11 @@ namespace HTTP {
 			throw e;
 		} catch (OS::Exception & e) {
 			logger->loge("ERROR: " + e.toString());
+            logger->loge("  last command: '" + env.last_command() + "'");
 			return false;
 		} catch (std::exception & e) {
 			logger->loge("ERROR: " + string(e.what()));
+            logger->loge("  last command: '" + env.last_command() + "'");
 			return false;
 		}
 		return true;
@@ -348,6 +350,7 @@ namespace HTTP {
 
 	string LispPage::parseLispPage(LISP::Env & env, const string & src) {
 
+        env.last_command() = "";
 		compile(env, "(defparameter *content* \"\")");
 		
 		LISP::BufferedCommandReader reader;
@@ -356,6 +359,7 @@ namespace HTTP {
 		try {
 			for (vector<string>::iterator cmd = commands.begin(); cmd != commands.end(); cmd++) {
 				compile(env, *cmd);
+                env.last_command() = *cmd;
 			}
 		} catch (LISP::ExitLispException e) {
 			logger->logd("[LispPage - (quit)]");

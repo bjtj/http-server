@@ -15,6 +15,7 @@ namespace HTTP {
 	class LispPage {
 	private:
 		LISP::Env _env;
+        std::string _last_command;
 	public:
 		LispPage();
 		virtual ~LispPage();
