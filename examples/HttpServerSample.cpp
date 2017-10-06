@@ -657,7 +657,8 @@ int main(int argc, char * args[]) {
 				printf(" * Connections: %zu\n", server->connections());
                 vector<AutoRef<Connection> > conns = server->connectionManager().getConnectionList();
                 for (vector<AutoRef<Connection> >::iterator iter = conns.begin(); iter != conns.end(); iter++) {
-                    printf("  - Recv: %10s Bytes / Send: %10s Bytes (%ld)\n",
+                    printf("  - [%s] Recv: %10s Bytes / Send: %10s Bytes (%ld)\n",
+						   (*iter)->socket()->getRemoteInetAddress().toString().c_str(),
 						   Text::toCommaNumber(Text::toString((*iter)->recvCount())).c_str(),
 						   Text::toCommaNumber(Text::toString((*iter)->sendCount())).c_str(),
 						   (*iter)->sendTryCount());

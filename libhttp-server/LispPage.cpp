@@ -289,12 +289,10 @@ namespace HTTP {
 		} catch (LISP::ExitLispException e) {
 			throw e;
 		} catch (OS::Exception & e) {
-			logger->loge("ERROR: " + e.toString());
-            logger->loge("  last command: '" + env.last_command() + "'");
+			logger->loge("ERROR: '" + e.toString() + "'");
 			return false;
 		} catch (std::exception & e) {
-			logger->loge("ERROR: " + string(e.what()));
-            logger->loge("  last command: '" + env.last_command() + "'");
+			logger->loge("ERROR: '" + string(e.what()) + "'");
 			return false;
 		}
 		return true;
@@ -345,7 +343,6 @@ namespace HTTP {
 
 	string LispPage::parseLispPage(LISP::Env & env, const string & src) {
 
-        env.last_command() = "";
 		compile(env, "(defparameter *content* \"\")");
 		
 		LISP::BufferedCommandReader reader;
@@ -353,8 +350,9 @@ namespace HTTP {
 		vector<string> commands = reader.getCommands();
 		try {
 			for (vector<string>::iterator cmd = commands.begin(); cmd != commands.end(); cmd++) {
-				compile(env, *cmd);
-                env.last_command() = *cmd;
+				if (compile(env, *cmd) == false) {
+					logger->loge("Error occurred with '" + *cmd + "'");
+				}
 			}
 		} catch (LISP::ExitLispException e) {
 			logger->logd("[LispPage - (quit)]");
