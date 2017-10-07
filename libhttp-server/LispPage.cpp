@@ -57,7 +57,7 @@ namespace HTTP {
 			virtual ~Enc() {}
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
-				string txt = LISP::eval(env, scope, iter.next())->toString();
+				string txt = LISP::eval(env, scope, iter.next())->toPrintString();
 				return HEAP_ALLOC(env, LISP::wrap_text(UrlEncoder::encode(txt)));
 			}
 		};
@@ -70,7 +70,7 @@ namespace HTTP {
 			virtual ~Dec() {}
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
-				return HEAP_ALLOC(env, LISP::wrap_text(UrlDecoder::decode(LISP::eval(env, scope, iter.next())->toString())));
+				return HEAP_ALLOC(env, LISP::wrap_text(UrlDecoder::decode(LISP::eval(env, scope, iter.next())->toPrintString())));
 			}
 		};
 		env.scope()->put_func("url-decode", HEAP_ALLOC(env, new Dec));
@@ -83,7 +83,7 @@ namespace HTTP {
 			virtual ~Config() {}
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
-				string key = LISP::eval(env, scope, iter.next())->toString();
+				string key = LISP::eval(env, scope, iter.next())->toPrintString();
 				return HEAP_ALLOC(env, LISP::wrap_text(config[key]));
 			}
 		};
@@ -105,9 +105,9 @@ namespace HTTP {
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
 				if (name->r_symbol() == "proc-basic-auth") {
-					string realm = LISP::eval(env, scope, iter.next())->toString();
-					string username = LISP::eval(env, scope, iter.next())->toString();
-					string password = LISP::eval(env, scope, iter.next())->toString();
+					string realm = LISP::eval(env, scope, iter.next())->toPrintString();
+					string username = LISP::eval(env, scope, iter.next())->toPrintString();
+					string password = LISP::eval(env, scope, iter.next())->toPrintString();
 					BasicAuth auth(realm, username, password);
 					if (!auth.validate(request)) {
 						auth.setAuthentication(response);
@@ -135,14 +135,14 @@ namespace HTTP {
 			virtual DECL_PROC() {
 				Iterator<_VAR > iter(args);
 				if (name->r_symbol() == "url") {
-					string url = LISP::eval(env, scope, iter.next())->toString();
+					string url = LISP::eval(env, scope, iter.next())->toPrintString();
 					return HEAP_ALLOC(env, LISP::wrap_text(HttpSessionTool::urlMan(request, url, session)));
 				} else if (name->r_symbol() == "get-session-value") {
-					string name = LISP::eval(env, scope, iter.next())->toString();
+					string name = LISP::eval(env, scope, iter.next())->toPrintString();
 					return HEAP_ALLOC(env, LISP::wrap_text((*session)[name]));
 				} else if (name->r_symbol() == "set-session-value") {
-					string name = LISP::eval(env, scope, iter.next())->toString();
-					string value = LISP::eval(env, scope, iter.next())->toString();
+					string name = LISP::eval(env, scope, iter.next())->toPrintString();
+					string value = LISP::eval(env, scope, iter.next())->toPrintString();
 					(*session)[name] = value;
 					return HEAP_ALLOC(env, LISP::wrap_text(value));
 				}
@@ -172,17 +172,17 @@ namespace HTTP {
 				} else if (name->r_symbol() == "get-request-path") {
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getPath()));
 				} else if (name->r_symbol() == "get-request-param") {
-					string paramName = LISP::eval(env, scope, iter.next())->toString();
+					string paramName = LISP::eval(env, scope, iter.next())->toPrintString();
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getParameter(paramName)));
 				} else if (name->r_symbol() == "get-request-header") {
-					string paramName = LISP::eval(env, scope, iter.next())->toString();
+					string paramName = LISP::eval(env, scope, iter.next())->toPrintString();
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getHeaderFieldIgnoreCase(paramName)));
 				} else if (name->r_symbol() == "get-remote-host") {
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getRemoteAddress().getHost()));
 				} else if (name->r_symbol() == "get-remote-port") {
 					return HEAP_ALLOC(env, LISP::Integer(request.getRemoteAddress().getPort()));
 				} else if (name->r_symbol() == "get-cookie") {
-					string key = LISP::eval(env, scope, iter.next())->toString();
+					string key = LISP::eval(env, scope, iter.next())->toPrintString();
 					vector<Cookie> cookies = request.getCookies();
 					for (vector<Cookie>::iterator iter = cookies.begin(); iter != cookies.end(); iter++) {
 						Cookie & cookie = *iter;
@@ -221,7 +221,7 @@ namespace HTTP {
 					int status = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
 					string statusMessage;
 					if (iter.has()) {
-						statusMessage = LISP::eval(env, scope, iter.next())->toString();
+						statusMessage = LISP::eval(env, scope, iter.next())->toPrintString();
 					}
 					if (statusMessage.empty()) {
 						response.setStatus(status);
@@ -230,24 +230,24 @@ namespace HTTP {
 					}
 					return HEAP_ALLOC(env, LISP::Integer(status));
 				} else if (name->r_symbol() == "set-response-header") {
-					string name = LISP::eval(env, scope, iter.next())->toString();
-					string value = LISP::eval(env, scope, iter.next())->toString();
+					string name = LISP::eval(env, scope, iter.next())->toPrintString();
+					string value = LISP::eval(env, scope, iter.next())->toPrintString();
 					response.setHeaderField(name, value);
 					return HEAP_ALLOC(env, LISP::wrap_text(value));
 				} else if (name->r_symbol() == "set-redirect") {
-					string location = LISP::eval(env, scope, iter.next())->toString();
+					string location = LISP::eval(env, scope, iter.next())->toPrintString();
 					response.setRedirect(location);
 					return HEAP_ALLOC(env, LISP::wrap_text(location));
 				} else if (name->r_symbol() == "set-forward") {
-					string location = LISP::eval(env, scope, iter.next())->toString();
+					string location = LISP::eval(env, scope, iter.next())->toPrintString();
 					response.setForward(location);
 					return HEAP_ALLOC(env, LISP::wrap_text(location));
 				} else if (name->r_symbol() == "set-file-transfer") {
-					string path = LISP::eval(env, scope, iter.next())->toString();
+					string path = LISP::eval(env, scope, iter.next())->toPrintString();
 					response["set-file-transfer"] = path;
 					return HEAP_ALLOC(env, LISP::wrap_text(path));
 				} else if (name->r_symbol() == "set-cookie") {
-					string cookie = LISP::eval(env, scope, iter.next())->toString();
+					string cookie = LISP::eval(env, scope, iter.next())->toPrintString();
 					vector<Cookie> cookies;
 					cookies.push_back(Cookie(cookie));
 					response.setCookies(cookies);
@@ -359,7 +359,7 @@ namespace HTTP {
 		}
 		reader.clearCommands();
 
-		return env.scope()->rget_sym("*content*")->toString();
+		return env.scope()->rget_sym("*content*")->toPrintString();
 	}
 	
 }
