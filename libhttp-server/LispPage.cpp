@@ -42,7 +42,8 @@ namespace HTTP {
 
 	void LispPage::applyProperties(const map<string, string> & props) {
 		for (map<string, string>::const_iterator iter = props.begin(); iter != props.end(); iter++) {
-			env().scope()->put_sym(toLispySymbolName(iter->first), env().alloc(new LISP::Var(LISP::wrap_text(iter->second))));
+			env().scope()->put_var(LISP::Symbol(toLispySymbolName(iter->first)),
+								   env().alloc(new LISP::Var(LISP::wrap_text(iter->second))));
 		}
 	}
 	
@@ -61,7 +62,7 @@ namespace HTTP {
 				return HEAP_ALLOC(env, LISP::wrap_text(UrlEncoder::encode(txt)));
 			}
 		};
-		env.scope()->put_func("url-encode", HEAP_ALLOC(env, new Enc));
+		env.scope()->put_func(LISP::Symbol("url-encode"), HEAP_ALLOC(env, new Enc));
         
 		class Dec : public LISP::Procedure {
 		private:
@@ -73,7 +74,7 @@ namespace HTTP {
 				return HEAP_ALLOC(env, LISP::wrap_text(UrlDecoder::decode(LISP::eval(env, scope, iter.next())->toPrintString())));
 			}
 		};
-		env.scope()->put_func("url-decode", HEAP_ALLOC(env, new Dec));
+		env.scope()->put_func(LISP::Symbol("url-decode"), HEAP_ALLOC(env, new Dec));
 
 		class Config : public LISP::Procedure {
 		private:
@@ -87,7 +88,7 @@ namespace HTTP {
 				return HEAP_ALLOC(env, LISP::wrap_text(config[key]));
 			}
 		};
-		env.scope()->put_func("http:get-config", HEAP_ALLOC(env, new Config(config)));
+		env.scope()->put_func(LISP::Symbol("http:get-config"), HEAP_ALLOC(env, new Config(config)));
 
 	}
 	void LispPage::applyAuth(HttpRequest & request, HttpResponse & response) {
@@ -118,7 +119,7 @@ namespace HTTP {
 				return HEAP_ALLOC(env, "nil");
 			}
 		};
-		env.scope()->put_func("proc-basic-auth", HEAP_ALLOC(env, new Auth(request, response)));
+		env.scope()->put_func(LISP::Symbol("proc-basic-auth"), HEAP_ALLOC(env, new Auth(request, response)));
 	}
 	void LispPage::applySession(HttpRequest & request, AutoRef<HttpSession> session) {
 		applySession(_env, request, session);
@@ -150,9 +151,9 @@ namespace HTTP {
                 
 			}
 		};
-		env.scope()->put_func("url", HEAP_ALLOC(env, new LispSession(request, session)));
-		env.scope()->put_func("get-session-value", HEAP_ALLOC(env, new LispSession(request, session)));
-		env.scope()->put_func("set-session-value", HEAP_ALLOC(env, new LispSession(request, session)));
+		env.scope()->put_func(LISP::Symbol("url"), HEAP_ALLOC(env, new LispSession(request, session)));
+		env.scope()->put_func(LISP::Symbol("get-session-value"), HEAP_ALLOC(env, new LispSession(request, session)));
+		env.scope()->put_func(LISP::Symbol("set-session-value"), HEAP_ALLOC(env, new LispSession(request, session)));
 	}
 	void LispPage::applyRequest(HttpRequest & request) {
 		applyRequest(_env, request);
@@ -195,13 +196,13 @@ namespace HTTP {
 				return HEAP_ALLOC(env, "nil");
 			}
 		};
-		env.scope()->put_func("get-request-method", HEAP_ALLOC(env, new LispRequest(request)));
-		env.scope()->put_func("get-request-path", HEAP_ALLOC(env, new LispRequest(request)));
-		env.scope()->put_func("get-request-param", HEAP_ALLOC(env, new LispRequest(request)));
-		env.scope()->put_func("get-request-header", HEAP_ALLOC(env, new LispRequest(request)));
-		env.scope()->put_func("get-remote-host", HEAP_ALLOC(env, new LispRequest(request)));
-		env.scope()->put_func("get-remote-port", HEAP_ALLOC(env, new LispRequest(request)));
-		env.scope()->put_func("get-cookie", HEAP_ALLOC(env, new LispRequest(request)));
+		env.scope()->put_func(LISP::Symbol("get-request-method"), HEAP_ALLOC(env, new LispRequest(request)));
+		env.scope()->put_func(LISP::Symbol("get-request-path"), HEAP_ALLOC(env, new LispRequest(request)));
+		env.scope()->put_func(LISP::Symbol("get-request-param"), HEAP_ALLOC(env, new LispRequest(request)));
+		env.scope()->put_func(LISP::Symbol("get-request-header"), HEAP_ALLOC(env, new LispRequest(request)));
+		env.scope()->put_func(LISP::Symbol("get-remote-host"), HEAP_ALLOC(env, new LispRequest(request)));
+		env.scope()->put_func(LISP::Symbol("get-remote-port"), HEAP_ALLOC(env, new LispRequest(request)));
+		env.scope()->put_func(LISP::Symbol("get-cookie"), HEAP_ALLOC(env, new LispRequest(request)));
 	}
 
 	void LispPage::applyResponse(HttpResponse & response) {
@@ -256,12 +257,12 @@ namespace HTTP {
 				return HEAP_ALLOC(env, "nil");
 			}
 		};
-		env.scope()->put_func("set-status-code", HEAP_ALLOC(env, new LispResponse(response)));
-		env.scope()->put_func("set-response-header", HEAP_ALLOC(env, new LispResponse(response)));
-		env.scope()->put_func("set-redirect", HEAP_ALLOC(env, new LispResponse(response)));
-		env.scope()->put_func("set-forward", HEAP_ALLOC(env, new LispResponse(response)));
-		env.scope()->put_func("set-file-transfer", HEAP_ALLOC(env, new LispResponse(response)));
-		env.scope()->put_func("set-cookie", HEAP_ALLOC(env, new LispResponse(response)));
+		env.scope()->put_func(LISP::Symbol("set-status-code"), HEAP_ALLOC(env, new LispResponse(response)));
+		env.scope()->put_func(LISP::Symbol("set-response-header"), HEAP_ALLOC(env, new LispResponse(response)));
+		env.scope()->put_func(LISP::Symbol("set-redirect"), HEAP_ALLOC(env, new LispResponse(response)));
+		env.scope()->put_func(LISP::Symbol("set-forward"), HEAP_ALLOC(env, new LispResponse(response)));
+		env.scope()->put_func(LISP::Symbol("set-file-transfer"), HEAP_ALLOC(env, new LispResponse(response)));
+		env.scope()->put_func(LISP::Symbol("set-cookie"), HEAP_ALLOC(env, new LispResponse(response)));
 		
 	}
 	void LispPage::applyLoadPage() {
@@ -279,7 +280,7 @@ namespace HTTP {
 				return HEAP_ALLOC(env, LISP::wrap_text(LispPage::parseLispPage(env, reader.readFullAsString())));
 			}
 		};
-		env.scope()->put_func("load-page", HEAP_ALLOC(env, new LispLoadPage));
+		env.scope()->put_func(LISP::Symbol("load-page"), HEAP_ALLOC(env, new LispLoadPage));
 	}
     
 	bool LispPage::compile(LISP::Env & env, const string & line) {
@@ -359,7 +360,7 @@ namespace HTTP {
 		}
 		reader.clearCommands();
 
-		return env.scope()->rget_sym("*content*")->toPrintString();
+		return env.scope()->rget_var(LISP::Symbol("*content*"))->toPrintString();
 	}
 	
 }
