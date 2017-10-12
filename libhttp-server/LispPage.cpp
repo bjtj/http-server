@@ -9,7 +9,7 @@
 #include "BasicAuth.hpp"
 
 #define _VAR OS::GCRef<LISP::Var> 
-#define DECL_PROC() OS::GCRef<LISP::Var> proc(LISP::Env & env, AutoRef<LISP::Scope> scope, OS::GCRef<LISP::Var> name, vector<OS::GCRef<LISP::Var> > & args)
+#define DECL_PROC() OS::GCRef<LISP::Var> proc(LISP::Env & env, AutoRef<LISP::Scope> scope, OS::GCRef<LISP::Var> name, LISP::Sequence & args)
 #define HEAP_ALLOC(E,V) E.alloc(new LISP::Var(V))
 
 namespace HTTP {
@@ -57,7 +57,7 @@ namespace HTTP {
 			Enc() {}
 			virtual ~Enc() {}
 			virtual DECL_PROC() {
-				Iterator<_VAR > iter(args);
+				Iterator<_VAR > iter = args.iter();
 				string txt = LISP::eval(env, scope, iter.next())->toPrintString();
 				return HEAP_ALLOC(env, LISP::wrap_text(UrlEncoder::encode(txt)));
 			}
@@ -70,7 +70,7 @@ namespace HTTP {
 			Dec() {}
 			virtual ~Dec() {}
 			virtual DECL_PROC() {
-				Iterator<_VAR > iter(args);
+				Iterator<_VAR > iter = args.iter();
 				return HEAP_ALLOC(env, LISP::wrap_text(UrlDecoder::decode(LISP::eval(env, scope, iter.next())->toPrintString())));
 			}
 		};
@@ -83,7 +83,7 @@ namespace HTTP {
 			Config(HttpServerConfig & config) : config(config) {}
 			virtual ~Config() {}
 			virtual DECL_PROC() {
-				Iterator<_VAR > iter(args);
+				Iterator<_VAR > iter = args.iter();
 				string key = LISP::eval(env, scope, iter.next())->toPrintString();
 				return HEAP_ALLOC(env, LISP::wrap_text(config[key]));
 			}
@@ -104,7 +104,7 @@ namespace HTTP {
 				: request(request), response(response) {}
 			virtual ~Auth() {}
 			virtual DECL_PROC() {
-				Iterator<_VAR > iter(args);
+				Iterator<_VAR > iter = args.iter();
 				if (name->r_symbol() == "proc-basic-auth") {
 					string realm = LISP::eval(env, scope, iter.next())->toPrintString();
 					string username = LISP::eval(env, scope, iter.next())->toPrintString();
@@ -134,7 +134,7 @@ namespace HTTP {
 				: request(request), session(session) {}
 			virtual ~LispSession() {}
 			virtual DECL_PROC() {
-				Iterator<_VAR > iter(args);
+				Iterator<_VAR > iter = args.iter();
 				if (name->r_symbol() == "url") {
 					string url = LISP::eval(env, scope, iter.next())->toPrintString();
 					return HEAP_ALLOC(env, LISP::wrap_text(HttpSessionTool::urlMan(request, url, session)));
@@ -167,7 +167,7 @@ namespace HTTP {
 				: request(request) {}
 			virtual ~LispRequest() {}
 			virtual DECL_PROC() {
-				Iterator<_VAR> iter(args);
+				Iterator<_VAR> iter = args.iter();
 				if (name->r_symbol() == "get-request-method") {
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getMethod()));
 				} else if (name->r_symbol() == "get-request-path") {
@@ -217,7 +217,7 @@ namespace HTTP {
 				: response(response) {}
 			virtual ~LispResponse() {}
 			virtual DECL_PROC() {
-				Iterator<_VAR> iter(args);
+				Iterator<_VAR> iter = args.iter();
 				if (name->r_symbol() == "set-status-code") {
 					int status = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
 					string statusMessage;
@@ -275,7 +275,7 @@ namespace HTTP {
 			LispLoadPage() {}
 			virtual ~LispLoadPage() {}
 			virtual DECL_PROC() {
-				Iterator<_VAR> iter(args);
+				Iterator<_VAR> iter = args.iter();
 				FileStream reader(LISP::pathname(env, LISP::eval(env, scope, iter.next()))->r_pathname().file(), "rb");
 				return HEAP_ALLOC(env, LISP::wrap_text(LispPage::parseLispPage(env, reader.readFullAsString())));
 			}
