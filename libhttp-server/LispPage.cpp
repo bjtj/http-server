@@ -9,7 +9,7 @@
 #include "BasicAuth.hpp"
 
 #define _VAR OS::GCRef<LISP::Var> 
-#define DECL_PROC() OS::GCRef<LISP::Var> proc(LISP::Env & env, AutoRef<LISP::Scope> scope, OS::GCRef<LISP::Var> name, LISP::Sequence & args)
+#define DECL_PROC() OS::GCRef<LISP::Var> proc(LISP::Env & env, UnsafeAutoRef<LISP::Scope> scope, OS::GCRef<LISP::Var> name, LISP::Sequence & args)
 #define HEAP_ALLOC(E,V) E.alloc(new LISP::Var(V))
 
 namespace HTTP {
