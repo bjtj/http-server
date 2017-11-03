@@ -172,6 +172,8 @@ namespace HTTP {
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getMethod()));
 				} else if (name->r_symbol() == "get-request-path") {
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getPath()));
+				} else if (name->r_symbol() == "get-request-raw-path") {
+					return HEAP_ALLOC(env, LISP::wrap_text(request.getRawPath()));
 				} else if (name->r_symbol() == "get-request-param") {
 					string paramName = LISP::eval(env, scope, iter.next())->toPrintString();
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getParameter(paramName)));
@@ -199,6 +201,7 @@ namespace HTTP {
 		_VAR func = HEAP_ALLOC(env, new LispRequest(request));
 		env.scope()->put_func(LISP::Symbol("get-request-method"), func);
 		env.scope()->put_func(LISP::Symbol("get-request-path"), func);
+		env.scope()->put_func(LISP::Symbol("get-request-raw-path"), func);
 		env.scope()->put_func(LISP::Symbol("get-request-param"), func);
 		env.scope()->put_func(LISP::Symbol("get-request-header"), func);
 		env.scope()->put_func(LISP::Symbol("get-remote-host"), func);
