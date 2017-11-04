@@ -104,6 +104,38 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
 	response.setContentLength(0);
 }
 
+class Cache {
+private:
+	Date _date;
+	string _content;
+public:
+    Cache() {
+	}
+	Cache(string content) : _content(content) {
+	}
+    virtual ~Cache() {
+	}
+	Date date() {
+		return _date;
+	}
+	string & content() {
+		return _content;
+	}
+	bool needUpdate(const File & file) {
+		return ((file.getSize() != (filesize_t)size()) ||
+				(file.lastModifiedDate() != _date));
+	}
+	void update(File & file) {
+		FileStream reader(file, "rb");
+		_date = file.lastModifiedDate();
+		_content = reader.readFullAsString();
+		reader.close();
+	}
+	size_t size() {
+		return _content.size();
+	}
+};
+
 /**
  * @brief 
  */
@@ -118,7 +150,7 @@ private:
 	string driverPath;
 	string driverName;
 	map<string, string> mimeTypes;
-    map<string, string> lspMemCache;
+    map<string, Cache> lspMemCache;
 	Pool<LispPage> lspPool;
 public:
 	StaticHttpRequestHandler(ServerConfig & config, const string & prefix)
@@ -235,6 +267,14 @@ public:
         setFileTransfer(response, file);
     }
 
+	bool needCacheUpdate(const File & file) {
+		string path = file.getPath();
+		if (lspMemCache.find(path) == lspMemCache.end()) {
+			return true;
+		}
+		return lspMemCache[path].needUpdate(file);
+	}
+
 	/**
 	 * handle lisp page
 	 */
@@ -243,13 +283,11 @@ public:
 		session->updateLastAccessTime();
 		response.setStatus(200);
 		response.setContentType("text/html");
-		if (lspMemCache.find(file.getPath()) == lspMemCache.end() ||
-			(filesize_t)lspMemCache[file.getPath()].size() != file.getSize()) {
-			FileStream reader(file, "rb");
-			lspMemCache[file.getPath()] = reader.readFullAsString();
-			reader.close();
+		if (needCacheUpdate(file)) {
+			logger->logd("[UPDATE CACHE]");
+			lspMemCache[file.getPath()].update(file);
 		}
-		string dump = lspMemCache[file.getPath()];
+		string dump = lspMemCache[file.getPath()].content();
 		string content = procLispPage(request, response, session, dump);
 		if (response.redirectRequested()) {
 			redirect(config, request, response, session, response.getRedirectLocation());
