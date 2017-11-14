@@ -111,11 +111,11 @@ namespace HTTP {
 					BasicAuth auth(realm, username, password);
 					if (!auth.validate(request)) {
 						auth.setAuthentication(response);
-						return HEAP_ALLOC(env, "nil");
+						return env.nil();
 					}
-					return HEAP_ALLOC(env, "t");
+					return env.t();
 				}
-				return HEAP_ALLOC(env, "nil");
+				return env.nil();
 			}
 		};
 		env.scope()->put_func(LISP::Symbol("proc-basic-auth"), HEAP_ALLOC(env, new Auth(request, response)));
@@ -146,7 +146,7 @@ namespace HTTP {
 					(*session)[name] = value;
 					return HEAP_ALLOC(env, LISP::wrap_text(value));
 				}
-				return HEAP_ALLOC(env, "nil");
+				return env.nil();
                 
 			}
 		};
@@ -193,9 +193,9 @@ namespace HTTP {
 							return HEAP_ALLOC(env, LISP::wrap_text(cookie[key]));
 						}
 					}
-					return HEAP_ALLOC(env, "nil");
+					return env.nil();
 				}
-				return HEAP_ALLOC(env, "nil");
+				return env.nil();
 			}
 		};
 		_VAR func = HEAP_ALLOC(env, new LispRequest(request));
@@ -258,7 +258,7 @@ namespace HTTP {
 					response.setCookies(cookies);
 					return HEAP_ALLOC(env, LISP::wrap_text(cookie));
 				}
-				return HEAP_ALLOC(env, "nil");
+				return env.nil();
 			}
 		};
 		_VAR func = HEAP_ALLOC(env, new LispResponse(response));
