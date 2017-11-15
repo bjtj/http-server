@@ -6,6 +6,8 @@ DIR_WORLD=$PWD/world
 
 OPT=build
 
+CPU_COUNT=$(cat /proc/cpuinfo | grep processor | wc -l)
+
 if [ -n "$1" ]; then
 	OPT=$1
 fi
@@ -28,20 +30,26 @@ build() {
 	mkdir -p $DIR_BUILD
 	mkdir -p $DIR_WORLD
 	cd $DIR_BUILD
-	$BASE/configure --prefix="$DIR_WORLD" --enable-debug && make && make install
+	$BASE/configure --prefix="$DIR_WORLD" --enable-debug
+	make -j$CPU_COUNT
+	make install
 }
 
 install() {
 	clean
 	mkdir -p $DIR_BUILD
 	cd $DIR_BUILD
-	$BASE/configure && make && sudo make install
+	$BASE/configure
+	make -j$CPU_COUNT
+	sudo make install
 }
 
 check() {
 	cd $DIR_BUILD
-	make check
+	make check -j$CPU_COUNT
 }
+
+echo "cpu count := $CPU_COUNT"
 
 case $OPT in
 	reconf)
