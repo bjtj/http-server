@@ -101,13 +101,13 @@ namespace HTTP {
 		return props[name];
 	}
 
-	void HttpResponse::setCookies(const vector<Cookie> & cookies) {
+	void HttpResponse::appendCookies(const vector<Cookie> & cookies) {
 		for (vector<Cookie>::const_iterator iter = cookies.begin(); iter != cookies.end(); iter++) {
-			setCookie(*iter);
+			appendCookie(*iter);
 		}
 	}
 
-	void HttpResponse::setCookie(const Cookie & cookie) {
+	void HttpResponse::appendCookie(const Cookie & cookie) {
 		_header.appendHeaderField("Set-Cookie", cookie.toString());
 	}
 }

@@ -187,13 +187,21 @@ namespace HTTP {
 				} else if (name->r_symbol() == "get-cookie") {
 					string key = LISP::eval(env, scope, iter.next())->toPrintString();
 					vector<Cookie> cookies = request.getCookies();
-					for (vector<Cookie>::iterator iter = cookies.begin(); iter != cookies.end(); iter++) {
+					for (Iterator<Cookie> iter(cookies); iter.has(); iter++) {
 						Cookie & cookie = *iter;
 						if (cookie[key].empty() == false) {
 							return HEAP_ALLOC(env, LISP::wrap_text(cookie[key]));
 						}
 					}
 					return env.nil();
+				} else if (name->r_symbol() == "get-all-cookies") {
+					vector<Cookie> cookies = request.getCookies();
+					vector<_VAR> lst;
+					for (Iterator<Cookie> iter(cookies); iter.has(); iter++) {
+						Cookie & cookie = *iter;
+						lst.push_back(HEAP_ALLOC(env, LISP::wrap_text(cookie.toString())));
+					}
+					return HEAP_ALLOC(env, lst);
 				}
 				return env.nil();
 			}
@@ -207,6 +215,7 @@ namespace HTTP {
 		env.scope()->put_func(LISP::Symbol("get-remote-host"), func);
 		env.scope()->put_func(LISP::Symbol("get-remote-port"), func);
 		env.scope()->put_func(LISP::Symbol("get-cookie"), func);
+		env.scope()->put_func(LISP::Symbol("get-all-cookies"), func);
 	}
 
 	void LispPage::applyResponse(HttpResponse & response) {
@@ -251,11 +260,11 @@ namespace HTTP {
 					string path = LISP::eval(env, scope, iter.next())->toPrintString();
 					response["set-file-transfer"] = path;
 					return HEAP_ALLOC(env, LISP::wrap_text(path));
-				} else if (name->r_symbol() == "set-cookie") {
+				} else if (name->r_symbol() == "push-set-cookie") {
 					string cookie = LISP::eval(env, scope, iter.next())->toPrintString();
 					vector<Cookie> cookies;
 					cookies.push_back(Cookie(cookie));
-					response.setCookies(cookies);
+					response.appendCookies(cookies);
 					return HEAP_ALLOC(env, LISP::wrap_text(cookie));
 				}
 				return env.nil();
@@ -267,7 +276,7 @@ namespace HTTP {
 		env.scope()->put_func(LISP::Symbol("set-redirect"), func);
 		env.scope()->put_func(LISP::Symbol("set-forward"), func);
 		env.scope()->put_func(LISP::Symbol("set-file-transfer"), func);
-		env.scope()->put_func(LISP::Symbol("set-cookie"), func);
+		env.scope()->put_func(LISP::Symbol("push-set-cookie"), func);
 		
 	}
 	void LispPage::applyLoadPage() {

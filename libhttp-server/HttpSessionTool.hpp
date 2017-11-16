@@ -14,6 +14,14 @@ namespace HTTP {
 		HttpSessionTool() {}
 		virtual ~HttpSessionTool() {}
 
+		static bool isCookieSession(HttpRequest & request) {
+			std::string sessionId = request.getCookie("sessionId");
+			if (sessionId.empty() == false) {
+				return true;
+			}
+			return false;
+		}
+
 		static std::string getSessionId(HttpRequest & request) {
 			std::string sessionId = request.getCookie("sessionId");
 			if (sessionId.empty() == false) {
@@ -22,25 +30,43 @@ namespace HTTP {
 			return request.getParameter("sessionId");
 		}
 
-        static OS::AutoRef<HttpSession> handleSession(HttpRequest & request, HttpResponse & response, HttpSessionManager & sessionManager) {
+		static void setCookieSession(HttpRequest & request,
+									 HttpResponse & response,
+									 OS::AutoRef<HttpSession> & session) {
+			OS::osl_time_t y = {(360ULL * 24ULL * 60ULL * 60ULL), 0};
+			OS::Date year(y);
+			std::string date = OS::Date::formatRfc1123(OS::Date::now() + year);
+			Cookie cookie("sessionId=" + session->id() +
+						  "; expires=" + date +
+						  "; path=" + request.getDirectory() +
+						  "; HttpOnly");
+			response.removeHeaderFields("Set-Cookie");
+			response.appendCookie(cookie);
+		}
+
+        static OS::AutoRef<HttpSession> handleSession(HttpRequest & request,
+													  HttpResponse & response,
+													  HttpSessionManager & sessionManager) {
 			std::string sessionId = getSessionId(request);
-            OS::AutoRef<HttpSession> session = (sessionId.empty() || !sessionManager.hasSession(sessionId)) ?
-				createSession(request, response, sessionManager) : sessionManager.getSession(sessionId);
+            OS::AutoRef<HttpSession> session =
+				(sessionId.empty() || !sessionManager.hasSession(sessionId)) ?
+				createSession(request, response, sessionManager) :
+				sessionManager.getSession(sessionId);
 			if (session->outdated()) {
 				sessionManager.destroySession(session->id());
-				return createSession(request, response, sessionManager);
+				session = createSession(request, response, sessionManager);
+			}
+			if (isCookieSession(request) == false) {
+				setCookieSession(request, response, session);
 			}
 			return session;
 		}
 
-		static OS::AutoRef<HttpSession> createSession(HttpRequest & request, HttpResponse & response, HttpSessionManager & sessionManager) {
+		static OS::AutoRef<HttpSession> createSession(HttpRequest & request,
+													  HttpResponse & response,
+													  HttpSessionManager & sessionManager) {
 			OS::AutoRef<HttpSession> session = sessionManager.createSession();
-			OS::osl_time_t y = {(360ULL * 24ULL * 60ULL * 60ULL), 0};
-			OS::Date year(y);
-			std::string date = OS::Date::formatRfc1123(OS::Date::now() + year);
-			Cookie cookie("sessionId=" + session->id() + "; expires=" + date + "; path=" + request.getDirectory() + "; HttpOnly");
-			response.header().removeHeaderFields("Set-Cookie");
-			response.setCookie(cookie);
+			setCookieSession(request, response, session);
 			return session;
 		}
 

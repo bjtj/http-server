@@ -51,8 +51,8 @@ namespace HTTP {
 		bool isRedirectionStatus();
 		std::string getLocation();
 		std::string & operator[] (const std::string & name);
-		void setCookies(const std::vector<Cookie> & cookies);
-		void setCookie(const Cookie & cookie);
+		void appendCookies(const std::vector<Cookie> & cookies);
+		void appendCookie(const Cookie & cookie);
 	};
 }
 
