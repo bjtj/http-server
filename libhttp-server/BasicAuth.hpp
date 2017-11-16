@@ -26,6 +26,7 @@ namespace HTTP {
 		OS::AutoRef<OnBasicAuth> onAuth;
 	public:
 		BasicAuth(OS::AutoRef<OnBasicAuth> onAuth);
+		BasicAuth(const std::string & realm, OS::AutoRef<OnBasicAuth> onAuth);
 		BasicAuth(const std::string & username, const std::string & password);
 		BasicAuth(const std::string & realm, const std::string & username, const std::string & password);
 		virtual ~BasicAuth();

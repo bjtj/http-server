@@ -103,12 +103,34 @@ namespace HTTP {
 				: request(request), response(response) {}
 			virtual ~Auth() {}
 			LISP_PROCEDURE_PROC(env, scope, name, args) {
+
+				class _cls : public OnBasicAuth {
+				private:
+					LISP::Env & _env;
+					OS::UnsafeAutoRef<LISP::Scope> & _scope;
+					_VAR _func;
+				public:
+					_cls(LISP::Env & env, OS::UnsafeAutoRef<LISP::Scope> & scope, _VAR func)
+						: _env(env), _scope(scope), _func(func) {
+					}
+					virtual ~_cls() {
+					}
+					virtual bool onAuth(const string & username, const string & password) {
+						_VAR name;
+						_VAR un = HEAP_ALLOC(_env, LISP::wrap_text(username));
+						_VAR pw = HEAP_ALLOC(_env, LISP::wrap_text(password));
+						LISP::Sequence fargs;
+						fargs.push_back(un);
+						fargs.push_back(pw);
+						return (_func->proc(_env, _scope, name, fargs)->isNil() == false);
+					}
+				};
+				
 				Iterator<_VAR > iter = args.iter();
 				if (name->r_symbol() == "proc-basic-auth") {
 					string realm = LISP::eval(env, scope, iter.next())->toPrintString();
-					string username = LISP::eval(env, scope, iter.next())->toPrintString();
-					string password = LISP::eval(env, scope, iter.next())->toPrintString();
-					BasicAuth auth(realm, username, password);
+					_VAR func = LISP::eval(env, scope, iter.next());
+					BasicAuth auth(realm, AutoRef<OnBasicAuth>(new _cls(env, scope, func)));
 					if (!auth.validate(request)) {
 						auth.setAuthentication(response);
 						return env.nil();

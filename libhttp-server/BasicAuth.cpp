@@ -31,6 +31,9 @@ namespace HTTP {
 	
 	BasicAuth::BasicAuth(AutoRef<OnBasicAuth> onAuth) : onAuth(onAuth) {
 	}
+	BasicAuth::BasicAuth(const string & realm, AutoRef<OnBasicAuth> onAuth)
+		: HttpAuth(realm), onAuth(onAuth) {
+	}
 	BasicAuth::BasicAuth(const string & username, const string & password)
 		: onAuth(new SimpleOnBasicAuth(username, password)) {
 	}
