@@ -30,6 +30,17 @@ namespace HTTP {
 			return request.getParameter("sessionId");
 		}
 
+		static std::string cookiePath(const std::string & path) {
+			if (path.size() > 1) {
+				for (size_t i = path.size() - 1; i > 1; i--) {
+					if (path[i] != '/') {
+						return path.substr(0, i+1);
+					}
+				}
+			}
+			return path;
+		}
+
 		static void setCookieSession(HttpRequest & request,
 									 HttpResponse & response,
 									 OS::AutoRef<HttpSession> & session) {
@@ -38,7 +49,7 @@ namespace HTTP {
 			std::string date = OS::Date::formatRfc1123(OS::Date::now() + year);
 			Cookie cookie("sessionId=" + session->id() +
 						  "; expires=" + date +
-						  "; path=" + request.getDirectory() +
+						  "; path=" + cookiePath(request.getDirectory()) +
 						  "; HttpOnly");
 			response.removeHeaderFields("Set-Cookie");
 			response.appendCookie(cookie);

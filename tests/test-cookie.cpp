@@ -2,6 +2,7 @@
 #include <libhttp-server/Cookie.hpp>
 #include <libhttp-server/HttpRequest.hpp>
 #include <libhttp-server/HttpResponse.hpp>
+#include <libhttp-server/HttpSessionTool.hpp>
 #include <vector>
 
 using namespace std;
@@ -16,6 +17,12 @@ public:
     virtual ~CookieTestCase() {
 	}
 	virtual void test() {
+
+		{
+			ASSERT(HttpSessionTool::cookiePath("/static/"), ==, "/static");
+			ASSERT(HttpSessionTool::cookiePath("/"), ==, "/");
+		}
+		
 		{
 			Cookie cookie;
 			cookie["a"] = "A";
@@ -69,7 +76,7 @@ public:
 
 			HttpResponse response;
 			response.setStatus(200);
-			response.setCookies(cookies);
+			response.appendCookies(cookies);
 			ASSERT(response.toString(), ==, "HTTP/1.1 200 OK\r\nSet-Cookie: a=A; b=B\r\nSet-Cookie: c=C; d=D\r\n\r\n");
 		}
 	}
