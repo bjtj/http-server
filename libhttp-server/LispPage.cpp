@@ -138,7 +138,6 @@ namespace HTTP {
 					string url = LISP::eval(env, scope, iter.next())->toPrintString();
 					return HEAP_ALLOC(env, LISP::wrap_text(HttpSessionTool::urlMan(request, url, session)));
 				} else if (name->r_symbol() == "get-session-id") {
-					string name = LISP::eval(env, scope, iter.next())->toPrintString();
 					return HEAP_ALLOC(env, LISP::wrap_text(session->id()));
 				} else if (name->r_symbol() == "get-session-value") {
 					string name = LISP::eval(env, scope, iter.next())->toPrintString();
