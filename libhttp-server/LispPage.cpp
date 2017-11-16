@@ -137,6 +137,9 @@ namespace HTTP {
 				if (name->r_symbol() == "url") {
 					string url = LISP::eval(env, scope, iter.next())->toPrintString();
 					return HEAP_ALLOC(env, LISP::wrap_text(HttpSessionTool::urlMan(request, url, session)));
+				} else if (name->r_symbol() == "get-session-id") {
+					string name = LISP::eval(env, scope, iter.next())->toPrintString();
+					return HEAP_ALLOC(env, LISP::wrap_text(session->id()));
 				} else if (name->r_symbol() == "get-session-value") {
 					string name = LISP::eval(env, scope, iter.next())->toPrintString();
 					return HEAP_ALLOC(env, LISP::wrap_text((*session)[name]));
@@ -152,6 +155,7 @@ namespace HTTP {
 		};
 		_VAR func = HEAP_ALLOC(env, new LispSession(request, session));
 		env.scope()->put_func(LISP::Symbol("url"), func);
+		env.scope()->put_func(LISP::Symbol("get-session-id"), func);
 		env.scope()->put_func(LISP::Symbol("get-session-value"), func);
 		env.scope()->put_func(LISP::Symbol("set-session-value"), func);
 	}
