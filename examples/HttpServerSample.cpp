@@ -99,7 +99,7 @@ static void redirect(ServerConfig & config, HttpRequest & request, HttpResponse 
     response.setStatus(302);
     header.setHeaderField("Location", (config.isSecure() ? "https://" : "http://") +
                           host + ":" + port + "/" +
-                          HttpSessionTool::urlMan(request, uri, session));
+                          HttpSessionTool::url(request, uri, session));
     response.setContentType("text/html");
 	response.setContentLength(0);
 }
@@ -208,7 +208,8 @@ public:
 			logger->loge(" ** error");
 			response.setStatus(500);
 			response.setContentType("text/html");
-			setFixedTransfer(response, "Server Error/" + e.toString());
+			setFixedTransfer(response, "<html><head><title>500 Server Error</title></head>"
+							 "<body><h1>Server Error</h1><p>" + e.toString() + "</p></body></html>");
 		}
 	}
 

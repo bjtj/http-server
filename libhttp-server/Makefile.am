@@ -103,6 +103,7 @@ libhttp_server_la_SOURCES = \
 	HttpSession.hpp \
 	HttpSessionManager.cpp \
 	HttpSessionManager.hpp \
+	HttpSessionTool.cpp \
 	HttpSessionTool.hpp \
 	HttpStatusCodes.cpp \
 	HttpStatusCodes.hpp \

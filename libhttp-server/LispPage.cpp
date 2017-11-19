@@ -158,7 +158,7 @@ namespace HTTP {
 				Iterator<_VAR > iter = args.iter();
 				if (name->r_symbol() == "url") {
 					string url = LISP::eval(env, scope, iter.next())->toPrintString();
-					return HEAP_ALLOC(env, LISP::wrap_text(HttpSessionTool::urlMan(request, url, session)));
+					return HEAP_ALLOC(env, LISP::wrap_text(HttpSessionTool::url(request, url, session)));
 				} else if (name->r_symbol() == "get-session-id") {
 					return HEAP_ALLOC(env, LISP::wrap_text(session->id()));
 				} else if (name->r_symbol() == "get-session-value") {
@@ -391,13 +391,14 @@ namespace HTTP {
 		try {
 			for (vector<string>::iterator cmd = commands.begin(); cmd != commands.end(); cmd++) {
 				if (compile(env, *cmd) == false) {
-					logger->loge("Error occurred with '" + *cmd + "'");
+					string errorMessage = "Error occurred with '" + *cmd + "'";
+					logger->loge(errorMessage);
+					throw Exception("Wrong opertation");
 				}
 			}
 		} catch (LISP::ExitLispException e) {
 			logger->logd("[LispPage - (quit)]");
 		}
-		reader.clearCommands();
 
 		return env.scope()->rget_var(LISP::Symbol("*content*"))->toPrintString();
 	}
