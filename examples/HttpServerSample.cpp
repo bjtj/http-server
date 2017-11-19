@@ -619,6 +619,7 @@ bool promptBoolean(const char * msg) {
  */
 int main(int argc, char * args[]) {
 
+	bool deamon = false;
 	System::getInstance()->ignoreSigpipe();
 	
 	LoggerFactory::getInstance().setLoggerDescriptorSimple("*", "basic", "console");
@@ -631,6 +632,15 @@ int main(int argc, char * args[]) {
         printf("Configuration file path(empty -> default): ");
 		configPath = readline();
     }
+
+	for (int i = 1; i < argc; i++) {
+		if (string(args[i]) == "-D") {
+			logger->logd("DAEMON MODE");
+			deamon = true;
+			break;
+		}
+	}
+
 
 	ServerConfig config;
 	config["domain.host"] = "localhost";
@@ -687,6 +697,10 @@ int main(int argc, char * args[]) {
 	printf("[Listening... / port: %d]\n", config.getPort());
 	
 	while (1) {
+		if (deamon) {
+			idle(10);
+			continue;
+		}
 		string line = readline();
 		if (line.empty() == false) {
 			if (line == "q" || line == "quit") {
