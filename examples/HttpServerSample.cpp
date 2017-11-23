@@ -629,7 +629,8 @@ int main(int argc, char * args[]) {
 	MimeTypes::load(DATA_PATH"/mimetypes");
 	
 	string configPath;
-	if (argc > 1) {
+	if (params.arguments().texts().size() > 0) {
+		params.arguments().texts()[0];
 		configPath = args[1];
     } else {
         printf("Configuration file path(empty -> default): ");
@@ -637,7 +638,7 @@ int main(int argc, char * args[]) {
     }
 
 	for (int i = 1; i < argc; i++) {
-		if (string(args[i]) == "-D") {
+		if (params.arguments().hasVarWithShortAlias("D") == true) {
 			logger->logd("DAEMON MODE");
 			deamon = true;
 			break;
