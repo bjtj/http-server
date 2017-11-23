@@ -6,8 +6,15 @@ namespace HTTP {
 	using namespace OS;
 
 	const string HttpSessionTool::KEY_SESSION_ID = "sessionId";
+
+	static const unsigned long long HOUR = 60ULL * 60ULL;
+	static const unsigned long long DAY = 24ULL * HOUR;
+	static const unsigned long long MONTH = 30ULL * DAY;
+	static const unsigned long long YEAR = 365ULL * DAY;
 	
-	HttpSessionTool::HttpSessionTool() {
+	HttpSessionTool::HttpSessionTool() : _path("/") {
+		_expire.sec = MONTH;
+		_expire.nano = 0;
 	}
 	HttpSessionTool::~HttpSessionTool() {
 	}
@@ -42,12 +49,10 @@ namespace HTTP {
 	void HttpSessionTool::setCookieSession(HttpRequest & request,
 										   HttpResponse & response,
 										   AutoRef<HttpSession> & session) {
-		osl_time_t y = {(360ULL * 24ULL * 60ULL * 60ULL), 0};
-		Date year(y);
-		string date = Date::formatRfc1123(Date::now() + year);
+		string date = Date::formatRfc1123(Date::now() + Date(_expire));
 		Cookie cookie(KEY_SESSION_ID + "=" + session->id() +
 					  "; expires=" + date +
-					  "; path=" + cookiePath(request.getDirectory()) +
+					  "; path=" + _path +
 					  "; HttpOnly");
 		response.removeHeaderFields("Set-Cookie");
 		response.appendCookie(cookie);
@@ -94,5 +99,13 @@ namespace HTTP {
 		string path = (f == string::npos) ? u : u.substr(0, f);
 		string rest = (f == string::npos) ? "" : u.substr(f);
 		return path + ";" + KEY_SESSION_ID + "=" + session->id() + rest;
+	}
+
+	osl_time_t & HttpSessionTool::expire() {
+		return _expire;
+	}
+
+	string & HttpSessionTool::path() {
+		return _path;
 	}
 }

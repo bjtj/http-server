@@ -153,6 +153,7 @@ private:
 	map<string, string> mimeTypes;
     map<string, Cache> lspMemCache;
 	Pool<LispPage> lspPool;
+	HttpSessionTool sessionTool;
 public:
 	StaticHttpRequestHandler(ServerConfig & config, const string & prefix)
 		: sessionManager(30 * 60 * 1000), dedicated(false), config(config), prefix(prefix), lspPool(config.getIntegerProperty("thread.count", 50))
@@ -226,7 +227,7 @@ public:
 		string path = request.getPath();
 		path = path.substr(prefix.size());
 		if (path.empty()) {
-			AutoRef<HttpSession> session = HttpSessionTool::handleSession(request, response, sessionManager);
+			AutoRef<HttpSession> session = sessionTool.handleSession(request, response, sessionManager);
 			redirect(config, request, response, session, prefix.substr(1) + "/");
 			return;
 		}
@@ -281,7 +282,7 @@ public:
 	 * handle lisp page
 	 */
 	void handleLispPage(File & file, HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
-		AutoRef<HttpSession> session = HttpSessionTool::handleSession(request, response, sessionManager);
+		AutoRef<HttpSession> session = sessionTool.handleSession(request, response, sessionManager);
 		session->updateLastAccessTime();
 		response.setStatus(200);
 		response.setContentType("text/html");

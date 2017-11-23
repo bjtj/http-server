@@ -13,24 +13,28 @@ namespace HTTP {
 	class HttpSessionTool {
 	private:
 		static const std::string KEY_SESSION_ID;
+		OS::osl_time_t _expire;
+		std::string _path;
 	public:
 		HttpSessionTool();
 		virtual ~HttpSessionTool();
-		static bool isCookieSession(HttpRequest & request);
-		static std::string getSessionId(HttpRequest & request);
-		static std::string cookiePath(const std::string & path);
-		static void setCookieSession(HttpRequest & request,
+		bool isCookieSession(HttpRequest & request);
+		std::string getSessionId(HttpRequest & request);
+		std::string cookiePath(const std::string & path);
+		void setCookieSession(HttpRequest & request,
 									 HttpResponse & response,
 									 OS::AutoRef<HttpSession> & session);
-        static OS::AutoRef<HttpSession> handleSession(HttpRequest & request,
+        OS::AutoRef<HttpSession> handleSession(HttpRequest & request,
 													  HttpResponse & response,
 													  HttpSessionManager & sessionManager);
-		static OS::AutoRef<HttpSession> createSession(HttpRequest & request,
+		OS::AutoRef<HttpSession> createSession(HttpRequest & request,
 													  HttpResponse & response,
 													  HttpSessionManager & sessionManager);
         static std::string url(HttpRequest & request,
 							   const std::string & u,
 							   OS::AutoRef<HttpSession> session);
+		OS::osl_time_t & expire();
+		std::string & path();
 	};
 }
 

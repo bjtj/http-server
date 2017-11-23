@@ -18,9 +18,11 @@ public:
 	}
 	virtual void test() {
 
+		HttpSessionTool sessionTool;
+
 		{
-			ASSERT(HttpSessionTool::cookiePath("/static/"), ==, "/static");
-			ASSERT(HttpSessionTool::cookiePath("/"), ==, "/");
+			ASSERT(sessionTool.cookiePath("/static/"), ==, "/static");
+			ASSERT(sessionTool.cookiePath("/"), ==, "/");
 		}
 		
 		{
