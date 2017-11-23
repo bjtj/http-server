@@ -1,4 +1,5 @@
 #include <liboslayer/os.hpp>
+#include <liboslayer/ArgumentParser.hpp>
 #include <liboslayer/SecureSocket.hpp>
 #include <liboslayer/FileStream.hpp>
 #include <liboslayer/AutoRef.hpp>
@@ -618,6 +619,8 @@ bool promptBoolean(const char * msg) {
  * @brief 
  */
 int main(int argc, char * args[]) {
+
+	ArgumentParser params(argc, args);
 
 	bool deamon = false;
 	System::getInstance()->ignoreSigpipe();
