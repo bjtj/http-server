@@ -27,9 +27,6 @@
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
 
-/* Define to 1 if you have the 'SSL_library_init' function. */
-#undef HAVE_OPENSSL
-
 /* Define if you have POSIX threads libraries and header files. */
 #undef HAVE_PTHREAD
 

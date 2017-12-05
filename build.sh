@@ -6,7 +6,16 @@ DIR_WORLD=$PWD/world
 
 OPT=build
 
-CPU_COUNT=$(cat /proc/cpuinfo | grep processor | wc -l)
+if [ -f "/proc/cpuinfo" ]; then
+	echo "[OS DETECT] linux"
+	CPU_COUNT=$(cat /proc/cpuinfo | grep processor | wc -l)
+elif [ `uname` == "Darwin" ]; then
+	echo "[OS DETECT] osx"
+	CPU_COUNT=`sysctl -n hw.ncpu`
+else
+	echo "[OS DETECT] unknown"
+	CPU_COUNT=1
+fi
 
 if [ -n "$1" ]; then
 	OPT=$1
