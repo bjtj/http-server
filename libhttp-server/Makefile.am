@@ -122,5 +122,11 @@ libhttp_server_la_SOURCES = \
 	WebServerUtil.cpp \
 	WebServerUtil.hpp
 
-libhttp_server_la_CXXFLAGS = $(PTHREAD_CXXFLAGS) $(LIBOSLAYER_CFLAGS)
-libhttp_server_la_LIBADD = $(LIBOSLAYER_LIBS)
+# cflags
+libhttp_server_la_CXXFLAGS=$(PTHREAD_CXXFLAGS)
+libhttp_server_la_CXXFLAGS+=$(LIBOSLAYER_CFLAGS)
+libhttp_server_la_CXXFLAGS+=$(LIBOPENSSL_CFLAGS)
+
+# libs
+libhttp_server_la_LIBADD=$(LIBOSLAYER_LIBS)
+libhttp_server_la_LIBADD+=$(LIBOPENSSL_LIBS)

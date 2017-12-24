@@ -193,9 +193,10 @@ namespace HTTP {
 		void parsePath(const std::string & path);
 		void parseQuery(const std::string & query);
         std::vector<std::string> getParameterNames();
-		std::string getParameter(std::string name);
-		std::vector<std::string> getParameters(std::string name);
-		void setParameter(std::string name, std::string value);
+		bool hasParameter(const std::string & name);
+		std::string getParameter(const std::string & name);
+		std::vector<std::string> getParameters(const std::string & name);
+		void setParameter(const std::string & name, const std::string & value);
 		void setParameters(std::vector<UTIL::KeyValue> & nvs);
         void setHost(const std::string & host);
 	};

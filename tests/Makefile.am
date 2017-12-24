@@ -26,6 +26,12 @@ test_http_client_SOURCES = test-http-client.cpp
 test_cookie_SOURCES = test-cookie.cpp
 
 AM_CPPFLAGS = -I$(top_srcdir)
+# cflags
 AM_CXXFLAGS=$(PTHREAD_CXXFLAGS)
+AM_CXXFLAGS+=$(LIBOPENSSL_CFLAGS)
+
+# libs
 AM_LDFLAGS=$(PTHREAD_CFLAGS)
+AM_LDFLAGS+=$(LIBOPENSSL_LIBS)
+
 LDADD = ../libhttp-server/libhttp-server.la

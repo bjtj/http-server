@@ -49,6 +49,10 @@ namespace HTTP {
     vector<string> HttpRequest::getParameterNames() {
         return _header.getParameterNames();
     }
+
+	bool HttpRequest::hasParameter(const string & name) {
+		return _header.hasParameter(name);
+	}
 	
 	string HttpRequest::getParameter(const string & name) {
 		return _header.getParameter(name);
@@ -58,7 +62,7 @@ namespace HTTP {
 		return _header.getParameter(name);
 	}
 	
-	vector<string> HttpRequest::getParameters(string & name) {
+	vector<string> HttpRequest::getParameters(const string & name) {
 		return _header.getParameters(name);
 	}
 	

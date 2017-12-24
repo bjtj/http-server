@@ -404,16 +404,20 @@ namespace HTTP {
         }
         return names;
     }
+
+	bool HttpRequestHeader::hasParameter(const string & name) {
+		return params.find(name) != params.end();
+	}
 	
-	string HttpRequestHeader::getParameter(string name) {
+	string HttpRequestHeader::getParameter(const string & name) {
 		return params[name].getFirstValue();
 	}
 	
-	vector<string> HttpRequestHeader::getParameters(string name) {
+	vector<string> HttpRequestHeader::getParameters(const string & name) {
 		return params[name].getValues();
 	}
 	
-	void HttpRequestHeader::setParameter(string name, string value) {
+	void HttpRequestHeader::setParameter(const string & name, const string & value) {
 		if (params.find(name) == params.end()) {
 			HttpParameter param(name);
 			param.setValue(value);

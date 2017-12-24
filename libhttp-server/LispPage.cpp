@@ -201,6 +201,9 @@ namespace HTTP {
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getRawPath()));
 				} else if (name->r_symbol() == "get-request-param") {
 					string paramName = LISP::eval(env, scope, iter.next())->toPrintString();
+					if (request.hasParameter(paramName) == false) {
+						return env.nil();
+					}
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getParameter(paramName)));
 				} else if (name->r_symbol() == "get-request-header") {
 					string paramName = LISP::eval(env, scope, iter.next())->toPrintString();

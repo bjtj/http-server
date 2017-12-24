@@ -39,9 +39,10 @@ namespace HTTP {
 		std::string getDirectory() const;
 		std::string getRawPath() const;
         std::vector<std::string> getParameterNames();
+		bool hasParameter(const std::string & name);
 		std::string getParameter(const std::string & name);
 		std::string getParameter(const char * name);
-		std::vector<std::string> getParameters(std::string & name);
+		std::vector<std::string> getParameters(const std::string & name);
 		HttpRequestHeader & header();
 		bool isWwwFormUrlEncoded();
 		void parseWwwFormUrlencoded();

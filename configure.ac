@@ -52,9 +52,8 @@ AC_FUNC_ERROR_AT_LINE
 AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
 AC_CHECK_FUNCS([gettimeofday memset mkdir socket strcasecmp SSL_library_init])
 
-if test $ac_cv_func_SSL_library_init = no; then
-   PKG_CHECK_MODULES([LIBOPENSSL],[openssl],[HAVE_OPENSSL=1],[HAVE_OPENSSL=0])
-fi
+PKG_CHECK_MODULES([LIBOPENSSL],[openssl],[HAVE_PKG_OPENSSL=yes],[HAVE_PKG_OPENSSL=no])
+AS_IF([test "x$HAVE_PKG_OPENSSL" = xyes], [AC_DEFINE([HAVE_OPENSSL], 1, [support openssl])])
 
 AC_CONFIG_FILES([Makefile
 				 libhttp-server/Makefile
@@ -63,3 +62,5 @@ AC_CONFIG_FILES([Makefile
 				 http-server.pc])
 
 AC_OUTPUT
+echo \
+OpenSSL enabled : ${HAVE_PKG_OPENSSL}
