@@ -1,5 +1,5 @@
 #include <liboslayer/os.hpp>
-#include <liboslayer/ArgumentParser.hpp>
+#include <liboslayer/Arguments.hpp>
 #include <liboslayer/SecureSocket.hpp>
 #include <liboslayer/FileStream.hpp>
 #include <liboslayer/AutoRef.hpp>
@@ -621,7 +621,7 @@ bool promptBoolean(const char * msg) {
  */
 int main(int argc, char * args[]) {
 
-	ArgumentParser params(argc, args);
+	Arguments arguments = ArgumentParser::parse(argc, args);
 
 	bool deamon = false;
 	System::getInstance()->ignoreSigpipe();
@@ -630,8 +630,8 @@ int main(int argc, char * args[]) {
 	MimeTypes::load(DATA_PATH"/mimetypes");
 	
 	string configPath;
-	if (params.arguments().texts().size() > 0) {
-		params.arguments().texts()[0];
+	if (arguments.texts().size() > 0) {
+		arguments.texts()[0];
 		configPath = args[1];
     } else {
         printf("Configuration file path(empty -> default): ");
@@ -639,7 +639,7 @@ int main(int argc, char * args[]) {
     }
 
 	for (int i = 1; i < argc; i++) {
-		if (params.arguments().hasVarWithShortAlias("D") == true) {
+		if (arguments.is_set("D") == true) {
 			logger->logd("DAEMON MODE");
 			deamon = true;
 			break;
