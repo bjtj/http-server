@@ -215,7 +215,7 @@ namespace HTTP {
 				} else if (name->r_symbol() == "get-cookie") {
 					string key = LISP::eval(env, scope, iter.next())->toPrintString();
 					vector<Cookie> cookies = request.getCookies();
-					for (Iterator<Cookie> iter(cookies); iter.has(); iter++) {
+					for (Iterator<Cookie> iter(cookies); iter.avail(); iter++) {
 						Cookie & cookie = *iter;
 						if (cookie[key].empty() == false) {
 							return HEAP_ALLOC(env, LISP::wrap_text(cookie[key]));
@@ -225,7 +225,7 @@ namespace HTTP {
 				} else if (name->r_symbol() == "get-all-cookies") {
 					vector<Cookie> cookies = request.getCookies();
 					vector<_VAR> lst;
-					for (Iterator<Cookie> iter(cookies); iter.has(); iter++) {
+					for (Iterator<Cookie> iter(cookies); iter.avail(); iter++) {
 						Cookie & cookie = *iter;
 						lst.push_back(HEAP_ALLOC(env, LISP::wrap_text(cookie.toString())));
 					}
@@ -262,7 +262,7 @@ namespace HTTP {
 				if (name->r_symbol() == "set-status-code") {
 					int status = (int)LISP::eval(env, scope, iter.next())->r_integer().getInteger();
 					string statusMessage;
-					if (iter.has()) {
+					if (iter.avail()) {
 						statusMessage = LISP::eval(env, scope, iter.next())->toPrintString();
 					}
 					if (statusMessage.empty()) {
