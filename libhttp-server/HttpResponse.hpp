@@ -7,12 +7,15 @@
 
 #include <liboslayer/os.hpp>
 #include <liboslayer/AutoRef.hpp>
+#include <liboslayer/File.hpp>
 #include "HttpHeader.hpp"
 #include "ChunkedReader.hpp"
 #include "DataTransfer.hpp"
 #include "Cookie.hpp"
+#include "HttpRange.hpp"
 
 namespace HTTP {
+	
 
 	/**
 	 * @brief http response
@@ -53,6 +56,10 @@ namespace HTTP {
 		std::string & operator[] (const std::string & name);
 		void appendCookies(const std::vector<Cookie> & cookies);
 		void appendCookie(const Cookie & cookie);
+		void setFixedTransfer(const std::string & content);
+		void setFileTransfer(const std::string & filepath);
+		void setFileTransfer(OS::File & file);
+		void setPartialFileTransfer(const HttpRange & range, OS::File & file);
 	};
 }
 

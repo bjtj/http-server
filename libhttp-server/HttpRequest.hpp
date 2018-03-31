@@ -12,6 +12,7 @@
 #include "Packet.hpp"
 #include "DataTransfer.hpp"
 #include "Cookie.hpp"
+#include "HttpRange.hpp"
 
 namespace HTTP {
 
@@ -55,6 +56,8 @@ namespace HTTP {
 		OS::InetAddress & getLocalAddress();
 		std::vector<Cookie> getCookies();
 		std::string getCookie(const std::string & key);
+		HttpRange getRange();
+		HttpRange parseRange(const std::string & range);
 	};
 }
 

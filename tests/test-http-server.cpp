@@ -5,7 +5,6 @@
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/StringDataSink.hpp>
-#include <libhttp-server/WebServerUtil.hpp>
 
 using namespace std;
 using namespace HTTP;
@@ -22,7 +21,7 @@ static void httpGet(const string & url, const LinkedStringMap & fields, OnHttpRe
 /**
  * my http request handler
  */
-class MyHttpRequestHandler : public HttpRequestHandler, public WebServerUtil {
+class MyHttpRequestHandler : public HttpRequestHandler {
 private:
 	HttpServerConfig config;
 	map<string, string> mimeTypes;
@@ -47,14 +46,14 @@ public:
 		if (path == "/") {
 			response.setStatus(200);
 			response.setContentType("text/plain");
-			setFixedTransfer(response, "Hello World");
+			response.setFixedTransfer("Hello World");
 			return;
 		}
 
 		if (path == "/medium") {
 			response.setStatus(200);
 			response.setContentType("text/plain");
-			setFixedTransfer(response, medium);
+			response.setFixedTransfer(medium);
 			return;
 		}
 
@@ -62,14 +61,14 @@ public:
 			response.setStatus(200);
 			response.setContentType("text/plain");
 			idle(1000);
-			setFixedTransfer(response, "taketime!");
+			response.setFixedTransfer("taketime!");
 			return;
 		}
 
 		if (!file.exists() || !file.isFile()) {
 			response.setStatus(404);
 			response.setContentType("text/plain");
-			setFixedTransfer(response, "Not Found");
+			response.setFixedTransfer("Not Found");
 			return;
 		}
 
@@ -77,13 +76,13 @@ public:
 		if (mimeTypes.find(ext) != mimeTypes.end()) {
 			response.setStatus(200);
 			response.setContentType(mimeTypes[ext]);
-			setFileTransfer(response, file);
+			response.setFileTransfer(file);
 			return;
 		}
 
 		response.setStatus(200);
 		response.setContentType("text/plain");
-		setFileTransfer(response, file);
+		response.setFileTransfer(file);
 	}
 	virtual void onHttpResponseTransferCompleted(HttpRequest & request, HttpResponse & response) {
 		cout << "done" << endl;

@@ -2,7 +2,6 @@
 #include <liboslayer/os.hpp>
 #include <liboslayer/FileStream.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
-#include <libhttp-server/WebServerUtil.hpp>
 
 using namespace std;
 using namespace OS;
@@ -12,7 +11,7 @@ using namespace HTTP;
 /**
  * 
  */
-class ChatHandler : public HttpRequestHandler, public WebServerUtil {
+class ChatHandler : public HttpRequestHandler {
 private:
 	vector<string> messages;
 	Semaphore sem;
@@ -43,7 +42,7 @@ public:
 		content.append("<form method=\"POST\">Message: <input type=\"text\" name=\"msg\" /></form>");
 
 		response.setStatus(200);
-		setFixedTransfer(response, "<html><head><title>Chat</title></head><body>" + content + "</body></html>");
+		response.setFixedTransfer("<html><head><title>Chat</title></head><body>" + content + "</body></html>");
 	}
 };
 

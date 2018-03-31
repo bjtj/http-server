@@ -37,11 +37,11 @@ libhttp_serverinc_HEADERS = \
 	LispPage.hpp \
 	MimeTypes.hpp \
 	Packet.hpp \
+	HttpRange.hpp \
 	SimpleHttpRequestHandlerDispatcher.hpp \
 	StringDataSink.hpp \
 	StringDataSource.hpp \
-	Url.hpp \
-	WebServerUtil.hpp
+	Url.hpp
 
 lib_LTLIBRARIES = libhttp-server.la
 libhttp_server_la_SOURCES = \
@@ -113,14 +113,13 @@ libhttp_server_la_SOURCES = \
 	MimeTypes.hpp \
 	Packet.cpp \
 	Packet.hpp \
+	HttpRange.hpp \
 	SimpleHttpRequestHandlerDispatcher.cpp \
 	SimpleHttpRequestHandlerDispatcher.hpp \
 	StringDataSink.hpp \
 	StringDataSource.hpp \
 	Url.cpp \
-	Url.hpp \
-	WebServerUtil.cpp \
-	WebServerUtil.hpp
+	Url.hpp
 
 # cflags
 libhttp_server_la_CXXFLAGS=$(PTHREAD_CXXFLAGS)

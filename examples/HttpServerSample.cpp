@@ -20,7 +20,6 @@
 #include <liboslayer/Hash.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/BasicAuth.hpp>
-#include <libhttp-server/WebServerUtil.hpp>
 
 using namespace std;
 using namespace OS;
@@ -140,7 +139,7 @@ public:
 /**
  * @brief 
  */
-class StaticHttpRequestHandler : public HttpRequestHandler, public WebServerUtil {
+class StaticHttpRequestHandler : public HttpRequestHandler {
 private:
 	HttpSessionManager sessionManager;
 	bool dedicated;
@@ -210,7 +209,7 @@ public:
 			logger->loge(" ** error");
 			response.setStatus(500);
 			response.setContentType("text/html");
-			setFixedTransfer(response, "<html><head><title>500 Server Error</title></head>"
+			response.setFixedTransfer("<html><head><title>500 Server Error</title></head>"
 							 "<body><h1>Server Error</h1><p>" + e.toString() + "</p></body></html>");
 		}
 	}
@@ -267,7 +266,7 @@ public:
 		if (request.getParameter("transfer") == "download") {
 			setContentDispositionWithFile(request, response, file);
 		}
-        setFileTransfer(response, file);
+        response.setFileTransfer(file);
     }
 
 	bool needCacheUpdate(const File & file) {
@@ -313,7 +312,7 @@ public:
 			setFileTransferX(request, response, file);
 			return;
 		}
-		setFixedTransfer(response, content);
+		response.setFixedTransfer(content);
 	}
 
 	/**
@@ -349,7 +348,7 @@ public:
 		response.setStatus(errorCode);
 		switch (errorCode) {
 		case 404:
-			setFixedTransfer(response, "Not Found");
+			response.setFixedTransfer("Not Found");
 			break;
 		default:
 			break;
@@ -365,16 +364,16 @@ public:
 		string range = request.getHeaderFieldIgnoreCase("Range");
 		if (!range.empty()) {
 			try {
-				setPartialFileTransfer(request, response, file);
+				response.setPartialFileTransfer(request.getRange(), file);
 			} catch (Exception e) {
 				response.setContentType("text/html");
 				response.setStatus(500);
-				setFixedTransfer(response, e.toString());
+				response.setFixedTransfer(e.toString());
 			}
 			return;
 		}
 		response.setStatus(200);
-		setFileTransfer(response, file);
+		response.setFileTransfer(file);
 	}
 
 	/**
@@ -402,7 +401,7 @@ public:
 /**
  * @brief 
  */
-class ProxyHandler : public HttpRequestHandler, public WebServerUtil {
+class ProxyHandler : public HttpRequestHandler {
 private:
 
 	/**
@@ -495,7 +494,7 @@ public:
 				
 				response.setStatus(statusCode);
 				response.setContentType(contentType);
-				setFixedTransfer(response, dump);
+				response.setFixedTransfer(dump);
 				
 			} else {
 
@@ -510,7 +509,7 @@ public:
 					out.close();
 					
 					response.setContentType(result.contentType());
-					setFixedTransfer(response, result.dump());
+					response.setFixedTransfer(result.dump());
 				}
 			}
 			
@@ -520,7 +519,7 @@ public:
 			response.setStatus(result.statusCode());
 			if (result.statusCode() != 500) {
 				response.setContentType(result.contentType());
-				setFixedTransfer(response, result.dump());
+				response.setFixedTransfer(result.dump());
 			}
 		}
 	}
@@ -552,7 +551,7 @@ public:
 /**
  * @brief 
  */
-class AuthHttpRequestHandler : public HttpRequestHandler, public WebServerUtil {
+class AuthHttpRequestHandler : public HttpRequestHandler {
 private:
 	AutoRef<BasicAuth> auth;
 public:
@@ -563,7 +562,7 @@ public:
 			if (!auth.nil() && !auth->validate(request)) {
 				auth->setAuthentication(response);
 				response.setContentType("text/plain");
-				setFixedTransfer(response, "Authentication required");
+				response.setFixedTransfer("Authentication required");
 				return;
 			}
 			doHandle(request, sink, response);
@@ -574,7 +573,7 @@ public:
 			logger->loge(" ** error");
 			response.setStatus(500);
 			response.setContentType("text/html");
-			setFixedTransfer(response, "Server Error/" + e.toString());
+			response.setFixedTransfer("Server Error/" + e.toString());
 		}
 	}
 
@@ -587,7 +586,7 @@ public:
 			request.parseWwwFormUrlencoded();
 		}
 		response.setStatus(200);
-		setFixedTransfer(response, "hello");
+		response.setFixedTransfer("hello");
     }
 };
 

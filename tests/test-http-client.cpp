@@ -2,7 +2,6 @@
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/StringDataSink.hpp>
-#include <libhttp-server/WebServerUtil.hpp>
 #include <liboslayer/SecureSocket.hpp>
 #include "utils.hpp"
 
@@ -46,7 +45,7 @@ public:
 };
 
 
-class RequestEchoHandler : public HttpRequestHandler, public WebServerUtil {
+class RequestEchoHandler : public HttpRequestHandler {
 private:
 public:
     RequestEchoHandler() {}
@@ -66,7 +65,7 @@ public:
 			idle(delay);
 			response.setStatus(200);
 			response.setContentType("text/plain");
-			setFixedTransfer(response, ("Duration - " + Text::toString(tick_milli() - tick) + " ms."));
+			response.setFixedTransfer(("Duration - " + Text::toString(tick_milli() - tick) + " ms."));
 			return;
 		}
 		
@@ -88,7 +87,7 @@ public:
 
 		cout << "** response / content : " << packetVisible(ret) << endl;
 
-		setFixedTransfer(response, ret);
+		response.setFixedTransfer(ret);
 	}
 };
 

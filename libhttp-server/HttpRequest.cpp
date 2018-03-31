@@ -129,4 +129,28 @@ namespace HTTP {
 		}
 		return "";
 	}
+
+	HttpRange HttpRequest::getRange() {
+		string rangeParam = getHeaderFieldIgnoreCase("Range");
+		if (rangeParam.empty()) {
+			throw Exception("Range field empty");
+		}
+		return parseRange(rangeParam);
+	}
+
+	HttpRange HttpRequest::parseRange(const string & range) {
+		if (range.empty()) {
+			throw Exception("empty string");
+		}
+		size_t s = range.find("=");
+		if (s == string::npos) {
+			throw Exception("'=' is missing");
+		}
+		size_t f = range.find("-", s + 1);
+		if (f == string::npos) {
+			throw Exception("'-' is missing");
+		}
+		return HttpRange((size_t)Text::toLong(range.substr(s + 1, f)),
+						 (size_t)Text::toLong(range.substr(f + 1)));
+	}
 }

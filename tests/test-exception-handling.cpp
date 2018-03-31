@@ -1,7 +1,6 @@
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/StringDataSink.hpp>
-#include <libhttp-server/WebServerUtil.hpp>
 #include <libhttp-server/HttpException.hpp>
 #include <liboslayer/TestSuite.hpp>
 
@@ -13,7 +12,7 @@ using namespace HTTP;
 /**
  * 
  */
-class MyHttpRequestHandler : public HttpRequestHandler, public WebServerUtil {
+class MyHttpRequestHandler : public HttpRequestHandler {
 private:
 public:
 	virtual void onHttpRequestContentCompleted(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
@@ -22,13 +21,13 @@ public:
 		}
 		response.setStatus(200);
 		response.setContentType("text/plain");
-		setFixedTransfer(response, "hello");
+		response.setFixedTransfer("hello");
 	}
 	virtual bool onException(HttpRequest & request, HttpResponse & response, Exception & e) {
 		cerr << "onException()" << endl;
 		response.setStatus(500);
 		response.setContentType("text/plain");
-		setFixedTransfer(response, "error");
+		response.setFixedTransfer("error");
 		return true;
 	}
 };
