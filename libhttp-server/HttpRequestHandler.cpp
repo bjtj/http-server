@@ -7,7 +7,7 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-	static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
+	static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
 
 	/**
 	 * @brief HttpRequestHandler
@@ -42,7 +42,7 @@ namespace HTTP {
 	}
 	
 	bool HttpRequestHandler::onException(HttpRequest & request, HttpResponse & response, Exception & ex) {
-		logger->loge("Error message - " + ex.toString());
+		logger->error("Error message - " + ex.toString());
 		return false;
 	}
 }

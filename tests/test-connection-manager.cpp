@@ -82,7 +82,10 @@ public:
 	virtual ~BasicConnectionManagerTestCase() {}
 	virtual void setUp(TestEnvironment & env) {
 		port = env.getIntegerProperty("listen.port");
-		cm = new ConnectionManager(AutoRef<CommunicationMaker>(new EchoCommunicationMaker), 5);
+		cm = new ConnectionManager(
+			ConnectionConfig(
+				AutoRef<CommunicationMaker>(new EchoCommunicationMaker),
+				5));
 		cm->start(port);
 
 		thread = new PollingThread(cm);
@@ -136,7 +139,10 @@ public:
 	virtual ~ConnectionManagerTestCase() {}
 	virtual void setUp(TestEnvironment & env) {
 		port = env.getIntegerProperty("listen.port");
-		cm = new ConnectionManager(AutoRef<CommunicationMaker>(new EchoCommunicationMaker), 5);
+		cm = new ConnectionManager(
+			ConnectionConfig(
+				AutoRef<CommunicationMaker>(new EchoCommunicationMaker),
+				5));
 		cm->start(port);
 
 		thread = new PollingThread(cm);
@@ -198,7 +204,10 @@ public:
 	virtual ~ConnectionManagerMultiConnTestCase() {}
 	virtual void setUp(TestEnvironment & env) {
 		port = env.getIntegerProperty("listen.port");
-		cm = new ConnectionManager(AutoRef<CommunicationMaker>(new EchoCommunicationMaker), 5);
+		cm = new ConnectionManager(
+			ConnectionConfig(
+				AutoRef<CommunicationMaker>(new EchoCommunicationMaker),
+				5));
 		cm->start(port);
 
 		thread = new PollingThread(cm);

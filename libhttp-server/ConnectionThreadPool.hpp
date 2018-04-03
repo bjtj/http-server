@@ -19,9 +19,11 @@ namespace HTTP {
         OS::Selector selector;
 
 	public:
-		ConnectionTask(OS::AutoRef<Connection> connection, OS::AutoRef<Communication> communication);
+		ConnectionTask(OS::AutoRef<Connection> connection,
+					   OS::AutoRef<Communication> communication);
 		virtual ~ConnectionTask();
-		void setConnection(OS::AutoRef<Connection> connection, OS::AutoRef<Communication> communication);
+		void setConnection(OS::AutoRef<Connection> connection,
+						   OS::AutoRef<Communication> communication);
 		OS::AutoRef<Connection> getConnection();
 		virtual void onTask();
 		void connectionTask();
@@ -39,7 +41,8 @@ namespace HTTP {
 	public:
 		ConnectionThreadPool(size_t maxThreads);
 		virtual ~ConnectionThreadPool();
-		void createConnection(OS::AutoRef<Communication> communication, OS::AutoRef<Connection> connection);
+		void createConnection(OS::AutoRef<Communication> communication,
+							  OS::AutoRef<Connection> connection);
 	};
 }
 

@@ -108,10 +108,10 @@ static void test_url_encode() {
 
 int main(int argc, char *args[]) {
 
-	LoggerDescriptor descriptor("*");
-	descriptor.setAllFormatter("basic");
-	descriptor.setAllPrinter("console");
-	LoggerFactory::getInstance().setLoggerDescriptor(descriptor);
+	LoggerProfile profile("*");
+	profile.allFormatters("basic");
+	profile.allWriters("console");
+	LoggerFactory::inst().setProfile(profile);
 
 	Url url;
 

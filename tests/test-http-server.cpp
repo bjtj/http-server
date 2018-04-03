@@ -280,7 +280,7 @@ static void httpGet(const string & url, const LinkedStringMap & fields, OnHttpRe
  */
 int main(int argc, char *args[]) {
 
-	LoggerFactory::getInstance().setLoggerDescriptorSimple("*", "basic", "console");
+	LoggerFactory::inst().setProfile("*", "basic", "console");
 	
 	TestSuite ts;
 	ts.addTestCase(AutoRef<TestCase>(new HttpServerTestCase));

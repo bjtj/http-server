@@ -17,7 +17,7 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-	static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
+	static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
 
 	static string escapeText(const string & txt) {
 		return Text::replaceAll(Text::replaceAll(txt, "\\", "\\\\"), "\"", "\\\"");
@@ -332,10 +332,10 @@ namespace HTTP {
 		} catch (LISP::ExitLispException e) {
 			throw e;
 		} catch (OS::Exception & e) {
-			logger->loge("ERROR: '" + e.toString() + "'");
+			logger->error("ERROR: '" + e.toString() + "'");
 			return false;
 		} catch (std::exception & e) {
-			logger->loge("ERROR: '" + string(e.what()) + "'");
+			logger->error("ERROR: '" + string(e.what()) + "'");
 			return false;
 		}
 		return true;
@@ -395,12 +395,12 @@ namespace HTTP {
 			for (vector<string>::iterator cmd = commands.begin(); cmd != commands.end(); cmd++) {
 				if (compile(env, *cmd) == false) {
 					string errorMessage = "Error occurred with '" + *cmd + "'";
-					logger->loge(errorMessage);
+					logger->error(errorMessage);
 					throw Exception("Wrong opertation");
 				}
 			}
 		} catch (LISP::ExitLispException e) {
-			logger->logd("[LispPage - (quit)]");
+			logger->debug("[LispPage - (quit)]");
 		}
 
 		return env.scope()->rget_var(LISP::Symbol("*content*"))->toPrintString();

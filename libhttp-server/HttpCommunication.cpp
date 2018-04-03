@@ -12,7 +12,7 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-	static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
+	static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
 
 	/**
 	 * @brief HttpCommunication
@@ -44,7 +44,7 @@ namespace HTTP {
 	void HttpCommunication::onConnected(AutoRef<Connection> connection) {
         request.setRemoteAddress(connection->getRemoteAddress());
 		request.setLocalAddress(connection->getLocalAddress());
-		logger->logd("[CONNECTED] '" + connection->getRemoteAddress().getHost() + "'");
+		logger->debug("[CONNECTED] '" + connection->getRemoteAddress().getHost() + "'");
 	}
 
 	bool HttpCommunication::isReadable() {
@@ -208,7 +208,7 @@ namespace HTTP {
 	}
 
 	void HttpCommunication::onDisconnected(AutoRef<Connection> connection) {
-		logger->logd("[DISCONNECTED] '" + connection->getRemoteAddress().getHost() + "'");
+		logger->debug("[DISCONNECTED] '" + connection->getRemoteAddress().getHost() + "'");
 	}
 
 	bool HttpCommunication::isCommunicationCompleted() {

@@ -8,28 +8,77 @@ namespace HTTP {
     using namespace OS;
     using namespace UTIL;
     
-    static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
+    static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
 
-    ConnectionManager::ConnectionManager(AutoRef<CommunicationMaker> communicationMaker,
-										 size_t threadCount) :
+
+	/**
+	 * @brief default server socket maker
+	 */
+	
+    class DefaultServerSocketMaker : public ServerSocketMaker {
+    private:
+    public:
+        DefaultServerSocketMaker() {}
+        virtual ~DefaultServerSocketMaker() {}
+        virtual AutoRef<ServerSocket> makeServerSocket(int port) {
+            return AutoRef<ServerSocket>(new ServerSocket(port));
+        }
+    };
+
+
+	/**
+	 * @brief
+	 */
+	
+	ConnectionConfig::ConnectionConfig(AutoRef<CommunicationMaker> communicationMaker,
+									   size_t threadCount)
+		: _communicationMaker(communicationMaker),
+		  _threadCount(threadCount)
+	{
+	}
+	ConnectionConfig::ConnectionConfig(AutoRef<CommunicationMaker> communicationMaker,
+									   AutoRef<ServerSocketMaker> serverSocketMaker,
+									   size_t threadCount)
+		: _communicationMaker(communicationMaker),
+		  _serverSocketMaker(serverSocketMaker),
+		  _threadCount(threadCount)
+	{
+	}
+	ConnectionConfig::~ConnectionConfig() {
+	}
+	AutoRef<CommunicationMaker> & ConnectionConfig::communicationMaker() {
+		return _communicationMaker;
+	}
+	AutoRef<ServerSocketMaker> & ConnectionConfig::serverSocketMaker() {
+		return _serverSocketMaker;
+	}
+	size_t & ConnectionConfig::threadCount() {
+		return _threadCount;
+	}
+	AutoRef<CommunicationMaker> ConnectionConfig::communicationMaker() const {
+		return _communicationMaker;
+	}
+	AutoRef<ServerSocketMaker> ConnectionConfig::serverSocketMaker() const {
+		return _serverSocketMaker;
+	}
+	size_t ConnectionConfig::threadCount() const {
+		return _threadCount;
+	}
+	
+
+	/**
+	 * @brief connection manager
+	 */
+
+	ConnectionManager::ConnectionManager(const ConnectionConfig & config) :
+		_config(config),
 		connectionsLock(1),
-		communicationMaker(communicationMaker),
-		threadPool(threadCount),
+		threadPool(config.threadCount()),
 		recvTimeout(0)
 	{
-		serverSocketMaker = AutoRef<ServerSocketMaker>(new DefaultServerSocketMaker);
-		threadPool.addObserver(this);
-    }
-    
-    ConnectionManager::ConnectionManager(AutoRef<CommunicationMaker> communicationMaker,
-										 size_t threadCount,
-										 AutoRef<ServerSocketMaker> serverSocketMaker) :
-		serverSocketMaker(serverSocketMaker),
-		connectionsLock(1),
-		communicationMaker(communicationMaker),
-		threadPool(threadCount),
-		recvTimeout(0)
-	{
+		if (_config.serverSocketMaker().nil()) {
+			_config.serverSocketMaker() = AutoRef<ServerSocketMaker>(new DefaultServerSocketMaker);
+		}
 		threadPool.addObserver(this);
     }
 
@@ -45,7 +94,7 @@ namespace HTTP {
         if (!serverSocket.nil()) {
             return;
         }
-        serverSocket = serverSocketMaker->makeServerSocket(port);
+		serverSocket = _config.serverSocketMaker()->makeServerSocket(port);
         serverSocket->setReuseAddr(true);
         serverSocket->bind();
         serverSocket->listen(backlog);
@@ -73,7 +122,7 @@ namespace HTTP {
 						onConnect(client);
 					}
 				} catch (IOException & e) {
-					logger->loge("client connection handling failed with '" + e.toString() + "'");
+					logger->error("client connection handling failed with '" + e.toString() + "'");
 				}
             }
         }
@@ -97,13 +146,13 @@ namespace HTTP {
     void ConnectionManager::onConnect(AutoRef<Socket> client) {
         AutoRef<Connection> connection = makeConnection(client);
 		connection->setRecvTimeout(recvTimeout);
-        AutoRef<Communication> communication = communicationMaker->makeCommunication();
+		AutoRef<Communication> communication = _config.communicationMaker()->makeCommunication();
 		registerConnection(connection);
 		try {
 			startCommunication(communication, connection);
 		} catch (Exception & e) {
-			logger->loge(e.toString());
-			handleMaxCapacity(connection);
+			logger->error(e.toString());
+			handleMaxCapacity(connection); // todo: check max connection exception
 			connection->close();
 			onDisconnect(connection);
 		}

@@ -24,19 +24,6 @@ namespace HTTP {
         virtual ~ServerSocketMaker() {}
         virtual OS::AutoRef<OS::ServerSocket> makeServerSocket(int port) = 0;
     };
-
-	/**
-	 * @brief default server socket maker
-	 */
-    class DefaultServerSocketMaker : public ServerSocketMaker {
-    private:
-    public:
-        DefaultServerSocketMaker() {}
-        virtual ~DefaultServerSocketMaker() {}
-        virtual OS::AutoRef<OS::ServerSocket> makeServerSocket(int port) {
-            return OS::AutoRef<OS::ServerSocket>(new OS::ServerSocket(port));
-        }
-    };
     
 	/**
 	 * @brief CommunicationMaker
@@ -62,29 +49,50 @@ namespace HTTP {
 		virtual void onMaxCapacity(ConnectionManager & cm, OS::AutoRef<Connection> connection) = 0;
 	};
 
+
+	/**
+	 * connection config
+	 */
+	class ConnectionConfig
+	{
+	private:
+		OS::AutoRef<CommunicationMaker> _communicationMaker;
+		OS::AutoRef<ServerSocketMaker> _serverSocketMaker;
+		size_t _threadCount;
+		
+	public:
+		ConnectionConfig(OS::AutoRef<CommunicationMaker> communicationMaker,
+						 size_t threadCount);
+		ConnectionConfig(OS::AutoRef<CommunicationMaker> communicationMaker,
+						 OS::AutoRef<ServerSocketMaker> serverSocketMaker,
+						 size_t threadCount);
+		virtual ~ConnectionConfig();
+		OS::AutoRef<CommunicationMaker> & communicationMaker();
+		OS::AutoRef<ServerSocketMaker> & serverSocketMaker();
+		size_t & threadCount();
+		OS::AutoRef<CommunicationMaker> communicationMaker() const;
+		OS::AutoRef<ServerSocketMaker> serverSocketMaker() const;
+		size_t threadCount() const;
+	};
+
+
     
 	/**
 	 * @brief ConnectionManager
 	 */
-
     class ConnectionManager : public UTIL::Observer {
     private:
-		OS::AutoRef<ServerSocketMaker> serverSocketMaker;
+		ConnectionConfig _config;
 		OS::AutoRef<OS::ServerSocket> serverSocket;
         OS::Selector selector;
         std::map<int, OS::AutoRef<Connection> > connections;
         OS::Semaphore connectionsLock;
-		OS::AutoRef<CommunicationMaker> communicationMaker;
 		ConnectionThreadPool threadPool;
 		OS::AutoRef<OnMaxCapacity> onMaxCapacity;
 		unsigned long recvTimeout;
         
     public:
-        ConnectionManager(OS::AutoRef<CommunicationMaker> communicationMaker,
-						  size_t threadCount);
-        ConnectionManager(OS::AutoRef<CommunicationMaker> communicationMaker,
-						  size_t threadCount,
-						  OS::AutoRef<ServerSocketMaker> serverSocketMaker);
+		ConnectionManager(const ConnectionConfig & config);
         virtual ~ConnectionManager();
 		void start(int port);
         void start(int port, int backlog);
@@ -98,7 +106,8 @@ namespace HTTP {
 		void unregisterConnection(OS::AutoRef<Connection> connection);
 		void removeCompletedConnections();
         void stopAllThreads();
-		void startCommunication(OS::AutoRef<Communication> communication, OS::AutoRef<Connection> connection);
+		void startCommunication(OS::AutoRef<Communication> communication,
+								OS::AutoRef<Connection> connection);
 		size_t getConnectionCount();
 		virtual void onUpdate(UTIL::Observable * target);
 		void handleMaxCapacity(OS::AutoRef<Connection> connection);

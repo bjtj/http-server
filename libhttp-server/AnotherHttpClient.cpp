@@ -13,7 +13,7 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-	static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
+	static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
 
 	/**
 	 * @brief OnResponseHeaderListener
@@ -47,7 +47,7 @@ namespace HTTP {
 	 */
     
     AnotherHttpClient::AnotherHttpClient() :
-		debug(false),
+		_debug(false),
 		connection(NULL),
 		socket(NULL),
 		requestHeaderSent(false),
@@ -63,7 +63,7 @@ namespace HTTP {
     }
 
 	AnotherHttpClient::AnotherHttpClient(AutoRef<SocketMaker> socketMaker) :
-		debug(false),
+		_debug(false),
 		connection(NULL),
 		socketMaker(socketMaker),
 		socket(NULL),
@@ -79,20 +79,33 @@ namespace HTTP {
         
     }
     
-	AnotherHttpClient::AnotherHttpClient(const Url & url) : debug(false), url(url), connection(NULL), socket(NULL), requestHeaderSent(false), responseHeaderReceived(false), readable(false), interrupted(false), complete(false), responseListener(NULL), connectionTimeout(0), recvTimeout(0), followRedirect(false) {
+	AnotherHttpClient::AnotherHttpClient(const Url & url)
+		: _debug(false),
+		  url(url),
+		  connection(NULL),
+		  socket(NULL),
+		  requestHeaderSent(false),
+		  responseHeaderReceived(false),
+		  readable(false),
+		  interrupted(false),
+		  complete(false),
+		  responseListener(NULL),
+		  connectionTimeout(0),
+		  recvTimeout(0),
+		  followRedirect(false) {
 	}
     
 	AnotherHttpClient::~AnotherHttpClient() {
 	}
 
 	void AnotherHttpClient::logd(const string & msg) {
-		if (debug) {
-			logger->logd(msg);
+		if (_debug) {
+			logger->debug(msg);
 		}
 	}
 
 	void AnotherHttpClient::setDebug(bool debug) {
-		this->debug = debug;
+		_debug = debug;
 	}
     
     void AnotherHttpClient::reconnect() {

@@ -26,7 +26,7 @@ using namespace OS;
 using namespace UTIL;
 using namespace HTTP;
 
-static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
+static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
 
 /**
  * @brief dump response handler
@@ -50,7 +50,7 @@ public:
 		}
     }
     virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
-		logger->loge("Error/e: " + e.toString());
+		logger->error("Error/e: " + e.toString());
     }
 	HttpResponseHeader & getResponseHeader() {
 		return responseHeader;
@@ -206,7 +206,7 @@ public:
 				response.setTransfer(AutoRef<DataTransfer>(NULL));
 			}
 		} catch (Exception & e) {
-			logger->loge(" ** error");
+			logger->error(" ** error");
 			response.setStatus(500);
 			response.setContentType("text/html");
 			response.setFixedTransfer("<html><head><title>500 Server Error</title></head>"
@@ -242,13 +242,13 @@ public:
 		}
         if (!file.exists() || !file.isFile()) {
 			if (path != "/") {
-				logger->logd(log + " | 404 Not Found (" + file.getPath() + ")");
+				logger->debug(log + " | 404 Not Found (" + file.getPath() + ")");
 				setErrorPage(response, 404);
 				return;
 			}
 			file = File(File::mergePaths(basePath, indexName));
 			if (!file.exists()) {
-				logger->logd(log + " | 404 No Index File, " + File::mergePaths(basePath, indexName));
+				logger->debug(log + " | 404 No Index File, " + File::mergePaths(basePath, indexName));
 				setErrorPage(response, 404);
 				return;
 			}
@@ -256,11 +256,11 @@ public:
 		
 		if (file.getExtension() == "lsp") {
             handleLispPage(file, request, sink, response);
-			logger->logd(log + " : (LISP PAGE '" + file.getName() + "') | " + Text::toString(response.getStatusCode()));
+			logger->debug(log + " : (LISP PAGE '" + file.getName() + "') | " + Text::toString(response.getStatusCode()));
 			return;
 		}
 		
-		logger->logd(log + " | 200 OK");
+		logger->debug(log + " | 200 OK");
         response.setStatus(200);
 		setContentTypeWithFile(request, response, file);
 		if (request.getParameter("transfer") == "download") {
@@ -286,7 +286,7 @@ public:
 		response.setStatus(200);
 		response.setContentType("text/html");
 		if (needCacheUpdate(file)) {
-			logger->logd("[UPDATE CACHE]");
+			logger->debug("[UPDATE CACHE]");
 			lspMemCache[file.getPath()].update(file);
 		}
 		string dump = lspMemCache[file.getPath()].content();
@@ -297,7 +297,7 @@ public:
 		}
 		if (response.forwardRequested()) {
 			string location = response.getForwardLocation();
-			logger->logd(Text::format(" ** Forward :: location : %s", location.c_str()));
+			logger->debug(Text::format(" ** Forward :: location : %s", location.c_str()));
 			request.setPath(location);
 			response.cancelForward();
 			doHandle(request, sink, response);
@@ -332,7 +332,7 @@ public:
 			page->applyResponse(response);
 			unsigned long tick = tick_milli();
 			string content = page->parseLispPage(dump);
-			logger->logd(Text::format(" ** processing : %ld ms.", tick_milli() - tick));
+			logger->debug(Text::format(" ** processing : %ld ms.", tick_milli() - tick));
 			lspPool.release(page);
 			return content;
 		} catch (Exception e) {
@@ -541,7 +541,7 @@ public:
 			result.contentType() = handler.getResponseHeader()["content-type"];
 			result.dump() = handler.getDump();
 		} catch (Exception & e) {
-			logger->loge(e.toString());
+			logger->error(e.toString());
 			result.statusCode() = 500;
 		}
 		return result;
@@ -570,7 +570,7 @@ public:
 				response.setTransfer(AutoRef<DataTransfer>(NULL));
 			}
 		} catch (Exception & e) {
-			logger->loge(" ** error");
+			logger->error(" ** error");
 			response.setStatus(500);
 			response.setContentType("text/html");
 			response.setFixedTransfer("Server Error/" + e.toString());
@@ -579,7 +579,7 @@ public:
 
 	void doHandle(HttpRequest & request, AutoRef<DataSink> sink, HttpResponse & response) {
 		string log;
-		logger->logd(Text::format("** Part2: %s [%s:%d]", request.getRawPath().c_str(),
+		logger->debug(Text::format("** Part2: %s [%s:%d]", request.getRawPath().c_str(),
                                  request.getRemoteAddress().getHost().c_str(),
 								 request.getRemoteAddress().getPort()));
 		if (request.isWwwFormUrlEncoded()) {
@@ -625,7 +625,7 @@ int main(int argc, char * args[]) {
 	bool deamon = false;
 	System::getInstance()->ignoreSigpipe();
 	
-	LoggerFactory::getInstance().setLoggerDescriptorSimple("*", "basic", "console");
+	LoggerFactory::inst().setProfile("*", "basic", "console");
 	MimeTypes::load(DATA_PATH"/mimetypes");
 	
 	string configPath;
@@ -639,7 +639,7 @@ int main(int argc, char * args[]) {
 
 	for (int i = 1; i < argc; i++) {
 		if (arguments.is_set("D") == true) {
-			logger->logd("DAEMON MODE");
+			logger->debug("DAEMON MODE");
 			deamon = true;
 			break;
 		}
@@ -663,7 +663,7 @@ int main(int argc, char * args[]) {
 #if !defined(USE_OPENSSL)
 		throw Exception("SSL not supported");
 #else
-		logger->logd(" ** OpenSSL version: " + SecureContext::getOpenSSLVersion());
+		logger->debug(" ** OpenSSL version: " + SecureContext::getOpenSSLVersion());
         class SecureServerSocketMaker : public ServerSocketMaker {
         private:
             string certPath;

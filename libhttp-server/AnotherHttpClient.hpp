@@ -52,7 +52,7 @@ namespace HTTP {
 	 */
 	class AnotherHttpClient {
 	private:
-		bool debug;
+		bool _debug;
 		Url url;
 		HttpRequest request;
 		HttpResponse response;

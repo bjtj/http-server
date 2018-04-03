@@ -35,6 +35,7 @@ libhttp_serverinc_HEADERS = \
 	HttpSessionTool.hpp \
 	HttpStatusCodes.hpp \
 	LispPage.hpp \
+	MaxConnectionException.hpp \
 	MimeTypes.hpp \
 	Packet.hpp \
 	HttpRange.hpp \
@@ -109,6 +110,7 @@ libhttp_server_la_SOURCES = \
 	HttpStatusCodes.hpp \
 	LispPage.cpp \
 	LispPage.hpp \
+	MaxConnectionException.hpp \
 	MimeTypes.cpp \
 	MimeTypes.hpp \
 	Packet.cpp \

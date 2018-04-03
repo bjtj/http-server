@@ -1,6 +1,8 @@
 #include "ConnectionThreadPool.hpp"
 #include <liboslayer/os.hpp>
 #include <liboslayer/Logger.hpp>
+#include "MaxConnectionException.hpp"
+
 
 namespace HTTP {
 
@@ -8,7 +10,7 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-	static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
+	static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
 
 	/**
 	 * @brief ConnectionTask
@@ -29,7 +31,7 @@ namespace HTTP {
 		try {
 			connectionTask();
 		} catch (NullException & e) {
-			logger->loge(e.toString());
+			logger->error(e.toString());
 		}
 	}
 
@@ -54,7 +56,7 @@ namespace HTTP {
 				}
             }
         } catch (IOException & e) {
-            logger->loge(e.toString());
+            logger->error(e.toString());
         }
         
         // notify disconnection to connection manager
@@ -112,7 +114,7 @@ namespace HTTP {
 	void ConnectionThreadPool::createConnection(AutoRef<Communication> communication, AutoRef<Connection> connection) {
 		StatefulThread * thread = acquire();
 		if (thread == NULL) {
-			throw Exception("ConnectionThreadPool error - no thread available");
+			throw MaxConnectionException("ConnectionThreadPool error - no thread available");
 		}
 		thread->task() = AutoRef<Task>(new ConnectionTask(connection, communication));
 		enqueue(thread);

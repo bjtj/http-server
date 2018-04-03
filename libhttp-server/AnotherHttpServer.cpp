@@ -12,7 +12,7 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-	static AutoRef<Logger> logger = LoggerFactory::getInstance().getObservingLogger(__FILE__);
+	static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
 
 	/**
 	 * @brief AnotherHttpServer
@@ -43,8 +43,8 @@ namespace HTTP {
 		virtual ~MaxClientHandler() {}
 		virtual void onMaxCapacity(ConnectionManager & cm, AutoRef<Connection> connection) {
 
-			logger->loge("ConnectinoManager / free : " + Text::toString(cm.available()) +
-						 ", work : " + Text::toString(cm.working()));
+			logger->error("ConnectinoManager / free : " + Text::toString(cm.available()) +
+						  ", work : " + Text::toString(cm.working()));
 			
 			string content = "<html><head><title>Not available</title></head>"
 				"<body><h1>Too many connections</h1><p>Try again</p></body></html>";
@@ -61,8 +61,12 @@ namespace HTTP {
 	AnotherHttpServer::AnotherHttpServer(HttpServerConfig config) :
 		config(config),
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
-		_connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
-						  config.getIntegerProperty("thread.count", 20)),
+		// _connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
+		// 				  config.getIntegerProperty("thread.count", 20)),
+		_connectionManager(
+			ConnectionConfig(
+				AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
+				config.getIntegerProperty("thread.count", 20))),
 		thread(NULL)
 	{
 		_connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
@@ -72,8 +76,11 @@ namespace HTTP {
     AnotherHttpServer::AnotherHttpServer(HttpServerConfig config, AutoRef<ServerSocketMaker> serverSocketMaker) :
 		config(config),
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
-		_connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
-						  config.getIntegerProperty("thread.count", 20), serverSocketMaker),
+		_connectionManager(
+			ConnectionConfig(
+				AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
+				serverSocketMaker,
+				config.getIntegerProperty("thread.count", 20))),
 		thread(NULL)
 	{
 		_connectionManager.setOnMaxCapacity(AutoRef<OnMaxCapacity>(new MaxClientHandler));
