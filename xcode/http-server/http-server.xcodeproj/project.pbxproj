@@ -28,8 +28,6 @@
 		E87F366D1C51067A00970869 /* HttpSession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E87F36681C51067A00970869 /* HttpSession.cpp */; };
 		E87F366E1C51067A00970869 /* HttpSessionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E87F366A1C51067A00970869 /* HttpSessionManager.cpp */; };
 		E87F366F1C51067A00970869 /* HttpSessionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E87F366A1C51067A00970869 /* HttpSessionManager.cpp */; };
-		E8848F001E6F73DF00FFA522 /* WebServerUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8848EFE1E6F73DF00FFA522 /* WebServerUtil.cpp */; };
-		E8848F011E6F740700FFA522 /* WebServerUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8848EFE1E6F73DF00FFA522 /* WebServerUtil.cpp */; };
 		E88A80141CB446FB00241D44 /* BufferIndicator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88A800D1CB446FB00241D44 /* BufferIndicator.cpp */; };
 		E88A80151CB4473300241D44 /* BufferIndicator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88A800D1CB446FB00241D44 /* BufferIndicator.cpp */; };
 		E8A6AC971FC1353A0091F236 /* HttpSessionTool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8A6AC961FC1353A0091F236 /* HttpSessionTool.cpp */; };
@@ -169,8 +167,6 @@
 		E87F36691C51067A00970869 /* HttpSession.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpSession.hpp; path = "../../libhttp-server/HttpSession.hpp"; sourceTree = "<group>"; };
 		E87F366A1C51067A00970869 /* HttpSessionManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpSessionManager.cpp; path = "../../libhttp-server/HttpSessionManager.cpp"; sourceTree = "<group>"; };
 		E87F366B1C51067A00970869 /* HttpSessionManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpSessionManager.hpp; path = "../../libhttp-server/HttpSessionManager.hpp"; sourceTree = "<group>"; };
-		E8848EFE1E6F73DF00FFA522 /* WebServerUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WebServerUtil.cpp; path = "../../libhttp-server/WebServerUtil.cpp"; sourceTree = "<group>"; };
-		E8848EFF1E6F73DF00FFA522 /* WebServerUtil.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = WebServerUtil.hpp; path = "../../libhttp-server/WebServerUtil.hpp"; sourceTree = "<group>"; };
 		E88A800D1CB446FB00241D44 /* BufferIndicator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BufferIndicator.cpp; path = "../../libhttp-server/BufferIndicator.cpp"; sourceTree = "<group>"; };
 		E88A800E1CB446FB00241D44 /* BufferIndicator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BufferIndicator.hpp; path = "../../libhttp-server/BufferIndicator.hpp"; sourceTree = "<group>"; };
 		E88A800F1CB446FB00241D44 /* DataSink.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DataSink.hpp; path = "../../libhttp-server/DataSink.hpp"; sourceTree = "<group>"; };
@@ -182,6 +178,8 @@
 		E8AC4F5A1C89C09A00504E50 /* HttpSessionTool.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpSessionTool.hpp; path = "../../libhttp-server/HttpSessionTool.hpp"; sourceTree = "<group>"; };
 		E8AC4F5B1C89C09A00504E50 /* LispPage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LispPage.cpp; path = "../../libhttp-server/LispPage.cpp"; sourceTree = "<group>"; };
 		E8AC4F5C1C89C09A00504E50 /* LispPage.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = LispPage.hpp; path = "../../libhttp-server/LispPage.hpp"; sourceTree = "<group>"; };
+		E8AD14B420743EF80031905F /* MaxConnectionException.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MaxConnectionException.hpp; path = "../../libhttp-server/MaxConnectionException.hpp"; sourceTree = "<group>"; };
+		E8AD14B520743EF80031905F /* HttpRange.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpRange.hpp; path = "../../libhttp-server/HttpRange.hpp"; sourceTree = "<group>"; };
 		E8B160DC1BF9E4FA002D68C7 /* Packet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Packet.cpp; path = "../../libhttp-server/Packet.cpp"; sourceTree = "<group>"; };
 		E8B160DD1BF9E4FA002D68C7 /* Packet.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Packet.hpp; path = "../../libhttp-server/Packet.hpp"; sourceTree = "<group>"; };
 		E8B160E01BFA9333002D68C7 /* ConnectionManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConnectionManager.cpp; path = "../../libhttp-server/ConnectionManager.cpp"; sourceTree = "<group>"; };
@@ -290,6 +288,8 @@
 		E8FAB2441BD7D2A500E89DC5 /* http-server-c++ */ = {
 			isa = PBXGroup;
 			children = (
+				E8AD14B520743EF80031905F /* HttpRange.hpp */,
+				E8AD14B420743EF80031905F /* MaxConnectionException.hpp */,
 				E8A6AC961FC1353A0091F236 /* HttpSessionTool.cpp */,
 				E8C1D44F1EA8E0D500AA8905 /* UrlEncoderDecoder.cpp */,
 				E8C1D4501EA8E0D500AA8905 /* UrlEncoderDecoder.hpp */,
@@ -305,8 +305,6 @@
 				E8EE1B601E8014DA0086E173 /* HttpRequestHandlerDispatcher.hpp */,
 				E8EE1B611E8014DA0086E173 /* SimpleHttpRequestHandlerDispatcher.cpp */,
 				E8EE1B621E8014DA0086E173 /* SimpleHttpRequestHandlerDispatcher.hpp */,
-				E8848EFE1E6F73DF00FFA522 /* WebServerUtil.cpp */,
-				E8848EFF1E6F73DF00FFA522 /* WebServerUtil.hpp */,
 				E86940491D1C004900192CBB /* BasicAuth.cpp */,
 				E869404A1D1C004900192CBB /* BasicAuth.hpp */,
 				E869404B1D1C004900192CBB /* HttpAuth.cpp */,
@@ -424,7 +422,7 @@
 		E8FAB2301BD7D29800E89DC5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = TJ;
 				TargetAttributes = {
 					E8FAB2371BD7D29800E89DC5 = {
@@ -482,7 +480,6 @@
 				E8C1D4521EA8E0FD00AA8905 /* UrlEncoderDecoder.cpp in Sources */,
 				E8EE1B6A1E8014DA0086E173 /* SimpleHttpRequestHandlerDispatcher.cpp in Sources */,
 				E81F60A11E8DCF0C0082D294 /* Cookie.cpp in Sources */,
-				E8848F011E6F740700FFA522 /* WebServerUtil.cpp in Sources */,
 				E88A80151CB4473300241D44 /* BufferIndicator.cpp in Sources */,
 				E8EE1B661E8014DA0086E173 /* HttpCommunicationMaker.cpp in Sources */,
 				E8B161391BFDF8B9002D68C7 /* AnotherHttpClient.cpp in Sources */,
@@ -534,7 +531,6 @@
 				E8B160DE1BF9E4FA002D68C7 /* Packet.cpp in Sources */,
 				E8A6AC971FC1353A0091F236 /* HttpSessionTool.cpp in Sources */,
 				E88A80141CB446FB00241D44 /* BufferIndicator.cpp in Sources */,
-				E8848F001E6F73DF00FFA522 /* WebServerUtil.cpp in Sources */,
 				E8FAB2661BD7D2CE00E89DC5 /* ChunkedReader.cpp in Sources */,
 				E8EE1B671E8014DA0086E173 /* HttpRequestHandler.cpp in Sources */,
 				E869404D1D1C004900192CBB /* BasicAuth.cpp in Sources */,
@@ -610,12 +606,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -662,12 +660,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
