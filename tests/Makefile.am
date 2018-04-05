@@ -2,6 +2,7 @@ TESTS=$(check_PROGRAMS)
 
 check_PROGRAMS=\
 	test-http-header \
+	test-http-range \
 	test-url \
 	test-connection-manager \
 	test-lisp-page \
@@ -14,6 +15,7 @@ check_PROGRAMS=\
 	test-cookie
 
 test_http_header_SOURCES = test-http-header.cpp
+test_http_range_SOURCES = test-http-range.cpp
 test_url_SOURCES = test-url.cpp
 test_connection_manager_SOURCES = test-connection-manager.cpp
 test_lisp_page_SOURCES = test-lisp-page.cpp

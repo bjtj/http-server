@@ -130,7 +130,11 @@ namespace HTTP {
 		return "";
 	}
 
-	HttpRange HttpRequest::getRange() {
+	bool HttpRequest::containsRange() const {
+		return getHeaderFieldIgnoreCase("Range").empty() == false;
+	}
+
+	HttpRange HttpRequest::getRange() const {
 		string rangeParam = getHeaderFieldIgnoreCase("Range");
 		if (rangeParam.empty()) {
 			throw Exception("Range field empty");
@@ -138,7 +142,7 @@ namespace HTTP {
 		return parseRange(rangeParam);
 	}
 
-	HttpRange HttpRequest::parseRange(const string & range) {
+	HttpRange HttpRequest::parseRange(const string & range) const {
 		if (range.empty()) {
 			throw Exception("empty string");
 		}

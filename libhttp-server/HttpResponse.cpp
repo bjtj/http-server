@@ -141,32 +141,32 @@ namespace HTTP {
 
 	void HttpResponse::setPartialFileTransfer(const HttpRange & r, const OS::File & file) {
         HttpRange range = r;
-		if (file.getSize() < 1) {
+		size_t filesize = (size_t)file.getSize();
+		if (filesize < 1) {
 			throw Exception("Empty file");
 		}
-		if (range.to() == 0 || range.to() >= (size_t)file.getSize()) {
-			range.to() = (size_t)file.getSize() - 1;
-		}
+		range.adjustTo(filesize);
 		if (range.from() >= range.to()) {
-            throw Exception("Wrong range start error : end(" + Text::toString(range.to()) +
-                            ") but start(" + Text::toString(range.from()) + ")");
+            throw Exception("Wrong range error - start (" + Text::toString(range.from()) +
+                            ") bigger than end (" + Text::toString(range.to()) + ")");
 		}
-        logger->debug("range: " + range.toString());
-		size_t size = (range.size() + 1);
+        logger->debug("Set Transfer Range: " + range.toString());
 		FileStream stream(file, "rb");
 		stream.seek(range.from());
 		AutoRef<DataSource> source(new FileDataSource(stream));
-		AutoRef<DataTransfer> transfer(new FixedTransfer(source, size, 10 * 1024));
+		AutoRef<DataTransfer> transfer(new FixedTransfer(source, range.size(), 10 * 1024));
 		setStatus(206);
-		setContentLength(size);
-		string bytes = "bytes=";
-		bytes.append(Text::toString(range.from()));
-		bytes.append("-");
-		bytes.append(Text::toString(range.to()));
-		bytes.append("/");
-		bytes.append(Text::toString(file.getSize()));
-		setHeaderField("Content-Range", bytes);
+		setContentLength(range.size());
+		setRange(range, filesize);
 		setTransfer(transfer);
+	}
+
+	void HttpResponse::setRange(const HttpRange & range, size_t filesize) {
+		string bytes = "bytes ";
+		bytes.append(range.toString());
+		bytes.append("/");
+		bytes.append(Text::toString(filesize));
+		setHeaderField("Content-Range", bytes);
 	}
 
 }

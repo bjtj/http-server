@@ -306,11 +306,19 @@ public:
 		if (response["set-file-transfer"].empty() == false) {
 			File file(response["set-file-transfer"]);
 			if (!file.exists() || !file.isFile()) {
-                logger->error("set-file-transfer error - file not found \"" + response["set-file-transfer"] + "\"");
+                logger->error("set-file-transfer error - file not found \"" +
+							  response["set-file-transfer"] + "\"");
 				setErrorPage(response, 404);
 				return;
 			}
-			setFileTransferX(request, response, file);
+			setContentTypeWithFile(request, response, file);
+			setContentDispositionWithFile(request, response, file);
+			if (request.containsRange()) {
+				response.setPartialFileTransfer(request.getRange(), file);
+			} else {
+				response.setStatus(200);
+				response.setFileTransfer(file);
+			}
 			return;
 		}
 		response.setFixedTransfer(content);
@@ -362,11 +370,11 @@ public:
 	void setFileTransferX(HttpRequest & request, HttpResponse & response, File & file) {
 		setContentTypeWithFile(request, response, file);
 		setContentDispositionWithFile(request, response, file);
-		string range = request.getHeaderFieldIgnoreCase("Range");
-		if (!range.empty()) {
+		if (request.containsRange()) {
 			try {
 				response.setPartialFileTransfer(request.getRange(), file);
 			} catch (Exception e) {
+				logger->error("partial file transfer failed - " + e.message());
 				response.setContentType("text/html");
 				response.setStatus(500);
 				response.setFixedTransfer(e.toString());

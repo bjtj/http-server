@@ -60,6 +60,7 @@ namespace HTTP {
 		void setFileTransfer(const std::string & filepath);
 		void setFileTransfer(OS::File & file);
 		void setPartialFileTransfer(const HttpRange & range, const OS::File & file);
+		void setRange(const HttpRange & range, size_t filesize);
 	};
 }
 

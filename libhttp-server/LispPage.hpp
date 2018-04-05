@@ -29,13 +29,7 @@ namespace HTTP {
 		void applyResponse(HttpResponse & response);
 		void applyLoadPage();
 		std::string parseLispPage(const std::string & src);
-		
-		static void applyWeb(LISP::Env & env, HttpServerConfig & config);
-		static void applyAuth(LISP::Env & env, HttpRequest & request, HttpResponse & response);
-        static void applySession(LISP::Env & env, HttpRequest & request, OS::AutoRef<HttpSession> session);
-		static void applyRequest(LISP::Env & env, HttpRequest & request);
-		static void applyResponse(LISP::Env & env, HttpResponse & response);
-		static void applyLoadPage(LISP::Env & env);
+
 		static bool compile(LISP::Env & env, const std::string & line);
 		static std::string convertLispPageToCode(const std::string & src);
 		static std::string parseLispPage(LISP::Env & env, const std::string & src);

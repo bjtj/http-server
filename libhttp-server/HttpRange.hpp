@@ -33,12 +33,21 @@ namespace HTTP {
 		size_t to() const {
 			return _to;
 		}
+		void adjustTo(size_t size) {
+			if (_to == 0 || _to >= size) {
+				_to = size - 1;
+			}
+		}
 		size_t size() const  {
-			return _to - _from;
+			return _to - _from + 1;
 		}
         
         std::string toString() const {
-            return UTIL::Text::format("%d ~ %d", _from, _to);
+			std::string str;
+			str.append(UTIL::Text::toString(_from));
+			str.append("-");
+			str.append(UTIL::Text::toString(_to));
+			return str;
         }
 	};
 

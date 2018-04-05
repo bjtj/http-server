@@ -56,8 +56,9 @@ namespace HTTP {
 		OS::InetAddress & getLocalAddress();
 		std::vector<Cookie> getCookies();
 		std::string getCookie(const std::string & key);
-		HttpRange getRange();
-		HttpRange parseRange(const std::string & range);
+		bool containsRange() const;
+		HttpRange getRange() const;
+		HttpRange parseRange(const std::string & range) const;
 	};
 }
 
