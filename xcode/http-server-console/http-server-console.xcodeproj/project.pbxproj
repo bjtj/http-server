@@ -388,6 +388,7 @@
 				OTHER_LDFLAGS = (
 					"-Wl,/usr/local/ssl/lib/libssl.1.0.0.dylib",
 					"-Wl,/usr/local/ssl/lib/libcrypto.1.0.0.dylib",
+					"-Wl,/usr/lib/libiconv.dylib",
 				);
 				OTHER_LIBTOOLFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -413,6 +414,7 @@
 				OTHER_LDFLAGS = (
 					"-Wl,/usr/local/ssl/lib/libssl.1.0.0.dylib",
 					"-Wl,/usr/local/ssl/lib/libcrypto.1.0.0.dylib",
+					"-Wl,/usr/lib/libiconv.dylib",
 				);
 				OTHER_LIBTOOLFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -8,6 +8,10 @@
 #include <liboslayer/DatabaseDriver.hpp>
 #include "BasicAuth.hpp"
 
+#ifdef PLATFORM_APPLE
+#   include <iconv.h>
+#endif
+
 #define _VAR OS::GCRef<LISP::Var> 
 #define HEAP_ALLOC(E,V) E.alloc(new LISP::Var(V))
 
@@ -55,11 +59,43 @@ namespace HTTP {
 		public:
 			Enc() {}
 			virtual ~Enc() {}
-			LISP_PROCEDURE_PROC(env, scope, name, args) {
-				Iterator<_VAR > iter = args.iter();
-				string txt = LISP::eval(env, scope, iter.next())->toPrintString();
-				return HEAP_ALLOC(env, LISP::wrap_text(UrlEncoder::encode(txt)));
-			}
+            LISP_PROCEDURE_PROC(env, scope, name, args) {
+                Iterator<_VAR > iter = args.iter();
+                string txt = LISP::eval(env, scope, iter.next())->toPrintString();
+#ifdef PLATFORM_APPLE
+                txt = resolve_utf8_mac(txt);
+#endif
+                return HEAP_ALLOC(env, LISP::wrap_text(UrlEncoder::encode(txt)));
+            }
+
+#ifdef PLATFORM_APPLE
+            static string resolve_utf8_mac(const string & str) {
+                string ret = str;
+                char * utf8 = new char[str.size() + 1];
+                try {
+                    memset(utf8, 0, str.size() + 1);
+                    resolve_utf8_mac(str.c_str(), utf8, str.size());
+                    ret = string(utf8);
+                } catch (const char * err) {
+                    logger->error(err);
+                }
+                delete[] utf8;
+                return ret;
+            }
+            
+            // https://www.gnu.org/software/libc/manual/html_node/iconv-Examples.html
+            static void resolve_utf8_mac(const char * str, char * out_buf, size_t avail) {
+                size_t in_size = strlen(str);
+                char * in_ptr = (char*)str;
+                char * out_ptr = (char*)out_buf;
+                iconv_t ic = iconv_open("UTF-8", "UTF-8-MAC");
+                if (iconv(ic, &in_ptr, &in_size, &out_ptr, &avail) == (size_t)-1) {
+                    iconv_close(ic);
+                    throw Exception("iconv() failed");
+                }
+                iconv_close(ic);
+            }
+#endif
 		};
 		env.scope()->put_func(LISP::Symbol("url-encode"), HEAP_ALLOC(env, new Enc));
         
