@@ -1,7 +1,8 @@
 #ifndef __RANGE_HPP__
 #define __RANGE_HPP__
 
-
+#include <string>
+#include <liboslayer/Text.hpp>
 
 namespace HTTP {
 
@@ -35,6 +36,10 @@ namespace HTTP {
 		size_t size() const  {
 			return _to - _from;
 		}
+        
+        std::string toString() const {
+            return UTIL::Text::format("%d ~ %d", _from, _to);
+        }
 	};
 
 }

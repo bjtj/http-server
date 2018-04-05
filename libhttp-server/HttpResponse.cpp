@@ -1,10 +1,10 @@
-#include <liboslayer/Text.hpp>
 #include "HttpResponse.hpp"
 #include "HttpStatusCodes.hpp"
 #include "StringDataSource.hpp"
 #include "FixedTransfer.hpp"
 #include "FileDataSource.hpp"
 #include <liboslayer/Text.hpp>
+#include <liboslayer/Logger.hpp>
 
 namespace HTTP {
 
@@ -12,6 +12,7 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
+    static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
 
 	/**
 	 * @brief http response constructor
@@ -138,18 +139,19 @@ namespace HTTP {
 		setContentLength(file.getSize());
 	}
 
-	void HttpResponse::setPartialFileTransfer(const HttpRange & range, OS::File & file) {
-		size_t to = range.to();
+	void HttpResponse::setPartialFileTransfer(const HttpRange & r, const OS::File & file) {
+        HttpRange range = r;
 		if (file.getSize() < 1) {
 			throw Exception("Empty file");
 		}
 		if (range.to() == 0 || range.to() >= (size_t)file.getSize()) {
-			to = (size_t)file.getSize() - 1;
+			range.to() = (size_t)file.getSize() - 1;
 		}
-		if (range.from() >= to) {
-            throw Exception("Wrong range start error : end(" + Text::toString(to) +
+		if (range.from() >= range.to()) {
+            throw Exception("Wrong range start error : end(" + Text::toString(range.to()) +
                             ") but start(" + Text::toString(range.from()) + ")");
 		}
+        logger->debug("range: " + range.toString());
 		size_t size = (range.size() + 1);
 		FileStream stream(file, "rb");
 		stream.seek(range.from());
@@ -160,7 +162,7 @@ namespace HTTP {
 		string bytes = "bytes=";
 		bytes.append(Text::toString(range.from()));
 		bytes.append("-");
-		bytes.append(Text::toString(to));
+		bytes.append(Text::toString(range.to()));
 		bytes.append("/");
 		bytes.append(Text::toString(file.getSize()));
 		setHeaderField("Content-Range", bytes);

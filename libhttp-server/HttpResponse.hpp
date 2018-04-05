@@ -59,7 +59,7 @@ namespace HTTP {
 		void setFixedTransfer(const std::string & content);
 		void setFileTransfer(const std::string & filepath);
 		void setFileTransfer(OS::File & file);
-		void setPartialFileTransfer(const HttpRange & range, OS::File & file);
+		void setPartialFileTransfer(const HttpRange & range, const OS::File & file);
 	};
 }
 
