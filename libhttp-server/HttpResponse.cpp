@@ -132,16 +132,17 @@ namespace HTTP {
 	}
 
 	void HttpResponse::setFileTransfer(OS::File & file) {
+		size_t filesize = (size_t)file.size();
 		AutoRef<DataSource> source(new FileDataSource(FileStream(file, "rb")));
-		AutoRef<DataTransfer> transfer(new FixedTransfer(source, (size_t)file.getSize()));
+		AutoRef<DataTransfer> transfer(new FixedTransfer(source, filesize));
 		clearTransfer();
 		setTransfer(transfer);
-		setContentLength(file.getSize());
+		setContentLength(filesize);
 	}
 
 	void HttpResponse::setPartialFileTransfer(const HttpRange & r, const OS::File & file) {
         HttpRange range = r;
-		size_t filesize = (size_t)file.getSize();
+		size_t filesize = (size_t)file.size();
 		if (filesize < 1) {
 			throw Exception("Empty file");
 		}

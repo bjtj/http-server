@@ -122,7 +122,7 @@ public:
 		return _content;
 	}
 	bool needUpdate(const File & file) {
-		return ((file.getSize() != (filesize_t)size()) ||
+		return ((file.size() != (filesize_t)size()) ||
 				(file.lastModifiedDate() != _date));
 	}
 	void update(File & file) {
@@ -236,27 +236,27 @@ public:
 								  request.getMethod().c_str(),
 								  path.c_str());
 		
-		File file(File::mergePaths(basePath, path));
+		File file(File::merge(basePath, path));
 		if (dedicated) {
-			file = File(File::mergePaths(basePath, indexName));
+			file = File(File::merge(basePath, indexName));
 		}
         if (!file.exists() || !file.isFile()) {
 			if (path != "/") {
-				logger->debug(log + " | 404 Not Found (" + file.getPath() + ")");
+				logger->debug(log + " | 404 Not Found (" + file.path() + ")");
 				setErrorPage(response, 404);
 				return;
 			}
-			file = File(File::mergePaths(basePath, indexName));
+			file = File(File::merge(basePath, indexName));
 			if (!file.exists()) {
-				logger->debug(log + " | 404 No Index File, " + File::mergePaths(basePath, indexName));
+				logger->debug(log + " | 404 No Index File, " + File::merge(basePath, indexName));
 				setErrorPage(response, 404);
 				return;
 			}
         }
 		
-		if (file.getExtension() == "lsp") {
+		if (file.extension() == "lsp") {
             handleLispPage(file, request, sink, response);
-			logger->debug(log + " : (LISP PAGE '" + file.getFileName() + "') | " + Text::toString(response.getStatusCode()));
+			logger->debug(log + " : (LISP PAGE '" + file.basename() + "') | " + Text::toString(response.getStatusCode()));
 			return;
 		}
 		
@@ -270,7 +270,7 @@ public:
     }
 
 	bool needCacheUpdate(const File & file) {
-		string path = file.getPath();
+		string path = file.path();
 		if (lspMemCache.find(path) == lspMemCache.end()) {
 			return true;
 		}
@@ -287,9 +287,9 @@ public:
 		response.setContentType("text/html");
 		if (needCacheUpdate(file)) {
 			logger->debug("[UPDATE CACHE]");
-			lspMemCache[file.getPath()].update(file);
+			lspMemCache[file.path()].update(file);
 		}
-		string dump = lspMemCache[file.getPath()].content();
+		string dump = lspMemCache[file.path()].content();
 		string content = procLispPage(request, response, session, dump);
 		if (response.redirectRequested()) {
 			redirect(config, request, response, session, response.getRedirectLocation());
@@ -391,8 +391,8 @@ public:
 	void setContentTypeWithFile(HttpRequest & request, HttpResponse & response, File & file) {
 		map<string, string> types = mimeTypes;
 
-		if (types.find(file.getExtension()) != types.end()) {
-			response.setContentType(types[file.getExtension()]);
+		if (types.find(file.extension()) != types.end()) {
+			response.setContentType(types[file.extension()]);
 		} else {
 			response.setContentType("Application/octet-stream");
 		}
@@ -403,7 +403,7 @@ public:
 	 */
 	void setContentDispositionWithFile(HttpRequest & request, HttpResponse & response, File & file) {
 		response.setHeaderField("Content-Disposition",
-										 "attachment; filename=\"" + file.getFileName() + "\"");
+										 "attachment; filename=\"" + file.basename() + "\"");
 	}
 };
 
@@ -487,7 +487,7 @@ public:
 			if (!path.empty()) {
 				File p(path);
 				p.mkdir();
-				path = File::mergePaths(path, Text::toString(h));
+				path = File::merge(path, Text::toString(h));
 			} else {
 				path = Text::toString(h);
 			}

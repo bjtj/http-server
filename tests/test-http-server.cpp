@@ -72,7 +72,7 @@ public:
 			return;
 		}
 
-		string ext = file.getExtension();
+		string ext = file.extension();
 		if (mimeTypes.find(ext) != mimeTypes.end()) {
 			response.setStatus(200);
 			response.setContentType(mimeTypes[ext]);
