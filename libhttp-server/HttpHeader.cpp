@@ -278,7 +278,7 @@ namespace HTTP {
 	}
 
 	string HttpRequestHeader::getDirectory() const {
-		return File::getDirectory(resourcePath);
+		return File::getDirectoryName(resourcePath);
 	}
 	
 	string HttpRequestHeader::getRawPath() const {

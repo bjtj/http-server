@@ -256,7 +256,7 @@ public:
 		
 		if (file.getExtension() == "lsp") {
             handleLispPage(file, request, sink, response);
-			logger->debug(log + " : (LISP PAGE '" + file.getName() + "') | " + Text::toString(response.getStatusCode()));
+			logger->debug(log + " : (LISP PAGE '" + file.getFileName() + "') | " + Text::toString(response.getStatusCode()));
 			return;
 		}
 		
@@ -306,6 +306,7 @@ public:
 		if (response["set-file-transfer"].empty() == false) {
 			File file(response["set-file-transfer"]);
 			if (!file.exists() || !file.isFile()) {
+                logger->error("set-file-transfer error - file not found \"" + response["set-file-transfer"] + "\"");
 				setErrorPage(response, 404);
 				return;
 			}

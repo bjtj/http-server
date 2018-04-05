@@ -12,21 +12,6 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-	// Range::Range() : _from(0), _to(0) {
-	// }
-	// Range::Range(size_t from, size_t to) : _from(from), _to(to) {
-	// }
-	// Range::~Range() {
-	// }
-	// size_t & Range::from() {
-	// 	return _from;
-	// }
-	// size_t & Range::to() {
-	// 	return _to;
-	// }
-	// size_t Range::size() const {
-	// 	return _to - _from;
-	// }
 
 	/**
 	 * @brief http response constructor
@@ -43,6 +28,7 @@ namespace HTTP {
 		_redirectLocation.clear();
 		_forwardRequested = false;
 		_forwardLocation.clear();
+        _props.clear();
     }
 	void HttpResponse::setStatus(int statusCode) {
 		_header.setStatus(statusCode);
@@ -118,7 +104,7 @@ namespace HTTP {
 	}
 
 	string & HttpResponse::operator[] (const string & name) {
-		return props[name];
+		return _props[name];
 	}
 
 	void HttpResponse::appendCookies(const vector<Cookie> & cookies) {

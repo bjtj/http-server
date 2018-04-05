@@ -28,7 +28,7 @@ namespace HTTP {
 		std::string _redirectLocation;
 		bool _forwardRequested;
 		std::string _forwardLocation;
-		std::map<std::string, std::string> props;
+		std::map<std::string, std::string> _props;
 		
 	public:
 		HttpResponse();
