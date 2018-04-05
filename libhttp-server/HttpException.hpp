@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 #include "HttpStatusCodes.hpp"
+#include "HttpResponse.hpp"
+
 
 namespace HTTP {
 
