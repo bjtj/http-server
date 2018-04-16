@@ -1,6 +1,8 @@
 #include "ConnectionManager.hpp"
 #include <liboslayer/Logger.hpp>
 #include <liboslayer/Text.hpp>
+#include <liboslayer/File.hpp>
+
 
 namespace HTTP {
     
@@ -8,7 +10,8 @@ namespace HTTP {
     using namespace OS;
     using namespace UTIL;
     
-    static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
+    static AutoRef<Logger> logger = LoggerFactory::instance().
+		getObservingLogger(File::basename(__FILE__));
 
 
 	/**

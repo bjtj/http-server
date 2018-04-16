@@ -1,5 +1,6 @@
 #include "ConnectionThreadPool.hpp"
 #include <liboslayer/os.hpp>
+#include <liboslayer/File.hpp>
 #include <liboslayer/Logger.hpp>
 #include "MaxConnectionException.hpp"
 
@@ -10,7 +11,8 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-	static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
+	static AutoRef<Logger> logger = LoggerFactory::instance().
+		getObservingLogger(File::basename(__FILE__));
 
 	/**
 	 * @brief ConnectionTask

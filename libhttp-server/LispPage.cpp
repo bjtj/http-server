@@ -4,6 +4,7 @@
 #include "HttpSessionTool.hpp"
 #include <liboslayer/Iterator.hpp>
 #include <liboslayer/Logger.hpp>
+#include <liboslayer/File.hpp>
 #include <liboslayer/FileStream.hpp>
 #include <liboslayer/DatabaseDriver.hpp>
 #include "BasicAuth.hpp"
@@ -21,7 +22,8 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-	static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
+	static AutoRef<Logger> logger = LoggerFactory::instance().
+		getObservingLogger(File::basename(__FILE__));
 
 	static string escapeText(const string & txt) {
 		return Text::replaceAll(Text::replaceAll(txt, "\\", "\\\\"), "\"", "\\\"");

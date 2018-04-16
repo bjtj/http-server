@@ -4,6 +4,7 @@
 #include "FixedTransfer.hpp"
 #include "FileDataSource.hpp"
 #include <liboslayer/Text.hpp>
+#include <liboslayer/File.hpp>
 #include <liboslayer/Logger.hpp>
 
 namespace HTTP {
@@ -12,7 +13,8 @@ namespace HTTP {
 	using namespace OS;
 	using namespace UTIL;
 
-    static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
+    static AutoRef<Logger> logger = LoggerFactory::instance().
+		getObservingLogger(File::basename(__FILE__));
 
 	/**
 	 * @brief http response constructor

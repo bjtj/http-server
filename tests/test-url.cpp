@@ -111,7 +111,7 @@ int main(int argc, char *args[]) {
 	LoggerProfile profile("*");
 	profile.allFormatters("basic");
 	profile.allWriters("console");
-	LoggerFactory::inst().setProfile(profile);
+	LoggerFactory::instance().setProfile(profile);
 
 	Url url;
 

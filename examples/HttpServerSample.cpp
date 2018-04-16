@@ -18,15 +18,18 @@
 #include <liboslayer/Lisp.hpp>
 #include <liboslayer/Base64.hpp>
 #include <liboslayer/Hash.hpp>
+#include <liboslayer/File.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/BasicAuth.hpp>
+
 
 using namespace std;
 using namespace OS;
 using namespace UTIL;
 using namespace HTTP;
 
-static AutoRef<Logger> logger = LoggerFactory::inst().getObservingLogger(__FILE__);
+static AutoRef<Logger> logger = LoggerFactory::instance().
+	getObservingLogger(File::basename(__FILE__));
 
 /**
  * @brief dump response handler
@@ -634,7 +637,7 @@ int main(int argc, char * args[]) {
 	bool deamon = false;
 	System::getInstance()->ignoreSigpipe();
 	
-	LoggerFactory::inst().setProfile("*", "basic", "console");
+	LoggerFactory::instance().setProfile("*", "basic", "console");
 	MimeTypes::load(DATA_PATH"/mimetypes");
 	
 	string configPath;
