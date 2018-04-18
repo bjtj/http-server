@@ -54,7 +54,7 @@ namespace HTTP {
 					  "; expires=" + date +
 					  "; path=" + _path +
 					  "; HttpOnly");
-		response.removeHeaderFields("Set-Cookie");
+		response.removeHeaderFieldsCase("Set-Cookie");
 		response.appendCookie(cookie);
 	}
 

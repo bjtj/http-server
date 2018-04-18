@@ -173,8 +173,8 @@ namespace HTTP {
 			}
 			communicationCompleted = true;
 			if (request.getProtocol() == "HTTP/1.1" &&
-				Text::equalsIgnoreCase(request.getHeaderFieldIgnoreCase("Connection"), "close") == false &&
-				Text::equalsIgnoreCase(response.getHeaderFieldIgnoreCase("Connection"), "close") == false) {
+				Text::equalsIgnoreCase(request.getHeaderField("Connection"), "close") == false &&
+				Text::equalsIgnoreCase(response.getHeaderField("Connection"), "close") == false) {
 				reset();
 			}
 		}

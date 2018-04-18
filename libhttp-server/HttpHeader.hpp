@@ -36,12 +36,12 @@ namespace HTTP {
 		virtual void setPart1(const std::string & part);
 		virtual void setPart2(const std::string & part);
 		virtual void setPart3(const std::string & part);
+		virtual bool hasHeaderFieldCase(const std::string & name) const;
+		virtual std::string getHeaderFieldCase(const std::string & name) const;
 		virtual bool hasHeaderField(const std::string & name) const;
 		virtual std::string getHeaderField(const std::string & name) const;
-		virtual bool hasHeaderFieldIgnoreCase(const std::string & name) const;
-		virtual std::string getHeaderFieldIgnoreCase(const std::string & name) const;
+		virtual int getHeaderFieldCaseAsInteger(std::string name) const;
 		virtual int getHeaderFieldAsInteger(std::string name) const;
-		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name) const;
 		virtual void setHeaderField(const std::string & name, const std::string & value);
 		virtual void setHeaderField(const std::string & name, const UTIL::StringList & value);
 		virtual void setHeaderField(const std::string & name, const std::vector<std::string> & value);
@@ -52,10 +52,10 @@ namespace HTTP {
 		virtual UTIL::StringList getHeaderFields(const std::string & name);
 		virtual UTIL::LinkedStringListMap getHeaderFields();
 		virtual std::map<std::string, std::string> getHeaderFieldsStdMap();
+		virtual void removeHeaderFieldCase(const std::string & name);
 		virtual void removeHeaderField(const std::string & name);
-		virtual void removeHeaderFieldIgnoreCase(const std::string & name);
+		virtual void removeHeaderFieldsCase(const std::string & name);
 		virtual void removeHeaderFields(const std::string & name);
-		virtual void removeHeaderFieldsIgnoreCase(const std::string & name);
 
         /* HTTP */
 		virtual std::string getContentType() const;
@@ -97,18 +97,18 @@ namespace HTTP {
 			{_header.setPart2(part);}
 		virtual void setPart3(const std::string & part)
 			{_header.setPart3(part);}
+		virtual bool hasHeaderFieldCase(const std::string & name) const
+			{return _header.hasHeaderFieldCase(name);}
+		virtual std::string getHeaderFieldCase(const std::string & name) const
+			{return _header.getHeaderFieldCase(name);}
 		virtual bool hasHeaderField(const std::string & name) const
 			{return _header.hasHeaderField(name);}
 		virtual std::string getHeaderField(const std::string & name) const
 			{return _header.getHeaderField(name);}
-		virtual bool hasHeaderFieldIgnoreCase(const std::string & name) const
-			{return _header.hasHeaderFieldIgnoreCase(name);}
-		virtual std::string getHeaderFieldIgnoreCase(const std::string & name) const
-			{return _header.getHeaderFieldIgnoreCase(name);}
-		virtual int getHeaderFieldAsInteger(const std::string & name) const
+		virtual int getHeaderFieldCaseAsInteger(const std::string & name) const
+			{return _header.getHeaderFieldCaseAsInteger(name);}
+		virtual int getHeaderFieldAsInteger(std::string name) const
 			{return _header.getHeaderFieldAsInteger(name);}
-		virtual int getHeaderFieldIgnoreCaseAsInteger(std::string name) const
-			{return _header.getHeaderFieldIgnoreCaseAsInteger(name);}
 		virtual void setHeaderField(const std::string & name, const std::string & value)
 			{_header.setHeaderField(name, value);}
 		virtual void setHeaderField(const std::string & name, const UTIL::StringList & value)
@@ -129,14 +129,14 @@ namespace HTTP {
 			{return _header.getHeaderFields();}
 		virtual std::map<std::string, std::string> getHeaderFieldsStdMap()
 			{return _header.getHeaderFieldsStdMap();}
+		virtual void removeHeaderFieldCase(const std::string & name)
+			{_header.removeHeaderFieldCase(name);}
 		virtual void removeHeaderField(const std::string & name)
 			{_header.removeHeaderField(name);}
-		virtual void removeHeaderFieldIgnoreCase(const std::string & name)
-			{_header.removeHeaderFieldIgnoreCase(name);}
+		virtual void removeHeaderFieldsCase(const std::string & name)
+			{_header.removeHeaderFieldsCase(name);}
 		virtual void removeHeaderFields(const std::string & name)
 			{_header.removeHeaderFields(name);}
-		virtual void removeHeaderFieldsIgnoreCase(const std::string & name)
-			{_header.removeHeaderFieldsIgnoreCase(name);}
 
         /* HTTP */
 		virtual std::string getContentType() const

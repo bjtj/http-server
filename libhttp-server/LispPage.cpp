@@ -233,7 +233,7 @@ namespace HTTP {
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getParameter(paramName)));
 				} else if (name->r_symbol() == "get-request-header") {
 					string paramName = LISP::eval(env, scope, iter.next())->toPrintString();
-					return HEAP_ALLOC(env, LISP::wrap_text(request.getHeaderFieldIgnoreCase(paramName)));
+					return HEAP_ALLOC(env, LISP::wrap_text(request.getHeaderField(paramName)));
 				} else if (name->r_symbol() == "get-remote-host") {
 					return HEAP_ALLOC(env, LISP::wrap_text(request.getRemoteAddress().getHost()));
 				} else if (name->r_symbol() == "get-remote-port") {

@@ -131,11 +131,11 @@ namespace HTTP {
 	}
 
 	bool HttpRequest::containsRange() const {
-		return getHeaderFieldIgnoreCase("Range").empty() == false;
+		return getHeaderField("Range").empty() == false;
 	}
 
 	HttpRange HttpRequest::getRange() const {
-		string rangeParam = getHeaderFieldIgnoreCase("Range");
+		string rangeParam = getHeaderField("Range");
 		if (rangeParam.empty()) {
 			throw Exception("Range field empty");
 		}

@@ -79,11 +79,11 @@ namespace HTTP {
 		part3 = part;
 	}
 	
-	bool HttpHeader::hasHeaderField(const string & name) const {
+	bool HttpHeader::hasHeaderFieldCase(const string & name) const {
 		return fields.contains(name);
 	}
 	
-    string HttpHeader::getHeaderField(const string & name) const {
+    string HttpHeader::getHeaderFieldCase(const string & name) const {
 		for (size_t i = 0; i < fields.size(); i++) {
 			if (fields[i].name() == name) {
 				return fields[i].obj().first("");
@@ -92,7 +92,7 @@ namespace HTTP {
 		return "";
     }
 	
-	bool HttpHeader::hasHeaderFieldIgnoreCase(const string & name) const {
+	bool HttpHeader::hasHeaderField(const string & name) const {
 		for (size_t i = 0; i < fields.size(); i++) {
 			if (Text::equalsIgnoreCase(fields[i].name(), name)) {
 				return true;
@@ -101,7 +101,7 @@ namespace HTTP {
 		return false;
 	}
 	
-	string HttpHeader::getHeaderFieldIgnoreCase(const string & name) const {
+	string HttpHeader::getHeaderField(const string & name) const {
 		for (size_t i = 0; i < fields.size(); i++) {
 			if (Text::equalsIgnoreCase(fields[i].name(), name)) {
 				return fields[i].obj().first("");
@@ -110,12 +110,12 @@ namespace HTTP {
 		return "";
 	}
 	
-	int HttpHeader::getHeaderFieldAsInteger(string name) const {
-		return Text::toInt(getHeaderField(name));
+	int HttpHeader::getHeaderFieldCaseAsInteger(string name) const {
+		return Text::toInt(getHeaderFieldCase(name));
 	}
 	
-	int HttpHeader::getHeaderFieldIgnoreCaseAsInteger(string name) const {
-		return Text::toInt(getHeaderFieldIgnoreCase(name));
+	int HttpHeader::getHeaderFieldAsInteger(string name) const {
+		return Text::toInt(getHeaderField(name));
 	}
 	
 	void HttpHeader::setHeaderField(const string & name, const string & value) {
@@ -158,24 +158,24 @@ namespace HTTP {
 		return fields.to_first_map("");
 	}
 	
-	void HttpHeader::removeHeaderField(const string & name) {
+	void HttpHeader::removeHeaderFieldCase(const string & name) {
 		fields.erase(name);
 	}
 	
-	void HttpHeader::removeHeaderFieldIgnoreCase(const string & name) {
+	void HttpHeader::removeHeaderField(const string & name) {
 		fields.eraseIgnoreCase(name);
 	}
 
-	void HttpHeader::removeHeaderFields(const string & name) {
+	void HttpHeader::removeHeaderFieldsCase(const string & name) {
 		fields.eraseAll(name);
 	}
 	
-	void HttpHeader::removeHeaderFieldsIgnoreCase(const string & name) {
+	void HttpHeader::removeHeaderFields(const string & name) {
 		fields.eraseAllIgnoreCase(name);
 	}
 	
 	string HttpHeader::getContentType() const {
-		return getHeaderFieldIgnoreCase("Content-Type");
+		return getHeaderField("Content-Type");
 	}
 	
 	void HttpHeader::setContentType(string contentType) {
@@ -183,7 +183,7 @@ namespace HTTP {
 	}
 	
 	int HttpHeader::getContentLength() const {
-		return getHeaderFieldIgnoreCaseAsInteger("Content-Length");
+		return getHeaderFieldAsInteger("Content-Length");
 	}
 	
 	void HttpHeader::setContentLength(long long contentLength) {
@@ -191,14 +191,14 @@ namespace HTTP {
 	}
 	
 	bool HttpHeader::isChunkedTransfer() const {
-		return Text::equalsIgnoreCase(getHeaderFieldIgnoreCase("Transfer-Encoding"), "chunked");
+		return Text::equalsIgnoreCase(getHeaderField("Transfer-Encoding"), "chunked");
 	}
 	
 	void HttpHeader::setChunkedTransfer(bool chunked) {
 		if (chunked) {
 			setHeaderField("Transfer-Encoding", "chunked");
 		} else {
-			removeHeaderFieldIgnoreCase("Transfer-Encoding");
+			removeHeaderField("Transfer-Encoding");
 		}
 	}
 	
@@ -207,7 +207,7 @@ namespace HTTP {
     }
     
     bool HttpHeader::keepConnection() {
-        return Text::equalsIgnoreCase(getHeaderFieldIgnoreCase("Connection"), "keep-alive");
+        return Text::equalsIgnoreCase(getHeaderField("Connection"), "keep-alive");
     }
 	
 	string HttpHeader::toString() const {
@@ -453,49 +453,63 @@ namespace HTTP {
 		init();
 		setStatus(statusCode, statusString);
 	}
+	
 	HttpResponseHeader::HttpResponseHeader(const HttpHeader & other) {
 		setHeader(other);
 	}
+	
 	HttpResponseHeader::~HttpResponseHeader() {
 		/**/
 	}
+	
 	void HttpResponseHeader::clear() {
 		HttpHeader::clear();
 		init();
 	}
+	
 	void HttpResponseHeader::init() {
 		setProtocol("HTTP/1.1");
 	}
+	
 	string HttpResponseHeader::getProtocol() const {
 		return getPart1();
 	}
+	
 	void HttpResponseHeader::setProtocol(const string & protocol) {
 		setPart1(protocol);
 	}
+	
 	void HttpResponseHeader::setStatus(int statusCode) {
 		setStatusCode(statusCode);
 		setStatusString(HttpStatusCodes::getStatusString(statusCode));
 	}
+	
 	void HttpResponseHeader::setStatus(int statusCode, const string & statusString) {
 		setStatusCode(statusCode);
 		setStatusString(statusString);
 	}
+	
 	int HttpResponseHeader::getStatusCode() const {
 		return Text::toInt(getPart2());
 	}
+	
 	void HttpResponseHeader::setStatusCode(int statusCode) {
 		setPart2(Text::toString(statusCode));
 	}
+	
 	string HttpResponseHeader::getStatusString() const {
 		return getPart3();
 	}
+	
 	void HttpResponseHeader::setStatusString(const string & message)  {
 		setPart3(message);
 	}
+	
     bool HttpResponseHeader::isRedirectionStatus() {
         return (getStatusCode() == 301 || getStatusCode() == 302);
     }
+	
     string HttpResponseHeader::getLocation() {
-        return getHeaderFieldIgnoreCase("Location");
+        return getHeaderField("Location");
     }
 }
