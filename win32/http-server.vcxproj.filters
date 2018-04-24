@@ -138,7 +138,10 @@
     <ClInclude Include="..\libhttp-server\UrlEncoderDecoder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\libhttp-server\WebServerUtil.hpp">
+    <ClInclude Include="..\libhttp-server\HttpRange.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\MaxConnectionException.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -239,7 +242,7 @@
     <ClCompile Include="..\libhttp-server\UrlEncoderDecoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\libhttp-server\WebServerUtil.cpp">
+    <ClCompile Include="..\libhttp-server\HttpSessionTool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -35,6 +35,7 @@
     <ClInclude Include="..\libhttp-server\HttpHeaderParser.hpp" />
     <ClInclude Include="..\libhttp-server\HttpHeaderReader.hpp" />
     <ClInclude Include="..\libhttp-server\HttpParameter.hpp" />
+    <ClInclude Include="..\libhttp-server\HttpRange.hpp" />
     <ClInclude Include="..\libhttp-server\HttpRequest.hpp" />
     <ClInclude Include="..\libhttp-server\HttpRequestHandler.hpp" />
     <ClInclude Include="..\libhttp-server\HttpRequestHandlerDispatcher.hpp" />
@@ -45,6 +46,7 @@
     <ClInclude Include="..\libhttp-server\HttpSessionTool.hpp" />
     <ClInclude Include="..\libhttp-server\HttpStatusCodes.hpp" />
     <ClInclude Include="..\libhttp-server\LispPage.hpp" />
+    <ClInclude Include="..\libhttp-server\MaxConnectionException.hpp" />
     <ClInclude Include="..\libhttp-server\MimeTypes.hpp" />
     <ClInclude Include="..\libhttp-server\Packet.hpp" />
     <ClInclude Include="..\libhttp-server\SimpleHttpRequestHandlerDispatcher.hpp" />
@@ -52,7 +54,6 @@
     <ClInclude Include="..\libhttp-server\StringDataSource.hpp" />
     <ClInclude Include="..\libhttp-server\Url.hpp" />
     <ClInclude Include="..\libhttp-server\UrlEncoderDecoder.hpp" />
-    <ClInclude Include="..\libhttp-server\WebServerUtil.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\libhttp-server\AnotherHttpClient.cpp" />
@@ -80,6 +81,7 @@
     <ClCompile Include="..\libhttp-server\HttpResponse.cpp" />
     <ClCompile Include="..\libhttp-server\HttpSession.cpp" />
     <ClCompile Include="..\libhttp-server\HttpSessionManager.cpp" />
+    <ClCompile Include="..\libhttp-server\HttpSessionTool.cpp" />
     <ClCompile Include="..\libhttp-server\HttpStatusCodes.cpp" />
     <ClCompile Include="..\libhttp-server\LispPage.cpp" />
     <ClCompile Include="..\libhttp-server\MimeTypes.cpp" />
@@ -87,7 +89,6 @@
     <ClCompile Include="..\libhttp-server\SimpleHttpRequestHandlerDispatcher.cpp" />
     <ClCompile Include="..\libhttp-server\Url.cpp" />
     <ClCompile Include="..\libhttp-server\UrlEncoderDecoder.cpp" />
-    <ClCompile Include="..\libhttp-server\WebServerUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\oslayer\win32\oslayer.vcxproj">
@@ -97,13 +98,12 @@
   <PropertyGroup Label="Globals">
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{A86AEA6E-750B-7C94-4188-77B9D2FCD973}</ProjectGuid>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
