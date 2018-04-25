@@ -10,7 +10,7 @@
 #include <liboslayer/StringElements.hpp>
 #include "HttpParameter.hpp"
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @breif HttpHeader
@@ -20,7 +20,7 @@ namespace HTTP {
 		std::string part1;
 		std::string part2;
 		std::string part3;
-		UTIL::LinkedStringListMap fields;
+		osl::LinkedStringListMap fields;
 	public:
 		HttpHeader();
 		HttpHeader(const std::string & part1, const std::string & part2, const std::string & part3);
@@ -43,14 +43,14 @@ namespace HTTP {
 		virtual int getHeaderFieldCaseAsInteger(std::string name) const;
 		virtual int getHeaderFieldAsInteger(std::string name) const;
 		virtual void setHeaderField(const std::string & name, const std::string & value);
-		virtual void setHeaderField(const std::string & name, const UTIL::StringList & value);
+		virtual void setHeaderField(const std::string & name, const osl::StringList & value);
 		virtual void setHeaderField(const std::string & name, const std::vector<std::string> & value);
 		virtual void setHeaderFields(const std::map<std::string, std::string> & fields);
 		virtual void appendHeaderField(const std::string & name, const std::string & value);
-		virtual void appendHeaderFields(const UTIL::LinkedStringMap & fields);
+		virtual void appendHeaderFields(const osl::LinkedStringMap & fields);
 		virtual void appendHeaderFields(const std::map<std::string, std::string> & fields);
-		virtual UTIL::StringList getHeaderFields(const std::string & name);
-		virtual UTIL::LinkedStringListMap getHeaderFields();
+		virtual osl::StringList getHeaderFields(const std::string & name);
+		virtual osl::LinkedStringListMap getHeaderFields();
 		virtual std::map<std::string, std::string> getHeaderFieldsStdMap();
 		virtual void removeHeaderFieldCase(const std::string & name);
 		virtual void removeHeaderField(const std::string & name);
@@ -111,7 +111,7 @@ namespace HTTP {
 			{return _header.getHeaderFieldAsInteger(name);}
 		virtual void setHeaderField(const std::string & name, const std::string & value)
 			{_header.setHeaderField(name, value);}
-		virtual void setHeaderField(const std::string & name, const UTIL::StringList & value)
+		virtual void setHeaderField(const std::string & name, const osl::StringList & value)
 			{_header.setHeaderField(name, value);}
 		virtual void setHeaderField(const std::string & name, const std::vector<std::string> & value)
 			{_header.setHeaderField(name, value);}
@@ -119,13 +119,13 @@ namespace HTTP {
 			{_header.setHeaderFields(fields);}
 		virtual void appendHeaderField(const std::string & name, const std::string & value)
 			{_header.appendHeaderField(name, value);}
-		virtual void appendHeaderFields(const UTIL::LinkedStringMap & fields)
+		virtual void appendHeaderFields(const osl::LinkedStringMap & fields)
 			{_header.appendHeaderFields(fields);}
 		virtual void appendHeaderFields(const std::map<std::string, std::string> & fields)
 			{_header.appendHeaderFields(fields);}
-		virtual UTIL::StringList getHeaderFields(const std::string & name)
+		virtual osl::StringList getHeaderFields(const std::string & name)
 			{return _header.getHeaderFields(name);}
-		virtual UTIL::LinkedStringListMap getHeaderFields()
+		virtual osl::LinkedStringListMap getHeaderFields()
 			{return _header.getHeaderFields();}
 		virtual std::map<std::string, std::string> getHeaderFieldsStdMap()
 			{return _header.getHeaderFieldsStdMap();}
@@ -188,8 +188,8 @@ namespace HTTP {
 		std::string extractQuery(const std::string & path);
 		std::string extractWithoutFragment(const std::string & path);
 		std::string extractFragment(const std::string & path);
-		std::vector<UTIL::KeyValue> parseSemiColonParameters(const std::string & path);
-		UTIL::KeyValue parseKeyValue(const std::string & text);
+		std::vector<osl::KeyValue> parseSemiColonParameters(const std::string & path);
+		osl::KeyValue parseKeyValue(const std::string & text);
 		void parsePath(const std::string & path);
 		void parseQuery(const std::string & query);
         std::vector<std::string> getParameterNames();
@@ -197,7 +197,7 @@ namespace HTTP {
 		std::string getParameter(const std::string & name);
 		std::vector<std::string> getParameters(const std::string & name);
 		void setParameter(const std::string & name, const std::string & value);
-		void setParameters(std::vector<UTIL::KeyValue> & nvs);
+		void setParameters(std::vector<osl::KeyValue> & nvs);
         void setHost(const std::string & host);
 	};
 

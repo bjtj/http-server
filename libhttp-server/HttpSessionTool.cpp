@@ -1,9 +1,9 @@
 #include "HttpSessionTool.hpp"
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-	using namespace OS;
+	using namespace osl;
 
 	const string HttpSessionTool::KEY_SESSION_ID = "sessionId";
 

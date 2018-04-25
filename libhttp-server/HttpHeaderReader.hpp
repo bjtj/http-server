@@ -10,7 +10,7 @@
 #include "HttpHeader.hpp"
 #include "HttpHeaderParser.hpp"
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief http header reader

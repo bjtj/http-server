@@ -7,12 +7,12 @@
 #include "HttpResponse.hpp"
 
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * http exception
 	 */
-	class HttpException : public OS::Exception {
+	class HttpException : public osl::Exception {
 	private:
 		int _statusCode;
 		std::string _statusString;

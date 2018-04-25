@@ -17,7 +17,7 @@
 #include <liboslayer/os.hpp>
 #include <liboslayer/AutoRef.hpp>
 
-namespace HTTP {
+namespace http {
 	
 	/**
 	 * @brief HttpCommunication
@@ -32,24 +32,24 @@ namespace HTTP {
 		bool responseHeaderTransferDone;
 		bool responseContentTransferDone;
 		bool communicationCompleted;
-		OS::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
+		osl::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
 	public:
-		HttpCommunication(OS::AutoRef<HttpRequestHandlerDispatcher> dispatcher);
+		HttpCommunication(osl::AutoRef<HttpRequestHandlerDispatcher> dispatcher);
 		virtual ~HttpCommunication();
 		void reset();
 		virtual bool isReadable();
 		virtual bool isWritable();
-        virtual void onConnected(OS::AutoRef<Connection> connection);
-		virtual bool onReceivable(OS::AutoRef<Connection> connection);
-		void readRequestHeaderIfNeed(OS::AutoRef<Connection> connection);
+        virtual void onConnected(osl::AutoRef<Connection> connection);
+		virtual bool onReceivable(osl::AutoRef<Connection> connection);
+		void readRequestHeaderIfNeed(osl::AutoRef<Connection> connection);
 		void readRequestContent(HttpRequest & request, HttpResponse & response, Packet & packet);
 		void onRequestHeader(HttpRequest & request, HttpResponse & response);
-		void onHttpRequestContentCompleted(HttpRequest & request, OS::AutoRef<DataSink> sink, HttpResponse & response);
-		void prepareRequestContentTransfer(HttpRequest & request, OS::AutoRef<DataSink> sink);
-		virtual bool onWriteable(OS::AutoRef<Connection> connection);
-		void sendResponseHeader(OS::AutoRef<Connection> connection);
-		void sendResponseContent(OS::AutoRef<Connection> connection);
-		virtual void onDisconnected(OS::AutoRef<Connection> connection);
+		void onHttpRequestContentCompleted(HttpRequest & request, osl::AutoRef<DataSink> sink, HttpResponse & response);
+		void prepareRequestContentTransfer(HttpRequest & request, osl::AutoRef<DataSink> sink);
+		virtual bool onWriteable(osl::AutoRef<Connection> connection);
+		void sendResponseHeader(osl::AutoRef<Connection> connection);
+		void sendResponseContent(osl::AutoRef<Connection> connection);
+		virtual void onDisconnected(osl::AutoRef<Connection> connection);
 		virtual bool isCommunicationCompleted();
 		void handleError(HttpRequest & request, HttpResponse & response, int errorCode);
 	};

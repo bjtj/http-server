@@ -5,7 +5,7 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 
-namespace HTTP {
+namespace http {
 	
 	class HttpAuth {
 	private:

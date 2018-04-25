@@ -14,7 +14,7 @@
 #include "Cookie.hpp"
 #include "HttpRange.hpp"
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief http request
@@ -22,9 +22,9 @@ namespace HTTP {
 	class HttpRequest : public HttpHeaderDelegator {
 	private:
         HttpRequestHeader _header;
-        OS::AutoRef<DataTransfer> transfer;
-        OS::InetAddress remoteAddress;
-		OS::InetAddress localAddress;
+        osl::AutoRef<DataTransfer> transfer;
+        osl::InetAddress remoteAddress;
+		osl::InetAddress localAddress;
 
 	public:
         HttpRequest();
@@ -47,13 +47,13 @@ namespace HTTP {
 		HttpRequestHeader & header();
 		bool isWwwFormUrlEncoded();
 		void parseWwwFormUrlencoded();
-        OS::AutoRef<DataTransfer> getTransfer();
-        void setTransfer(OS::AutoRef<DataTransfer> transfer);
+        osl::AutoRef<DataTransfer> getTransfer();
+        void setTransfer(osl::AutoRef<DataTransfer> transfer);
         void clearTransfer();
-        void setRemoteAddress(const OS::InetAddress & remoteAddress);
-        OS::InetAddress & getRemoteAddress();
-		void setLocalAddress(const OS::InetAddress & localAddress);
-		OS::InetAddress & getLocalAddress();
+        void setRemoteAddress(const osl::InetAddress & remoteAddress);
+        osl::InetAddress & getRemoteAddress();
+		void setLocalAddress(const osl::InetAddress & localAddress);
+		osl::InetAddress & getLocalAddress();
 		std::vector<Cookie> getCookies();
 		std::string getCookie(const std::string & key);
 		bool containsRange() const;

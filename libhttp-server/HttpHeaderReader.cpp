@@ -2,10 +2,10 @@
 
 #include "HttpHeaderReader.hpp"
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-	using namespace UTIL;
+	using namespace osl;
 
 	/**
 	 * @brief http header reader constructor

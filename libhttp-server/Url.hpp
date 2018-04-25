@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-namespace HTTP {
+namespace http {
     
     DECL_NAMED_EXCEPTION(UrlParseException);
 	DECL_EXCEPTION(WrongUrlFormatException, UrlParseException);
@@ -22,7 +22,7 @@ namespace HTTP {
 		std::string host;
 		std::string port;
 		std::string path;
-        UTIL::LinkedStringMap parameters;
+        osl::LinkedStringMap parameters;
 		static std::vector<std::string> knownSchemes;
 	public:
         Url();
@@ -50,7 +50,7 @@ namespace HTTP {
         void setRelativePath(const std::string & relativePath);
 		Url relativePath(const std::string & relativePath) const;
 		void setParameter(const std::string & name, const std::string & value);
-        UTIL::LinkedStringMap & getParameters();
+        osl::LinkedStringMap & getParameters();
         void setUrl(const std::string & urlStr);
 		void parseUrlString(const std::string & urlStr);
 		void parseAddress(const std::string & address);

@@ -5,7 +5,7 @@
 #include <liboslayer/Socket.hpp>
 #include <string>
 
-namespace HTTP {
+namespace http {
     
     /**
      * @brief Chunked Buffer
@@ -106,11 +106,11 @@ namespace HTTP {
 	 */
 	class ChunkedReader {
 	private:
-		OS::Socket & socket;
+		osl::Socket & socket;
 		ChunkedReaderBuffer chunkedBuffer;
 		
 	public:
-		ChunkedReader(OS::Socket & socket);
+		ChunkedReader(osl::Socket & socket);
 		virtual ~ChunkedReader();
 
 		size_t minSize(size_t a, size_t b);

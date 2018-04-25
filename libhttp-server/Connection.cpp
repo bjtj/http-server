@@ -1,10 +1,9 @@
 #include "Connection.hpp"
 
-namespace HTTP {
+namespace http {
     
 	using namespace std;
-	using namespace OS;
-	using namespace UTIL;
+	using namespace osl;
 
 	Connection::Connection(AutoRef<Socket> socket) :
 		_socket(socket),

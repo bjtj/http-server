@@ -10,7 +10,7 @@
 #include <map>
 #include <vector>
 
-namespace HTTP {
+namespace http {
 
 	class ConnectionManager;
 
@@ -22,7 +22,7 @@ namespace HTTP {
     public:
         ServerSocketMaker() {}
         virtual ~ServerSocketMaker() {}
-        virtual OS::AutoRef<OS::ServerSocket> makeServerSocket(int port) = 0;
+        virtual osl::AutoRef<osl::ServerSocket> makeServerSocket(int port) = 0;
     };
     
 	/**
@@ -36,7 +36,7 @@ namespace HTTP {
         CommunicationMaker() {}
         virtual ~CommunicationMaker() {}
         
-        virtual OS::AutoRef<Communication> makeCommunication() = 0;
+        virtual osl::AutoRef<Communication> makeCommunication() = 0;
     };
 
 	/**
@@ -46,7 +46,7 @@ namespace HTTP {
 	public:
 		OnMaxCapacity() {}
 		virtual ~OnMaxCapacity() {}
-		virtual void onMaxCapacity(ConnectionManager & cm, OS::AutoRef<Connection> connection) = 0;
+		virtual void onMaxCapacity(ConnectionManager & cm, osl::AutoRef<Connection> connection) = 0;
 	};
 
 
@@ -56,22 +56,22 @@ namespace HTTP {
 	class ConnectionConfig
 	{
 	private:
-		OS::AutoRef<CommunicationMaker> _communicationMaker;
-		OS::AutoRef<ServerSocketMaker> _serverSocketMaker;
+		osl::AutoRef<CommunicationMaker> _communicationMaker;
+		osl::AutoRef<ServerSocketMaker> _serverSocketMaker;
 		size_t _threadCount;
 		
 	public:
-		ConnectionConfig(OS::AutoRef<CommunicationMaker> communicationMaker,
+		ConnectionConfig(osl::AutoRef<CommunicationMaker> communicationMaker,
 						 size_t threadCount);
-		ConnectionConfig(OS::AutoRef<CommunicationMaker> communicationMaker,
-						 OS::AutoRef<ServerSocketMaker> serverSocketMaker,
+		ConnectionConfig(osl::AutoRef<CommunicationMaker> communicationMaker,
+						 osl::AutoRef<ServerSocketMaker> serverSocketMaker,
 						 size_t threadCount);
 		virtual ~ConnectionConfig();
-		OS::AutoRef<CommunicationMaker> & communicationMaker();
-		OS::AutoRef<ServerSocketMaker> & serverSocketMaker();
+		osl::AutoRef<CommunicationMaker> & communicationMaker();
+		osl::AutoRef<ServerSocketMaker> & serverSocketMaker();
 		size_t & threadCount();
-		OS::AutoRef<CommunicationMaker> communicationMaker() const;
-		OS::AutoRef<ServerSocketMaker> serverSocketMaker() const;
+		osl::AutoRef<CommunicationMaker> communicationMaker() const;
+		osl::AutoRef<ServerSocketMaker> serverSocketMaker() const;
 		size_t threadCount() const;
 	};
 
@@ -80,15 +80,15 @@ namespace HTTP {
 	/**
 	 * @brief ConnectionManager
 	 */
-    class ConnectionManager : public UTIL::Observer {
+    class ConnectionManager : public osl::Observer {
     private:
 		ConnectionConfig _config;
-		OS::AutoRef<OS::ServerSocket> serverSocket;
-        OS::Selector selector;
-        std::map<int, OS::AutoRef<Connection> > connections;
-        OS::Semaphore connectionsLock;
+		osl::AutoRef<osl::ServerSocket> serverSocket;
+        osl::Selector selector;
+        std::map<int, osl::AutoRef<Connection> > connections;
+        osl::Semaphore connectionsLock;
 		ConnectionThreadPool threadPool;
-		OS::AutoRef<OnMaxCapacity> onMaxCapacity;
+		osl::AutoRef<OnMaxCapacity> onMaxCapacity;
 		unsigned long recvTimeout;
         
     public:
@@ -99,25 +99,25 @@ namespace HTTP {
 		void stop();
         void poll(unsigned long timeout);
         void clearConnections();
-		void onConnect(OS::AutoRef<OS::Socket> client);
-		OS::AutoRef<Connection> makeConnection(OS::AutoRef<OS::Socket> client);
-        void onDisconnect(OS::AutoRef<Connection> connection);
-		void registerConnection(OS::AutoRef<Connection> connection);
-		void unregisterConnection(OS::AutoRef<Connection> connection);
+		void onConnect(osl::AutoRef<osl::Socket> client);
+		osl::AutoRef<Connection> makeConnection(osl::AutoRef<osl::Socket> client);
+        void onDisconnect(osl::AutoRef<Connection> connection);
+		void registerConnection(osl::AutoRef<Connection> connection);
+		void unregisterConnection(osl::AutoRef<Connection> connection);
 		void removeCompletedConnections();
         void stopAllThreads();
-		void startCommunication(OS::AutoRef<Communication> communication,
-								OS::AutoRef<Connection> connection);
+		void startCommunication(osl::AutoRef<Communication> communication,
+								osl::AutoRef<Connection> connection);
 		size_t getConnectionCount();
-		virtual void onUpdate(UTIL::Observable * target);
-		void handleMaxCapacity(OS::AutoRef<Connection> connection);
-		void setOnMaxCapacity(OS::AutoRef<OnMaxCapacity> onMaxCapacity);
+		virtual void onUpdate(osl::Observable * target);
+		void handleMaxCapacity(osl::AutoRef<Connection> connection);
+		void setOnMaxCapacity(osl::AutoRef<OnMaxCapacity> onMaxCapacity);
 		void setRecvTimeout(unsigned long recvTimeout);
 		unsigned long getRecvTimeout();
 		size_t available();
 		size_t working();
 		size_t capacity();
-        std::vector<OS::AutoRef<Connection> > getConnectionList();
+        std::vector<osl::AutoRef<Connection> > getConnectionList();
     };
 }
 

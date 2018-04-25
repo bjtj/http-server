@@ -7,34 +7,34 @@
 #include <liboslayer/Socket.hpp>
 #include <liboslayer/Lifetime.hpp>
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief 
 	 */
-	class Connection : public UTIL::Lifetime {
+	class Connection : public osl::Lifetime {
 	private:
-		OS::AutoRef<OS::Socket> _socket;
+		osl::AutoRef<osl::Socket> _socket;
 		bool terminateFlag;
 		bool _completed;
 		Packet _packet;
 		int id;
-		UTIL::Lifetime _recvLifetime;
+		osl::Lifetime _recvLifetime;
 		unsigned long _recvTimeout;
         unsigned long _recvCount;
         unsigned long _sendCount;
         unsigned long _sendTryCount;
 
 	public:
-		Connection(OS::AutoRef<OS::Socket> socket);
-		Connection(OS::AutoRef<OS::Socket> socket, size_t packetSize);
+		Connection(osl::AutoRef<osl::Socket> socket);
+		Connection(osl::AutoRef<osl::Socket> socket, size_t packetSize);
 		virtual ~Connection();
 		int getId();
-		OS::AutoRef<OS::Socket> socket();
-		void registerSelector(OS::Selector & selector, unsigned char flags);
-		void unregisterSelector(OS::Selector & selector, unsigned char flags);
-		bool isReadable(OS::Selector & selector);
-		bool isWritable(OS::Selector & selector);
+		osl::AutoRef<osl::Socket> socket();
+		void registerSelector(osl::Selector & selector, unsigned char flags);
+		void unregisterSelector(osl::Selector & selector, unsigned char flags);
+		bool isReadable(osl::Selector & selector);
+		bool isWritable(osl::Selector & selector);
 		void negotiate();
 		int recv(char * buffer, size_t size);
 		int send(const char * data, size_t len);
@@ -45,9 +45,9 @@ namespace HTTP {
 		bool & completed();
 		Packet & read();
 		Packet & packet();
-		OS::InetAddress getRemoteAddress();
-		OS::InetAddress getLocalAddress();
-		UTIL::Lifetime & recvLifetime();
+		osl::InetAddress getRemoteAddress();
+		osl::InetAddress getLocalAddress();
+		osl::Lifetime & recvLifetime();
 		unsigned long getRecvTimeout();
 		void setRecvTimeout(unsigned long timeout);
 		bool expiredRecvTimeout();

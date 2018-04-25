@@ -1,6 +1,6 @@
 #include "Communication.hpp"
 
-namespace HTTP {
+namespace http {
     Communication::Communication() {
     }
     Communication::~Communication() {

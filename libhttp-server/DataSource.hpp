@@ -1,7 +1,7 @@
 #ifndef __DATA_SOURCE_HPP__
 #define __DATA_SOURCE_HPP__
 
-namespace HTTP {
+namespace http {
 	
 	class DataSource {
 	private:

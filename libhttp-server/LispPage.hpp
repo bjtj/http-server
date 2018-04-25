@@ -10,29 +10,29 @@
 #include "HttpResponse.hpp"
 #include "HttpServerConfig.hpp"
 
-namespace HTTP {
+namespace http {
 	
 	class LispPage {
 	private:
-		LISP::Env _env;
+		lisp::Env _env;
         std::string _last_command;
 	public:
 		LispPage();
 		virtual ~LispPage();
-		LISP::Env & env();
+		lisp::Env & env();
 		std::string toLispySymbolName(const std::string & name);
 		void applyProperties(const std::map<std::string, std::string> & props);
 		void applyWeb(HttpServerConfig & config);
 		void applyAuth(HttpRequest & request, HttpResponse & response);
-        void applySession(HttpRequest & request, OS::AutoRef<HttpSession> session);
+        void applySession(HttpRequest & request, osl::AutoRef<HttpSession> session);
 		void applyRequest(HttpRequest & request);
 		void applyResponse(HttpResponse & response);
 		void applyLoadPage();
 		std::string parseLispPage(const std::string & src);
 
-		static bool compile(LISP::Env & env, const std::string & line);
+		static bool compile(lisp::Env & env, const std::string & line);
 		static std::string convertLispPageToCode(const std::string & src);
-		static std::string parseLispPage(LISP::Env & env, const std::string & src);
+		static std::string parseLispPage(lisp::Env & env, const std::string & src);
 	};
 }
 

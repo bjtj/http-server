@@ -4,13 +4,13 @@
 #include "DataSource.hpp"
 #include <liboslayer/FileStream.hpp>
 
-namespace HTTP {
+namespace http {
 	
 	class FileDataSource : public DataSource {
 	private:
-		UTIL::FileStream _fstream;
+		osl::FileStream _fstream;
 	public:
-		FileDataSource(UTIL::FileStream fstream) : _fstream(fstream) {
+		FileDataSource(osl::FileStream fstream) : _fstream(fstream) {
 		}
 		virtual ~FileDataSource() {
 			_fstream.close();

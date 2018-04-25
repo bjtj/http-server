@@ -12,7 +12,7 @@
 #include <liboslayer/AutoRef.hpp>
 #include <liboslayer/Text.hpp>
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief HttpRequestHandler
@@ -24,13 +24,13 @@ namespace HTTP {
 		HttpRequestHandler();
 		virtual ~HttpRequestHandler();
 
-		virtual OS::AutoRef<DataSink> getDataSink();
+		virtual osl::AutoRef<DataSink> getDataSink();
     
 		virtual void onHttpRequestHeaderCompleted(HttpRequest & request, HttpResponse & response);
-        virtual void onHttpRequestContentCompleted(HttpRequest & request, OS::AutoRef<DataSink> sink, HttpResponse & response);
+        virtual void onHttpRequestContentCompleted(HttpRequest & request, osl::AutoRef<DataSink> sink, HttpResponse & response);
 		virtual void onHttpResponseHeaderCompleted(HttpRequest & request, HttpResponse & response);
 		virtual void onHttpResponseTransferCompleted(HttpRequest & request, HttpResponse & response);
-		virtual bool onException(HttpRequest & request, HttpResponse & response, OS::Exception & ex);
+		virtual bool onException(HttpRequest & request, HttpResponse & response, osl::Exception & ex);
 	};
 }
 

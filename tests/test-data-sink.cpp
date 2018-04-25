@@ -2,7 +2,7 @@
 #include <libhttp-server/StringDataSink.hpp>
 
 using namespace std;
-using namespace HTTP;
+using namespace http;
 
 static void test_string_data_sink() {
 	StringDataSink sink;

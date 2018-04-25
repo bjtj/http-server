@@ -5,7 +5,7 @@
 #include "ChunkedReader.hpp"
 #include "DataTransfer.hpp"
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief ChunkedTransfer
@@ -18,11 +18,11 @@ namespace HTTP {
 
 	public:
 
-		ChunkedTransfer(OS::AutoRef<DataSource> source);
-		ChunkedTransfer(OS::AutoRef<DataSink> sink);
+		ChunkedTransfer(osl::AutoRef<DataSource> source);
+		ChunkedTransfer(osl::AutoRef<DataSink> sink);
 		virtual ~ChunkedTransfer();
-		virtual void recv(OS::AutoRef<Connection> connection);
-		virtual void send(OS::AutoRef<Connection> connection);
+		virtual void recv(osl::AutoRef<Connection> connection);
+		virtual void send(osl::AutoRef<Connection> connection);
 		virtual unsigned long long size();
 	};
 

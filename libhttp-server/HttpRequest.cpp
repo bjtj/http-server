@@ -2,11 +2,10 @@
 #include "HttpRequest.hpp"
 #include "StringDataSink.hpp"
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-	using namespace OS;
-	using namespace UTIL;
+	using namespace osl;
 	
 	/**
 	 * @brief http request

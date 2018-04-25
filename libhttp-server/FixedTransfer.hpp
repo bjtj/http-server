@@ -4,7 +4,7 @@
 #include "DataTransfer.hpp"
 #include "BufferIndicator.hpp"
 
-namespace HTTP {
+namespace http {
     
     /**
      * @brief FixedTransfer
@@ -15,15 +15,15 @@ namespace HTTP {
 		char * _buffer;
 		size_t _size;
     public:
-		FixedTransfer(OS::AutoRef<DataSource> source, size_t size);
-        FixedTransfer(OS::AutoRef<DataSource> source, size_t size, size_t fragmentSize);
-		FixedTransfer(OS::AutoRef<DataSink> sink, size_t size);
+		FixedTransfer(osl::AutoRef<DataSource> source, size_t size);
+        FixedTransfer(osl::AutoRef<DataSource> source, size_t size, size_t fragmentSize);
+		FixedTransfer(osl::AutoRef<DataSink> sink, size_t size);
         virtual ~FixedTransfer();
 	private:
 		void realloc(size_t size);
 	public:
-		virtual void recv(OS::AutoRef<Connection> connection);
-        virtual void send(OS::AutoRef<Connection> connection);
+		virtual void recv(osl::AutoRef<Connection> connection);
+        virtual void send(osl::AutoRef<Connection> connection);
 		virtual unsigned long long size();
     };
 }

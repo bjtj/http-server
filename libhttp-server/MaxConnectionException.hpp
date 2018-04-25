@@ -4,9 +4,9 @@
 #include <liboslayer/os.hpp>
 #include <string>
 
-namespace HTTP {
+namespace http {
 
-	class MaxConnectionException : public OS::Exception
+	class MaxConnectionException : public osl::Exception
 	{
 	public:
 		MaxConnectionException() {}

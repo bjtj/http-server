@@ -1,10 +1,9 @@
 #include "HttpCommunicationMaker.hpp"
 #include "HttpCommunication.hpp"
 
-namespace HTTP {
+namespace http {
 
-	using namespace OS;
-	using namespace UTIL;
+	using namespace osl;
 
 	/**
 	 * @brief HttpCommunicationMaker

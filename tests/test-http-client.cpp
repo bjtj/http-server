@@ -6,9 +6,9 @@
 #include "utils.hpp"
 
 using namespace std;
-using namespace OS;
-using namespace UTIL;
-using namespace HTTP;
+using namespace osl;
+using namespace http;
+
 
 static string packetVisible(const string pack) {
 	return Text::replaceAll(Text::replaceAll(pack, "\n", "\\n"), "\r", "\\r");
@@ -110,7 +110,7 @@ public:
 			throw Exception("sink is nil");
 		}
     }
-    virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
+    virtual void onError(Exception & e, AutoRef<UserData> userData) {
         cout << " [Error] " << e.toString() << endl;
     }
 	HttpResponseHeader & getResponseHeader() {

@@ -1,10 +1,10 @@
 #include "Url.hpp"
 #include <liboslayer/Text.hpp>
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-    using namespace UTIL;
+    using namespace osl;
 
 	static vector<string> createSchemes() {
 		vector<string> schemes;

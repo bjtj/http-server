@@ -9,7 +9,6 @@
 #include <libhttp-server/ConnectionManager.hpp>
 
 using namespace std;
-using namespace OS;
 using namespace HTTP;
 
 

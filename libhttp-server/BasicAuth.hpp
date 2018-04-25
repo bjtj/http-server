@@ -5,7 +5,7 @@
 #include <string>
 #include "HttpAuth.hpp"
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief 
@@ -23,10 +23,10 @@ namespace HTTP {
 	 */
 	class BasicAuth : public HttpAuth {
 	private:
-		OS::AutoRef<OnBasicAuth> onAuth;
+		osl::AutoRef<OnBasicAuth> onAuth;
 	public:
-		BasicAuth(OS::AutoRef<OnBasicAuth> onAuth);
-		BasicAuth(const std::string & realm, OS::AutoRef<OnBasicAuth> onAuth);
+		BasicAuth(osl::AutoRef<OnBasicAuth> onAuth);
+		BasicAuth(const std::string & realm, osl::AutoRef<OnBasicAuth> onAuth);
 		BasicAuth(const std::string & username, const std::string & password);
 		BasicAuth(const std::string & realm, const std::string & username, const std::string & password);
 		virtual ~BasicAuth();

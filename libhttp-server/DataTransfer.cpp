@@ -1,9 +1,8 @@
 #include "DataTransfer.hpp"
 
-namespace HTTP {
+namespace http {
 
-	using namespace OS;
-	using namespace UTIL;
+	using namespace osl;
     
     DataTransfer::DataTransfer() : _completed(false) {
     }

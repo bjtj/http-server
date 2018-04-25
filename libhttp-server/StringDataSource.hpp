@@ -7,7 +7,7 @@
 #include <string>
 #include <cstring>
 
-namespace HTTP {
+namespace http {
 	
 	class StringDataSource : public DataSource {
 	private:

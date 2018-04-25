@@ -5,7 +5,7 @@
 #include <liboslayer/os.hpp>
 #include <liboslayer/StringElements.hpp>
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * http session
@@ -16,7 +16,7 @@ namespace HTTP {
 		unsigned long _creationTime;
 		unsigned long _lastAccessTime;
 		unsigned long _timeout;
-		UTIL::StringMap _props;
+		osl::StringMap _props;
 	public:
 		HttpSession(const std::string & id);
 		virtual ~HttpSession();

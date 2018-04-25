@@ -7,7 +7,7 @@
 #include <map>
 #include <cstdlib>
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief http header field

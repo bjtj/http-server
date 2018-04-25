@@ -7,11 +7,10 @@
 #include <liboslayer/File.hpp>
 #include <liboslayer/Logger.hpp>
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-	using namespace OS;
-	using namespace UTIL;
+	using namespace osl;
 
     static AutoRef<Logger> logger = LoggerFactory::instance().
 		getObservingLogger(File::basename(__FILE__));
@@ -133,7 +132,7 @@ namespace HTTP {
 		setFileTransfer(file);
 	}
 
-	void HttpResponse::setFileTransfer(OS::File & file) {
+	void HttpResponse::setFileTransfer(osl::File & file) {
 		size_t filesize = (size_t)file.size();
 		AutoRef<DataSource> source(new FileDataSource(FileStream(file, "rb")));
 		AutoRef<DataTransfer> transfer(new FixedTransfer(source, filesize));
@@ -142,7 +141,7 @@ namespace HTTP {
 		setContentLength(filesize);
 	}
 
-	void HttpResponse::setPartialFileTransfer(const HttpRange & r, const OS::File & file) {
+	void HttpResponse::setPartialFileTransfer(const HttpRange & r, const osl::File & file) {
         HttpRange range = r;
 		size_t filesize = (size_t)file.size();
 		if (filesize < 1) {

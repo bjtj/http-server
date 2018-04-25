@@ -2,7 +2,7 @@
 #include <libhttp-server/LispPage.hpp>
 
 using namespace std;
-using namespace HTTP;
+using namespace http;
 
 #define ASSERT(A,CMP,B) if (!(A CMP B)) {								\
 		cerr << #A <<  " should be " << #CMP << " " <<  B << " but " << A << endl; \
@@ -24,8 +24,8 @@ static void test_apply_properties() {
 	props["base.path"] = "/home/user/steve/";
 	props["date_and_path.of.the.record"] = "2016-03-05 /home/user/";
 	page.applyProperties(props);
-	ASSERT(page.env().scope()->get_var(LISP::Symbol("*base-path*"))->toPrintString(), ==, "/home/user/steve/");
-	ASSERT(page.env().scope()->get_var(LISP::Symbol("*date-and-path-of-the-record*"))->toPrintString(), ==, "2016-03-05 /home/user/");
+	ASSERT(page.env().scope()->get_var(lisp::Symbol("*base-path*"))->toPrintString(), ==, "/home/user/steve/");
+	ASSERT(page.env().scope()->get_var(lisp::Symbol("*date-and-path-of-the-record*"))->toPrintString(), ==, "2016-03-05 /home/user/");
 }
 
 int main(int argc, char *args[]) {

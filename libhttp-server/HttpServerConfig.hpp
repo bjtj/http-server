@@ -4,9 +4,9 @@
 #include <liboslayer/Properties.hpp>
 #include <string>
 
-namespace HTTP {
+namespace http {
 
-	class HttpServerConfig : public UTIL::Properties {
+	class HttpServerConfig : public osl::Properties {
 	private:
 	public:
 		HttpServerConfig() {}

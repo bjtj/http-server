@@ -1,10 +1,10 @@
 #include "HttpSession.hpp"
 
-using namespace OS;
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
+	using namespace osl;
 
 	static unsigned long s_tick() {
 		return tick_milli();

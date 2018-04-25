@@ -24,9 +24,8 @@
 
 
 using namespace std;
-using namespace OS;
-using namespace UTIL;
-using namespace HTTP;
+using namespace osl;
+using namespace http;
 
 static AutoRef<Logger> logger = LoggerFactory::instance().
 	getObservingLogger(File::basename(__FILE__));
@@ -52,7 +51,7 @@ public:
 			throw Exception("error");
 		}
     }
-    virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
+    virtual void onError(Exception & e, AutoRef<UserData> userData) {
 		logger->error("Error/e: " + e.toString());
     }
 	HttpResponseHeader & getResponseHeader() {

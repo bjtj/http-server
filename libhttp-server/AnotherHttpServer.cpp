@@ -7,11 +7,10 @@
 #include <liboslayer/Logger.hpp>
 #include <liboslayer/File.hpp>
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-	using namespace OS;
-	using namespace UTIL;
+	using namespace osl;
 
 	static AutoRef<Logger> logger = LoggerFactory::instance().
 		getObservingLogger(File::basename(__FILE__));

@@ -1,10 +1,10 @@
 #include "UrlEncoderDecoder.hpp"
 #include <liboslayer/Text.hpp>
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-	using namespace UTIL;
+	using namespace osl;
 
 	static string _num = "0123456789";
 	static string _hex = "0123456789abcdef";

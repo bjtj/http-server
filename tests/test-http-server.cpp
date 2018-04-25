@@ -7,9 +7,8 @@
 #include <libhttp-server/StringDataSink.hpp>
 
 using namespace std;
-using namespace HTTP;
-using namespace OS;
-using namespace UTIL;
+using namespace osl;
+using namespace http;
 
 
 static string s_last_msg;
@@ -114,7 +113,7 @@ public:
 			}
         }
     }
-    virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
+    virtual void onError(Exception & e, AutoRef<UserData> userData) {
         cout << " - [Error] " << e.toString() << endl;
     }
 	HttpResponseHeader & getResponseHeader() {
@@ -138,7 +137,7 @@ public:
 
 	virtual void setUp(TestEnvironment & env) {
 		HttpServerConfig config;
-		config["listen.port"] = "9000";
+		config["listen.port"] = "9001";
 		config["base.path"] = "~/test";
 		config["thread.count"] = "10";
 		server = new AnotherHttpServer(config);
@@ -154,7 +153,7 @@ public:
 
 	virtual void test() {
 		DumpResponseHandler handler;
-		httpGet("http://127.0.0.1:9000/", &handler);
+		httpGet("http://127.0.0.1:9001/", &handler);
 		ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 		ASSERT(handler.getDump(), ==, "Hello World");
 	}
@@ -205,7 +204,7 @@ public:
 		
 		for (size_t i = 0; i < 50; i++) {
 			pool.setTask(AutoRef<Task>(new SynchronizedHttpClientTask(
-										   latch, doneLatch, "http://127.0.0.1:9000/medium")));
+										   latch, doneLatch, "http://127.0.0.1:9001/medium")));
 		}
 		
 		idle(100);
@@ -238,7 +237,7 @@ public:
 		CountDownLatch doneLatch(cnt);
 		
 		for (size_t i = 0; i < cnt; i++) {
-			pool.setTask(AutoRef<Task>(new SynchronizedHttpClientTask(latch, doneLatch, "http://127.0.0.1:9000/taketime")));
+			pool.setTask(AutoRef<Task>(new SynchronizedHttpClientTask(latch, doneLatch, "http://127.0.0.1:9001/taketime")));
 		}
 		
 		idle(100);

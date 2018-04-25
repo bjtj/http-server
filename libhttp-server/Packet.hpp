@@ -3,7 +3,7 @@
 
 #include <liboslayer/os.hpp>
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief packet

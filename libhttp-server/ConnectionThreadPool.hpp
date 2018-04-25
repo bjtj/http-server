@@ -7,24 +7,24 @@
 #include "Connection.hpp"
 #include "Communication.hpp"
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief ConnectionTask
 	 */
-	class ConnectionTask : public UTIL::Task {
+	class ConnectionTask : public osl::Task {
 	private:
-		OS::AutoRef<Connection> connection;
-		OS::AutoRef<Communication> communication;
-        OS::Selector selector;
+		osl::AutoRef<Connection> connection;
+		osl::AutoRef<Communication> communication;
+        osl::Selector selector;
 
 	public:
-		ConnectionTask(OS::AutoRef<Connection> connection,
-					   OS::AutoRef<Communication> communication);
+		ConnectionTask(osl::AutoRef<Connection> connection,
+					   osl::AutoRef<Communication> communication);
 		virtual ~ConnectionTask();
-		void setConnection(OS::AutoRef<Connection> connection,
-						   OS::AutoRef<Communication> communication);
-		OS::AutoRef<Connection> getConnection();
+		void setConnection(osl::AutoRef<Connection> connection,
+						   osl::AutoRef<Communication> communication);
+		osl::AutoRef<Connection> getConnection();
 		virtual void onTask();
 		void connectionTask();
 		void testReceiveTimeout();
@@ -36,13 +36,13 @@ namespace HTTP {
 	/**
 	 * @brief ConnectionThreadPool
 	 */
-	class ConnectionThreadPool : public UTIL::ThreadPool {
+	class ConnectionThreadPool : public osl::ThreadPool {
 	private:
 	public:
 		ConnectionThreadPool(size_t maxThreads);
 		virtual ~ConnectionThreadPool();
-		void createConnection(OS::AutoRef<Communication> communication,
-							  OS::AutoRef<Connection> connection);
+		void createConnection(osl::AutoRef<Communication> communication,
+							  osl::AutoRef<Connection> connection);
 	};
 }
 

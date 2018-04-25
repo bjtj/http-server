@@ -3,8 +3,9 @@
 #include <libhttp-server/HttpHeader.hpp>
 
 using namespace std;
-using namespace HTTP;
-using namespace UTIL;
+using namespace osl;
+using namespace http;
+
 
 static void test_http_header() {
 	HttpHeader header;

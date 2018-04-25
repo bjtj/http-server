@@ -7,26 +7,26 @@
 #include "DataSource.hpp"
 #include "DataSink.hpp"
 
-namespace HTTP {
+namespace http {
 	
     class DataTransfer {
     private:
         bool _completed;
-		OS::AutoRef<DataSource> _source;
-		OS::AutoRef<DataSink> _sink;
+		osl::AutoRef<DataSource> _source;
+		osl::AutoRef<DataSink> _sink;
 
     public:
         DataTransfer();
-		DataTransfer(OS::AutoRef<DataSource> source);
-		DataTransfer(OS::AutoRef<DataSink> sink);
+		DataTransfer(osl::AutoRef<DataSource> source);
+		DataTransfer(osl::AutoRef<DataSink> sink);
         virtual ~DataTransfer();
-		virtual void recv(OS::AutoRef<Connection> connection) = 0;
-        virtual void send(OS::AutoRef<Connection> connection) = 0;
+		virtual void recv(osl::AutoRef<Connection> connection) = 0;
+        virtual void send(osl::AutoRef<Connection> connection) = 0;
 		virtual unsigned long long size();
         void complete();
         virtual bool completed();
-		OS::AutoRef<DataSource> & source();
-		OS::AutoRef<DataSink> & sink();
+		osl::AutoRef<DataSource> & source();
+		osl::AutoRef<DataSink> & sink();
     };
 }
 

@@ -1,7 +1,7 @@
 #ifndef __DATA_SINK_HPP__
 #define __DATA_SINK_HPP__
 
-namespace HTTP {
+namespace http {
 	
 	class DataSink {
 	private:

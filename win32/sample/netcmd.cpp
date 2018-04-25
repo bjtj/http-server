@@ -5,7 +5,6 @@
 
 using namespace std;
 using namespace HTTP;
-using namespace OS;
 using namespace UTIL;
 
 class DumpResponseHandler : public OnResponseListener {

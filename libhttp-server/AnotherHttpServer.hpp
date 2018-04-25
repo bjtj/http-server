@@ -21,7 +21,7 @@
 #include <liboslayer/AutoRef.hpp>
 #include <liboslayer/Text.hpp>
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief AnotherHttpServer
@@ -29,14 +29,14 @@ namespace HTTP {
 	class AnotherHttpServer {
 	private:
 		HttpServerConfig config;
-		OS::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
+		osl::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
 		ConnectionManager _connectionManager;
-		OS::Thread * thread;
+		osl::Thread * thread;
 	public:
 		AnotherHttpServer(HttpServerConfig config);
-        AnotherHttpServer(HttpServerConfig config, OS::AutoRef<ServerSocketMaker> serverSocketMaker);
+        AnotherHttpServer(HttpServerConfig config, osl::AutoRef<ServerSocketMaker> serverSocketMaker);
 		virtual ~AnotherHttpServer();
-		void registerRequestHandler(const std::string & pattern, OS::AutoRef<HttpRequestHandler> handler);
+		void registerRequestHandler(const std::string & pattern, osl::AutoRef<HttpRequestHandler> handler);
 		void unregisterRequestHandler(const std::string & pattern);
 		int getPort();
 		void start();

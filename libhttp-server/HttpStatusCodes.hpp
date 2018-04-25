@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-namespace HTTP {
+namespace http {
 	
 	class HttpStatusCodes {
 	private:

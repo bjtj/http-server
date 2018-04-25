@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace HTTP {
+namespace http {
 
 	class UrlEncoder {
 	private:

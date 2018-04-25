@@ -5,18 +5,18 @@
 #include "HttpRequestHandlerDispatcher.hpp"
 #include <liboslayer/AutoRef.hpp>
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief HttpCommunicationMaker
 	 */
 	class HttpCommunicationMaker : public CommunicationMaker {
 	private:
-		OS::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
+		osl::AutoRef<HttpRequestHandlerDispatcher> dispatcher;
 	public:
-		HttpCommunicationMaker(OS::AutoRef<HttpRequestHandlerDispatcher> dispatcher);
+		HttpCommunicationMaker(osl::AutoRef<HttpRequestHandlerDispatcher> dispatcher);
 		virtual ~HttpCommunicationMaker();
-		virtual OS::AutoRef<Communication> makeCommunication();
+		virtual osl::AutoRef<Communication> makeCommunication();
 	};
 }
 

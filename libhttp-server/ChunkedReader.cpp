@@ -4,11 +4,10 @@
 #include <liboslayer/Text.hpp>
 #include <string>
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-    using namespace OS;
-	using namespace UTIL;
+	using namespace osl;
 
     ChunkedBuffer::ChunkedBuffer() : chunkDataBuffer(NULL) {
         clear();

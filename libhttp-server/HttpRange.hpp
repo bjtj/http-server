@@ -4,7 +4,7 @@
 #include <string>
 #include <liboslayer/Text.hpp>
 
-namespace HTTP {
+namespace http {
 
 	
 	/**
@@ -44,9 +44,9 @@ namespace HTTP {
         
         std::string toString() const {
 			std::string str;
-			str.append(UTIL::Text::toString(_from));
+			str.append(osl::Text::toString(_from));
 			str.append("-");
-			str.append(UTIL::Text::toString(_to));
+			str.append(osl::Text::toString(_to));
 			return str;
         }
 	};

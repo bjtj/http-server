@@ -2,10 +2,10 @@
 #include <vector>
 #include <liboslayer/Text.hpp>
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-	using namespace UTIL;
+	using namespace osl;
 
 	Cookie::Cookie() {
 	}

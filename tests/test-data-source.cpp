@@ -2,7 +2,7 @@
 #include <libhttp-server/StringDataSource.hpp>
 
 using namespace std;
-using namespace HTTP;
+using namespace http;
 
 static void test_string_data_source() {
 	string text = "hello world";

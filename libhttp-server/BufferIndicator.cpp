@@ -1,6 +1,6 @@
 #include "BufferIndicator.hpp"
 
-namespace HTTP {
+namespace http {
 	
 	BufferIndicator::BufferIndicator() : _position(0), _size(0) {
 	}

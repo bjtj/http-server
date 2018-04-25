@@ -4,25 +4,25 @@
 #include <liboslayer/StringElements.hpp>
 #include <string>
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * cookie
 	 */
 	class Cookie {
 	private:
-		UTIL::LinkedStringMap _components;
+		osl::LinkedStringMap _components;
 	public:
 		Cookie();
 		Cookie(const std::string & phrase);
-		Cookie(const UTIL::LinkedStringMap & components);
+		Cookie(const osl::LinkedStringMap & components);
 		virtual ~Cookie();
-		UTIL::LinkedStringMap & components();
+		osl::LinkedStringMap & components();
 		bool contains(const std::string & key);
 		bool containsIgnoreCase(const std::string & key);
 		std::string toString() const;
-		static UTIL::LinkedStringMap parse(const std::string & phrase);
-		static std::string toString(const UTIL::LinkedStringMap & components);
+		static osl::LinkedStringMap parse(const std::string & phrase);
+		static std::string toString(const osl::LinkedStringMap & components);
 		std::string & operator[] (const std::string & name);
 	};
 }

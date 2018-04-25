@@ -1,6 +1,6 @@
 #include "HttpStatusCodes.hpp"
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
 

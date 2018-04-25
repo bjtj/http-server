@@ -1,10 +1,10 @@
 #include "MimeTypes.hpp"
 #include <liboslayer/FileStream.hpp>
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-	using namespace UTIL;
+	using namespace osl;
 
 	map<string, string> MimeTypes::types;
 	

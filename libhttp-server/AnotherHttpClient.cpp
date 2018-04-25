@@ -8,11 +8,10 @@
 #include "DataSink.hpp"
 #include "StringDataSink.hpp"
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-	using namespace OS;
-	using namespace UTIL;
+	using namespace osl;
 
 	static AutoRef<Logger> logger = LoggerFactory::instance().
 		getObservingLogger(File::basename(__FILE__));
@@ -124,9 +123,9 @@ namespace HTTP {
         int remotePort = url.getIntegerPort();
         
         if (!socketMaker.nil()) {
-            socket = socketMaker->make(url.getProtocol(), OS::InetAddress(remoteHost, remotePort));
+            socket = socketMaker->make(url.getProtocol(), osl::InetAddress(remoteHost, remotePort));
         } else {
-            socket = AutoRef<Socket>(new Socket(OS::InetAddress(remoteHost, remotePort)));
+            socket = AutoRef<Socket>(new Socket(osl::InetAddress(remoteHost, remotePort)));
         }
         
         if (connectionTimeout > 0) {

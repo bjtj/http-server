@@ -5,9 +5,8 @@
 #include <liboslayer/TestSuite.hpp>
 
 using namespace std;
-using namespace OS;
-using namespace UTIL;
-using namespace HTTP;
+using namespace osl;
+using namespace http;
 
 /**
  * 
@@ -53,7 +52,7 @@ public:
 			}
         }
     }
-    virtual void onError(OS::Exception & e, AutoRef<UserData> userData) {
+    virtual void onError(Exception & e, AutoRef<UserData> userData) {
         cout << " * [Error] " << e.toString() << endl;
     }
 	HttpResponseHeader & getResponseHeader() {

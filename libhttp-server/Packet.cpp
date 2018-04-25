@@ -1,10 +1,9 @@
 #include "Packet.hpp"
 #include <liboslayer/Text.hpp>
 
-namespace HTTP {
+namespace http {
     
-    using namespace OS;
-	using namespace UTIL;
+	using namespace osl;
 
     Packet::Packet(size_t capacity) : buffer(NULL), _capacity(capacity), _pos(0), _limit(capacity) {
         if (_capacity > 0) {

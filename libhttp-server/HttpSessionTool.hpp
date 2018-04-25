@@ -8,12 +8,12 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 
-namespace HTTP {
+namespace http {
 	
 	class HttpSessionTool {
 	private:
 		static const std::string KEY_SESSION_ID;
-		OS::osl_time_t _expire;
+		osl::osl_time_t _expire;
 		std::string _path;
 	public:
 		HttpSessionTool();
@@ -23,17 +23,17 @@ namespace HTTP {
 		std::string cookiePath(const std::string & path);
 		void setCookieSession(HttpRequest & request,
 									 HttpResponse & response,
-									 OS::AutoRef<HttpSession> & session);
-        OS::AutoRef<HttpSession> handleSession(HttpRequest & request,
+									 osl::AutoRef<HttpSession> & session);
+        osl::AutoRef<HttpSession> handleSession(HttpRequest & request,
 													  HttpResponse & response,
 													  HttpSessionManager & sessionManager);
-		OS::AutoRef<HttpSession> createSession(HttpRequest & request,
+		osl::AutoRef<HttpSession> createSession(HttpRequest & request,
 													  HttpResponse & response,
 													  HttpSessionManager & sessionManager);
         static std::string url(HttpRequest & request,
 							   const std::string & u,
-							   OS::AutoRef<HttpSession> session);
-		OS::osl_time_t & expire();
+							   osl::AutoRef<HttpSession> session);
+		osl::osl_time_t & expire();
 		std::string & path();
 	};
 }

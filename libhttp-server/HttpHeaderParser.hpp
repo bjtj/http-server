@@ -9,7 +9,7 @@
 
 #include "HttpHeader.hpp"
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * @brief http header parse result

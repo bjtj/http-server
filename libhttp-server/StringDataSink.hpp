@@ -3,7 +3,7 @@
 
 #include "DataSink.hpp"
 
-namespace HTTP {
+namespace http {
 	
 	class StringDataSink : public DataSink {
 	private:

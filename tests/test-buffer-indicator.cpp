@@ -3,7 +3,7 @@
 #include "utils.hpp"
 
 using namespace std;
-using namespace HTTP;
+using namespace http;
 
 static void test_buffer_indicator() {
 	

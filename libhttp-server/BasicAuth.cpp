@@ -2,11 +2,10 @@
 #include <liboslayer/Base64.hpp>
 #include <liboslayer/Text.hpp>
 
-namespace HTTP {
+namespace http {
 	
 	using namespace std;
-	using namespace OS;
-	using namespace UTIL;
+	using namespace osl;
 
 	OnBasicAuth::OnBasicAuth() {
 	}

@@ -2,11 +2,10 @@
 #include <liboslayer/AutoLock.hpp>
 #include <liboslayer/Text.hpp>
 
-namespace HTTP {
+namespace http {
 
 	using namespace std;
-	using namespace OS;
-    using namespace UTIL;
+    using namespace osl;
 	
 	HttpSessionManager::HttpSessionManager(unsigned long timeout)
 		: _id_idx(0), _timeout(timeout), _sem(1) {
@@ -53,7 +52,7 @@ namespace HTTP {
 	}
 	
 	AutoRef<HttpSession> HttpSessionManager::getSession(const string & id) {
-		OS::AutoLock lock((Ref<Semaphore>(&_sem)));
+		osl::AutoLock lock((Ref<Semaphore>(&_sem)));
 		for (vector< AutoRef<HttpSession> >::iterator iter = _sessions.begin();
 			 iter != _sessions.end(); iter++) {
 			if ((*iter)->id() == id) {
@@ -64,7 +63,7 @@ namespace HTTP {
 	}
 	
 	AutoRef<HttpSession> HttpSessionManager::createSession() {
-        OS::AutoLock lock((Ref<Semaphore>(&_sem)));
+        osl::AutoLock lock((Ref<Semaphore>(&_sem)));
 		AutoRef<HttpSession> session(new HttpSession(genSessionId()));
 		session->timeout() = _timeout;
 		_sessions.push_back(session);

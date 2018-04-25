@@ -7,7 +7,7 @@
 #include <vector>
 #include "HttpSession.hpp"
 
-namespace HTTP {
+namespace http {
 
 	/**
 	 * http session manager
@@ -16,8 +16,8 @@ namespace HTTP {
 	private:
 		unsigned long _id_idx;
 		unsigned long _timeout;
-        std::vector< OS::AutoRef<HttpSession> > _sessions;
-		OS::Semaphore _sem;
+        std::vector< osl::AutoRef<HttpSession> > _sessions;
+		osl::Semaphore _sem;
 	private:
 		/* do not allow copy */
 		HttpSessionManager(const HttpSessionManager & other);
@@ -30,10 +30,10 @@ namespace HTTP {
 		void removeOutdatedSessions();
 		bool hasSession(const std::string & id);
 		unsigned long & timeout();
-		OS::AutoRef<HttpSession> getSession(const std::string & id);
-		OS::AutoRef<HttpSession> createSession();
+		osl::AutoRef<HttpSession> getSession(const std::string & id);
+		osl::AutoRef<HttpSession> createSession();
 		void destroySession(const std::string & id);
-		std::vector< OS::AutoRef<HttpSession> > & getSessions();
+		std::vector< osl::AutoRef<HttpSession> > & getSessions();
 	};
 }
 

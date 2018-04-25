@@ -14,7 +14,7 @@
 #include "Cookie.hpp"
 #include "HttpRange.hpp"
 
-namespace HTTP {
+namespace http {
 	
 
 	/**
@@ -23,7 +23,7 @@ namespace HTTP {
 	class HttpResponse : public HttpHeaderDelegator {
 	private:
 		HttpResponseHeader _header;
-        OS::AutoRef<DataTransfer> transfer;
+        osl::AutoRef<DataTransfer> transfer;
 		bool _redirectRequested;
 		std::string _redirectLocation;
 		bool _forwardRequested;
@@ -40,8 +40,8 @@ namespace HTTP {
 		void setParts(std::vector<std::string> &parts);
         bool completeContentTransfer();
 		HttpResponseHeader & header();
-        void setTransfer(OS::AutoRef<DataTransfer> transfer);
-        OS::AutoRef<DataTransfer> getTransfer();
+        void setTransfer(osl::AutoRef<DataTransfer> transfer);
+        osl::AutoRef<DataTransfer> getTransfer();
 		void clearTransfer();
 		void setRedirect(const std::string & location);
 		void cancelRedirect();
@@ -58,8 +58,8 @@ namespace HTTP {
 		void appendCookie(const Cookie & cookie);
 		void setFixedTransfer(const std::string & content);
 		void setFileTransfer(const std::string & filepath);
-		void setFileTransfer(OS::File & file);
-		void setPartialFileTransfer(const HttpRange & range, const OS::File & file);
+		void setFileTransfer(osl::File & file);
+		void setPartialFileTransfer(const HttpRange & range, const osl::File & file);
 		void setRange(const HttpRange & range, size_t filesize);
 	};
 }
