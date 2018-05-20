@@ -1,6 +1,7 @@
 #include "HttpSessionManager.hpp"
 #include <liboslayer/AutoLock.hpp>
 #include <liboslayer/Text.hpp>
+#include <liboslayer/Hash.hpp>
 
 namespace http {
 
@@ -15,7 +16,9 @@ namespace http {
 	}
 
 	std::string HttpSessionManager::genSessionId() {
-		return Text::toString(_id_idx++);
+		SimpleHash hash;
+		string str = Text::format("secret%ld", _id_idx++);
+		return Text::toString(hash.hash(str.c_str()));
 	}
 
 	void HttpSessionManager::clear() {
