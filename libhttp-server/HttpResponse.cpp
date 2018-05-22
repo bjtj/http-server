@@ -32,17 +32,17 @@ namespace http {
 		_forwardLocation.clear();
         _props.clear();
     }
+
 	void HttpResponse::setStatus(int statusCode) {
 		_header.setStatus(statusCode);
 	}
+
 	void HttpResponse::setStatus(int statusCode, const string & statusString) {
 		_header.setStatus(statusCode, statusString);
 	}
+
 	int HttpResponse::getStatusCode() {
 		return _header.getStatusCode();
-	}
-	void HttpResponse::setParts(vector<string> & parts) {
-		_header.setParts(parts);
 	}
 	
 	HttpResponseHeader & HttpResponse::header() {

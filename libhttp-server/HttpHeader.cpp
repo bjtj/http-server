@@ -109,7 +109,7 @@ namespace http {
 		return "";
 	}
 	
-	int HttpHeader::getHeaderFieldCaseAsInteger(string name) const {
+	int HttpHeader::getHeaderFieldCaseAsInteger(const string & name) const {
 		return Text::toInt(getHeaderFieldCase(name));
 	}
 	

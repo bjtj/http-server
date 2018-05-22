@@ -22,6 +22,7 @@ libhttp_serverinc_HEADERS = \
 	UrlEncoderDecoder.hpp \
 	HttpException.hpp \
 	HttpHeader.hpp \
+	HttpHeaderDelegator.hpp \
 	HttpHeaderParser.hpp \
 	HttpHeaderReader.hpp \
 	HttpParameter.hpp \
@@ -86,6 +87,8 @@ libhttp_server_la_SOURCES = \
 	HttpException.hpp \
 	HttpHeader.cpp \
 	HttpHeader.hpp \
+	HttpHeaderDelegator.cpp \
+	HttpHeaderDelegator.hpp \
 	HttpHeaderParser.cpp \
 	HttpHeaderParser.hpp \
 	HttpHeaderReader.cpp \

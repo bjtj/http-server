@@ -94,8 +94,10 @@ namespace http {
     
     void ConnectionManager::start(int port, int backlog) {
         if (!serverSocket.nil()) {
+			logger->error("server is already started");
             return;
         }
+		logger->error("start connection manager / port: " + Text::toString(port));
 		serverSocket = _config.serverSocketMaker()->makeServerSocket(port);
         serverSocket->setReuseAddr(true);
         serverSocket->bind();
@@ -105,6 +107,7 @@ namespace http {
     }
 
 	void ConnectionManager::stop() {
+		logger->debug("connection manager stop");
         if (serverSocket.nil()) {
             return;
         }

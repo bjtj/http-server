@@ -8,6 +8,7 @@
 #include <liboslayer/os.hpp>
 #include <liboslayer/AutoRef.hpp>
 #include "HttpHeader.hpp"
+#include "HttpHeaderDelegator.hpp"
 #include "ChunkedReader.hpp"
 #include "Packet.hpp"
 #include "DataTransfer.hpp"

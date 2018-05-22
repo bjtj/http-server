@@ -10,7 +10,7 @@ namespace http {
 	static const unsigned long long HOUR = 60ULL * 60ULL;
 	static const unsigned long long DAY = 24ULL * HOUR;
 	static const unsigned long long MONTH = 30ULL * DAY;
-	static const unsigned long long YEAR = 365ULL * DAY;
+	// static const unsigned long long YEAR = 365ULL * DAY;
 	
 	HttpSessionTool::HttpSessionTool() : _path("/") {
 		_expire.sec = MONTH;

@@ -46,7 +46,7 @@ namespace http {
 	void HttpCommunication::onConnected(AutoRef<Connection> connection) {
         request.setRemoteAddress(connection->getRemoteAddress());
 		request.setLocalAddress(connection->getLocalAddress());
-		logger->debug("[CONNECTED] '" + connection->getRemoteAddress().getHost() + "'");
+		logger->info("[CONNECTED] '" + connection->getRemoteAddress().getHost() + "'");
 	}
 
 	bool HttpCommunication::isReadable() {
@@ -183,6 +183,7 @@ namespace http {
 	void HttpCommunication::sendResponseHeader(AutoRef<Connection> connection) {
 		HttpResponseHeader & header = response.header();
         string headerString = header.toString();
+		logger->info("Response code - " + Text::toString(response.getStatusCode()));
         if (connection->send(headerString.c_str(), (int)headerString.length()) != (int)headerString.length()) {
             // TODO: retry
             throw Exception("Response Header send failed");
@@ -210,7 +211,7 @@ namespace http {
 	}
 
 	void HttpCommunication::onDisconnected(AutoRef<Connection> connection) {
-		logger->debug("[DISCONNECTED] '" + connection->getRemoteAddress().getHost() + "'");
+		logger->info("[DISCONNECTED] '" + connection->getRemoteAddress().getHost() + "'");
 	}
 
 	bool HttpCommunication::isCommunicationCompleted() {

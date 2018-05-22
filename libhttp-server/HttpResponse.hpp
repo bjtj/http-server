@@ -9,6 +9,7 @@
 #include <liboslayer/AutoRef.hpp>
 #include <liboslayer/File.hpp>
 #include "HttpHeader.hpp"
+#include "HttpHeaderDelegator.hpp"
 #include "ChunkedReader.hpp"
 #include "DataTransfer.hpp"
 #include "Cookie.hpp"
@@ -37,7 +38,6 @@ namespace http {
 		void setStatus(int statusCode);
 		void setStatus(int statusCode, const std::string & statusString);
 		int getStatusCode();
-		void setParts(std::vector<std::string> &parts);
         bool completeContentTransfer();
 		HttpResponseHeader & header();
         void setTransfer(osl::AutoRef<DataTransfer> transfer);

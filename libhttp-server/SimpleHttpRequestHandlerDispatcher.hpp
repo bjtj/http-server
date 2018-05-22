@@ -22,24 +22,14 @@ namespace http {
 			std::string _pattern;
 			osl::AutoRef<HttpRequestHandler> handler;
 		public:
-			RequestHandlerNode(const std::string & pattern, osl::AutoRef<HttpRequestHandler> handler)
-				: _pattern(pattern), handler(handler) {
-			}
-			virtual ~RequestHandlerNode() {
-			}
-			bool patternMatch(const std::string & query) {
-				return osl::Text::match(_pattern, query);
-			}
-			bool equalsPattern(const std::string & pattern) {
-				return (!_pattern.compare(pattern) ? true : false);
-			}
-			osl::AutoRef<HttpRequestHandler> getHandler() {
-				return handler;
-			}
-			std::string & pattern() {
-				return _pattern;
-			}
+			RequestHandlerNode(const std::string & pattern, osl::AutoRef<HttpRequestHandler> handler);
+			virtual ~RequestHandlerNode();
+			bool patternMatch(const std::string & query);
+			bool equalsPattern(const std::string & pattern);
+			osl::AutoRef<HttpRequestHandler> getHandler();
+			std::string & pattern();
 		};
+	private:
 		std::vector<RequestHandlerNode> handlers;
 		osl::Semaphore sem;
 	public:
