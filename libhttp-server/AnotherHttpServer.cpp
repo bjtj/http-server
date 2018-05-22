@@ -62,8 +62,6 @@ namespace http {
 	AnotherHttpServer::AnotherHttpServer(HttpServerConfig config) :
 		config(config),
 		dispatcher(AutoRef<HttpRequestHandlerDispatcher>(new SimpleHttpRequestHandlerDispatcher)),
-		// _connectionManager(AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
-		// 				  config.getIntegerProperty("thread.count", 20)),
 		_connectionManager(
 			ConnectionConfig(
 				AutoRef<CommunicationMaker>(new HttpCommunicationMaker(dispatcher)),
