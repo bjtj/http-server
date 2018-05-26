@@ -30,6 +30,8 @@
 		E87F366F1C51067A00970869 /* HttpSessionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E87F366A1C51067A00970869 /* HttpSessionManager.cpp */; };
 		E88A80141CB446FB00241D44 /* BufferIndicator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88A800D1CB446FB00241D44 /* BufferIndicator.cpp */; };
 		E88A80151CB4473300241D44 /* BufferIndicator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E88A800D1CB446FB00241D44 /* BufferIndicator.cpp */; };
+		E8975B9220B947D900A77488 /* HttpHeaderDelegator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8975B9120B947D900A77488 /* HttpHeaderDelegator.cpp */; };
+		E8975B9320B947D900A77488 /* HttpHeaderDelegator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8975B9120B947D900A77488 /* HttpHeaderDelegator.cpp */; };
 		E8A6AC971FC1353A0091F236 /* HttpSessionTool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8A6AC961FC1353A0091F236 /* HttpSessionTool.cpp */; };
 		E8A6AC981FC135500091F236 /* HttpSessionTool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8A6AC961FC1353A0091F236 /* HttpSessionTool.cpp */; };
 		E8AC4F5D1C89C09A00504E50 /* LispPage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E8AC4F5B1C89C09A00504E50 /* LispPage.cpp */; };
@@ -174,6 +176,8 @@
 		E88A80111CB446FB00241D44 /* FileDataSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FileDataSource.hpp; path = "../../libhttp-server/FileDataSource.hpp"; sourceTree = "<group>"; };
 		E88A80121CB446FB00241D44 /* StringDataSink.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = StringDataSink.hpp; path = "../../libhttp-server/StringDataSink.hpp"; sourceTree = "<group>"; };
 		E88A80131CB446FB00241D44 /* StringDataSource.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = StringDataSource.hpp; path = "../../libhttp-server/StringDataSource.hpp"; sourceTree = "<group>"; };
+		E8975B9020B947D800A77488 /* HttpHeaderDelegator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpHeaderDelegator.hpp; path = "../../libhttp-server/HttpHeaderDelegator.hpp"; sourceTree = "<group>"; };
+		E8975B9120B947D900A77488 /* HttpHeaderDelegator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpHeaderDelegator.cpp; path = "../../libhttp-server/HttpHeaderDelegator.cpp"; sourceTree = "<group>"; };
 		E8A6AC961FC1353A0091F236 /* HttpSessionTool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HttpSessionTool.cpp; path = "../../libhttp-server/HttpSessionTool.cpp"; sourceTree = "<group>"; };
 		E8AC4F5A1C89C09A00504E50 /* HttpSessionTool.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HttpSessionTool.hpp; path = "../../libhttp-server/HttpSessionTool.hpp"; sourceTree = "<group>"; };
 		E8AC4F5B1C89C09A00504E50 /* LispPage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LispPage.cpp; path = "../../libhttp-server/LispPage.cpp"; sourceTree = "<group>"; };
@@ -288,6 +292,8 @@
 		E8FAB2441BD7D2A500E89DC5 /* http-server-c++ */ = {
 			isa = PBXGroup;
 			children = (
+				E8975B9120B947D900A77488 /* HttpHeaderDelegator.cpp */,
+				E8975B9020B947D800A77488 /* HttpHeaderDelegator.hpp */,
 				E8AD14B520743EF80031905F /* HttpRange.hpp */,
 				E8AD14B420743EF80031905F /* MaxConnectionException.hpp */,
 				E8A6AC961FC1353A0091F236 /* HttpSessionTool.cpp */,
@@ -489,6 +495,7 @@
 				E8B160DF1BF9E90F002D68C7 /* Packet.cpp in Sources */,
 				E8E0FEA91BD848EB00292C54 /* http_server.mm in Sources */,
 				E87F366F1C51067A00970869 /* HttpSessionManager.cpp in Sources */,
+				E8975B9320B947D900A77488 /* HttpHeaderDelegator.cpp in Sources */,
 				E8B161141BFB6099002D68C7 /* FixedTransfer.cpp in Sources */,
 				E8B160FE1BFB4DE1002D68C7 /* ChunkedTransfer.cpp in Sources */,
 				E8E0FEAB1BD848EB00292C54 /* HttpHeaderReader.cpp in Sources */,
@@ -530,6 +537,7 @@
 				E87F366E1C51067A00970869 /* HttpSessionManager.cpp in Sources */,
 				E8B160DE1BF9E4FA002D68C7 /* Packet.cpp in Sources */,
 				E8A6AC971FC1353A0091F236 /* HttpSessionTool.cpp in Sources */,
+				E8975B9220B947D900A77488 /* HttpHeaderDelegator.cpp in Sources */,
 				E88A80141CB446FB00241D44 /* BufferIndicator.cpp in Sources */,
 				E8FAB2661BD7D2CE00E89DC5 /* ChunkedReader.cpp in Sources */,
 				E8EE1B671E8014DA0086E173 /* HttpRequestHandler.cpp in Sources */,

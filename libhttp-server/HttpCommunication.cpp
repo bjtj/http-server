@@ -183,7 +183,7 @@ namespace http {
 	void HttpCommunication::sendResponseHeader(AutoRef<Connection> connection) {
 		HttpResponseHeader & header = response.header();
         string headerString = header.toString();
-		logger->info("Response code - " + Text::toString(response.getStatusCode()));
+		logger->info(Text::toString(response.getStatusCode()) + " - " + request.header().getRawPath());
         if (connection->send(headerString.c_str(), (int)headerString.length()) != (int)headerString.length()) {
             // TODO: retry
             throw Exception("Response Header send failed");

@@ -48,14 +48,14 @@ namespace http {
 
 	void SimpleHttpRequestHandlerDispatcher::registerRequestHandler(const string & pattern, AutoRef<HttpRequestHandler> handler) {
 		AutoLock _lock((Ref<Semaphore>(&sem)));
-		logger->debug("Register request handler - '" + pattern + "'");
+		logger->info("Register request handler - '" + pattern + "'");
 		handlers.push_back(RequestHandlerNode(pattern, handler));
 		sort(handlers.begin(), handlers.end(), _fn_sort_desc);
 	}
 
 	void SimpleHttpRequestHandlerDispatcher::unregisterRequestHandler(const string & pattern) {
 		AutoLock _lock((Ref<Semaphore>(&sem)));
-		logger->debug("Unregister request handler - '" + pattern + "'");
+		logger->info("Unregister request handler - '" + pattern + "'");
 		for (vector<RequestHandlerNode>::iterator iter = handlers.begin(); iter != handlers.end();) {
 			RequestHandlerNode & node = *iter;
 			if (node.equalsPattern(pattern)) {
@@ -71,11 +71,10 @@ namespace http {
 		for (vector<RequestHandlerNode>::iterator iter = handlers.begin(); iter != handlers.end(); iter++) {
 			RequestHandlerNode & node = *iter;
 			if (node.patternMatch(path)) {
-				logger->debug("pattern matched - '" + path + "'");
 				return node.getHandler();
 			}
 		}
-		logger->debug("pattern not found - '" + path + "'");
+		logger->info("pattern not found - '" + path + "'");
 		return AutoRef<HttpRequestHandler>();
 	}
 
