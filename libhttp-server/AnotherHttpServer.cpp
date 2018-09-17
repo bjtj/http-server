@@ -98,12 +98,13 @@ namespace http {
 		dispatcher->unregisterRequestHandler(pattern);
 	}
 
-	int AnotherHttpServer::getPort() {
-		return config.getIntegerProperty("listen.port", 80);
+	InetAddress AnotherHttpServer::getServerAddress() {
+		return _connectionManager.getServerAddress();
 	}
 
 	void AnotherHttpServer::start() {
-		_connectionManager.start(getPort(), config.getIntegerProperty("backlog", 5));
+		_connectionManager.start(config.getIntegerProperty("listen.port", 80),
+								 config.getIntegerProperty("backlog", 5));
 	}
 
 	void AnotherHttpServer::startAsync() {

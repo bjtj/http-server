@@ -117,6 +117,10 @@ namespace http {
         serverSocket->close();
         serverSocket = NULL;
     }
+
+	InetAddress ConnectionManager::getServerAddress() {
+		return serverSocket->getLocalInetAddress();
+	}
     
     void ConnectionManager::poll(unsigned long timeout) {
         if (selector.select(timeout) > 0) {

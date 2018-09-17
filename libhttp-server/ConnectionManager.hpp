@@ -97,6 +97,7 @@ namespace http {
 		void start(int port);
         void start(int port, int backlog);
 		void stop();
+		osl::InetAddress getServerAddress();
         void poll(unsigned long timeout);
         void clearConnections();
 		void onConnect(osl::AutoRef<osl::Socket> client);

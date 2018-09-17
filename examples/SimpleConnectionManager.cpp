@@ -9,7 +9,9 @@
 #include <libhttp-server/ConnectionManager.hpp>
 
 using namespace std;
-using namespace HTTP;
+using namespace osl;
+using namespace http;
+
 
 
 /**
@@ -118,12 +120,13 @@ public:
     ServerThread(Ref<Application> app, int port)
         : _finish(false),
           _port(port),
-          _cm(AutoRef<CommunicationMaker>(new MsgComm(app)), 5) {
+          _cm(ConnectionConfig(AutoRef<CommunicationMaker>(new MsgComm(app)), 5)) {
     }
     virtual ~ServerThread() {
     }
     virtual void run() {
         _cm.start(_port);
+		cout << "connection manager port: " << _cm.getServerAddress().getPort() << endl;
         while (!_finish && !interrupted()) {
             _cm.poll(100);
         }
@@ -137,13 +140,13 @@ public:
 int main(int argc, char *argv[])
 {
     Application app;
-    ServerThread st(Ref<Application>(&app), 9009);
+    ServerThread st(Ref<Application>(&app), 0);
     st.start();
 
     while (1) {
         string cmd;
         cin >> cmd;
-        if (cmd == "quit") {
+        if (cmd == "quit" || cmd == "q") {
             break;
         }
     }
@@ -151,7 +154,7 @@ int main(int argc, char *argv[])
     st.interrupt();
     st.waitFor();
 
-    cout << "Bye~" << endl;
+    cout << "QUIT" << endl;
 
     return 0;
 }

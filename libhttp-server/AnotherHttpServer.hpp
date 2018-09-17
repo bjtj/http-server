@@ -38,7 +38,7 @@ namespace http {
 		virtual ~AnotherHttpServer();
 		void registerRequestHandler(const std::string & pattern, osl::AutoRef<HttpRequestHandler> handler);
 		void unregisterRequestHandler(const std::string & pattern);
-		int getPort();
+		osl::InetAddress getServerAddress();
 		void start();
 		void startAsync();
 		void poll(unsigned long timeout);

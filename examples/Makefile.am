@@ -1,7 +1,8 @@
-noinst_PROGRAMS=HttpServerSample ChatServer
+noinst_PROGRAMS=HttpServerSample ChatServer SimpleConnectionManager
 
 HttpServerSample_SOURCES=HttpServerSample.cpp
 ChatServer_SOURCES=ChatServer.cpp
+SimpleConnectionManager_SOURCES=SimpleConnectionManager.cpp
 
 AM_CPPFLAGS = -I$(top_srcdir)
 
