@@ -233,7 +233,7 @@ namespace http {
 	}
     
     void AnotherHttpClient::communicate() {
-		TimeoutChecker readTimeoutChecker(recvTimeout);
+		Timeout readTimeout(recvTimeout);
         while (!interrupted) {
 			if (selector.select(100) > 0) {
 				if (connection->isWritable(selector)) {
@@ -245,13 +245,13 @@ namespace http {
 						recvResponseHeader();
 						recvResponseContent();
 					} while (connection->socket()->pending() > 0);
-					readTimeoutChecker.reset();
+					readTimeout.reset();
 				}
 				if (complete) {
 					break;
 				}
 			}
-			if (readTimeoutChecker.timeout() > 0 && readTimeoutChecker.trigger()) {
+			if (readTimeout.value() > 0 && readTimeout.expired()) {
 				throw Exception("recv timeout - " + Text::toString(recvTimeout) + " ms.");
 			}
         }

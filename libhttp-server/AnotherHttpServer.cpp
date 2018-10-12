@@ -122,7 +122,7 @@ namespace http {
 	void AnotherHttpServer::stop() {
 		if (thread) {
 			thread->interrupt();
-			thread->wait();
+			thread->join();
 			delete thread;
 			thread = NULL;
 		}

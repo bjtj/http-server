@@ -1,15 +1,14 @@
 #include <liboslayer/Logger.hpp>
 #include <liboslayer/TestSuite.hpp>
 #include <liboslayer/TaskThreadPool.hpp>
-#include <liboslayer/CountDownLatch.hpp>
 #include <libhttp-server/AnotherHttpServer.hpp>
 #include <libhttp-server/AnotherHttpClient.hpp>
 #include <libhttp-server/StringDataSink.hpp>
+#include "Expect.hpp"
 
 using namespace std;
 using namespace osl;
 using namespace http;
-
 
 static string s_last_msg;
 
@@ -165,22 +164,23 @@ public:
 class SynchronizedHttpClientTask : public Task {
 private:
 	static int idx;
-	CountDownLatch & latch;
-	CountDownLatch & doneLatch;
+	Expect & ready;
+	Expect & done;
 	string url;
 	int id;
 public:
-	SynchronizedHttpClientTask(CountDownLatch & latch, CountDownLatch & doneLatch, const string & url) : latch(latch), doneLatch(doneLatch), url(url) {
+	SynchronizedHttpClientTask(Expect & ready, Expect & done, const string & url)
+		: ready(ready), done(done), url(url) {
 		id = idx++;
 	}
 	virtual ~SynchronizedHttpClientTask() {}
 	virtual void onTask() {
-		latch.await();
+		ready.wait();
 		DumpResponseHandler handler;
 		cout << "[" << id << "] http get" << endl;
 		httpGet(url, &handler);
 		cout << "[" << id << "] " << handler.getResponseHeader().getStatusCode() << endl;
-		doneLatch.countDown();
+		done--;
 	}
 };
 
@@ -199,19 +199,19 @@ public:
 		TaskThreadPool pool(50);
 		pool.start();
 
-		CountDownLatch latch(1);
-		CountDownLatch doneLatch(50);
+		Expect ready(1);
+		Expect done(50);
 		
 		for (size_t i = 0; i < 50; i++) {
 			pool.setTask(AutoRef<Task>(new SynchronizedHttpClientTask(
-										   latch, doneLatch, "http://127.0.0.1:9001/medium")));
+										   ready, done, "http://127.0.0.1:9001/medium")));
 		}
 		
 		idle(100);
-		latch.countDown();
+		ready--;
 
 		unsigned long tick = tick_milli();
-		doneLatch.await();
+		done.wait();
 
 		cout << " ** stop / dur : " << (tick_milli() - tick) << " ms." << endl;
 
@@ -233,18 +233,18 @@ public:
 		TaskThreadPool pool(cnt);
 		pool.start();
 
-		CountDownLatch latch(1);
-		CountDownLatch doneLatch(cnt);
+		Expect ready(1);
+		Expect done(cnt);
 		
 		for (size_t i = 0; i < cnt; i++) {
-			pool.setTask(AutoRef<Task>(new SynchronizedHttpClientTask(latch, doneLatch, "http://127.0.0.1:9001/taketime")));
+			pool.setTask(AutoRef<Task>(new SynchronizedHttpClientTask(ready, done, "http://127.0.0.1:9001/taketime")));
 		}
 		
 		idle(100);
-		latch.countDown();
+		ready--;
 
 		unsigned long tick = tick_milli();
-		doneLatch.await();
+		done.wait();
 
 		cout << " ** stop / dur : " << (tick_milli() - tick) << " ms." << endl;
 

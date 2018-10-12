@@ -12,7 +12,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 
 AM_SILENT_RULES([yes])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([serial-tests])
 LT_PREREQ([2.2])
 LT_INIT([dlopen])
 

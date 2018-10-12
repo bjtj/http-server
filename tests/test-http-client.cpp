@@ -171,42 +171,50 @@ static DumpResponseHandler httpsRequest(const Url & url, const string & method, 
 }
 #endif
 
-static void test_http_client() {
+static void test_http_client(int port) {
+
+	printf(" === test http client === \n");
 	
 	LinkedStringMap ext_headers;
+
+	string portStr = Text::toString(port);
 	
-	DumpResponseHandler handler = httpRequest("http://127.0.0.1:9999", "GET", ext_headers);
+	DumpResponseHandler handler = httpRequest("http://127.0.0.1:" + portStr, "GET", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	ASSERT(handler.getDump(), ==, "method: GET\npath: /\n");
 
-	handler = httpRequest("http://127.0.0.1:9999", "SUBSCRIBE", ext_headers);
+	handler = httpRequest("http://127.0.0.1:" + portStr, "SUBSCRIBE", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	ASSERT(handler.getDump(), ==, "method: SUBSCRIBE\npath: /\n");
 
-	handler = httpRequest("http://127.0.0.1:9999", "UNSUBSCRIBE", ext_headers);
+	handler = httpRequest("http://127.0.0.1:" + portStr, "UNSUBSCRIBE", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	ASSERT(handler.getDump(), ==, "method: UNSUBSCRIBE\npath: /\n");
 
-	handler = httpRequest("http://127.0.0.1:9999/?a=A&b=B", "UNSUBSCRIBE", ext_headers);
+	handler = httpRequest("http://127.0.0.1:" + portStr + "/?a=A&b=B", "UNSUBSCRIBE", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	ASSERT(handler.getDump(), ==, "method: UNSUBSCRIBE\npath: /\n - a : A\n - b : B\n");
 
-	handler = httpRequest("http://127.0.0.1:9999/?b=B&a=A", "UNSUBSCRIBE", ext_headers);
+	handler = httpRequest("http://127.0.0.1:" + portStr + "/?b=B&a=A", "UNSUBSCRIBE", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	ASSERT(handler.getDump(), ==, "method: UNSUBSCRIBE\npath: /\n - a : A\n - b : B\n");
 }
 
-static void test_recv_timeout() {
+static void test_recv_timeout(int port) {
+
+	printf(" === test recv timeout === \n");
 
 	LinkedStringMap ext_headers;
+
+	string portStr = Text::toString(port);
 	
-	DumpResponseHandler handler = httpRequest("http://127.0.0.1:9999/delay?timeout=500", "GET", ext_headers);
+	DumpResponseHandler handler = httpRequest("http://127.0.0.1:" + portStr + "/delay?timeout=500", "GET", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
 	cout << handler.getDump() << endl;
 
 	string err;
 	try {
-		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=2000", "GET", ext_headers);
+		handler = httpRequest("http://127.0.0.1:" + portStr + "/delay?timeout=2000", "GET", ext_headers);
 	} catch (Exception & e) {
 		err = e.what();
 		cerr << e.what() << endl;
@@ -215,7 +223,7 @@ static void test_recv_timeout() {
 
 	err = "";
 	try {
-		handler = httpRequest("http://127.0.0.1:9999/delay?timeout=3000", "GET", ext_headers);
+		handler = httpRequest("http://127.0.0.1:" + portStr + "/delay?timeout=3000", "GET", ext_headers);
 	} catch (Exception & e) {
 		err = e.what();
 		cerr << e.what() << endl;
@@ -223,9 +231,12 @@ static void test_recv_timeout() {
 	ASSERT(err, >, "recv timeout");
 }
 
-static void test_https_client() {
+static void test_https_client(int port) {
 #if defined(USE_OPENSSL)
+	printf(" === test https client === \n");
 	LinkedStringMap ext_headers;
+
+	string portStr = Text::toString(port);
 	
 	DumpResponseHandler handler = httpsRequest("https://google.com", "GET", ext_headers);
 	ASSERT(handler.getResponseHeader().getStatusCode(), ==, 200);
@@ -235,18 +246,20 @@ static void test_https_client() {
 
 int main(int argc, char *args[]) {
 
+	System::getInstance()->ignoreSigpipe();
+
 	HttpServerConfig config;
-	config["listen.port"] = "9999";
+	config["listen.port"] = "0";
 	config["thread.count"] = "5";
 	AnotherHttpServer server(config);
 	server.registerRequestHandler("/*", AutoRef<HttpRequestHandler>(new RequestEchoHandler));
 	server.startAsync();
 
-	test_http_client();
+	InetAddress addr = server.getServerAddress();
+	test_http_client(addr.getPort());
 	idle(10); // TODO: check ; previous connection resist?
-	test_recv_timeout();
-	test_https_client();
-
+	test_recv_timeout(addr.getPort());
+	test_https_client(addr.getPort());
 
 	server.stop();
 	

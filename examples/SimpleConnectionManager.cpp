@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     }
 
     st.interrupt();
-    st.waitFor();
+    st.join();
 
     cout << "QUIT" << endl;
 

@@ -4,10 +4,12 @@
 #include <liboslayer/Socket.hpp>
 #include <liboslayer/Text.hpp>
 #include <liboslayer/CountDownLatch.hpp>
+#include "Expect.hpp"
 
 using namespace std;
 using namespace osl;
 using namespace http;
+
 
 class EchoCommunication : public Communication {
 private:
@@ -82,9 +84,7 @@ public:
 	virtual void setUp(TestEnvironment & env) {
 		port = env.getIntegerProperty("listen.port");
 		cm = new ConnectionManager(
-			ConnectionConfig(
-				AutoRef<CommunicationMaker>(new EchoCommunicationMaker),
-				5));
+			ConnectionConfig(AutoRef<CommunicationMaker>(new EchoCommunicationMaker), 5));
 		cm->start(port);
 
 		thread = new PollingThread(cm);
@@ -93,7 +93,7 @@ public:
 	virtual void tearDown() {
 
 		thread->interrupt();
-		thread->wait();
+		thread->join();
 		delete thread;
 		
 		cm->stop();
@@ -103,26 +103,27 @@ public:
 
 		class NormalVisitorTask : public Task {
 		private:
-			CountDownLatch & doneSignal;
+			Expect & done;
 			InetAddress remoteAddr;
 		public:
-			NormalVisitorTask(CountDownLatch & doneSignal, InetAddress remoteAddr) : doneSignal(doneSignal), remoteAddr(remoteAddr) {}
+			NormalVisitorTask(Expect & done, InetAddress remoteAddr)
+				: done(done), remoteAddr(remoteAddr) {}
 			virtual ~NormalVisitorTask() {}
 			virtual void onTask() {
 				Socket sock(remoteAddr);
 				sock.connect();
 				sock.close();
-				doneSignal.countDown();
+				done--;
 			}
 		};
 		
 		TaskThreadPool pool(10);
 		pool.start();
 
-		CountDownLatch doneSignal(1);
-		pool.setTask(AutoRef<Task>(new NormalVisitorTask(doneSignal, InetAddress("127.0.0.1", port))));
-
-		doneSignal.await();
+		Expect done(1);
+		InetAddress addr = cm->getServerAddress();
+		pool.setTask(AutoRef<Task>(new NormalVisitorTask(done, InetAddress("127.0.0.1", addr.getPort()))));
+		done.wait();
 		
 		pool.stop();
 	}
@@ -150,7 +151,7 @@ public:
 	virtual void tearDown() {
 
 		thread->interrupt();
-		thread->wait();
+		thread->join();
 		delete thread;
 		
 		cm->stop();
@@ -160,10 +161,10 @@ public:
 
 		class EchoVisitorTask : public Task {
 		private:
-			CountDownLatch & doneSignal;
+			Expect & done;
 			InetAddress remoteAddr;
 		public:
-			EchoVisitorTask(CountDownLatch & doneSignal, InetAddress remoteAddr) : doneSignal(doneSignal), remoteAddr(remoteAddr) {}
+			EchoVisitorTask(Expect & done, InetAddress remoteAddr) : done(done), remoteAddr(remoteAddr) {}
 			virtual ~EchoVisitorTask() {}
 			virtual void onTask() {
 				Socket sock(remoteAddr);
@@ -176,17 +177,19 @@ public:
 				
 				ASSERT(say, ==, buffer);
 								
-				doneSignal.countDown();
+				done--;
 			}
 		};
 		
 		TaskThreadPool pool(10);
 		pool.start();
 
-		CountDownLatch doneSignal(1);
-		pool.setTask(AutoRef<Task>(new EchoVisitorTask(doneSignal, InetAddress("127.0.0.1", port))));
+		Expect done(1);
 
-		doneSignal.await();
+		InetAddress addr = cm->getServerAddress();
+		pool.setTask(AutoRef<Task>(new EchoVisitorTask(done, InetAddress("127.0.0.1", addr.getPort()))));
+
+		done.wait();
 		
 		pool.stop();
 	}
@@ -215,7 +218,7 @@ public:
 	virtual void tearDown() {
 
 		thread->interrupt();
-		thread->wait();
+		thread->join();
 		delete thread;
 
 		cm->stop();
@@ -226,10 +229,10 @@ public:
 		class EchoVisitorTask : public Task {
 		private:
 			int id;
-			CountDownLatch & doneSignal;
+			Expect & done;
 			InetAddress remoteAddr;
 		public:
-			EchoVisitorTask(int id, CountDownLatch & doneSignal, InetAddress remoteAddr) : id(id), doneSignal(doneSignal), remoteAddr(remoteAddr) {}
+			EchoVisitorTask(int id, Expect & done, InetAddress remoteAddr) : id(id), done(done), remoteAddr(remoteAddr) {}
 			virtual ~EchoVisitorTask() {}
 			virtual void onTask() {
 				Socket sock(remoteAddr);
@@ -247,7 +250,7 @@ public:
 				}
 				
 				sock.close();
-				doneSignal.countDown();
+				done--;
 			}
 		};
 		
@@ -255,12 +258,13 @@ public:
 		pool.start();
 
 		size_t cnt = 100;
-		CountDownLatch doneSignal(cnt);
+		Expect done(cnt);
+		InetAddress addr = cm->getServerAddress();
 		for (size_t i = 0; i < cnt; i++) {
-			pool.setTaskWaitIfFull(AutoRef<Task>(new EchoVisitorTask((int)i, doneSignal, InetAddress("127.0.0.1", port))));
+			pool.setTaskWaitIfFull(AutoRef<Task>(new EchoVisitorTask((int)i, done, InetAddress("127.0.0.1", addr.getPort()))));
 		}
 
-		doneSignal.await();
+		done.wait();
 
 		pool.stop();
 	}
@@ -268,7 +272,7 @@ public:
 
 int main(int argc, char *args[]) {
 	TestEnvironment env;
-	env["listen.port"] = "9000";
+	env["listen.port"] = "0";
 	TestSuite ts(env);
 	ts.addTestCase(AutoRef<TestCase>(new BasicConnectionManagerTestCase));
 	ts.addTestCase(AutoRef<TestCase>(new ConnectionManagerTestCase));
