@@ -7,6 +7,7 @@ check_PROGRAMS=\
 	test-connection-manager \
 	test-lisp-page \
 	test-buffer-indicator \
+	test-cache \
 	test-data-source \
 	test-data-sink \
 	test-http-server \
@@ -20,6 +21,7 @@ test_url_SOURCES = test-url.cpp
 test_connection_manager_SOURCES = test-connection-manager.cpp
 test_lisp_page_SOURCES = test-lisp-page.cpp
 test_buffer_indicator_SOURCES = test-buffer-indicator.cpp
+test_cache_SOURCES = test-cache.cpp
 test_data_source_SOURCES = test-data-source.cpp
 test_data_sink_SOURCES = test-data-sink.cpp
 test_http_server_SOURCES = test-http-server.cpp

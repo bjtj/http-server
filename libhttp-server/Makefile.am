@@ -4,6 +4,8 @@ libhttp_serverinc_HEADERS = \
 	AnotherHttpServer.hpp \
 	BasicAuth.hpp \
 	BufferIndicator.hpp \
+	Cache.hpp \
+	CacheManager.hpp \
 	ChunkedReader.hpp \
 	ChunkedTransfer.hpp \
 	Communication.hpp \
@@ -55,6 +57,10 @@ libhttp_server_la_SOURCES = \
 	BasicAuth.hpp \
 	BufferIndicator.cpp \
 	BufferIndicator.hpp \
+	Cache.cpp \
+	Cache.hpp \
+	CacheManager.cpp \
+	CacheManager.hpp \
 	ChunkedReader.cpp \
 	ChunkedReader.hpp \
 	ChunkedTransfer.cpp \
