@@ -144,6 +144,15 @@
     <ClInclude Include="..\libhttp-server\MaxConnectionException.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\libhttp-server\Cache.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\CacheManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libhttp-server\HttpHeaderDelegator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\libhttp-server\HttpHeader.cpp">
@@ -243,6 +252,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\libhttp-server\HttpSessionTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\Cache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\CacheManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libhttp-server\HttpHeaderDelegator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
